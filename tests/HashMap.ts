@@ -17,7 +17,7 @@ class MyClass {
     }
 }
 
-describe("hashmap basic sanity tests", () => {
+describe("hashmap construction basic sanity tests", () => {
     it("should overwrite values with the same key", () => assert.ok(
         HashMap.empty<number,String>().put(5, "test").put(5, "test1")
             .equals(HashMap.empty<number,String>().put(5, "test1"))));
@@ -42,6 +42,15 @@ describe("hashmap basic sanity tests", () => {
                     .put(HashMap.empty<string,number>().put("bye", 1), 7))));
 
 });
+
+describe("hashmap equality", () => {
+    it("empty should be equal with empty", () =>
+       assert.ok(HashMap.empty<number,String>().equals(HashMap.empty<number,String>())));
+    it("non empty should be not be equal with empty", () =>
+       assert.ok(!HashMap.empty<number,String>().put(1,"t").equals(HashMap.empty<number,String>())));
+    it("empty should be not be equal with non empty", () =>
+       assert.ok(!HashMap.empty<number,String>().equals(HashMap.empty<number,String>().put(1,"t"))));
+})
 
 describe("hashmap - toString should be nicely formatted", () => {
     it("should format strings and numbers", () => assert.equal(
