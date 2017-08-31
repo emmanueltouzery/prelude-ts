@@ -11,12 +11,16 @@ export class Vector<T> implements Seq<T> {
         return <Vector<T>>emptyVector;
     }
 
-    static of<T>(arr: Array<T & WithEquality>): Vector<T> {
+    static ofArray<T>(arr: Array<T & WithEquality>): Vector<T> {
         if (arr.length === 0) {
             return <Vector<T>>emptyVector;
         }
         return new Vector<T>(hamt.empty.mutate(
             (h:any) => arr.forEach((x, i) => h.set(i, x))), 0);
+    }
+
+    static of<T>(...arr: Array<T & WithEquality>): Vector<T> {
+        return Vector.ofArray(arr);
     }
 
     toArray(): T[] {
@@ -29,6 +33,10 @@ export class Vector<T> implements Seq<T> {
 
     size(): number {
         return this.hamt.size;
+    }
+
+    append(elt: T|null): Vector<T> {
+        return new Vector<T>(this.hamt.set(this.hamt.size, elt), this.indexShift);
     }
 
     equals(other: Vector<T>): boolean {
