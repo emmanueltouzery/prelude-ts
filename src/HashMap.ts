@@ -60,7 +60,6 @@ export class HashMap<K,V> implements Map<K,V> {
                 (acc: string[], value: V, key: K) =>
                     {acc.push(key + " => " + value); return acc;}, []).join(", ") + "}";
     }
-
 }
 
 // we need to override the empty hashmap
