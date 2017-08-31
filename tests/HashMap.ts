@@ -60,3 +60,13 @@ describe("hashmap - toString should be nicely formatted", () => {
         "{key1 => {field1: test, field2: -1}}",
         ""+HashMap.empty<string,MyClass>().put("key1", new MyClass('test', -1))));
 });
+
+describe("hashmap get", () => {
+    it("should retrieve values", () => assert.ok(
+        HashMap.empty<string,number>().put("key1", 6).get("key1").contains(6)));
+    it("should not find missing values", () => assert.ok(
+        HashMap.empty<string,number>().put("key1", 6).get("key2").isNone()));
+    it("should retrieve nulls", () => assert.ok(
+        HashMap.empty<string,number|null>().put("key1", null).get("key1").contains(null)));
+});
+// TODO null values must be OK

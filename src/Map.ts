@@ -1,7 +1,8 @@
 import { WithEquality } from "./Util";
+import { Option } from "./Option";
 
 export interface Map<K,V> {
-    get(k: K & WithEquality): V & WithEquality | undefined; // TODO: Option<V>
+    get(k: K & WithEquality): Option<V & WithEquality>;
 
     /**
      * I require WithEquality also for the value, otherwise

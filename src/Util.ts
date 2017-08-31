@@ -2,6 +2,7 @@ export type WithEquality
     = string
     | number
     | boolean
+    | null
     | HasEquals;
 
 export type HasEquals = {equals(other: any): boolean; hashCode(): number;};
@@ -22,7 +23,13 @@ export function stringHashCode(str: string): number {
     return hash;
 }
 
-export function withEqEquals(obj: WithEquality, obj2: WithEquality): boolean {
+export function withEqEquals(obj: WithEquality|null, obj2: WithEquality|null): boolean {
+    if (obj === null != obj2 === null) {
+        return false;
+    }
+    if (obj === null || obj2 === null) {
+        return true;
+    }
     if (hasEquals(obj)) {
         return obj.equals(obj2);
     }

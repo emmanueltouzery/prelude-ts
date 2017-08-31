@@ -1,6 +1,7 @@
 import { Map } from "./Map";
 import { hasEquals, HasEquals, WithEquality,
          withEqHashCode, withEqEquals } from "./Util";
+import { Option, none } from "./Option";
 const hamt: any = require("hamt_plus");
 
 export class HashMap<K,V> implements Map<K,V> {
@@ -11,8 +12,8 @@ export class HashMap<K,V> implements Map<K,V> {
         return <HashMap<K,V>>emptyHashMap;
     }
     
-    get(k: K & WithEquality): V & WithEquality|undefined { // TODO: Option<V>
-        return this.hamt.get(k);
+    get(k: K & WithEquality): Option<V & WithEquality> {
+        return Option.fromNullable(this.hamt.get(k));
     }
 
     put(k: K & WithEquality, v: V & WithEquality): HashMap<K,V> {
@@ -35,8 +36,8 @@ export class HashMap<K,V> implements Map<K,V> {
         }
         const keys: Array<K & WithEquality> = Array.from<K & WithEquality>(this.hamt.keys());
         for (let k of keys) {
-            const myVal: V & WithEquality|undefined = this.hamt.get(k);
-            const hisVal: V & WithEquality|undefined = other.get(k);
+            const myVal: V & WithEquality|null|undefined = this.hamt.get(k);
+            const hisVal: V & WithEquality|null|undefined = other.get(k).getOrUndefined();
             if (myVal === undefined || hisVal === undefined) {
                 return false;
             }
@@ -72,8 +73,8 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         super({}); // we must override all the functions
     }
 
-    get(k: K & WithEquality): V & WithEquality | undefined { // TODO: Option<V>
-        return undefined;
+    get(k: K & WithEquality): Option<V & WithEquality> {
+        return <Option<V & WithEquality>>none;
     }
 
     put(k: K & WithEquality, v: V & WithEquality): HashMap<K,V> {
