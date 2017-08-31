@@ -1,0 +1,36 @@
+{
+    "name": "prelude.ts",
+    "version": "0.1.0",
+    "description": "A typescript functional programming library",
+    "main": "dist/src/index.js",
+    "typings": "dist/src/index.d.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/emmanueltouzery/prelude.ts.git"
+    },
+    "dependencies": {
+        "hamt_plus": "1.0.2"
+    },
+    "devDependencies": {
+        "@types/mocha": "2.2.41",
+        "mocha": "3.4.2"
+    },
+    "keywords": [
+        "typescript",
+        "functional-programming",
+        "immutable",
+        "collections"
+    ],
+    "author": "Emmanuel Touzery",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/emmanueltouzery/prelude.ts/issues"
+    },
+    "homepage": "https://github.com/emmanueltouzery/prelude.ts#readme",
+    "scripts": {
+        "test": "tsc && ./node_modules/mocha/bin/mocha ./dist/tests/*.js"
+    }
+}

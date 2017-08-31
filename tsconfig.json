@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "strict": true,
+        "outDir": "./dist",
+        "declaration": true,
+        "sourceMap": true,
+        "lib": ["es2015"]
+    },
+    "include": [
+        "src/**/*",
+        "tests/**/*"
+    ]
+}
