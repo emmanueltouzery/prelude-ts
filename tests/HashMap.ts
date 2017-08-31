@@ -17,7 +17,7 @@ class MyClass {
     }
 }
 
-describe("basic sanity tests", () => {
+describe("hashmap basic sanity tests", () => {
     it("should overwrite values with the same key", () => assert.ok(
         HashMap.empty<number,String>().put(5, "test").put(5, "test1")
             .equals(HashMap.empty<number,String>().put(5, "test1"))));
@@ -43,7 +43,7 @@ describe("basic sanity tests", () => {
 
 });
 
-describe("toString should be nicely formatted", () => {
+describe("hashmap - toString should be nicely formatted", () => {
     it("should format strings and numbers", () => assert.equal(
         "{key1 => 6, key2 => 7}",
         ""+HashMap.empty<string,number>().put("key1", 6).put("key2", 7)));
