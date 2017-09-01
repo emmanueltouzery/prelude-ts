@@ -46,6 +46,11 @@ export class Vector<T> implements Seq<T> {
         }
     }
 
+    appendAll(elts: Vector<T & WithEquality>): Vector<T> {
+        return new Vector<T>(this.hamt.mutate(
+            (h:any) => elts.forEach(x => h.set(h.size, x))), this.indexShift);
+    }
+
     equals(other: Vector<T>): boolean {
         const sz = this.hamt.size;
         if (sz !== other.hamt.size) {

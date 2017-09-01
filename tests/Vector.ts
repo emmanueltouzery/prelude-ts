@@ -13,6 +13,8 @@ describe("Vector creation", () => {
 describe("Vector manipulation", () => {
     it("appends correctly", () => assert.ok(
         Vector.ofArray<number>([1,2,3,4]).equals(Vector.of(1,2,3).append(4))));
+    it("appendAll works", () => assert.ok(
+        Vector.of(1,2,3,4).equals(Vector.of(1,2).appendAll(Vector.of(3,4)))));
 });
 
 describe("Vector iteration", () => {
