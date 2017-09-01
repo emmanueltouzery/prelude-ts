@@ -95,6 +95,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return new HashMap<K,V>(hamt.make().set(k,v));
     }
 
+    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V, v2: V) => V): HashMap<K,V> {
+        return this.put(k,v);
+    }
+
     size(): number {
         return 0;
     }

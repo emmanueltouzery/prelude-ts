@@ -1,4 +1,5 @@
 import { Vector } from "../src/Vector";
+import { HashMap } from "../src/HashMap";
 import * as assert from 'assert'
 
 describe("Vector creation", () => {
@@ -15,6 +16,9 @@ describe("Vector manipulation", () => {
         Vector.ofArray<number>([1,2,3,4]).equals(Vector.of(1,2,3).append(4))));
     it("appendAll works", () => assert.ok(
         Vector.of(1,2,3,4).equals(Vector.of(1,2).appendAll(Vector.of(3,4)))));
+    it("groupBy works", () => assert.ok(
+        HashMap.empty().put(0, Vector.of(2,4)).put(1, Vector.of(1,3))
+            .equals(Vector.of(1,2,3,4).groupBy(x => x%2))));
 });
 
 describe("Vector iteration", () => {

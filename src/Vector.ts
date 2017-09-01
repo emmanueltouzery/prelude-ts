@@ -46,9 +46,15 @@ export class Vector<T> implements Seq<T> {
         }
     }
 
-    appendAll(elts: Vector<T & WithEquality>): Vector<T> {
+    appendAll(elts: Vector<T>): Vector<T> {
         return new Vector<T>(this.hamt.mutate(
             (h:any) => elts.forEach(x => h.set(h.size, x))), this.indexShift);
+    }
+
+    groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {
+        return this.hamt.fold(
+            (acc: HashMap<C,Vector<T>>, v:T & WithEquality, k:number) =>
+                acc.putWithMerge(classifier(v), Vector.of(v), (v1,v2)=>v1.appendAll(v2)), HashMap.empty());
     }
 
     equals(other: Vector<T>): boolean {
