@@ -1,5 +1,5 @@
 import { Value } from "./Value";
-import { WithEquality } from "./Util";
+import { WithEquality, Ordering } from "./Util";
 import { IMap } from "./IMap";
 
 export interface Seq<T> extends Value {
@@ -11,4 +11,5 @@ export interface Seq<T> extends Value {
     map<U>(mapper:(v:T)=>U): Seq<U>;
     filter(predicate:(v:T)=>boolean): Seq<T>;
     groupBy<C>(classifier: (v:T)=>C): IMap<C,Seq<T>>;
+    sortBy(compare: (v1:T,v2:T)=>Ordering): Seq<T>;
 }

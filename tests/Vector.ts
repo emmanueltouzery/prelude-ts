@@ -24,6 +24,9 @@ describe("Vector manipulation", () => {
     it("filter works", () => assert.ok(
         Vector.of(2,4)
             .equals(Vector.of(1,2,3,4).filter(x => x%2 === 0))));
+    it("sorting works", () => assert.ok(
+        Vector.of(4,3,2,1)
+            .equals(Vector.of(1,2,3,4).sortBy((x,y) => y-x))));
 });
 
 describe("Vector iteration", () => {

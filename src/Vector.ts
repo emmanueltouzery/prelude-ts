@@ -1,6 +1,6 @@
 import { Seq } from "./Seq";
-import { WithEquality} from "./Util";
-import { withEqHashCode, withEqEquals } from "./Util";
+import { WithEquality, Ordering, 
+         withEqHashCode, withEqEquals } from "./Util";
 import { HashMap} from "./HashMap";
 const hamt: any = require("hamt_plus");
 
@@ -59,6 +59,10 @@ export class Vector<T> implements Seq<T> {
 
     filter(predicate:(v:T)=>boolean): Vector<T> {
         return Vector.ofArray(this.toArray().filter(predicate));
+    }
+
+    sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
+        return Vector.ofArray(this.toArray().sort(compare));
     }
 
     groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {
