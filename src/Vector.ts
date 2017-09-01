@@ -24,7 +24,7 @@ export class Vector<T> implements Seq<T> {
         return Vector.ofArray(arr);
     }
 
-    toArray(): T[] {
+    toArray(): Array<T & WithEquality> {
         let r = [];
         for (let i=0;i<this.hamt.size;i++) {
             r.push(this.hamt.get(i));
@@ -55,6 +55,10 @@ export class Vector<T> implements Seq<T> {
         return new Vector<U>(this.hamt.fold(
             (acc: any, v:T & WithEquality, k:number) => acc.set(k-this.indexShift, mapper(v)),
             hamt.empty), 0);
+    }
+
+    filter(predicate:(v:T)=>boolean): Vector<T> {
+        return Vector.ofArray(this.toArray().filter(predicate));
     }
 
     groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {

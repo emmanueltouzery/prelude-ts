@@ -21,6 +21,9 @@ describe("Vector manipulation", () => {
     it("groupBy works", () => assert.ok(
         HashMap.empty().put(0, Vector.of(2,4)).put(1, Vector.of(1,3))
             .equals(Vector.of(1,2,3,4).groupBy(x => x%2))));
+    it("filter works", () => assert.ok(
+        Vector.of(2,4)
+            .equals(Vector.of(1,2,3,4).filter(x => x%2 === 0))));
 });
 
 describe("Vector iteration", () => {
