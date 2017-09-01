@@ -2,6 +2,7 @@ import { Seq } from "./Seq";
 import { WithEquality, Ordering, 
          withEqHashCode, withEqEquals } from "./Util";
 import { HashMap} from "./HashMap";
+import { Option } from "./Option";
 const hamt: any = require("hamt_plus");
 
 export class Vector<T> implements Seq<T> {
@@ -47,7 +48,7 @@ export class Vector<T> implements Seq<T> {
 
     forEach(fn: (v:T)=>void): void {
         for (let i=0;i<this.hamt.size;i++) {
-            fn(this.hamt.get(i));
+            fn(this.hamt.get(i+this.indexShift));
         }
     }
 
@@ -66,6 +67,16 @@ export class Vector<T> implements Seq<T> {
         return Vector.ofArray(this.toArray().filter(predicate));
     }
 
+    find(predicate:(v:T)=>boolean): Option<T> {
+        for (let i=0;i<this.hamt.size;i++) {
+            const item = this.hamt.get(i+this.indexShift);
+            if (predicate(item)) {
+                return Option.of(item);
+            }
+        }
+        return Option.none<T>();
+    }
+    
     flatMap<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
         var r:Array<U & WithEquality> = [];
         for (let i=0;i<this.hamt.size;i++) {

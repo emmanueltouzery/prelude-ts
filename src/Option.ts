@@ -11,6 +11,10 @@ export abstract class Option<T> {
         return new Some(v);
     }
 
+    static none<T>(): Option<T> {
+        return <Option<T>>none;
+    }
+
     abstract isSome(): boolean;
     abstract isNone(): boolean;
     abstract contains(v: T|null): boolean;

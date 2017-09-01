@@ -53,6 +53,10 @@ describe("Vector iteration", () => {
         Vector.of(1,2,3).forEach((v:number) => ar.push(v));
         assert.deepEqual([1,2,3], ar);
     });
+    it("finds items", () => 
+       Vector.of(1,2,3).find(x => x >= 2).contains(2));
+    it("doesn't find if the predicate doesn't match", () => 
+       Vector.of(1,2,3).find(x => x >= 4).isNone());
 })
 
 describe("Vector Value tests", () => {
