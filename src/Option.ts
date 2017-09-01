@@ -4,7 +4,7 @@ export abstract class Option<T> {
      * undefined gives a none
      * null (for now?) gives a some
      */
-    static fromNullable<T>(v: T|null|undefined): Option<T> {
+    static of<T>(v: T|null|undefined): Option<T> {
         if (v === undefined) {
             return <Option<T>>none;
         }

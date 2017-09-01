@@ -1,23 +1,32 @@
-import { Map } from "./Map";
+import { IMap } from "./IMap";
 import { hasEquals, HasEquals, WithEquality,
          withEqHashCode, withEqEquals } from "./Util";
 import { Option, none } from "./Option";
 const hamt: any = require("hamt_plus");
 
-export class HashMap<K,V> implements Map<K,V> {
+export class HashMap<K,V> implements IMap<K,V> {
 
     /*private*/ constructor(private hamt: any) {}
 
     static empty<K,V>(): HashMap<K,V> {
         return <HashMap<K,V>>emptyHashMap;
     }
-    
+
     get(k: K & WithEquality): Option<V & WithEquality> {
-        return Option.fromNullable(this.hamt.get(k));
+        return Option.of(this.hamt.get(k));
     }
 
     put(k: K & WithEquality, v: V & WithEquality): HashMap<K,V> {
         return new HashMap<K,V>(this.hamt.set(k,v));
+    }
+
+    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V, v2: V) => V): HashMap<K,V> {
+        return new HashMap<K,V>(this.hamt.modify(k, (curV?: V) => {
+            if (curV === undefined) {
+                return v;
+            }
+            return merge(curV, v);
+        }))
     }
 
     size(): number {

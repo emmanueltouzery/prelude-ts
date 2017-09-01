@@ -41,6 +41,10 @@ describe("hashmap construction basic sanity tests", () => {
                     .put(HashMap.empty<string,number>().put("hello", 1), 7)
                     .put(HashMap.empty<string,number>().put("bye", 1), 7))));
 
+    it("should put with merge", () => assert.ok(
+        HashMap.empty<number,string>()
+            .put(5,"test").putWithMerge(5,"a",(a,b)=>a+b)
+            .equals(HashMap.empty<number,string>().put(5, "testa"))));
 });
 
 describe("hashmap equality", () => {
@@ -69,4 +73,3 @@ describe("hashmap get", () => {
     it("should retrieve nulls", () => assert.ok(
         HashMap.empty<string,number|null>().put("key1", null).get("key1").contains(null)));
 });
-// TODO null values must be OK
