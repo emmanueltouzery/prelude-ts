@@ -51,6 +51,12 @@ export class Vector<T> implements Seq<T> {
             (h:any) => elts.forEach(x => h.set(h.size, x))), this.indexShift);
     }
 
+    map<U>(mapper:(v:T)=>U): Vector<U> {
+        return new Vector<U>(this.hamt.fold(
+            (acc: any, v:T & WithEquality, k:number) => acc.set(k-this.indexShift, mapper(v)),
+            hamt.empty), 0);
+    }
+
     groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {
         return this.hamt.fold(
             (acc: HashMap<C,Vector<T>>, v:T & WithEquality, k:number) =>
