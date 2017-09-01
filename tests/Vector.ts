@@ -27,6 +27,10 @@ describe("Vector manipulation", () => {
     it("sorting works", () => assert.ok(
         Vector.of(4,3,2,1)
             .equals(Vector.of(1,2,3,4).sortBy((x,y) => y-x))));
+    it("flatMap works", () => assert.ok(
+        Vector.of(1,2,2,3,3,3,4,4,4,4)
+            .equals(Vector.of(1,2,3,4).flatMap(
+                x => Vector.ofArray(Array.from(Array(x), ()=>x))))));
 });
 
 describe("Vector iteration", () => {

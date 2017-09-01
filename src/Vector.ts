@@ -61,6 +61,14 @@ export class Vector<T> implements Seq<T> {
         return Vector.ofArray(this.toArray().filter(predicate));
     }
 
+    flatMap<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
+        var r:Array<U & WithEquality> = [];
+        for (let i=0;i<this.hamt.size;i++) {
+            r = r.concat(mapper(this.hamt.get(i)).toArray());
+        }
+        return Vector.ofArray(r);
+    }
+
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
         return Vector.ofArray(this.toArray().sort(compare));
     }
