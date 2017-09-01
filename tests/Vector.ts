@@ -15,6 +15,14 @@ describe("Vector manipulation", () => {
         Vector.ofArray<number>([1,2,3,4]).equals(Vector.of(1,2,3).append(4))));
 });
 
+describe("Vector iteration", () => {
+    it("calls forEach correctly", () => {
+        let ar: number[] = [];
+        Vector.of(1,2,3).forEach((v:number) => ar.push(v));
+        assert.deepEqual([1,2,3], ar);
+    });
+})
+
 describe("Vector Value tests", () => {
     it("serializes to string correctly", () => assert.equal(
         "[1, 2, 3]", Vector.of(1,2,3).toString()));

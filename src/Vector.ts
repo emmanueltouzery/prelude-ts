@@ -1,6 +1,7 @@
 import { Seq } from "./Seq";
 import { WithEquality} from "./Util";
 import { withEqHashCode, withEqEquals } from "./Util";
+import { HashMap} from "./HashMap";
 const hamt: any = require("hamt_plus");
 
 export class Vector<T> implements Seq<T> {
@@ -35,8 +36,14 @@ export class Vector<T> implements Seq<T> {
         return this.hamt.size;
     }
 
-    append(elt: T|null): Vector<T> {
+    append(elt: T & WithEquality|null): Vector<T> {
         return new Vector<T>(this.hamt.set(this.hamt.size, elt), this.indexShift);
+    }
+
+    forEach(fn: (v:T)=>void): void {
+        for (let i=0;i<this.hamt.size;i++) {
+            fn(this.hamt.get(i));
+        }
     }
 
     equals(other: Vector<T>): boolean {
