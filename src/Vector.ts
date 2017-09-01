@@ -27,7 +27,7 @@ export class Vector<T> implements Seq<T> {
     toArray(): Array<T & WithEquality> {
         let r = [];
         for (let i=0;i<this.hamt.size;i++) {
-            r.push(this.hamt.get(i));
+            r.push(this.hamt.get(i+this.indexShift));
         }
         return r;
     }
@@ -37,7 +37,12 @@ export class Vector<T> implements Seq<T> {
     }
 
     append(elt: T & WithEquality|null): Vector<T> {
-        return new Vector<T>(this.hamt.set(this.hamt.size, elt), this.indexShift);
+        return new Vector<T>(this.hamt.set(this.hamt.size+this.indexShift, elt), this.indexShift);
+    }
+
+    prepend(elt: T & WithEquality|null): Vector<T> {
+        const newIndexShift = this.indexShift - 1;
+        return new Vector<T>(this.hamt.set(newIndexShift, elt), newIndexShift);
     }
 
     forEach(fn: (v:T)=>void): void {
@@ -48,7 +53,7 @@ export class Vector<T> implements Seq<T> {
 
     appendAll(elts: Vector<T>): Vector<T> {
         return new Vector<T>(this.hamt.mutate(
-            (h:any) => elts.forEach(x => h.set(h.size, x))), this.indexShift);
+            (h:any) => elts.forEach(x => h.set(h.size+this.indexShift, x))), this.indexShift);
     }
 
     map<U>(mapper:(v:T)=>U): Vector<U> {
@@ -64,7 +69,7 @@ export class Vector<T> implements Seq<T> {
     flatMap<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
         var r:Array<U & WithEquality> = [];
         for (let i=0;i<this.hamt.size;i++) {
-            r = r.concat(mapper(this.hamt.get(i)).toArray());
+            r = r.concat(mapper(this.hamt.get(i+this.indexShift)).toArray());
         }
         return Vector.ofArray(r);
     }
@@ -85,8 +90,8 @@ export class Vector<T> implements Seq<T> {
             return false;
         }
         for (let i=0;i<this.hamt.size;i++) {
-            const myVal: T & WithEquality|null|undefined = this.hamt.get(i);
-            const hisVal: T & WithEquality|null|undefined = other.hamt.get(i);
+            const myVal: T & WithEquality|null|undefined = this.hamt.get(i+this.indexShift);
+            const hisVal: T & WithEquality|null|undefined = other.hamt.get(i+other.indexShift);
             if (myVal === undefined !== hisVal === undefined) {
                 return false;
             }
@@ -103,7 +108,7 @@ export class Vector<T> implements Seq<T> {
     hashCode(): number {
         let hash = 1;
         for (let i=0;i<this.hamt.size;i++) {
-            hash = 31 * hash + withEqHashCode(this.hamt.get(i));
+            hash = 31 * hash + withEqHashCode(this.hamt.get(i+this.indexShift));
         }
         return hash;
     }
@@ -114,7 +119,7 @@ export class Vector<T> implements Seq<T> {
             if (i>0) {
                 r += ", ";
             }
-            r += "" + this.hamt.get(i);
+            r += "" + this.hamt.get(i+this.indexShift);
         }
         return r + "]";
     }

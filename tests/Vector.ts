@@ -33,6 +33,20 @@ describe("Vector manipulation", () => {
                 x => Vector.ofArray(Array.from(Array(x), ()=>x))))));
 });
 
+describe("Prepend", () => {
+    const basic = Vector.of(1,2,3,4);
+    const prepended = Vector.of(2,3,4).prepend(1);
+    it("prepends correctly", () => assert.ok(basic.equals(prepended)));
+    it("converts to array correctly", () => assert.deepEqual(
+        basic.toArray(), prepended.toArray()));
+    it("appends correctly after prepend", () => assert.ok(
+        basic.append(5).equals(prepended.append(5))));
+    it("appendsAll correctly after prepend", () => assert.ok(
+        basic.appendAll(Vector.of(5,6)).equals(prepended.appendAll(Vector.of(5,6)))));
+    it("converts to string correctly after prepend", () => assert.equal(
+        basic.toString(), prepended.toString()));
+});
+
 describe("Vector iteration", () => {
     it("calls forEach correctly", () => {
         let ar: number[] = [];
