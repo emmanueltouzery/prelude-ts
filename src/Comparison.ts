@@ -36,7 +36,7 @@ export function withEqEquals(obj: WithEquality|null, obj2: WithEquality|null): b
     return obj === obj2;
 }
 
-export function withEqHashCode(obj: WithEquality): number {
+export function withEqHashCode(obj: WithEquality|null): number {
     if (hasEquals(obj)) {
         return obj.hashCode();
     }

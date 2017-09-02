@@ -1,10 +1,13 @@
-export abstract class Option<T> {
+import { Value } from "./Value";
+import { WithEquality, withEqEquals, withEqHashCode } from "./Comparison";
+
+export abstract class Option<T> implements Value {
     /**
      * T gives a some
      * undefined gives a none
-     * null (for now?) gives a some
+     * null gives a some
      */
-    static of<T>(v: T|null|undefined): Option<T> {
+    static of<T>(v: T & WithEquality|undefined): Option<T> {
         if (v === undefined) {
             return <Option<T>>none;
         }
@@ -19,10 +22,14 @@ export abstract class Option<T> {
     abstract isNone(): boolean;
     abstract contains(v: T|null): boolean;
     abstract getOrUndefined(): T|null|undefined;
+    abstract map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U>;
+    abstract equals(other: Option<T>): boolean;
+    abstract hashCode(): number;
+    abstract toString(): string;
 }
 
 export class Some<T> extends Option<T> {
-    constructor(private value: T|null) {
+    constructor(private value: T & WithEquality) {
         super();
     }
 
@@ -32,11 +39,27 @@ export class Some<T> extends Option<T> {
     isNone(): boolean {
         return false;
     }
-    contains(v: T|null): boolean {
+    contains(v: T): boolean {
         return v === this.value;
     }
-    getOrUndefined(): T|null|undefined {
+    getOrUndefined(): T | undefined {
         return this.value;
+    }
+    map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U> {
+        return Option.of(fn(this.value));
+    }
+    equals(other: Option<T>): boolean {
+        if (other === none) {
+            return false;
+        }
+        const someOther = <Some<T>>other;
+        return withEqEquals(this.value, someOther.value);
+    }
+    hashCode(): number {
+        return withEqHashCode(this.value);
+    }
+    toString(): string {
+        return "Some(" + this.value + ")";
     }
 }
 
@@ -47,11 +70,23 @@ export class None<T> extends Option<T> {
     isNone(): boolean {
         return true;
     }
-    contains(v: T|null): boolean {
+    contains(v: T): boolean {
         return false;
     }
-    getOrUndefined(): T|null|undefined {
+    getOrUndefined(): T|undefined {
         return undefined;
+    }
+    map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U> {
+        return <Option<U>>none;
+    }
+    equals(other: Option<T>): boolean {
+        return other === none;
+    }
+    hashCode(): number {
+        return 1;
+    }
+    toString(): string {
+        return "None()";
     }
 }
 
