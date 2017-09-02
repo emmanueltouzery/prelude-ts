@@ -11,6 +11,18 @@ export class HashSet<T> implements ISet<T> {
         return <HashSet<T>>emptyHashSet;
     }
 
+    static ofArray<T>(arr: Array<T & WithEquality>): HashSet<T> {
+        if (arr.length === 0) {
+            return <HashSet<T>>emptyHashSet;
+        }
+        return new HashSet<T>(hamt.empty.mutate(
+            (h:any) => arr.forEach((x) => h.set(x, x))));
+    }
+
+    static of<T>(...arr: Array<T & WithEquality>): HashSet<T> {
+        return HashSet.ofArray(arr);
+    }
+
     add(elt: T & WithEquality): HashSet<T> {
         return new HashSet<T>(this.hamt.set(elt,elt));
     }
