@@ -18,4 +18,5 @@ export interface Seq<T> extends Value {
     prepend(elt: T & WithEquality): Seq<T>;
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U;
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;
+    mkString(separator: string): string;
 }

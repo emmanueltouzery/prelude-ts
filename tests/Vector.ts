@@ -33,6 +33,8 @@ describe("Vector manipulation", () => {
         Vector.of(1,2,2,3,3,3,4,4,4,4)
             .equals(Vector.of(1,2,3,4).flatMap(
                 x => Vector.ofArray(Array.from(Array(x), ()=>x))))));
+    it("mkString works", () => assert.equal(
+        "1, 2, 3", Vector.of(1,2,3).mkString(", ")));
 });
 
 describe("Prepend", () => {

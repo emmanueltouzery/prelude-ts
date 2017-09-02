@@ -101,6 +101,17 @@ export class Vector<T> implements Seq<T> {
         return r;
     }
 
+    mkString(separator: string): string {
+        let r = "";
+        for (let i=0;i<this.hamt.size;i++) {
+            if (i>0) {
+                r += separator;
+            }
+            r += this.hamt.get(i+this.indexShift).toString()
+        }
+        return r;
+    }
+
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
         return Vector.ofArray(this.toArray().sort(compare));
     }
