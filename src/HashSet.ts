@@ -27,6 +27,10 @@ export class HashSet<T> implements ISet<T> {
         return new HashSet<T>(this.hamt.set(elt,elt));
     }
 
+    contains(elt: T & WithEquality): boolean {
+        return this.hamt.get(elt) !== undefined;
+    }
+
     toArray(): Array<T & WithEquality> {
         return Array.from<T & WithEquality>(this.hamt.keys());
     }
@@ -83,6 +87,10 @@ class EmptyHashSet<T> extends HashSet<T> {
             }).set(elt,elt));
         }
         return new HashSet<T>(hamt.make().set(elt,elt));
+    }
+    
+    contains(elt: T & WithEquality): boolean {
+        return false;
     }
 
     size(): number {

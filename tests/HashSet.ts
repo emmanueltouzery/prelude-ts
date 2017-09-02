@@ -28,4 +28,13 @@ describe("hashset conversions", () => {
     it("should be created correctly from a spread", () => {
         assert.deepEqual(["a","b","c"], HashSet.of("a","b","c").toArray().sort());
     });
-})
+});
+
+describe("hashset access", () => {
+    it("should return true from contains", () => {
+        assert.ok(HashSet.of(1,2,3).contains(2));
+    });
+    it("should return false from contains", () => {
+        assert.ok(!HashSet.of(1,2,3).contains(4));
+    });
+});
