@@ -33,6 +33,10 @@ describe("Vector manipulation", () => {
                 x => Vector.ofArray(Array.from(Array(x), ()=>x))))));
     it("mkString works", () => assert.equal(
         "1, 2, 3", Vector.of(1,2,3).mkString(", ")));
+    it("correctly drops n items", () => assert.deepEqual(
+        [4,5,6], Vector.of(1,2,3,4,5,6).drop(3).toArray()));
+    it("returns an empty vector when dropping too much", () => assert.deepEqual(
+        [], Vector.of(1,2).drop(3).toArray()));
 });
 
 describe("Vector value extraction", () => {

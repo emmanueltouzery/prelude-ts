@@ -7,8 +7,8 @@ export interface Seq<T> extends Value {
     size(): number;
     toArray(): T[];
     append(elt: T & WithEquality): Seq<T>;
-    forEach(fn: (v:T)=>void): void;
     appendAll(elts: Seq<T>): Seq<T>;
+    forEach(fn: (v:T)=>void): void;
     map<U>(mapper:(v:T)=>U): Seq<U>;
     filter(predicate:(v:T)=>boolean): Seq<T>;
     find(predicate:(v:T)=>boolean): Option<T>;
@@ -20,4 +20,5 @@ export interface Seq<T> extends Value {
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;
     mkString(separator: string): string;
     get(idx: number): Option<T>;
+    drop(n:number): Seq<T>;
 }
