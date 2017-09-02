@@ -9,6 +9,8 @@ describe("Vector creation", () => {
     it("creates from a spread", () => assert.deepEqual(
         ["a","b", "c"],
         Vector.of("a","b","c").toArray()));
+    it("creates also with nulls", () => assert.deepEqual(
+        [1, null, 2], Vector.of(1, null, 2).toArray()));
 });
 
 describe("Vector manipulation", () => {

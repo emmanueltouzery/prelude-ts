@@ -37,11 +37,11 @@ export class Vector<T> implements Seq<T> {
         return this.hamt.size;
     }
 
-    append(elt: T & WithEquality|null): Vector<T> {
+    append(elt: T & WithEquality): Vector<T> {
         return new Vector<T>(this.hamt.set(this.hamt.size+this.indexShift, elt), this.indexShift);
     }
 
-    prepend(elt: T & WithEquality|null): Vector<T> {
+    prepend(elt: T & WithEquality): Vector<T> {
         const newIndexShift = this.indexShift - 1;
         return new Vector<T>(this.hamt.set(newIndexShift, elt), newIndexShift);
     }
