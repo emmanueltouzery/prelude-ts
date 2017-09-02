@@ -16,11 +16,7 @@ export class HashSet<T> implements ISet<T> {
     }
 
     toArray(): Array<T & WithEquality> {
-        let r = [];
-        for (let i=0;i<this.hamt.size;i++) {
-            r.push(this.hamt.get(i));
-        }
-        return r;
+        return Array.from<T & WithEquality>(this.hamt.keys());
     }
 
     size(): number {

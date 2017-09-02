@@ -16,3 +16,10 @@ describe("hashset construction basic sanity tests", () => {
                     .add(new MyClass("a", 1))
                     .add(new MyClass("a", 2)))));
 });
+
+describe("hashset conversions", () => {
+    it("should convert to array correctly", () => {
+        assert.deepEqual([1,2,3,4], HashSet.empty<number>()
+                         .add(1).add(2).add(3).add(4).toArray().sort());
+    });
+})
