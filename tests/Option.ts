@@ -30,4 +30,13 @@ describe("option transformation", () => {
        assert.equal("Some(5)", Option.of(5).toString()));
     it("should transform a None to string properly", () =>
        assert.equal("None()", Option.none().toString()));
+    it("should transform with flatMap x->y", () => {
+        assert.ok(Option.of(5).equals(Option.of(4).flatMap(x=>Option.of(x+1))));
+    });
+    it("should transform with flatMap x->none", () => {
+        assert.ok(Option.none().equals(Option.of(4).flatMap(x=>Option.none())));
+    });
+    it("should transform with flatMap none->none", () => {
+        assert.ok(Option.none().equals(Option.none<number>().flatMap(x=>Option.of(x+1))));
+    });
 });
