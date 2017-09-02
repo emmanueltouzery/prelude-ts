@@ -1,4 +1,4 @@
-import { WithEquality } from "./Util";
+import { WithEquality } from "./Comparison";
 import { Option } from "./Option";
 import { Value } from "./Value"
 

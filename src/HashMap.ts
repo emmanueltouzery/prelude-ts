@@ -1,6 +1,6 @@
 import { IMap } from "./IMap";
 import { hasEquals, HasEquals, WithEquality,
-         withEqHashCode, withEqEquals } from "./Util";
+         withEqHashCode, withEqEquals } from "./Comparison";
 import { Option, none } from "./Option";
 const hamt: any = require("hamt_plus");
 

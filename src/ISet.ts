@@ -1,4 +1,4 @@
-import { WithEquality } from "./Util";
+import { WithEquality } from "./Comparison";
 import { Value} from "./Value";
 
 export interface ISet<T> extends Value {

@@ -1,4 +1,4 @@
-import { stringHashCode } from "../src/Util";
+import { stringHashCode } from "../src/Comparison";
 
 export class MyClass {
     constructor(private field1:string, private field2:number) {}

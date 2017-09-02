@@ -1,5 +1,5 @@
 import { Value } from "./Value";
-import { WithEquality, Ordering } from "./Util";
+import { WithEquality, Ordering } from "./Comparison";
 import { IMap } from "./IMap";
 import { Option } from "./Option";
 

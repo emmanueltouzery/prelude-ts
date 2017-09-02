@@ -1,6 +1,6 @@
 import { ISet } from "./ISet";
 import { WithEquality, hasEquals, HasEquals,
-         withEqHashCode, withEqEquals } from "./Util";
+         withEqHashCode, withEqEquals } from "./Comparison";
 const hamt: any = require("hamt_plus");
 
 export class HashSet<T> implements ISet<T> {

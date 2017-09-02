@@ -1,6 +1,6 @@
 import { Seq } from "./Seq";
 import { WithEquality, Ordering, 
-         withEqHashCode, withEqEquals } from "./Util";
+         withEqHashCode, withEqEquals } from "./Comparison";
 import { HashMap} from "./HashMap";
 import { Option } from "./Option";
 const hamt: any = require("hamt_plus");
