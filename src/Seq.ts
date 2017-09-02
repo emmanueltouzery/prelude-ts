@@ -21,4 +21,5 @@ export interface Seq<T> extends Value {
     mkString(separator: string): string;
     get(idx: number): Option<T>;
     drop(n:number): Seq<T>;
+    dropWhile(predicate:(x:T)=>boolean): Seq<T>;
 }

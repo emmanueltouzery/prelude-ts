@@ -107,7 +107,7 @@ export class Vector<T> implements Seq<T> {
             if (i>0) {
                 r += separator;
             }
-            r += this.hamt.get(i+this.indexShift).toString()
+            r += this.hamt.get(i+this.indexShift).toString();
         }
         return r;
     }
@@ -124,6 +124,22 @@ export class Vector<T> implements Seq<T> {
             (h:any,v:T,k:number) => (k-this.indexShift>=n) ?
                 h.set(k-this.indexShift-n, v) : h,
             hamt.make()), 0);
+    }
+
+    dropWhile(predicate:(x:T)=>boolean): Vector<T> {
+        let h = hamt.make();
+        let skip = true;
+        let newIdx = 0;
+        for (let i=0;i<this.hamt.size;i++) {
+            const v = this.hamt.get(i+this.indexShift);
+            if (skip && !predicate(v)) {
+                skip = false;
+            }
+            if (!skip) {
+                h = h.set(newIdx++, v);
+            }
+        }
+        return new Vector<T>(h, 0);
     }
 
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {

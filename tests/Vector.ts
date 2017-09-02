@@ -44,13 +44,15 @@ describe("Vector value extraction", () => {
         Vector.of(2,4)
             .equals(Vector.of(1,2,3,4).filter(x => x%2 === 0))));
     it("get finds when present", () => assert.ok(
-        Option.of(5).equals(Vector.of(1,2,3,4,5,6).get(4))))
+        Option.of(5).equals(Vector.of(1,2,3,4,5,6).get(4))));
     it("get finds when present after prepend", () => assert.ok(
-        Option.of(5).equals(Vector.of(2,3,4,5,6).prepend(1).get(4))))
+        Option.of(5).equals(Vector.of(2,3,4,5,6).prepend(1).get(4))));
     it("get doesn't find when vector too short", () => assert.ok(
-        Option.none().equals(Vector.of(1,2,3).get(4))))
+        Option.none().equals(Vector.of(1,2,3).get(4))));
     it("get doesn't find when negative index", () => assert.ok(
-        Option.none().equals(Vector.of(1,2,3).get(-1))))
+        Option.none().equals(Vector.of(1,2,3).get(-1))));
+    it("correctly dropsWhile", () => assert.deepEqual(
+        [4,5,6], Vector.of(1,2,3,4,5,6).dropWhile(x=>x<4).toArray()));
 });
 
 describe("Prepend", () => {
