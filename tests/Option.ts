@@ -1,4 +1,6 @@
 import { Option } from "../src/Option";
+import { Vector } from "../src/Vector";
+import { Seq } from "../src/Seq";
 import * as assert from 'assert'
 
 describe("option comparison", () => {
@@ -45,4 +47,15 @@ describe("option transformation", () => {
        assert.ok(Option.of(5).filter(x => x<2).isNone()));
     it("should filter none->none", () =>
        assert.ok(Option.none<number>().filter(x => x<2).isNone()));
+});
+
+describe("Option helpers", () => {
+    it("should do sequence when all are some", () =>
+       assert.ok(
+           Option.of(<Seq<number>>Vector.of(1,2,3)).equals(
+               Option.sequence(<Seq<Option<number>>>Vector.of(Option.of(1), Option.of(2), Option.of(3))))));
+    it("should fail sequence when some are none", () =>
+       assert.ok(
+           Option.none().equals(
+               Option.sequence(<Seq<Option<number>>>Vector.of(Option.of(1), Option.none(), Option.of(3))))));
 });

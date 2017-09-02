@@ -1,4 +1,6 @@
 import { Value } from "./Value";
+import { Seq } from "./Seq";
+import { Vector } from "./Vector";
 import { WithEquality, withEqEquals, withEqHashCode } from "./Comparison";
 
 export abstract class Option<T> implements Value {
@@ -6,6 +8,9 @@ export abstract class Option<T> implements Value {
      * T gives a some
      * undefined gives a none
      * null gives a some
+     *
+     * require WithEquality for the value otherwise
+     * I can't talk about equality between Option objects.
      */
     static of<T>(v: T & WithEquality|undefined): Option<T> {
         if (v === undefined) {
@@ -18,8 +23,21 @@ export abstract class Option<T> implements Value {
         return <Option<T>>none;
     }
 
+    static sequence<T>(seq:Seq<Option<T>>): Option<Seq<T>> {
+        let r: Seq<T> = Vector.empty();
+        for (let i=0;i<seq.size();i++) {
+            const v = seq.get(i).getOrThrow();
+            if (v.isNone()) {
+                return <Option<Seq<T>>>none;
+            }
+            r = r.append(v.getOrThrow());
+        }
+        return Option.of(r);
+    }
+
     abstract isSome(): boolean;
     abstract isNone(): boolean;
+    abstract getOrThrow(): T & WithEquality;
     abstract contains(v: T|null): boolean;
     abstract getOrUndefined(): T|null|undefined;
     abstract map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U>;
@@ -40,6 +58,9 @@ export class Some<T> extends Option<T> {
     }
     isNone(): boolean {
         return false;
+    }
+    getOrThrow(): T & WithEquality {
+        return this.value;
     }
     contains(v: T): boolean {
         return v === this.value;
@@ -77,6 +98,9 @@ export class None<T> extends Option<T> {
     }
     isNone(): boolean {
         return true;
+    }
+    getOrThrow(): T & WithEquality {
+        throw "getOrThrow called on none!";
     }
     contains(v: T): boolean {
         return false;

@@ -5,7 +5,7 @@ import { Option } from "./Option";
 
 export interface Seq<T> extends Value {
     size(): number;
-    toArray(): T[];
+    toArray(): Array< & WithEquality>;
     append(elt: T & WithEquality): Seq<T>;
     appendAll(elts: Seq<T>): Seq<T>;
     forEach(fn: (v:T)=>void): void;
