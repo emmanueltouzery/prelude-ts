@@ -1,21 +1,6 @@
 import { HashMap } from "../src/HashMap";
-import { stringHashCode } from "../src/Util";
-
+import { MyClass} from "./SampleData";
 import * as assert from 'assert'
-
-class MyClass {
-    constructor(private field1:string, private field2:number) {}
-    equals(other: MyClass): boolean {
-        return this.field1 === other.field1 &&
-            this.field2 === other.field2;
-    }
-    hashCode(): number {
-        return stringHashCode("" + this.field1 + this.field2);
-    }
-    toString(): string {
-        return `{field1: ${this.field1}, field2: ${this.field2}}`
-    }
-}
 
 describe("hashmap construction basic sanity tests", () => {
     it("should overwrite values with the same key", () => assert.ok(
