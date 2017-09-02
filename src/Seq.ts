@@ -19,4 +19,5 @@ export interface Seq<T> extends Value {
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U;
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;
     mkString(separator: string): string;
+    get(idx: number): Option<T>;
 }

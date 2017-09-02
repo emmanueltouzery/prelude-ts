@@ -1,5 +1,6 @@
 import { Vector } from "../src/Vector";
 import { HashMap } from "../src/HashMap";
+import { Option } from "../src/Option";
 import * as assert from 'assert'
 
 describe("Vector creation", () => {
@@ -23,9 +24,6 @@ describe("Vector manipulation", () => {
     it("groupBy works", () => assert.ok(
         HashMap.empty().put(0, Vector.of(2,4)).put(1, Vector.of(1,3))
             .equals(Vector.of(1,2,3,4).groupBy(x => x%2))));
-    it("filter works", () => assert.ok(
-        Vector.of(2,4)
-            .equals(Vector.of(1,2,3,4).filter(x => x%2 === 0))));
     it("sorting works", () => assert.ok(
         Vector.of(4,3,2,1)
             .equals(Vector.of(1,2,3,4).sortBy((x,y) => y-x))));
@@ -35,6 +33,20 @@ describe("Vector manipulation", () => {
                 x => Vector.ofArray(Array.from(Array(x), ()=>x))))));
     it("mkString works", () => assert.equal(
         "1, 2, 3", Vector.of(1,2,3).mkString(", ")));
+});
+
+describe("Vector value extraction", () => {
+    it("filter works", () => assert.ok(
+        Vector.of(2,4)
+            .equals(Vector.of(1,2,3,4).filter(x => x%2 === 0))));
+    it("get finds when present", () => assert.ok(
+        Option.of(5).equals(Vector.of(1,2,3,4,5,6).get(4))))
+    it("get finds when present after prepend", () => assert.ok(
+        Option.of(5).equals(Vector.of(2,3,4,5,6).prepend(1).get(4))))
+    it("get doesn't find when vector too short", () => assert.ok(
+        Option.none().equals(Vector.of(1,2,3).get(4))))
+    it("get doesn't find when negative index", () => assert.ok(
+        Option.none().equals(Vector.of(1,2,3).get(-1))))
 });
 
 describe("Prepend", () => {

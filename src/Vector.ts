@@ -112,6 +112,10 @@ export class Vector<T> implements Seq<T> {
         return r;
     }
 
+    get(idx: number): Option<T> {
+        return Option.of(this.hamt.get(idx+this.indexShift));
+    }
+
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
         return Vector.ofArray(this.toArray().sort(compare));
     }
