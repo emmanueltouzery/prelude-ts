@@ -59,6 +59,12 @@ describe("Vector iteration", () => {
        Vector.of(1,2,3).find(x => x >= 2).contains(2));
     it("doesn't find if the predicate doesn't match", () => 
        Vector.of(1,2,3).find(x => x >= 4).isNone());
+    it("foldsLeft correctly", () => assert.equal(
+        "cba!",
+        Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs)));
+    it("foldsRight correctly", () => assert.equal(
+        "!cba",
+        Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x)));
 })
 
 describe("Vector Value tests", () => {

@@ -85,6 +85,22 @@ export class Vector<T> implements Seq<T> {
         return Vector.ofArray(r);
     }
 
+    foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
+        let r = zero;
+        for (let i=0;i<this.hamt.size;i++) {
+            r = fn(r, this.hamt.get(i+this.indexShift));
+        }
+        return r;
+    }
+
+    foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U {
+        let r = zero;
+        for (let i=this.hamt.size-1;i>=0;i--) {
+            r = fn(this.hamt.get(i+this.indexShift), r);
+        }
+        return r;
+    }
+
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
         return Vector.ofArray(this.toArray().sort(compare));
     }
