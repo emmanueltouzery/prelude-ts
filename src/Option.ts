@@ -24,6 +24,7 @@ export abstract class Option<T> implements Value {
     abstract getOrUndefined(): T|null|undefined;
     abstract map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U>;
     abstract flatMap<U>(mapper:(v:T)=>Option<U>): Option<U>;
+    abstract filter(fn: (v:T & WithEquality)=>boolean): Option<T>;
     abstract equals(other: Option<T>): boolean;
     abstract hashCode(): number;
     abstract toString(): string;
@@ -51,6 +52,9 @@ export class Some<T> extends Option<T> {
     }
     flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return mapper(this.value);
+    }
+    filter(fn: (v:T & WithEquality)=>boolean): Option<T> {
+        return fn(this.value) ? this : Option.none<T>();
     }
     equals(other: Option<T>): boolean {
         if (other === none) {
@@ -85,6 +89,9 @@ export class None<T> extends Option<T> {
     }
     flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return <Option<U>>none;
+    }
+    filter(fn: (v:T & WithEquality)=>boolean): Option<T> {
+        return <Option<T>>none;
     }
     equals(other: Option<T>): boolean {
         return other === none;
