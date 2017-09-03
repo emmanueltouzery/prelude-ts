@@ -6,7 +6,7 @@ const hamt: any = require("hamt_plus");
 
 export class HashMap<K,V> implements IMap<K,V> {
 
-    /*private*/ constructor(private hamt: any) {}
+    protected constructor(private hamt: any) {}
 
     static empty<K,V>(): HashMap<K,V> {
         return <HashMap<K,V>>emptyHashMap;
@@ -77,7 +77,7 @@ export class HashMap<K,V> implements IMap<K,V> {
 // the functions from
 class EmptyHashMap<K,V> extends HashMap<K,V> {
 
-    /*private*/ constructor() {
+    constructor() {
         super({}); // we must override all the functions
     }
 

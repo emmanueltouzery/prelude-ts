@@ -7,15 +7,17 @@ const hamt: any = require("hamt_plus");
 
 export class Vector<T> implements Seq<T> {
     
-    /*private*/ constructor(private hamt: any, private indexShift: number) {}
+    protected constructor(private hamt: any, private indexShift: number) {}
+
+    private static readonly emptyVector = new Vector(hamt.make(), 0);
 
     static empty<T>(): Vector<T> {
-        return <Vector<T>>emptyVector;
+        return <Vector<T>>Vector.emptyVector;
     }
 
     static ofArray<T>(arr: Array<T & WithEquality>): Vector<T> {
         if (arr.length === 0) {
-            return <Vector<T>>emptyVector;
+            return <Vector<T>>Vector.emptyVector;
         }
         return new Vector<T>(hamt.empty.mutate(
             (h:any) => arr.forEach((x, i) => h.set(i, x))), 0);
@@ -118,7 +120,7 @@ export class Vector<T> implements Seq<T> {
 
     drop(n:number): Vector<T> {
         if (n>=this.hamt.size) {
-            return <Vector<T>>emptyVector;
+            return <Vector<T>>Vector.emptyVector;
         }
         return new Vector<T>(this.hamt.fold(
             (h:any,v:T,k:number) => (k-this.indexShift>=n) ?
@@ -192,5 +194,3 @@ export class Vector<T> implements Seq<T> {
         return r + "]";
     }
 }
-
-const emptyVector = new Vector(hamt.make(), 0);

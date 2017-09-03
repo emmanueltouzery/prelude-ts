@@ -5,7 +5,7 @@ const hamt: any = require("hamt_plus");
 
 export class HashSet<T> implements ISet<T> {
     
-    /*private*/ constructor(private hamt: any) {}
+    protected constructor(private hamt: any) {}
 
     static empty<T>(): HashSet<T> {
         return <HashSet<T>>emptyHashSet;
@@ -75,7 +75,7 @@ export class HashSet<T> implements ISet<T> {
 // the functions from
 class EmptyHashSet<T> extends HashSet<T> {
 
-    /*private*/ constructor() {
+    constructor() {
         super({}); // we must override all the functions
     }
 
