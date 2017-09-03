@@ -59,3 +59,10 @@ describe("Option helpers", () => {
            Option.none().equals(
                Option.sequence(<Seq<Option<number>>>Vector.of(Option.of(1), Option.none(), Option.of(3))))));
 });
+
+describe("option retrieval", () => {
+    it("should return the value on Some.getOrElse", () =>
+       assert.equal(5, Option.of(5).getOrElse(6)));
+    it("should return the alternative on None.getOrElse", () =>
+       assert.equal(6, Option.none().getOrElse(6)));
+});

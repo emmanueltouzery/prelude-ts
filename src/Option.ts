@@ -38,6 +38,7 @@ export abstract class Option<T> implements Value {
     abstract isSome(): boolean;
     abstract isNone(): boolean;
     abstract getOrThrow(): T & WithEquality;
+    abstract getOrElse(alt: T & WithEquality): T & WithEquality;
     abstract contains(v: T|null): boolean;
     abstract getOrUndefined(): T|null|undefined;
     abstract map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U>;
@@ -66,6 +67,9 @@ export class Some<T> extends Option<T> {
         return v === this.value;
     }
     getOrUndefined(): T | undefined {
+        return this.value;
+    }
+    getOrElse(alt: T & WithEquality): T & WithEquality {
         return this.value;
     }
     map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U> {
@@ -107,6 +111,9 @@ export class None<T> extends Option<T> {
     }
     getOrUndefined(): T|undefined {
         return undefined;
+    }
+    getOrElse(alt: T & WithEquality): T & WithEquality {
+        return alt;
     }
     map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U> {
         return <Option<U>>none;
