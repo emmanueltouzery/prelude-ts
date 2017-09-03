@@ -37,6 +37,7 @@ export abstract class Option<T> implements Value {
 
     abstract isSome(): boolean;
     abstract isNone(): boolean;
+    abstract orElse(other: Option<T>): Option<T>;
     abstract getOrThrow(): T & WithEquality;
     abstract getOrElse(alt: T & WithEquality): T & WithEquality;
     abstract contains(v: T|null): boolean;
@@ -59,6 +60,9 @@ export class Some<T> extends Option<T> {
     }
     isNone(): boolean {
         return false;
+    }
+    orElse(other: Option<T>): Option<T> {
+        return this;
     }
     getOrThrow(): T & WithEquality {
         return this.value;
@@ -102,6 +106,9 @@ export class None<T> extends Option<T> {
     }
     isNone(): boolean {
         return true;
+    }
+    orElse(other: Option<T>): Option<T> {
+        return other;
     }
     getOrThrow(): T & WithEquality {
         throw "getOrThrow called on none!";
