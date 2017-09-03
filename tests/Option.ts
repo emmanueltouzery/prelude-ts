@@ -65,4 +65,8 @@ describe("option retrieval", () => {
        assert.equal(5, Option.of(5).getOrElse(6)));
     it("should return the alternative on None.getOrElse", () =>
        assert.equal(6, Option.none().getOrElse(6)));
+    it("should return the value on Some.toVector", () =>
+       assert.deepEqual([5], Option.of(5).toVector().toArray()));
+    it("should return empty on None.toVector", () =>
+       assert.deepEqual([], Option.none().toVector().toArray()));
 });
