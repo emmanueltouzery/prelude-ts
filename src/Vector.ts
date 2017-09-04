@@ -2,6 +2,7 @@ import { Seq } from "./Seq";
 import { WithEquality, Ordering, 
          withEqHashCode, withEqEquals } from "./Comparison";
 import { HashMap} from "./HashMap";
+import { IMap } from "./IMap";
 import { Option } from "./Option";
 const hamt: any = require("hamt_plus");
 
@@ -168,6 +169,18 @@ export class Vector<T> implements Seq<T> {
         return this.hamt.fold(
             (acc: HashMap<C,Vector<T>>, v:T & WithEquality, k:number) =>
                 acc.putWithMerge(classifier(v), Vector.of(v), (v1,v2)=>v1.appendAll(v2)), HashMap.empty());
+    }
+
+    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V & WithEquality]): IMap<K,V> {
+        return this.toMapStruct(converter);
+    }
+
+    toMapStruct<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
+        return this.hamt.fold(
+            (acc: HashMap<K,V>, value:T, k:number) => {
+                const converted = converter(value);
+                return acc.putStruct(converted[0], converted[1]);
+            }, HashMap.empty());
     }
 
     equals(other: Vector<T>): boolean {

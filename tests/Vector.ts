@@ -85,6 +85,10 @@ describe("Vector iteration", () => {
     it("foldsRight correctly", () => assert.equal(
         "!cba",
         Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x)));
+    it("transforms to map", () => {
+        assert.ok(HashMap.empty<number,string>().put(1,"ok").put(2, "bad")
+                  .equals(<HashMap<number,string>>Vector.ofStruct<[number,string]>([1,"ok"],[2,"bad"]).toMap(x => x)));
+    });
 })
 
 describe("Vector Value tests", () => {
