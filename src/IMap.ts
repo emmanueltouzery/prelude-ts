@@ -23,5 +23,7 @@ export interface IMap<K,V> extends Value {
 
     size(): number;
 
+    isEmpty(): boolean;
+
     mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V>;
 }

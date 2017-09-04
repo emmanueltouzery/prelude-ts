@@ -43,6 +43,10 @@ export class HashMap<K,V> implements IMap<K,V> {
         return this.hamt.size;
     }
 
+    isEmpty(): boolean {
+        return this.hamt.size === 0;
+    }
+
     keySet(): HashSet<K> {
         return HashSet.ofArray<K>(Array.from<K & WithEquality>(this.hamt.keys()));
     }
@@ -134,6 +138,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     size(): number {
         return 0;
+    }
+
+    isEmpty(): boolean {
+        return true;
     }
 
     keySet(): HashSet<K> {

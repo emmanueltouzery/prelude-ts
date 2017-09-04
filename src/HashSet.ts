@@ -39,6 +39,10 @@ export class HashSet<T> implements ISet<T> {
         return this.hamt.size;
     }
 
+    isEmpty(): boolean {
+        return this.hamt.size === 0;
+    }
+
     equals(other: HashSet<T>): boolean {
         const sz = this.hamt.size;
         if (other === emptyHashSet && sz === 0) {
@@ -95,6 +99,10 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     size(): number {
         return 0;
+    }
+
+    isEmpty(): boolean {
+        return true;
     }
 
     equals(other: HashSet<T>): boolean {
