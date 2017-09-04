@@ -31,6 +31,11 @@ describe("hashmap construction basic sanity tests", () => {
         HashMap.empty<number,string>()
             .put(5,"test").putWithMerge(5,"a",(a,b)=>a+b)
             .equals(HashMap.empty<number,string>().put(5, "testa"))));
+
+    it("should mergeWith", () => assert.ok(
+        HashMap.empty<number,string>().put(1,"a").put(2,"bc").put(3,"d")
+            .equals(HashMap.empty<number,string>().put(1,"a").put(2,"b")
+                    .mergeWith(HashMap.empty<number,string>().put(2,"c").put(3,"d"), (v1,v2)=>v1+v2))));
 });
 
 describe("hashmap equality", () => {

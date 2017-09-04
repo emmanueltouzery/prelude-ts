@@ -7,7 +7,7 @@ export interface IMap<K,V> extends Value {
 
     keySet(): ISet<K>;
 
-    get(k: K & WithEquality): Option<V & WithEquality>;
+    get(k: K & WithEquality): Option<V>;
 
     /**
      * I require WithEquality also for the value, otherwise
@@ -22,4 +22,6 @@ export interface IMap<K,V> extends Value {
     putStructWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): IMap<K,V>;
 
     size(): number;
+
+    mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V>;
 }
