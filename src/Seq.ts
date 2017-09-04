@@ -18,6 +18,7 @@ export interface Seq<T> extends Value {
     groupBy<C>(classifier: (v:T)=>C): IMap<C,Seq<T>>;
     sortBy(compare: (v1:T,v2:T)=>Ordering): Seq<T>;
     prepend(elt: T): Seq<T>;
+    prependAll(elts: Seq<T>): Seq<T>;
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U;
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;
     mkString(separator: string): string;

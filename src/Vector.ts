@@ -65,6 +65,17 @@ export class Vector<T> implements Seq<T> {
         return new Vector<T>(this.hamt.set(newIndexShift, elt), newIndexShift);
     }
 
+    prependAll(elts: Seq<T>): Vector<T> {
+        // could optimize if i'm 100% the other one is a Vector...
+        // (no need for in-order get, i can take all the keys in any order)
+        const newIndexShift = this.indexShift - elts.size();
+        let hamt = this.hamt;
+        for (let i=0;i<elts.size();i++) {
+            hamt = hamt.set(newIndexShift+i, elts.get(i).getOrUndefined());
+        }
+        return new Vector<T>(hamt, newIndexShift);
+    }
+
     forEach(fn: (v:T)=>void): void {
         for (let i=0;i<this.hamt.size;i++) {
             fn(this.hamt.get(i+this.indexShift));

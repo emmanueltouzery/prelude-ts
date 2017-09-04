@@ -67,6 +67,8 @@ describe("Prepend", () => {
         basic.appendAll(Vector.of(5,6)).equals(prepended.appendAll(Vector.of(5,6)))));
     it("converts to string correctly after prepend", () => assert.equal(
         basic.toString(), prepended.toString()));
+    it("prependsAll correctly", () => assert.deepEqual(
+        [1,2,3,4,5], Vector.of(4,5).prependAll(Vector.of(1,2,3)).toArray()));
 });
 
 describe("Vector iteration", () => {
