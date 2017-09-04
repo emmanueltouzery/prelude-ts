@@ -7,6 +7,7 @@ export interface Seq<T> extends Value {
     size(): number;
     toArray(): Array< & WithEquality>;
     append(elt: T & WithEquality): Seq<T>;
+    isEmpty(): boolean;
     appendAll(elts: Seq<T>): Seq<T>;
     forEach(fn: (v:T)=>void): void;
     map<U>(mapper:(v:T)=>U): Seq<U>;
