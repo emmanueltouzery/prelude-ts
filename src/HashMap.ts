@@ -2,6 +2,8 @@ import { IMap } from "./IMap";
 import { hasEquals, HasEquals, WithEquality,
          withEqHashCode, withEqEquals } from "./Comparison";
 import { Option, none } from "./Option";
+import { HashSet } from "./HashSet";
+import { ISet } from "./ISet";
 const hamt: any = require("hamt_plus");
 
 export class HashMap<K,V> implements IMap<K,V> {
@@ -39,6 +41,10 @@ export class HashMap<K,V> implements IMap<K,V> {
 
     size(): number {
         return this.hamt.size;
+    }
+
+    keySet(): HashSet<K> {
+        return HashSet.ofArray<K>(Array.from<K & WithEquality>(this.hamt.keys()));
     }
 
     equals(other: HashMap<K,V>): boolean {
@@ -117,6 +123,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     size(): number {
         return 0;
+    }
+
+    keySet(): HashSet<K> {
+        return HashSet.empty<K>();
     }
 
     equals(other: HashMap<K,V>): boolean {

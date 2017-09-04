@@ -1,4 +1,5 @@
 import { HashMap } from "../src/HashMap";
+import { HashSet } from "../src/HashSet";
 import { MyClass} from "./SampleData";
 import * as assert from 'assert'
 
@@ -57,4 +58,8 @@ describe("hashmap get", () => {
         HashMap.empty<string,number>().put("key1", 6).get("key2").isNone()));
     it("should retrieve nulls", () => assert.ok(
         HashMap.empty<string,number|null>().put("key1", null).get("key1").contains(null)));
+    it("should get empty keySet", () => assert.ok(
+        HashSet.empty<string>().equals(HashMap.empty<string,string>().keySet())));
+    it("should get non-empty keySet", () => assert.ok(
+        HashSet.of("a","c").equals(HashMap.empty<string,string>().put("a","b").put("c","d").keySet())));
 });

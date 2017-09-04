@@ -1,8 +1,12 @@
 import { WithEquality } from "./Comparison";
 import { Option } from "./Option";
 import { Value } from "./Value"
+import { ISet } from "./ISet";
 
 export interface IMap<K,V> extends Value {
+
+    keySet(): ISet<K>;
+
     get(k: K & WithEquality): Option<V & WithEquality>;
 
     /**
