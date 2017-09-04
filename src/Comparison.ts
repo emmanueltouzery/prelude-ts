@@ -23,7 +23,7 @@ export function stringHashCode(str: string): number {
     return hash;
 }
 
-export function withEqEquals(obj: WithEquality|null, obj2: WithEquality|null): boolean {
+export function withEqEquals(obj: any|null, obj2: any|null): boolean {
     if (obj === null != obj2 === null) {
         return false;
     }
@@ -36,7 +36,7 @@ export function withEqEquals(obj: WithEquality|null, obj2: WithEquality|null): b
     return obj === obj2;
 }
 
-export function withEqHashCode(obj: WithEquality|null): number {
+export function withEqHashCode(obj: any|null): number {
     if (hasEquals(obj)) {
         return obj.hashCode();
     }

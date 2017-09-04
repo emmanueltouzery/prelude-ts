@@ -16,17 +16,25 @@ export class HashMap<K,V> implements IMap<K,V> {
         return Option.of(this.hamt.get(k));
     }
 
-    put(k: K & WithEquality, v: V & WithEquality): HashMap<K,V> {
+    putStruct(k: K & WithEquality, v: V): HashMap<K,V> {
         return new HashMap<K,V>(this.hamt.set(k,v));
     }
 
-    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V, v2: V) => V): HashMap<K,V> {
+    put(k: K & WithEquality, v: V & WithEquality): HashMap<K,V> {
+        return this.putStruct(k, v);
+    }
+
+    putStructWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): HashMap<K,V> {
         return new HashMap<K,V>(this.hamt.modify(k, (curV?: V) => {
             if (curV === undefined) {
                 return v;
             }
             return merge(curV, v);
         }))
+    }
+
+    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V, v2: V) => V): HashMap<K,V> {
+        return this.putStructWithMerge(k, v, merge);
     }
 
     size(): number {
@@ -85,7 +93,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return <Option<V & WithEquality>>none;
     }
 
-    put(k: K & WithEquality, v: V & WithEquality): HashMap<K,V> {
+    putStruct(k: K & WithEquality, v: V): HashMap<K,V> {
         if (hasEquals(k)) {
             return new HashMap<K,V>(hamt.make({
                 hash: (v: K & HasEquals) => v.hashCode(),
@@ -93,6 +101,14 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
             }).set(k,v));
         }
         return new HashMap<K,V>(hamt.make().set(k,v));
+    }
+
+    put(k: K & WithEquality, v: V & WithEquality): HashMap<K,V> {
+        return this.putStruct(k,v);
+    }
+
+    putStructWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): HashMap<K,V> {
+        return this.putStruct(k,v);
     }
 
     putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V, v2: V) => V): HashMap<K,V> {

@@ -14,13 +14,20 @@ export abstract class Option<T> implements Value {
      */
     static of<T>(v: T & WithEquality|undefined): Option<T> {
         if (v === undefined) {
-            return <Option<T>>none;
+            return <None<T>>none;
+        }
+        return new Some(v);
+    }
+
+    static ofStruct<T>(v: T|undefined): Option<T> {
+        if (v === undefined) {
+            return <None<T>>none;
         }
         return new Some(v);
     }
 
     static none<T>(): Option<T> {
-        return <Option<T>>none;
+        return <None<T>>none;
     }
 
     static sequence<T>(seq:Seq<Option<T>>): Option<Seq<T>> {
@@ -28,23 +35,24 @@ export abstract class Option<T> implements Value {
         for (let i=0;i<seq.size();i++) {
             const v = seq.get(i).getOrThrow();
             if (v.isNone()) {
-                return <Option<Seq<T>>>none;
+                return <None<Seq<T>>>none;
             }
             r = r.append(v.getOrThrow());
         }
-        return Option.of(r);
+        return Option.ofStruct(r);
     }
 
     abstract isSome(): boolean;
     abstract isNone(): boolean;
     abstract orElse(other: Option<T>): Option<T>;
-    abstract getOrThrow(): T & WithEquality;
-    abstract getOrElse(alt: T & WithEquality): T & WithEquality;
+    abstract getOrThrow(): T;
+    abstract getOrElse(alt: T): T;
     abstract contains(v: T|null): boolean;
     abstract getOrUndefined(): T|null|undefined;
-    abstract map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U>;
+    abstract map<U>(fn: (v:T)=>U & WithEquality): Option<U>;
+    abstract mapStruct<U>(fn: (v:T)=>U): Option<U>;
     abstract flatMap<U>(mapper:(v:T)=>Option<U>): Option<U>;
-    abstract filter(fn: (v:T & WithEquality)=>boolean): Option<T>;
+    abstract filter(fn: (v:T)=>boolean): Option<T>;
     abstract toVector(): Vector<T>;
     abstract equals(other: Option<T>): boolean;
     abstract hashCode(): number;
@@ -52,7 +60,7 @@ export abstract class Option<T> implements Value {
 }
 
 export class Some<T> extends Option<T> {
-    constructor(private value: T & WithEquality) {
+    constructor(private value: T) {
         super();
     }
 
@@ -65,7 +73,7 @@ export class Some<T> extends Option<T> {
     orElse(other: Option<T>): Option<T> {
         return this;
     }
-    getOrThrow(): T & WithEquality {
+    getOrThrow(): T {
         return this.value;
     }
     contains(v: T): boolean {
@@ -74,23 +82,26 @@ export class Some<T> extends Option<T> {
     getOrUndefined(): T | undefined {
         return this.value;
     }
-    getOrElse(alt: T & WithEquality): T & WithEquality {
+    getOrElse(alt: T): T {
         return this.value;
     }
-    map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U> {
+    map<U>(fn: (v:T)=>U & WithEquality): Option<U> {
         return Option.of(fn(this.value));
+    }
+    mapStruct<U>(fn: (v:T)=>U): Option<U> {
+        return Option.ofStruct(fn(this.value));
     }
     flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return mapper(this.value);
     }
-    filter(fn: (v:T & WithEquality)=>boolean): Option<T> {
+    filter(fn: (v:T)=>boolean): Option<T> {
         return fn(this.value) ? this : Option.none<T>();
     }
     toVector(): Vector<T> {
-        return Vector.of(this.value);
+        return Vector.ofStruct(this.value);
     }
     equals(other: Option<T>): boolean {
-        if (other === none) {
+        if (other === <None<T>>none) {
             return false;
         }
         const someOther = <Some<T>>other;
@@ -126,20 +137,23 @@ export class None<T> extends Option<T> {
     getOrElse(alt: T & WithEquality): T & WithEquality {
         return alt;
     }
-    map<U>(fn: (v:T & WithEquality)=>U & WithEquality): Option<U> {
-        return <Option<U>>none;
+    map<U>(fn: (v:T)=>U & WithEquality): Option<U> {
+        return <None<U>>none;
+    }
+    mapStruct<U>(fn: (v:T)=>U): Option<U> {
+        return <None<U>>none;
     }
     flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
-        return <Option<U>>none;
+        return <None<U>>none;
     }
-    filter(fn: (v:T & WithEquality)=>boolean): Option<T> {
-        return <Option<T>>none;
+    filter(fn: (v:T)=>boolean): Option<T> {
+        return <None<T>>none;
     }
     toVector(): Vector<T> {
         return Vector.empty<T>();
     }
     equals(other: Option<T>): boolean {
-        return other === none;
+        return other === <None<T>>none;
     }
     hashCode(): number {
         return 1;

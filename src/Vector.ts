@@ -14,13 +14,21 @@ export class Vector<T> implements Seq<T> {
     static empty<T>(): Vector<T> {
         return <Vector<T>>Vector.emptyVector;
     }
-
-    static ofArray<T>(arr: Array<T & WithEquality>): Vector<T> {
+    
+    static ofArrayStruct<T>(arr: Array<T>): Vector<T> {
         if (arr.length === 0) {
             return <Vector<T>>Vector.emptyVector;
         }
         return new Vector<T>(hamt.empty.mutate(
             (h:any) => arr.forEach((x, i) => h.set(i, x))), 0);
+    }
+
+    static ofArray<T>(arr: Array<T & WithEquality>): Vector<T> {
+        return Vector.ofArrayStruct(arr);
+    }
+
+    static ofStruct<T>(...arr: Array<T>): Vector<T> {
+        return Vector.ofArrayStruct(arr);
     }
 
     static of<T>(...arr: Array<T & WithEquality>): Vector<T> {
