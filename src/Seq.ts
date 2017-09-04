@@ -10,6 +10,7 @@ export interface Seq<T> extends Value {
     isEmpty(): boolean;
     appendAll(elts: Seq<T>): Seq<T>;
     forEach(fn: (v:T)=>void): void;
+    head(): Option<T>;
     map<U>(mapper:(v:T)=>U): Seq<U>;
     filter(predicate:(v:T)=>boolean): Seq<T>;
     find(predicate:(v:T)=>boolean): Option<T>;

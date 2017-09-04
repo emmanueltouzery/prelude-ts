@@ -43,6 +43,10 @@ export class Vector<T> implements Seq<T> {
         return this.hamt.size === 0;
     }
 
+    head(): Option<T> {
+        return Option.ofStruct(this.hamt.get(0));
+    }
+
     append(elt: T & WithEquality): Vector<T> {
         return new Vector<T>(this.hamt.set(this.hamt.size+this.indexShift, elt), this.indexShift);
     }
