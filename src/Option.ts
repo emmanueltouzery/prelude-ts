@@ -56,7 +56,7 @@ export abstract class Option<T> implements Value {
     abstract getOrThrow(): T;
     abstract getOrElse(alt: T): T;
     abstract contains(v: T|null): boolean;
-    abstract getOrUndefined(): T|null|undefined;
+    abstract getOrUndefined(): T|undefined;
     abstract map<U>(fn: (v:T)=>U & WithEquality): Option<U>;
     abstract mapStruct<U>(fn: (v:T)=>U): Option<U>;
     abstract flatMap<U>(mapper:(v:T)=>Option<U>): Option<U>;
