@@ -95,10 +95,14 @@ export class Vector<T> implements Seq<T> {
             (h:any) => elts.forEach(x => h.set(h.size+this.indexShift, x))), this.indexShift);
     }
 
-    map<U>(mapper:(v:T)=>U): Vector<U> {
+    mapStruct<U>(mapper:(v:T)=>U): Vector<U> {
         return new Vector<U>(this.hamt.fold(
             (acc: any, v:T & WithEquality, k:number) => acc.set(k-this.indexShift, mapper(v)),
             hamt.empty), 0);
+    }
+
+    map<U>(mapper:(v:T)=>U&WithEquality): Vector<U> {
+        return this.mapStruct(mapper);
     }
 
     filter(predicate:(v:T)=>boolean): Vector<T> {
