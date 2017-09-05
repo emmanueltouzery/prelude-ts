@@ -29,6 +29,7 @@ export interface Seq<T> extends Value {
     get(idx: number): Option<T>;
     drop(n:number): Seq<T>;
     dropWhile(predicate:(x:T)=>boolean): Seq<T>;
+    dropRight(n:number): Seq<T>;
     toMap<K,V>(converter:(x:T)=>[K & WithEquality,V & WithEquality]): IMap<K,V>;
     toMapStruct<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V>;
 }

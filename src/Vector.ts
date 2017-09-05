@@ -188,6 +188,16 @@ export class Vector<T> implements Seq<T> {
         return new Vector<T>(h, 0);
     }
 
+    dropRight(n:number): Vector<T> {
+        if (n>=this.hamt.size) {
+            return <Vector<T>>Vector.emptyVector;
+        }
+        return new Vector<T>(this.hamt.fold(
+            (h:any,v:T,k:number) => (k-this.indexShift<n) ?
+                h.set(k-this.indexShift, v) : h,
+            hamt.make()), 0);
+    }
+
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
         return Vector.ofArray(this.toArray().sort(compare));
     }
