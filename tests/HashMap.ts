@@ -82,4 +82,10 @@ describe("hashmap transformation", () => {
     it("should transform through empty mapValues", () => assert.ok(
         HashMap.empty<string,number>().equals(
         HashMap.empty<string,number>().mapValues(v => v*2))));
+    it("should transform non-empty to vector", () => assert.deepEqual(
+        [["a",1], ["b",2]],
+        HashMap.empty<string,number>().put("a",1).put("b",2).toVector().toArray()));
+    it("should transform empty to vector", () => assert.deepEqual(
+        [],
+        HashMap.empty<string,number>().toVector().toArray()));
 });

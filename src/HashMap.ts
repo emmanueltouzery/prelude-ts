@@ -4,6 +4,7 @@ import { hasEquals, HasEquals, WithEquality,
 import { Option, none, None } from "./Option";
 import { HashSet } from "./HashSet";
 import { ISet } from "./ISet";
+import { Vector } from "./Vector";
 const hamt: any = require("hamt_plus");
 
 export class HashMap<K,V> implements IMap<K,V> {
@@ -82,6 +83,12 @@ export class HashMap<K,V> implements IMap<K,V> {
 
     mapValues<V2>(fn:(v:V)=>V2&WithEquality): HashMap<K,V2> {
         return this.mapValuesStruct(fn);
+    }
+
+    toVector(): Vector<[K,V]> {
+        return this.hamt.fold(
+            (acc: Vector<[K,V]>, value: V, key: K&WithEquality) =>
+                acc.appendStruct([key,value]), Vector.empty());
     }
 
     equals(other: IMap<K,V>): boolean {
@@ -180,6 +187,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     mapValuesStruct<V2>(fn:(v:V)=>V2): HashMap<K,V2> {
         return HashMap.empty<K,V2>();
+    }
+
+    toVector(): Vector<[K,V]> {
+        return Vector.empty<[K,V]>();
     }
 
     equals(other: HashMap<K,V>): boolean {

@@ -2,6 +2,7 @@ import { WithEquality } from "./Comparison";
 import { Option } from "./Option";
 import { Value } from "./Value"
 import { ISet } from "./ISet";
+import { Vector } from "./Vector";
 
 export interface IMap<K,V> extends Value {
 
@@ -28,6 +29,8 @@ export interface IMap<K,V> extends Value {
     // these two should be uncommented but then the build time explodes
     // mapValuesStruct<V2>(fn:(v:V)=>V2): IMap<K,V2>;
     // mapValues<V2>(fn:(v:V)=>V2&WithEquality): IMap<K,V2>;
+
+    toVector(): Vector<[K,V]>;
 
     size(): number;
 
