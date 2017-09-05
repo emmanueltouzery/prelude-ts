@@ -7,7 +7,8 @@ export interface Seq<T> extends Value {
     size(): number;
     isEmpty(): boolean;
     toArray(): Array<T>;
-    append(elt: T): Seq<T>;
+    appendStruct(elt: T): Seq<T>;
+    append(elt: T & WithEquality): Seq<T>;
     appendAll(elts: Seq<T>): Seq<T>;
     forEach(fn: (v:T)=>void): void;
     head(): Option<T>;
@@ -17,7 +18,8 @@ export interface Seq<T> extends Value {
     flatMap<U>(mapper:(v:T)=>Seq<U>): Seq<U>;
     groupBy<C>(classifier: (v:T)=>C): IMap<C,Seq<T>>;
     sortBy(compare: (v1:T,v2:T)=>Ordering): Seq<T>;
-    prepend(elt: T): Seq<T>;
+    prependStruct(elt: T): Seq<T>;
+    prepend(elt: T & WithEquality): Seq<T>;
     prependAll(elts: Seq<T>): Seq<T>;
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U;
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;

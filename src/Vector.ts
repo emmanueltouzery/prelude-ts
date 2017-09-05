@@ -56,13 +56,21 @@ export class Vector<T> implements Seq<T> {
         return Option.ofStruct(this.hamt.get(0));
     }
 
-    append(elt: T & WithEquality): Vector<T> {
+    appendStruct(elt: T): Vector<T> {
         return new Vector<T>(this.hamt.set(this.hamt.size+this.indexShift, elt), this.indexShift);
     }
 
-    prepend(elt: T & WithEquality): Vector<T> {
+    append(elt: T & WithEquality): Vector<T> {
+        return this.appendStruct(elt);
+    }
+
+    prependStruct(elt: T): Vector<T> {
         const newIndexShift = this.indexShift - 1;
         return new Vector<T>(this.hamt.set(newIndexShift, elt), newIndexShift);
+    }
+
+    prepend(elt: T & WithEquality): Vector<T> {
+        return this.prependStruct(elt);
     }
 
     prependAll(elts: Seq<T>): Vector<T> {

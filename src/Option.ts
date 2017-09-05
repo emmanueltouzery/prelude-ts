@@ -37,7 +37,7 @@ export abstract class Option<T> implements Value {
             if (v.isNone()) {
                 return <None<Seq<T>>>none;
             }
-            r = r.append(v.getOrThrow());
+            r = r.appendStruct(v.getOrThrow());
         }
         return Option.ofStruct(r);
     }
