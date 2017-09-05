@@ -62,7 +62,7 @@ export class HashMap<K,V> implements IMap<K,V> {
         return map;
     }
 
-    mapStruct<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): IMap<K2,V2> {
+    mapStruct<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): HashMap<K2,V2> {
         return this.hamt.fold(
             (acc: HashMap<K2,V2>, value: V, key: K&WithEquality) => {
                 const [newk,newv] = fn(key, value);
@@ -70,7 +70,7 @@ export class HashMap<K,V> implements IMap<K,V> {
             }, HashMap.empty());
     }
 
-    map<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2&WithEquality]): IMap<K2,V2> {
+    map<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2&WithEquality]): HashMap<K2,V2> {
         return this.mapStruct(fn);
     }
 
@@ -164,7 +164,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return other;
     }
 
-    mapStruct<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): IMap<K2,V2> {
+    mapStruct<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): HashMap<K2,V2> {
         return HashMap.empty<K2,V2>();
     }
 
