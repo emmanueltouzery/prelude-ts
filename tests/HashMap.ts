@@ -68,3 +68,12 @@ describe("hashmap get", () => {
     it("should get non-empty keySet", () => assert.ok(
         HashSet.of("a","c").equals(HashMap.empty<string,string>().put("a","b").put("c","d").keySet())));
 });
+
+describe("hashmap transformation", () => {
+    it("should transform through map", () => assert.ok(
+        HashMap.empty<number,string>().put(12,"key1").put(6,"key2").equals(
+        HashMap.empty<string,number>().put("key1",6).put("key2", 3).map((k,v) => [v*2,k]))));
+    it("should transform through empty map", () => assert.ok(
+        HashMap.empty<number,string>().equals(
+        HashMap.empty<string,number>().map((k,v) => [v*2,k]))));
+});
