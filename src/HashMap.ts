@@ -74,6 +74,16 @@ export class HashMap<K,V> implements IMap<K,V> {
         return this.mapStruct(fn);
     }
 
+    mapValuesStruct<V2>(fn:(v:V)=>V2): HashMap<K,V2> {
+        return this.hamt.fold(
+            (acc: HashMap<K,V2>, value: V, key: K&WithEquality) =>
+                acc.putStruct(key,fn(value)), HashMap.empty());
+    }
+
+    mapValues<V2>(fn:(v:V)=>V2&WithEquality): HashMap<K,V2> {
+        return this.mapValuesStruct(fn);
+    }
+
     equals(other: IMap<K,V>): boolean {
         const sz = this.hamt.size;
         if (other.size() === 0 && sz === 0) {
@@ -166,6 +176,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     mapStruct<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): HashMap<K2,V2> {
         return HashMap.empty<K2,V2>();
+    }
+
+    mapValuesStruct<V2>(fn:(v:V)=>V2): HashMap<K,V2> {
+        return HashMap.empty<K,V2>();
     }
 
     equals(other: HashMap<K,V>): boolean {

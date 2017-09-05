@@ -25,6 +25,10 @@ export interface IMap<K,V> extends Value {
 
     map<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2&WithEquality]): IMap<K2,V2>;
 
+    // these two should be uncommented but then the build time explodes
+    // mapValuesStruct<V2>(fn:(v:V)=>V2): IMap<K,V2>;
+    // mapValues<V2>(fn:(v:V)=>V2&WithEquality): IMap<K,V2>;
+
     size(): number;
 
     isEmpty(): boolean;

@@ -76,4 +76,10 @@ describe("hashmap transformation", () => {
     it("should transform through empty map", () => assert.ok(
         HashMap.empty<number,string>().equals(
         HashMap.empty<string,number>().map((k,v) => [v*2,k]))));
+    it("should transform through mapValues", () => assert.ok(
+        HashMap.empty<string,number>().put("key1",12).put("key2",6).equals(
+        HashMap.empty<string,number>().put("key1",6).put("key2", 3).mapValues(v => v*2))));
+    it("should transform through empty mapValues", () => assert.ok(
+        HashMap.empty<string,number>().equals(
+        HashMap.empty<string,number>().mapValues(v => v*2))));
 });
