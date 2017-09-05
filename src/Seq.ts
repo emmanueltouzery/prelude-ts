@@ -12,6 +12,7 @@ export interface Seq<T> extends Value {
     appendAll(elts: Seq<T>): Seq<T>;
     forEach(fn: (v:T)=>void): void;
     head(): Option<T>;
+    last(): Option<T>;
     mapStruct<U>(mapper:(v:T)=>U): Seq<U>;
     map<U>(mapper:(v:T)=>U&WithEquality): Seq<U>;
     filter(predicate:(v:T)=>boolean): Seq<T>;

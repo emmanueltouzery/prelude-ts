@@ -53,6 +53,12 @@ describe("Vector value extraction", () => {
         Option.none().equals(Vector.of(1,2,3).get(-1))));
     it("correctly dropsWhile", () => assert.deepEqual(
         [4,5,6], Vector.of(1,2,3,4,5,6).dropWhile(x=>x<4).toArray()));
+    it("correctly gets the last element", () => assert.equal(
+        5, Vector.of(1,2,3,4,5).last().getOrUndefined()));
+    it("correctly gets the last element of an empty vector", () => assert.ok(
+        Vector.empty().last().isNone()));
+    it("correctly gets the last element also after prepend", () => assert.equal(
+        5, Vector.of(4,5).prependAll(Vector.of(1,2,3)).last().getOrUndefined()));
 });
 
 describe("Prepend", () => {

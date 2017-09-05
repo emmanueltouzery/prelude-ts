@@ -56,6 +56,10 @@ export class Vector<T> implements Seq<T> {
         return Option.ofStruct(this.hamt.get(0));
     }
 
+    last(): Option<T> {
+        return Option.ofStruct(this.hamt.get(this.hamt.size+this.indexShift-1));
+    }
+
     appendStruct(elt: T): Vector<T> {
         return new Vector<T>(this.hamt.set(this.hamt.size+this.indexShift, elt), this.indexShift);
     }
