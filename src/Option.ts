@@ -42,6 +42,14 @@ export abstract class Option<T> implements Value {
         return Option.ofStruct(r);
     }
 
+    static liftA2<T,U,V>(fn:(v1:T,v2:U)=>V&WithEquality): (p1:Option<T>, p2:Option<U>)=>Option<V> {
+        return (p1,p2) => p1.flatMap(a1 => p2.map(a2 => fn(a1,a2)));
+    }
+
+    static liftA2Struct<T,U,V>(fn:(v1:T,v2:U)=>V): (p1:Option<T>, p2:Option<U>) => Option<V> {
+        return (p1,p2) => p1.flatMap(a1 => p2.mapStruct(a2 => fn(a1,a2)));
+    }
+
     abstract isSome(): boolean;
     abstract isNone(): boolean;
     abstract orElse(other: Option<T>): Option<T>;

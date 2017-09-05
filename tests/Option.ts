@@ -58,6 +58,10 @@ describe("Option helpers", () => {
        assert.ok(
            Option.none().equals(
                Option.sequence(<Seq<Option<number>>>Vector.of(Option.of(1), Option.none(), Option.of(3))))));
+    it("should liftA2", () => assert.ok(Option.of(11).equals(
+        Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.of(6)))));
+    it("should abort liftA2 on none", () => assert.ok(Option.none().equals(
+        Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.none()))));
 });
 
 describe("option retrieval", () => {
