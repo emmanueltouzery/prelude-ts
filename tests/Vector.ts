@@ -38,7 +38,7 @@ describe("Vector manipulation", () => {
     it("returns an empty vector when dropping too much", () => assert.deepEqual(
         [], Vector.of(1,2).drop(3).toArray()));
     it("correctly drops right n items", () => assert.deepEqual(
-        [1,2,3], Vector.of(1,2,3,4,5,6).dropRight(3).toArray()));
+        [1,2,3,4], Vector.of(1,2,3,4,5,6).dropRight(2).toArray()));
     it("returns an empty vector when dropping right too much", () => assert.deepEqual(
         [], Vector.of(1,2).dropRight(3).toArray()));
 });

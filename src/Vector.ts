@@ -189,11 +189,12 @@ export class Vector<T> implements Seq<T> {
     }
 
     dropRight(n:number): Vector<T> {
-        if (n>=this.hamt.size) {
+        const sz = this.hamt.size;
+        if (n>=sz) {
             return <Vector<T>>Vector.emptyVector;
         }
         return new Vector<T>(this.hamt.fold(
-            (h:any,v:T,k:number) => (k-this.indexShift<n) ?
+            (h:any,v:T,k:number) => (sz-k+this.indexShift>n) ?
                 h.set(k-this.indexShift, v) : h,
             hamt.make()), 0);
     }
