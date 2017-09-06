@@ -63,6 +63,18 @@ describe("Vector value extraction", () => {
         Vector.empty().last().isNone()));
     it("correctly gets the last element also after prepend", () => assert.equal(
         5, Vector.of(4,5).prependAll(Vector.of(1,2,3)).last().getOrUndefined()));
+    it("correctly gets the first element", () => assert.equal(
+        1, Vector.of(1,2,3,4,5).head().getOrUndefined()));
+    it("correctly gets the first element of an empty vector", () => assert.ok(
+        Vector.empty().head().isNone()));
+    it("correctly gets the first element also after prepend", () => assert.equal(
+        1, Vector.of(4,5).prependAll(Vector.of(1,2,3)).head().getOrUndefined()));
+    it("correctly gets the tail of the empty vector", () => assert.ok(
+        Vector.empty().equals(Vector.empty().tail())));
+    it("correctly gets the tail of a simple vector", () => assert.ok(
+        Vector.of(2,3,4).equals(Vector.of(1,2,3,4).tail())));
+    it("correctly gets the tail of a vector after prepend", () => assert.ok(
+        Vector.of(2,3,4).equals(Vector.of(2,3,4).prepend(1).tail())));
 });
 
 describe("Prepend", () => {

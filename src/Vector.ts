@@ -69,11 +69,15 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     head(): Option<T> {
-        return Option.ofStruct(this.hamt.get(0));
+        return Option.ofStruct(this.hamt.get(this.indexShift));
     }
 
     last(): Option<T> {
         return Option.ofStruct(this.hamt.get(this.hamt.size+this.indexShift-1));
+    }
+
+    tail(): Vector<T> {
+        return new Vector(this.hamt.remove(this.indexShift), this.indexShift+1);
     }
 
     appendStruct(elt: T): Vector<T> {
