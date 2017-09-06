@@ -49,7 +49,7 @@ describe("hashset access", () => {
     });
     it("supports empty iterator", () => {
         let total = 0;
-        const iterator = HashSet.empty()[Symbol.iterator]();
+        const iterator = HashSet.empty<number>()[Symbol.iterator]();
         let curItem = iterator.next();
         while (!curItem.done) {
             total += curItem.value;

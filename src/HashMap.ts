@@ -19,7 +19,7 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
         return Option.of<V>(this.hamt.get(k));
     }
 
-    [Symbol.iterator]() {
+    [Symbol.iterator](): Iterator<[K,V]> {
         return this.hamt.entries();
     }
 
@@ -40,7 +40,7 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
         }))
     }
 
-    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V, v2: V) => V): HashMap<K,V> {
+    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V&WithEquality, v2: V&WithEquality) => V): HashMap<K,V> {
         return this.putStructWithMerge(k, v, merge);
     }
 
@@ -147,7 +147,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return <None<V>>none;
     }
 
-    [Symbol.iterator]() {
+    [Symbol.iterator](): Iterator<[K,V]> {
         return { next: () => ({ done: true, value: <any>undefined }) };
     }
 
@@ -169,7 +169,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return this.putStruct(k,v);
     }
 
-    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V, v2: V) => V): HashMap<K,V> {
+    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V&WithEquality, v2: V&WithEquality) => V): HashMap<K,V> {
         return this.put(k,v);
     }
 

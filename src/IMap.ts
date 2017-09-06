@@ -18,7 +18,7 @@ export interface IMap<K,V> extends Value {
 
     putStruct(k: K & WithEquality, v: V): IMap<K,V>;
 
-    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V, v2: V) => V): IMap<K,V>;
+    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V&WithEquality, v2: V&WithEquality) => V): IMap<K,V>;
 
     putStructWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): IMap<K,V>;
 

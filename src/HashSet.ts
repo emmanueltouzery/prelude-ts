@@ -26,7 +26,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
         return HashSet.ofIterable(arr);
     }
 
-    [Symbol.iterator]() {
+    [Symbol.iterator](): Iterator<T> {
         return this.hamt.keys();
     }
 
@@ -104,7 +104,7 @@ class EmptyHashSet<T> extends HashSet<T> {
         return false;
     }
 
-    [Symbol.iterator]() {
+    [Symbol.iterator](): Iterator<T> {
         return { next: () => ({ done: true, value: <any>undefined }) };
     }
 

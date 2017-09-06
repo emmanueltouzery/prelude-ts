@@ -25,23 +25,44 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return <Vector<T>>Vector.emptyVector;
     }
     
+    /**
+     * Build a vector from any iterable, which means also
+     * an array for instance.
+     * @type T the item type -- no equality requirement
+     */
     static ofIterableStruct<T>(elts: Iterable<T>): Vector<T> {
-        return (<Vector<T>>Vector.emptyVector).appendAll(elts);
+        return (<Vector<T>>Vector.emptyVector).appendAllStruct(elts);
     }
 
+    /**
+     * Build a vector from any iterable, which means also
+     * an array for instance.
+     * @type T the item type -- equality requirement
+     */
     static ofIterable<T>(elts: Iterable<T & WithEquality>): Vector<T> {
         return Vector.ofIterableStruct(elts);
     }
 
+    /**
+     * Build a vector from a series of items (any number, as parameters)
+     * @type T the item type -- no equality requirement
+     */
     static ofStruct<T>(...arr: Array<T>): Vector<T> {
         return Vector.ofIterableStruct(arr);
     }
 
+    /**
+     * Build a vector from a series of items (any number, as parameters)
+     * @type T the item type -- equality requirement
+     */
     static of<T>(...arr: Array<T & WithEquality>): Vector<T> {
         return Vector.ofIterable(arr);
     }
     
-    [Symbol.iterator]() {
+    /**
+     * Implementation of the Iterator interface.
+     */
+    [Symbol.iterator](): Iterator<T> {
         let curIdx = 0;
         const hamt = this.hamt;
         return {
@@ -57,6 +78,9 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         };
     }
 
+    /**
+     * Convert to array.
+     */
     toArray(): Array<T & WithEquality> {
         let r = [];
         for (let i=0;i<this.hamt.size;i++) {
@@ -105,29 +129,60 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return new Vector(this.hamt.remove(this.indexShift), this.indexShift+1);
     }
 
+    /**
+     * Append an element at the end of the collection.
+     * No equality requirements.
+     */
     appendStruct(elt: T): Vector<T> {
         return new Vector<T>(this.hamt.set(this.hamt.size+this.indexShift, elt), this.indexShift);
     }
 
+    /**
+     * Append an element at the end of the collection.
+     * Equality requirements.
+     */
     append(elt: T & WithEquality): Vector<T> {
         return this.appendStruct(elt);
     }
 
+    /**
+     * Prepend an element at the beginning of the collection.
+     * No equality requirements.
+     */
     prependStruct(elt: T): Vector<T> {
         const newIndexShift = this.indexShift - 1;
         return new Vector<T>(this.hamt.set(newIndexShift, elt), newIndexShift);
     }
 
+    /**
+     * Prepend an element at the beginning of the collection.
+     * Equality requirements.
+     */
     prepend(elt: T & WithEquality): Vector<T> {
         return this.prependStruct(elt);
     }
 
     /**
+     * Prepend multiple elements at the beginning of the collection.
+     * Equality requirements.
+     *
      * This method requires Array.from()
      * You may need to polyfill it =>
      * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
      */
-    prependAll(elts: Iterable<T>): Vector<T> {
+    prependAll(elts: Iterable<T & WithEquality>): Vector<T> {
+        return this.prependAllStruct(elts);
+    }
+
+    /**
+     * Prepend multiple elements at the beginning of the collection.
+     * No equality requirements.
+     *
+     * This method requires Array.from()
+     * You may need to polyfill it =>
+     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
+     */
+    prependAllStruct(elts: Iterable<T>): Vector<T> {
         // could optimize if i'm 100% the other one is a Vector...
         // (no need for in-order get, i can take all the keys in any order)
         //
@@ -142,13 +197,16 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return new Vector<T>(hamt, newIndexShift);
     }
 
+    /**
+     * Call a function for element in the collection.
+     */
     forEach(fn: (v:T)=>void): void {
         for (let i=0;i<this.hamt.size;i++) {
             fn(this.hamt.get(i+this.indexShift));
         }
     }
 
-    appendAll(elts: Iterable<T>): Vector<T> {
+    appendAllStruct(elts: Iterable<T>): Vector<T> {
         return new Vector<T>(this.hamt.mutate(
             (h:any) => {
                 const iterator = elts[Symbol.iterator]();
@@ -158,6 +216,10 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
                     curItem = iterator.next();
                 }
             }), this.indexShift);
+    }
+
+    appendAll(elts: Iterable<T&WithEquality>): Vector<T> {
+        return this.appendAllStruct(elts);
     }
 
     mapStruct<U>(mapper:(v:T)=>U): Vector<U> {
@@ -267,7 +329,9 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {
         return this.hamt.fold(
             (acc: HashMap<C,Vector<T>>, v:T & WithEquality, k:number) =>
-                acc.putWithMerge(classifier(v), Vector.of(v), (v1,v2)=>v1.appendAll(v2)), HashMap.empty());
+                acc.putWithMerge(
+                    classifier(v), Vector.of(v),
+                    (v1:Vector<T&WithEquality>,v2:Vector<T&WithEquality>)=>v1.appendAll(v2)), HashMap.empty());
     }
 
     toMap<K,V>(converter:(x:T)=>[K & WithEquality,V & WithEquality]): IMap<K,V> {

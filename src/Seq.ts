@@ -13,10 +13,29 @@ export interface Seq<T> extends Value {
      * true if the collection is empty, false otherwise.
      */
     isEmpty(): boolean;
+
+    /**
+     * Convert to array.
+     */
     toArray(): Array<T>;
+
+    /**
+     * Append an element at the end of the collection.
+     * No equality requirements.
+     */
     appendStruct(elt: T): Seq<T>;
+
+    /**
+     * Append an element at the end of the collection.
+     * Equality requirements.
+     */
     append(elt: T & WithEquality): Seq<T>;
-    appendAll(elts: Iterable<T>): Seq<T>;
+    appendAll(elts: Iterable<T&WithEquality>): Seq<T>;
+    appendAllStruct(elts: Iterable<T>): Seq<T>;
+
+    /**
+     * Call a function for element in the collection.
+     */
     forEach(fn: (v:T)=>void): void;
 
     /**
@@ -45,9 +64,31 @@ export interface Seq<T> extends Value {
     flatMap<U>(mapper:(v:T)=>Seq<U>): Seq<U>;
     groupBy<C>(classifier: (v:T)=>C): IMap<C,Seq<T>>;
     sortBy(compare: (v1:T,v2:T)=>Ordering): Seq<T>;
+
+    /**
+     * Prepend an element at the beginning of the collection.
+     * Equality requirements.
+     */
     prependStruct(elt: T): Seq<T>;
+
+    /**
+     * Prepend an element at the beginning of the collection.
+     * No equality requirements.
+     */
     prepend(elt: T & WithEquality): Seq<T>;
-    prependAll(elts: Iterable<T>): Seq<T>;
+
+    /**
+     * Prepend multiple elements at the beginning of the collection.
+     * Equality requirements.
+     */
+    prependAll(elts: Iterable<T&WithEquality>): Seq<T>;
+
+    /**
+     * Prepend multiple elements at the beginning of the collection.
+     * No equality requirements.
+     */
+    prependAllStruct(elts: Iterable<T>): Seq<T>;
+
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U;
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;
     mkString(separator: string): string;
