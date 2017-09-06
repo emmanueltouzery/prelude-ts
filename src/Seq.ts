@@ -3,6 +3,10 @@ import { WithEquality, Ordering } from "./Comparison";
 import { IMap } from "./IMap";
 import { Option } from "./Option";
 
+/**
+ * A generic interface for list-like implementations.
+ * @type T the item type
+ */
 export interface Seq<T> extends Value {
     /**
      * Get the size (length) of the collection.

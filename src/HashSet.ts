@@ -6,6 +6,7 @@ const hamt: any = require("hamt_plus");
 /**
  * An unordered collection of values, where no two values
  * may be equal. A value can only be present once.
+ * @type T the item type
  */
 export class HashSet<T> implements ISet<T>, Iterable<T> {
     

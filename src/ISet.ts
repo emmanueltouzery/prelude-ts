@@ -1,6 +1,10 @@
 import { WithEquality } from "./Comparison";
 import { Value} from "./Value";
 
+/**
+ * A generic interface for set-like implementations.
+ * @type T the item type
+ */
 export interface ISet<T> extends Value {
     
     /**
