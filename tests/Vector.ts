@@ -41,6 +41,8 @@ describe("Vector manipulation", () => {
         [1,2,3,4], Vector.of(1,2,3,4,5,6).dropRight(2).toArray()));
     it("returns an empty vector when dropping right too much", () => assert.deepEqual(
         [], Vector.of(1,2).dropRight(3).toArray()));
+    it("zips two vectors", () => assert.deepEqual(
+        [[1,"a"], [2,"b"]], Vector.of(1,2,3).zip(["a","b"]).toArray()));
 });
 
 describe("Vector value extraction", () => {

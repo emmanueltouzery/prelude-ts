@@ -257,6 +257,27 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             }, HashMap.empty());
     }
 
+    zipStruct<U>(other: Iterable<U>): Vector<[T,U]> {
+        return new Vector<[T,U]>(hamt.empty.mutate(
+            (h:any) => {
+                let i = 0;
+                const thisIterator = this[Symbol.iterator]();
+                const otherIterator = other[Symbol.iterator]();
+                let thisCurItem = thisIterator.next();
+                let otherCurItem = otherIterator.next();
+
+                while (!thisCurItem.done && !otherCurItem.done) {
+                    h.set(i++, [thisCurItem.value, otherCurItem.value]);
+                    thisCurItem = thisIterator.next();
+                    otherCurItem = otherIterator.next();
+                }
+            }), 0);
+    }
+
+    zip<U>(other: Iterable<U&WithEquality>): Vector<[T,U]> {
+        return this.zipStruct(other);
+    }
+
     equals(other: Vector<T>): boolean {
         const sz = this.hamt.size;
         if (sz !== other.hamt.size) {

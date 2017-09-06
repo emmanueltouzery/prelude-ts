@@ -27,6 +27,9 @@ export interface Seq<T> extends Value {
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U;
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;
     mkString(separator: string): string;
+    // https://github.com/Microsoft/TypeScript/issues/18257
+    // zip<U>(other: Iterable<U&WithEquality>): Seq<[T,U]>;
+    // zipStruct<U>(other: Iterable<U>): Seq<[T,U]>;
     get(idx: number): Option<T>;
     drop(n:number): Seq<T>;
     dropWhile(predicate:(x:T)=>boolean): Seq<T>;
