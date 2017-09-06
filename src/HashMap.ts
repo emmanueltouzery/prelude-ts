@@ -7,18 +7,34 @@ import { ISet } from "./ISet";
 import { Vector } from "./Vector";
 const hamt: any = require("hamt_plus");
 
+/**
+ * A dictionary, mapping keys to values.
+ * @type K the key type
+ * @type V the value type
+ */
 export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
 
     protected constructor(private hamt: any) {}
 
+    /**
+     * The empty map.
+     * @type K the key type
+     * @type V the value type
+     */
     static empty<K,V>(): HashMap<K,V> {
         return <EmptyHashMap<K,V>>emptyHashMap;
     }
 
+    /**
+     * Get the value for the key you give, if the key is present.
+     */
     get(k: K & WithEquality): Option<V> {
         return Option.of<V>(this.hamt.get(k));
     }
 
+    /**
+     * Implementation of the Iterator interface.
+     */
     [Symbol.iterator](): Iterator<[K,V]> {
         return this.hamt.entries();
     }
@@ -44,10 +60,16 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
         return this.putStructWithMerge(k, v, merge);
     }
 
+    /**
+     * number of items in the map
+     */
     size(): number {
         return this.hamt.size;
     }
 
+    /**
+     * true if the map is empty, false otherwise.
+     */
     isEmpty(): boolean {
         return this.hamt.size === 0;
     }
@@ -95,6 +117,11 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
                 acc.appendStruct([key,value]), Vector.empty());
     }
 
+    /**
+     * Two objects are equal if they represent the same value,
+     * regardless of whether they are the same object physically
+     * in memory.
+     */
     equals(other: IMap<K,V>): boolean {
         const sz = this.hamt.size;
         if (other.size() === 0 && sz === 0) {
@@ -119,12 +146,20 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
         return true;
     }
 
+    /**
+     * Get a number for that object. Two different values
+     * may get the same number, but one value must always get
+     * the same number. The formula can impact performance.
+     */
     hashCode(): number {
         return this.hamt.fold(
             (acc: number, value: V, key: K & WithEquality) =>
                 withEqHashCode(key) + withEqHashCode(value), 0);
     }
 
+    /*
+     * Get a human-friendly string representation of that value.
+     */
     toString(): string {
         return "{" +
             this.hamt.fold(

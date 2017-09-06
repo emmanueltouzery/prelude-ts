@@ -4,10 +4,18 @@ import { Value } from "./Value"
 import { ISet } from "./ISet";
 import { Vector } from "./Vector";
 
+/**
+ * A generic interface for a dictionary, mapping keys to values.
+ * @type K the key type
+ * @type V the value type
+ */
 export interface IMap<K,V> extends Value {
 
     keySet(): ISet<K>;
 
+    /**
+     * Get the value for the key you give, if the key is present.
+     */
     get(k: K & WithEquality): Option<V>;
 
     /**
@@ -32,8 +40,14 @@ export interface IMap<K,V> extends Value {
 
     toVector(): Vector<[K,V]>;
 
+    /**
+     * number of items in the map
+     */
     size(): number;
 
+    /**
+     * true if the map is empty, false otherwise.
+     */
     isEmpty(): boolean;
 
     mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V>;

@@ -43,6 +43,18 @@ export abstract class Option<T> implements Value {
         return <None<T>>none;
     }
 
+    /**
+     * Turns a list of options in an option containing a list of items.
+     * Useful in many contexts.
+     *
+     *     Option.sequence(Vector.of(Option.of(1),Option.of(2)))
+     *     => Option.of(Vector.of(1,2))
+     *
+     * But if a single element is None, everything is discarded:
+     *
+     *     Option.sequence(Vector.of(Option.of(1), Option.none()))
+     *     => Option.none()
+     */
     static sequence<T>(elts:Iterable<Option<T>>): Option<Seq<T>> {
         let r: Seq<T> = Vector.empty<T>();
         const iterator = elts[Symbol.iterator]();
