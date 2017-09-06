@@ -53,11 +53,11 @@ describe("Option helpers", () => {
     it("should do sequence when all are some", () =>
        assert.ok(
            Option.of(<Seq<number>>Vector.of(1,2,3)).equals(
-               Option.sequence(<Seq<Option<number>>>Vector.of(Option.of(1), Option.of(2), Option.of(3))))));
+               Option.sequence(Vector.of(Option.of(1), Option.of(2), Option.of(3))))));
     it("should fail sequence when some are none", () =>
        assert.ok(
            Option.none().equals(
-               Option.sequence(<Seq<Option<number>>>Vector.of(Option.of(1), Option.none(), Option.of(3))))));
+               Option.sequence(Vector.of(Option.of(1), Option.none(), Option.of(3))))));
     it("should liftA2", () => assert.ok(Option.of(11).equals(
         Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.of(6)))));
     it("should abort liftA2 on none", () => assert.ok(Option.none().equals(
