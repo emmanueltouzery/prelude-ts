@@ -28,6 +28,8 @@ describe("hashset conversions", () => {
     it("should be created correctly from a spread", () => {
         assert.deepEqual(["a","b","c"], HashSet.of("a","b","c").toArray().sort());
     });
+    it("should be displayed in a nice format by toString", () =>
+       assert.equal("{a, b, c}", HashSet.of("a","b","c").toString()));
 });
 
 describe("hashset access", () => {

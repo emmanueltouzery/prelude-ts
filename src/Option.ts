@@ -44,7 +44,7 @@ export abstract class Option<T> implements Value {
     }
 
     static sequence<T>(elts:Iterable<Option<T>>): Option<Seq<T>> {
-        let r: Seq<T> = Vector.empty();
+        let r: Seq<T> = Vector.empty<T>();
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
         while (!curItem.done) {

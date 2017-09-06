@@ -3,14 +3,27 @@ import { WithEquality, hasEquals, HasEquals,
          withEqHashCode, withEqEquals } from "./Comparison";
 const hamt: any = require("hamt_plus");
 
+/**
+ * An unordered collection of values, where no two values
+ * may be equal. A value can only be present once.
+ */
 export class HashSet<T> implements ISet<T>, Iterable<T> {
     
     protected constructor(private hamt: any) {}
 
+    /**
+     * The empty hashset.
+     * @type T the item type
+     */
     static empty<T>(): HashSet<T> {
         return <HashSet<T>>emptyHashSet;
     }
 
+    /**
+     * Build a hashset from any iterable, which means also
+     * an array for instance.
+     * @type T the item type
+     */
     static ofIterable<T>(elts: Iterable<T & WithEquality>): HashSet<T> {
         return new HashSet<T>(hamt.empty.mutate((h:any) => {
                 const iterator = elts[Symbol.iterator]();
@@ -22,34 +35,62 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
         }));
     }
 
+    /**
+     * Build a hashset from a series of items (any number, as parameters)
+     * @type T the item type
+     */
     static of<T>(...arr: Array<T & WithEquality>): HashSet<T> {
         return HashSet.ofIterable(arr);
     }
 
+    /**
+     * Implementation of the Iterator interface.
+     */
     [Symbol.iterator](): Iterator<T> {
         return this.hamt.keys();
     }
 
+    /**
+     * Add an element to this set.
+     */
     add(elt: T & WithEquality): HashSet<T> {
         return new HashSet<T>(this.hamt.set(elt,elt));
     }
 
+    /**
+     * Returns true if the element you give is present in
+     * the set, false otherwise.
+     */
     contains(elt: T & WithEquality): boolean {
         return this.hamt.get(elt) !== undefined;
     }
 
+    /**
+     * Converts this set to an array
+     */
     toArray(): Array<T & WithEquality> {
         return Array.from<T & WithEquality>(this.hamt.keys());
     }
 
+    /**
+     * Returns the number of elements in the set.
+     */
     size(): number {
         return this.hamt.size;
     }
 
+    /**
+     * true if the set is empty, false otherwise.
+     */
     isEmpty(): boolean {
         return this.hamt.size === 0;
     }
 
+    /**
+     * Two objects are equal if they represent the same value,
+     * regardless of whether they are the same object physically
+     * in memory.
+     */
     equals(other: HashSet<T>): boolean {
         const sz = this.hamt.size;
         if (other === emptyHashSet && sz === 0) {
@@ -73,10 +114,25 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
         return true;
     }
 
+    /**
+     * Get a number for that object. Two different values
+     * may get the same number, but one value must always get
+     * the same number. The formula can impact performance.
+     */
     hashCode(): number {
         return this.hamt.fold(
             (acc: number, value: T & WithEquality, key: T & WithEquality) =>
                 withEqHashCode(key), 0);
+    }
+
+    /**
+     * Get a human-friendly string representation of that value.
+     */
+    toString(): string {
+        return "{" +
+            this.hamt.fold(
+                (acc: string[], value: T, key: T) =>
+                    {acc.push(key+""); return acc;}, []).join(", ") + "}";
     }
 }
 
@@ -122,6 +178,13 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     hashCode(): number {
         return 0;
+    }
+
+    /**
+     * Get a human-friendly string representation of that value.
+     */
+    toString(): string {
+        return "{}";
     }
 }
 

@@ -81,7 +81,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     /**
      * Convert to array.
      */
-    toArray(): Array<T & WithEquality> {
+    toArray(): Array<T> {
         let r = [];
         for (let i=0;i<this.hamt.size;i++) {
             r.push(this.hamt.get(i+this.indexShift));
@@ -126,7 +126,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * If the collection is empty, return an empty collection.
      */
     tail(): Vector<T> {
-        return new Vector(this.hamt.remove(this.indexShift), this.indexShift+1);
+        return new Vector<T>(this.hamt.remove(this.indexShift), this.indexShift+1);
     }
 
     /**
@@ -258,7 +258,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * for which the predicate returned true.
      */
     filter(predicate:(v:T)=>boolean): Vector<T> {
-        return Vector.ofIterable(this.toArray().filter(predicate));
+        return Vector.ofIterableStruct<T>(this.toArray().filter(predicate));
     }
 
     /**
@@ -284,11 +284,11 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * No equality requirement
      */
     flatMapStruct<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
-        var r:Array<U & WithEquality> = [];
+        var r:Array<U> = [];
         for (let i=0;i<this.hamt.size;i++) {
             r = r.concat(mapper(this.hamt.get(i+this.indexShift)).toArray());
         }
-        return Vector.ofIterable(r);
+        return Vector.ofIterableStruct<U>(r);
     }
 
     /**
@@ -432,7 +432,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * sorted according to the comparator you give.
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
-        return Vector.ofIterable(this.toArray().sort(compare));
+        return Vector.ofIterableStruct<T>(this.toArray().sort(compare));
     }
 
     /**

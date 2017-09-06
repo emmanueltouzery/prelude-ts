@@ -61,7 +61,7 @@ describe("Option helpers", () => {
     it("should liftA2", () => assert.ok(Option.of(11).equals(
         Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.of(6)))));
     it("should abort liftA2 on none", () => assert.ok(Option.none().equals(
-        Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.none()))));
+        Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.none<number>()))));
 });
 
 describe("option retrieval", () => {
