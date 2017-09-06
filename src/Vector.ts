@@ -206,6 +206,11 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         }
     }
 
+    /**
+     * Append multiple elements at the end of the collection.
+     * Note that arrays are also iterables.
+     * No equality requirements.
+     */
     appendAllStruct(elts: Iterable<T>): Vector<T> {
         return new Vector<T>(this.hamt.mutate(
             (h:any) => {
@@ -218,24 +223,49 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             }), this.indexShift);
     }
 
+    /**
+     * Append multiple elements at the end of the collection.
+     * Note that arrays are also iterables.
+     * Equality requirements.
+     */
     appendAll(elts: Iterable<T&WithEquality>): Vector<T> {
         return this.appendAllStruct(elts);
     }
 
+    /**
+     * Return a new collection where each element was transformed
+     * by the mapper function you give.
+     * No equality requirements.
+     */
     mapStruct<U>(mapper:(v:T)=>U): Vector<U> {
         return new Vector<U>(this.hamt.fold(
             (acc: any, v:T & WithEquality, k:number) => acc.set(k-this.indexShift, mapper(v)),
             hamt.empty), 0);
     }
 
+    /**
+     * Return a new collection where each element was transformed
+     * by the mapper function you give.
+     * Equality requirements.
+     */
     map<U>(mapper:(v:T)=>U&WithEquality): Vector<U> {
         return this.mapStruct(mapper);
     }
 
+    /**
+     * Call a predicate for each element in the collection,
+     * build a new collection holding only the elements
+     * for which the predicate returned true.
+     */
     filter(predicate:(v:T)=>boolean): Vector<T> {
         return Vector.ofIterable(this.toArray().filter(predicate));
     }
 
+    /**
+     * Search for an item matching the predicate you pass,
+     * return Option.Some of that element if found,
+     * Option.None otherwise.
+     */
     find(predicate:(v:T)=>boolean): Option<T> {
         for (let i=0;i<this.hamt.size;i++) {
             const item = this.hamt.get(i+this.indexShift);
@@ -246,7 +276,14 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return Option.none<T>();
     }
     
-    flatMap<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
+    /**
+     * Calls the function you give for each item in the collection,
+     * your function returns a collection, all the collections are
+     * concatenated.
+     * This is the monadic bind.
+     * No equality requirement
+     */
+    flatMapStruct<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
         var r:Array<U & WithEquality> = [];
         for (let i=0;i<this.hamt.size;i++) {
             r = r.concat(mapper(this.hamt.get(i+this.indexShift)).toArray());
@@ -254,6 +291,31 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return Vector.ofIterable(r);
     }
 
+    /**
+     * Calls the function you give for each item in the collection,
+     * your function returns a collection, all the collections are
+     * concatenated.
+     * This is the monadic bind.
+     * Equality requirement
+     */
+    flatMap<U>(mapper:(v:T)=>Vector<U&WithEquality>): Vector<U> {
+        return this.flatMapStruct(mapper);
+    }
+
+    /**
+     * Reduces the collection to a single value.
+     * Left-associative.
+     *
+     * Example:
+     *
+     *     Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs))
+     *     => "cba!"
+     *
+     * @param zero The initial value
+     * @param fn A function taking the previous value and
+     *           the current collection item, and returning
+     *           an updated value.
+     */
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
         let r = zero;
         for (let i=0;i<this.hamt.size;i++) {
@@ -262,6 +324,20 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return r;
     }
 
+    /**
+     * Reduces the collection to a single value.
+     * Right-associative.
+     *
+     * Example:
+     *
+     *     Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x))
+     *     => "!cba"
+     *
+     * @param zero The initial value
+     * @param fn A function taking the current collection item and
+     *           the previous value , and returning
+     *           an updated value.
+     */
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U {
         let r = zero;
         for (let i=this.hamt.size-1;i>=0;i--) {
@@ -270,6 +346,13 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return r;
     }
 
+    /**
+     * Joins elements of the collection by a separator.
+     * Example:
+     *
+     *     Vector.of(1,2,3).mkString(", ")
+     *     => "1, 2, 3"
+     */
     mkString(separator: string): string {
         let r = "";
         for (let i=0;i<this.hamt.size;i++) {
@@ -281,10 +364,19 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return r;
     }
 
+    /**
+     * Retrieve the element at index idx.
+     * Returns an option because the collection may
+     * contain less elements than the index.
+     */
     get(idx: number): Option<T> {
         return Option.of(this.hamt.get(idx+this.indexShift));
     }
 
+    /**
+     * Returns a new collection with the first
+     * n elements discarded.
+     */
     drop(n:number): Vector<T> {
         if (n>=this.hamt.size) {
             return <Vector<T>>Vector.emptyVector;
