@@ -7,7 +7,7 @@ import { ISet } from "./ISet";
 import { Vector } from "./Vector";
 const hamt: any = require("hamt_plus");
 
-export class HashMap<K,V> implements IMap<K,V> {
+export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
 
     protected constructor(private hamt: any) {}
 
@@ -17,6 +17,10 @@ export class HashMap<K,V> implements IMap<K,V> {
 
     get(k: K & WithEquality): Option<V> {
         return Option.of<V>(this.hamt.get(k));
+    }
+
+    [Symbol.iterator]() {
+        return this.hamt.entries();
     }
 
     putStruct(k: K & WithEquality, v: V): HashMap<K,V> {
@@ -141,6 +145,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     get(k: K & WithEquality): Option<V> {
         return <None<V>>none;
+    }
+
+    [Symbol.iterator]() {
+        return { next: () => ({ done: true, value: <any>undefined }) };
     }
 
     putStruct(k: K & WithEquality, v: V): HashMap<K,V> {

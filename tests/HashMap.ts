@@ -67,6 +67,34 @@ describe("hashmap get", () => {
         HashSet.empty<string>().equals(HashMap.empty<string,string>().keySet())));
     it("should get non-empty keySet", () => assert.ok(
         HashSet.of("a","c").equals(HashMap.empty<string,string>().put("a","b").put("c","d").keySet())));
+    it("supports iterator", () => {
+        let total = 0;
+        let letters = [];
+        const iterator = HashMap.empty<string,number>()
+            .put("a",1).put("b",6).put("c",3)[Symbol.iterator]();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            letters.push(curItem.value[0]);
+            total += curItem.value[1];
+            curItem = iterator.next();
+        }
+        assert.equal(10, total);
+        letters.sort();
+        assert.deepEqual(["a","b","c"], letters);
+    });
+    it("supports empty iterator", () => {
+        let total = 0;
+        let letters = [];
+        const iterator = HashMap.empty<string,number>()[Symbol.iterator]();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            letters.push(curItem.value[0]);
+            total += curItem.value[1];
+            curItem = iterator.next();
+        }
+        assert.equal(0, total);
+        assert.deepEqual([], letters);
+    })
 });
 
 describe("hashmap transformation", () => {

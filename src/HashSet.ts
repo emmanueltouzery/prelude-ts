@@ -3,7 +3,7 @@ import { WithEquality, hasEquals, HasEquals,
          withEqHashCode, withEqEquals } from "./Comparison";
 const hamt: any = require("hamt_plus");
 
-export class HashSet<T> implements ISet<T> {
+export class HashSet<T> implements ISet<T>, Iterable<T> {
     
     protected constructor(private hamt: any) {}
 
@@ -21,6 +21,10 @@ export class HashSet<T> implements ISet<T> {
 
     static of<T>(...arr: Array<T & WithEquality>): HashSet<T> {
         return HashSet.ofArray(arr);
+    }
+
+    [Symbol.iterator]() {
+        return this.hamt.keys();
     }
 
     add(elt: T & WithEquality): HashSet<T> {
@@ -95,6 +99,10 @@ class EmptyHashSet<T> extends HashSet<T> {
     
     contains(elt: T & WithEquality): boolean {
         return false;
+    }
+
+    [Symbol.iterator]() {
+        return { next: () => ({ done: true, value: <any>undefined }) };
     }
 
     size(): number {

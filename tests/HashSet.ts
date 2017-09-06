@@ -37,4 +37,23 @@ describe("hashset access", () => {
     it("should return false from contains", () => {
         assert.ok(!HashSet.of(1,2,3).contains(4));
     });
+    it("supports iterator", () => {
+        let total = 0;
+        const iterator = HashSet.of(1,6,3)[Symbol.iterator]();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            total += curItem.value;
+            curItem = iterator.next();
+        }
+        assert.equal(10, total);
+    });
+    it("supports empty iterator", () => {
+        let total = 0;
+        const iterator = HashSet.empty()[Symbol.iterator]();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            total += curItem.value;
+        }
+        assert.equal(0, total);
+    })
 });
