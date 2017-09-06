@@ -3,14 +3,17 @@ import { Seq } from "./Seq";
 import { Vector } from "./Vector";
 import { WithEquality, withEqEquals, withEqHashCode } from "./Comparison";
 
+/**
+ * Expresses that a value may be present, or not.
+ * @type T the item type
+ */
 export abstract class Option<T> implements Value {
     /**
+     * Builds an optional value.
      * T gives a some
      * undefined gives a none
      * null gives a some
-     *
-     * require WithEquality for the value otherwise
-     * I can't talk about equality between Option objects.
+     * Equality requirements.
      */
     static of<T>(v: T & WithEquality|undefined): Option<T> {
         if (v === undefined) {
@@ -19,6 +22,13 @@ export abstract class Option<T> implements Value {
         return new Some(v);
     }
 
+    /**
+     * Builds an optional value.
+     * T gives a some
+     * undefined gives a none
+     * null gives a some
+     * No equality requirements.
+     */
     static ofStruct<T>(v: T|undefined): Option<T> {
         if (v === undefined) {
             return <None<T>>none;
@@ -26,6 +36,9 @@ export abstract class Option<T> implements Value {
         return new Some(v);
     }
 
+    /**
+     * The optional value expressing a missing value.
+     */
     static none<T>(): Option<T> {
         return <None<T>>none;
     }
@@ -70,6 +83,9 @@ export abstract class Option<T> implements Value {
     abstract toString(): string;
 }
 
+/**
+ * @hidden
+ */
 export class Some<T> extends Option<T> {
     constructor(private value: T) {
         super();
@@ -126,6 +142,9 @@ export class Some<T> extends Option<T> {
     }
 }
 
+/**
+ * @hidden
+ */
 export class None<T> extends Option<T> {
     isSome(): boolean {
         return false;
@@ -174,4 +193,7 @@ export class None<T> extends Option<T> {
     }
 }
 
+/**
+ * @hidden
+ */
 export const none = new None();

@@ -1,5 +1,8 @@
 import { stringHashCode } from "../src/Comparison";
 
+/**
+ * @hidden
+ */
 export class MyClass {
     constructor(private field1:string, private field2:number) {}
     equals(other: MyClass): boolean {

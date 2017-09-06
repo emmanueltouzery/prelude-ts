@@ -46,4 +46,21 @@ export function withEqHashCode(obj: any|null): number {
     return stringHashCode(obj+"");
 }
 
-export const enum Ordering { LT=-1, EQ=0, GT=1 };
+/**
+ * Enumeration used to express ordering relationships.
+ * it's a const enum, is replaced by integers in the source.
+ */
+export const enum Ordering {
+
+    /**
+     * Lower Than
+     */
+    LT=-1,
+    /**
+     * EQuals
+     */
+    EQ=0,
+    /**
+     * Greater Than
+     */
+    GT=1 };
