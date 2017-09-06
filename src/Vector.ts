@@ -6,7 +6,7 @@ import { IMap } from "./IMap";
 import { Option } from "./Option";
 const hamt: any = require("hamt_plus");
 
-export class Vector<T> implements Seq<T> {
+export class Vector<T> implements Seq<T>, Iterable<T> {
     
     protected constructor(private hamt: any, private indexShift: number) {}
 
@@ -34,6 +34,22 @@ export class Vector<T> implements Seq<T> {
 
     static of<T>(...arr: Array<T & WithEquality>): Vector<T> {
         return Vector.ofArray(arr);
+    }
+    
+    [Symbol.iterator]() {
+        let curIdx = 0;
+        const hamt = this.hamt;
+        return {
+            next(): IteratorResult<T> {
+                if (curIdx < hamt.size) {
+                    return {
+                        done: false,
+                        value: hamt.get(curIdx++)
+                    };
+                }
+                return { done: true, value: <any>undefined };
+            }
+        };
     }
 
     toArray(): Array<T & WithEquality> {
@@ -94,9 +110,16 @@ export class Vector<T> implements Seq<T> {
         }
     }
 
-    appendAll(elts: Vector<T>): Vector<T> {
+    appendAll(elts: Iterable<T>): Vector<T> {
         return new Vector<T>(this.hamt.mutate(
-            (h:any) => elts.forEach(x => h.set(h.size+this.indexShift, x))), this.indexShift);
+            (h:any) => {
+                const iterator = elts[Symbol.iterator]();
+                let curItem = iterator.next();
+                while (!curItem.done) {
+                    h.set(h.size+this.indexShift, curItem.value);
+                    curItem = iterator.next();
+                }
+            }), this.indexShift);
     }
 
     mapStruct<U>(mapper:(v:T)=>U): Vector<U> {

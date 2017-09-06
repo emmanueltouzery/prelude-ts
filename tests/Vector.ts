@@ -101,6 +101,26 @@ describe("Vector iteration", () => {
         assert.ok(HashMap.empty<number,string>().put(1,"ok").put(2, "bad")
                   .equals(<HashMap<number,string>>Vector.ofStruct<[number,string]>([1,"ok"],[2,"bad"]).toMap(x => x)));
     });
+    it("supports iterator", () => {
+        let total = 0;
+        const iterator = Vector.of(1,2,3)[Symbol.iterator]();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            total += curItem.value;
+            curItem = iterator.next();
+        }
+        assert.equal(6, total);
+    })
+    // can get for..of in tests by changing the target to es6,
+    // or enabling downlevelIteration in the tsconfig.json,
+    // not doing that for now.
+    // it("supports for of", () => {
+    //     let total = 0;
+    //     for (const x of Vector.of(1,2,3)) {
+    //         total += x;
+    //     }
+    //     assert.equal(6, total);
+    // })
 })
 
 describe("Vector Value tests", () => {

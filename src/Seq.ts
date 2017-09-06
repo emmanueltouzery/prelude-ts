@@ -9,7 +9,7 @@ export interface Seq<T> extends Value {
     toArray(): Array<T>;
     appendStruct(elt: T): Seq<T>;
     append(elt: T & WithEquality): Seq<T>;
-    appendAll(elts: Seq<T>): Seq<T>;
+    appendAll(elts: Iterable<T>): Seq<T>;
     forEach(fn: (v:T)=>void): void;
     head(): Option<T>;
     last(): Option<T>;
