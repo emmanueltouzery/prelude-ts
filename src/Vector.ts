@@ -93,13 +93,22 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return this.prependStruct(elt);
     }
 
-    prependAll(elts: Seq<T>): Vector<T> {
+    /**
+     * This method requires Array.from()
+     * You may need to polyfill it =>
+     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
+     */
+    prependAll(elts: Iterable<T>): Vector<T> {
         // could optimize if i'm 100% the other one is a Vector...
         // (no need for in-order get, i can take all the keys in any order)
-        const newIndexShift = this.indexShift - elts.size();
+        //
+        // need to transform to an array, because
+        // I need the size immediately for the indexShift.
+        const eltsAr = Array.from(elts);
+        const newIndexShift = this.indexShift - eltsAr.length;
         let hamt = this.hamt;
-        for (let i=0;i<elts.size();i++) {
-            hamt = hamt.set(newIndexShift+i, elts.get(i).getOrUndefined());
+        for (let i=0;i<eltsAr.length;i++) {
+            hamt = hamt.set(newIndexShift+i, eltsAr[i]);
         }
         return new Vector<T>(hamt, newIndexShift);
     }

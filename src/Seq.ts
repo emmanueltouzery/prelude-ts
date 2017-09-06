@@ -22,7 +22,7 @@ export interface Seq<T> extends Value {
     sortBy(compare: (v1:T,v2:T)=>Ordering): Seq<T>;
     prependStruct(elt: T): Seq<T>;
     prepend(elt: T & WithEquality): Seq<T>;
-    prependAll(elts: Seq<T>): Seq<T>;
+    prependAll(elts: Iterable<T>): Seq<T>;
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U;
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;
     mkString(separator: string): string;
