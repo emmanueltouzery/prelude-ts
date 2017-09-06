@@ -53,7 +53,7 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
     }
 
     keySet(): HashSet<K> {
-        return HashSet.ofArray<K>(Array.from<K & WithEquality>(this.hamt.keys()));
+        return HashSet.ofIterable<K>(Array.from<K & WithEquality>(this.hamt.keys()));
     }
 
     mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V> {

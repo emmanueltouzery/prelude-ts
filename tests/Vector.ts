@@ -6,7 +6,7 @@ import * as assert from 'assert'
 describe("Vector creation", () => {
     it("creates from a JS array", () => assert.deepEqual(
         ["a","b", "c"],
-        Vector.ofArray<string>(["a","b","c"]).toArray()));
+        Vector.ofIterable<string>(["a","b","c"]).toArray()));
     it("creates from a spread", () => assert.deepEqual(
         ["a","b", "c"],
         Vector.of("a","b","c").toArray()));
@@ -16,7 +16,7 @@ describe("Vector creation", () => {
 
 describe("Vector manipulation", () => {
     it("appends correctly", () => assert.ok(
-        Vector.ofArray<number>([1,2,3,4]).equals(Vector.of(1,2,3).append(4))));
+        Vector.ofIterable<number>([1,2,3,4]).equals(Vector.of(1,2,3).append(4))));
     it("appendAll works", () => assert.ok(
         Vector.of(1,2,3,4).equals(Vector.of(1,2).appendAll(Vector.of(3,4)))));
     it("map works", () => assert.ok(
@@ -30,7 +30,7 @@ describe("Vector manipulation", () => {
     it("flatMap works", () => assert.ok(
         Vector.of(1,2,2,3,3,3,4,4,4,4)
             .equals(Vector.of(1,2,3,4).flatMap(
-                x => Vector.ofArray(Array.from(Array(x), ()=>x))))));
+                x => Vector.ofIterable(Array.from(Array(x), ()=>x))))));
     it("mkString works", () => assert.equal(
         "1, 2, 3", Vector.of(1,2,3).mkString(", ")));
     it("correctly drops n items", () => assert.deepEqual(

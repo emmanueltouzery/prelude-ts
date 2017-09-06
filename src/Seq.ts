@@ -4,15 +4,39 @@ import { IMap } from "./IMap";
 import { Option } from "./Option";
 
 export interface Seq<T> extends Value {
+    /**
+     * Get the size (length) of the collection.
+     */
     size(): number;
+
+    /**
+     * true if the collection is empty, false otherwise.
+     */
     isEmpty(): boolean;
     toArray(): Array<T>;
     appendStruct(elt: T): Seq<T>;
     append(elt: T & WithEquality): Seq<T>;
     appendAll(elts: Iterable<T>): Seq<T>;
     forEach(fn: (v:T)=>void): void;
+
+    /**
+     * Get the first value of the vector, if any.
+     * returns Option.Some if the vector is not empty,
+     * Option.None if it's empty.
+     */
     head(): Option<T>;
+
+    /**
+     * Get the last value of the collection, if any.
+     * returns Option.Some if the collection is not empty,
+     * Option.None if it's empty.
+     */
     last(): Option<T>;
+
+    /**
+     * Get all the elements in the collection but the first one.
+     * If the collection is empty, return an empty collection.
+     */
     tail(): Seq<T>;
     mapStruct<U>(mapper:(v:T)=>U): Seq<U>;
     map<U>(mapper:(v:T)=>U&WithEquality): Seq<U>;

@@ -23,7 +23,7 @@ describe("hashset conversions", () => {
                          .add(1).add(2).add(3).add(4).toArray().sort());
     });
     it("should be created correctly from an array", () => {
-        assert.deepEqual(["a","b","c"], HashSet.ofArray(["a","b","c"]).toArray().sort());
+        assert.deepEqual(["a","b","c"], HashSet.ofIterable(["a","b","c"]).toArray().sort());
     });
     it("should be created correctly from a spread", () => {
         assert.deepEqual(["a","b","c"], HashSet.of("a","b","c").toArray().sort());

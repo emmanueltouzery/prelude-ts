@@ -6,34 +6,39 @@ import { IMap } from "./IMap";
 import { Option } from "./Option";
 const hamt: any = require("hamt_plus");
 
+/**
+ * A general-purpose list class with all-around good performance.
+ * O(1) access, append, prepend.
+ * @type T the item type
+ */
 export class Vector<T> implements Seq<T>, Iterable<T> {
     
     protected constructor(private hamt: any, private indexShift: number) {}
 
     private static readonly emptyVector = new Vector(hamt.make(), 0);
 
+    /**
+     * The empty vector.
+     * @type T the item type
+     */
     static empty<T>(): Vector<T> {
         return <Vector<T>>Vector.emptyVector;
     }
     
-    static ofArrayStruct<T>(arr: Array<T>): Vector<T> {
-        if (arr.length === 0) {
-            return <Vector<T>>Vector.emptyVector;
-        }
-        return new Vector<T>(hamt.empty.mutate(
-            (h:any) => arr.forEach((x, i) => h.set(i, x))), 0);
+    static ofIterableStruct<T>(elts: Iterable<T>): Vector<T> {
+        return (<Vector<T>>Vector.emptyVector).appendAll(elts);
     }
 
-    static ofArray<T>(arr: Array<T & WithEquality>): Vector<T> {
-        return Vector.ofArrayStruct(arr);
+    static ofIterable<T>(elts: Iterable<T & WithEquality>): Vector<T> {
+        return Vector.ofIterableStruct(elts);
     }
 
     static ofStruct<T>(...arr: Array<T>): Vector<T> {
-        return Vector.ofArrayStruct(arr);
+        return Vector.ofIterableStruct(arr);
     }
 
     static of<T>(...arr: Array<T & WithEquality>): Vector<T> {
-        return Vector.ofArray(arr);
+        return Vector.ofIterable(arr);
     }
     
     [Symbol.iterator]() {
@@ -60,22 +65,42 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return r;
     }
 
+    /**
+     * Get the size (length) of the collection.
+     */
     size(): number {
         return this.hamt.size;
     }
 
+    /**
+     * true if the collection is empty, false otherwise.
+     */
     isEmpty(): boolean {
         return this.hamt.size === 0;
     }
 
+    /**
+     * Get the first value of the vector, if any.
+     * returns Option.Some if the vector is not empty,
+     * Option.None if it's empty.
+     */
     head(): Option<T> {
         return Option.ofStruct(this.hamt.get(this.indexShift));
     }
 
+    /**
+     * Get the last value of the collection, if any.
+     * returns Option.Some if the collection is not empty,
+     * Option.None if it's empty.
+     */
     last(): Option<T> {
         return Option.ofStruct(this.hamt.get(this.hamt.size+this.indexShift-1));
     }
 
+    /**
+     * Get all the elements in the collection but the first one.
+     * If the collection is empty, return an empty collection.
+     */
     tail(): Vector<T> {
         return new Vector(this.hamt.remove(this.indexShift), this.indexShift+1);
     }
@@ -146,7 +171,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     filter(predicate:(v:T)=>boolean): Vector<T> {
-        return Vector.ofArray(this.toArray().filter(predicate));
+        return Vector.ofIterable(this.toArray().filter(predicate));
     }
 
     find(predicate:(v:T)=>boolean): Option<T> {
@@ -164,7 +189,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         for (let i=0;i<this.hamt.size;i++) {
             r = r.concat(mapper(this.hamt.get(i+this.indexShift)).toArray());
         }
-        return Vector.ofArray(r);
+        return Vector.ofIterable(r);
     }
 
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
@@ -236,7 +261,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
-        return Vector.ofArray(this.toArray().sort(compare));
+        return Vector.ofIterable(this.toArray().sort(compare));
     }
 
     groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {

@@ -11,16 +11,19 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
         return <HashSet<T>>emptyHashSet;
     }
 
-    static ofArray<T>(arr: Array<T & WithEquality>): HashSet<T> {
-        if (arr.length === 0) {
-            return <HashSet<T>>emptyHashSet;
-        }
-        return new HashSet<T>(hamt.empty.mutate(
-            (h:any) => arr.forEach((x) => h.set(x, x))));
+    static ofIterable<T>(elts: Iterable<T & WithEquality>): HashSet<T> {
+        return new HashSet<T>(hamt.empty.mutate((h:any) => {
+                const iterator = elts[Symbol.iterator]();
+                let curItem = iterator.next();
+                while (!curItem.done) {
+                    h.set(curItem.value, curItem.value);
+                    curItem = iterator.next();
+                }
+        }));
     }
 
     static of<T>(...arr: Array<T & WithEquality>): HashSet<T> {
-        return HashSet.ofArray(arr);
+        return HashSet.ofIterable(arr);
     }
 
     [Symbol.iterator]() {
