@@ -17,7 +17,7 @@
     "devDependencies": {
         "@types/mocha": "2.2.41",
         "mocha": "3.4.2",
-        "typedoc": "0.8.0"
+        "typedoc": "0.7.2"
     },
     "keywords": [
         "typescript",
