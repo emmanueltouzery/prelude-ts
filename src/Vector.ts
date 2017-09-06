@@ -376,6 +376,8 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     /**
      * Returns a new collection with the first
      * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
      */
     drop(n:number): Vector<T> {
         if (n>=this.hamt.size) {
@@ -387,6 +389,11 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             hamt.make()), 0);
     }
 
+    /**
+     * Returns a new collection, discarding the first elements
+     * until one element fails the predicate. All elements
+     * after that point are retained.
+     */
     dropWhile(predicate:(x:T)=>boolean): Vector<T> {
         let h = hamt.make();
         let skip = true;
@@ -403,6 +410,12 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return new Vector<T>(h, 0);
     }
 
+    /**
+     * Returns a new collection with the last
+     * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
+     */
     dropRight(n:number): Vector<T> {
         const sz = this.hamt.size;
         if (n>=sz) {
@@ -414,10 +427,20 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             hamt.make()), 0);
     }
 
+    /**
+     * Returns a new collection with elements
+     * sorted according to the comparator you give.
+     */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
         return Vector.ofIterable(this.toArray().sort(compare));
     }
 
+    /**
+     * Group elements in the collection using a classifier function.
+     * Elements are then organized in a map. The key is the value of
+     * the classifier, and in value we get the list of elements
+     * matching that value.
+     */
     groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {
         return this.hamt.fold(
             (acc: HashMap<C,Vector<T>>, v:T & WithEquality, k:number) =>
@@ -426,10 +449,26 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
                     (v1:Vector<T&WithEquality>,v2:Vector<T&WithEquality>)=>v1.appendAll(v2)), HashMap.empty());
     }
 
+    /**
+     * Convert this collection to a map. You give a function which
+     * for each element in the collection returns a pair. The
+     * key of the pair will be used as a key in the map, the value,
+     * as a value in the map. If several values get the same key,
+     * entries will be lost.
+     * Equality requirements.
+     */
     toMap<K,V>(converter:(x:T)=>[K & WithEquality,V & WithEquality]): IMap<K,V> {
         return this.toMapStruct(converter);
     }
 
+    /**
+     * Convert this collection to a map. You give a function which
+     * for each element in the collection returns a pair. The
+     * key of the pair will be used as a key in the map, the value,
+     * as a value in the map. If several values get the same key,
+     * entries will be lost.
+     * No equality requirements.
+     */
     toMapStruct<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
         return this.hamt.fold(
             (acc: HashMap<K,V>, value:T, k:number) => {
@@ -438,6 +477,18 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             }, HashMap.empty());
     }
 
+    /**
+     * Combine this collection with the collection you give in
+     * parameter to produce a new collection which combines both,
+     * in pairs. For instance:
+     *
+     *     Vector.of(1,2,3).zip("a","b","c")
+     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
+     *
+     * The result collection will have the length of the shorter
+     * of both collections. Extra elements will be discarded.
+     * No equality requirements.
+     */
     zipStruct<U>(other: Iterable<U>): Vector<[T,U]> {
         return new Vector<[T,U]>(hamt.empty.mutate(
             (h:any) => {
@@ -455,10 +506,27 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             }), 0);
     }
 
+    /**
+     * Combine this collection with the collection you give in
+     * parameter to produce a new collection which combines both,
+     * in pairs. For instance:
+     *
+     *     Vector.of(1,2,3).zip("a","b","c")
+     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
+     *
+     * The result collection will have the length of the shorter
+     * of both collections. Extra elements will be discarded.
+     * Equality requirements.
+     */
     zip<U>(other: Iterable<U&WithEquality>): Vector<[T,U]> {
         return this.zipStruct(other);
     }
 
+    /**
+     * Two objects are equal if they represent the same value,
+     * regardless of whether they are the same object physically
+     * in memory.
+     */
     equals(other: Vector<T>): boolean {
         const sz = this.hamt.size;
         if (sz !== other.hamt.size) {
@@ -480,6 +548,11 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return true;
     }
 
+    /**
+     * Get a number for that object. Two different values
+     * may get the same number, but one value must always get
+     * the same number. The formula can impact performance.
+     */
     hashCode(): number {
         let hash = 1;
         for (let i=0;i<this.hamt.size;i++) {
@@ -488,6 +561,9 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return hash;
     }
 
+    /**
+     * Get a human-friendly string representation of that value.
+     */
     toString(): string {
         let r = "[";
         for (let i=0;i<this.hamt.size;i++) {

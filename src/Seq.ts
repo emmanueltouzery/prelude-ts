@@ -116,7 +116,18 @@ export interface Seq<T> extends Value {
      */
     flatMapStruct<U>(mapper:(v:T)=>Seq<U>): Seq<U>;
 
+    /**
+     * Group elements in the collection using a classifier function.
+     * Elements are then organized in a map. The key is the value of
+     * the classifier, and in value we get the list of elements
+     * matching that value.
+     */
     groupBy<C>(classifier: (v:T)=>C): IMap<C,Seq<T>>;
+
+    /**
+     * Returns a new collection with elements
+     * sorted according to the comparator you give.
+     */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Seq<T>;
 
     /**
@@ -183,8 +194,34 @@ export interface Seq<T> extends Value {
      *     => "1, 2, 3"
      */
     mkString(separator: string): string;
+
     // https://github.com/Microsoft/TypeScript/issues/18257
+    /**
+     * Combine this collection with the collection you give in
+     * parameter to produce a new collection which combines both,
+     * in pairs. For instance:
+     *
+     *     Vector.of(1,2,3).zip("a","b","c")
+     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
+     *
+     * The result collection will have the length of the shorter
+     * of both collections. Extra elements will be discarded.
+     * Equality requirements.
+     */
     // zip<U>(other: Iterable<U&WithEquality>): Seq<[T,U]>;
+
+    /**
+     * Combine this collection with the collection you give in
+     * parameter to produce a new collection which combines both,
+     * in pairs. For instance:
+     *
+     *     Vector.of(1,2,3).zip("a","b","c")
+     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
+     *
+     * The result collection will have the length of the shorter
+     * of both collections. Extra elements will be discarded.
+     * No equality requirements.
+     */
     // zipStruct<U>(other: Iterable<U>): Seq<[T,U]>;
 
     /**
@@ -197,10 +234,43 @@ export interface Seq<T> extends Value {
     /**
      * Returns a new collection with the first
      * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
      */
     drop(n:number): Seq<T>;
+
+    /**
+     * Returns a new collection, discarding the first elements
+     * until one element fails the predicate. All elements
+     * after that point are retained.
+     */
     dropWhile(predicate:(x:T)=>boolean): Seq<T>;
+
+    /**
+     * Returns a new collection with the last
+     * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
+     */
     dropRight(n:number): Seq<T>;
+
+    /**
+     * Convert this collection to a map. You give a function which
+     * for each element in the collection returns a pair. The
+     * key of the pair will be used as a key in the map, the value,
+     * as a value in the map. If several values get the same key,
+     * entries will be lost.
+     * Equality requirements.
+     */
     toMap<K,V>(converter:(x:T)=>[K & WithEquality,V & WithEquality]): IMap<K,V>;
+
+    /**
+     * Convert this collection to a map. You give a function which
+     * for each element in the collection returns a pair. The
+     * key of the pair will be used as a key in the map, the value,
+     * as a value in the map. If several values get the same key,
+     * entries will be lost.
+     * No equality requirements.
+     */
     toMapStruct<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V>;
 }
