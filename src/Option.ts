@@ -70,28 +70,135 @@ export abstract class Option<T> implements Value {
         return Option.ofStruct(r);
     }
 
+    /**
+     * Applicative lifting for Option.
+     * Takes a function which operates on basic values, and turns it
+     * in a function that operates on options of these values ('lifts'
+     * the function). The 2 is because it works on functions taking two
+     * parameters.
+     * Equality requirements.
+     */
     static liftA2<T,U,V>(fn:(v1:T,v2:U)=>V&WithEquality): (p1:Option<T>, p2:Option<U>)=>Option<V> {
         return (p1,p2) => p1.flatMap(a1 => p2.map(a2 => fn(a1,a2)));
     }
 
+    /**
+     * Applicative lifting for Option.
+     * Takes a function which operates on basic values, and turns it
+     * in a function that operates on options of these values ('lifts'
+     * the function). The 2 is because it works on functions taking two
+     * parameters.
+     * No equality requirements.
+     */
     static liftA2Struct<T,U,V>(fn:(v1:T,v2:U)=>V): (p1:Option<T>, p2:Option<U>) => Option<V> {
-        return (p1,p2) => p1.flatMap(a1 => p2.mapStruct(a2 => fn(a1,a2)));
+        return (p1,p2) => p1.flatMapStruct(a1 => p2.mapStruct(a2 => fn(a1,a2)));
     }
 
+    /**
+     * Returns true if the option is a Some (contains a value),
+     * false otherwise (it's a None)
+     */
     abstract isSome(): boolean;
+
+    /**
+     * Returns true if the option is a None (doesn't contains a value),
+     * false otherwise (it's a Some)
+     */
     abstract isNone(): boolean;
+
+    /**
+     * Combines two options. If this option is a Some, returns it.
+     * If it's a None, returns the other one.
+     */
     abstract orElse(other: Option<T>): Option<T>;
+
+    /**
+     * Get the value from this option if it's a Some, otherwise
+     * throw an exception.
+     */
     abstract getOrThrow(): T;
+
+    /**
+     * Get the value from this option; if it's a None (no value
+     * present), then return the default value that you give.
+     */
     abstract getOrElse(alt: T): T;
+
+    /**
+     * Returns true if the option is a Some and contains the
+     * value you give, false otherwise.
+     */
     abstract contains(v: T|null): boolean;
+
+    /**
+     * Get the value contained in the option if it's a Some,
+     * return undefined if it's a None.
+     */
     abstract getOrUndefined(): T|undefined;
+
+    /**
+     * Return a new option where the element (if present) was transformed
+     * by the mapper function you give. If the option was None it'll stay None.
+     * Equality requirements.
+     */
     abstract map<U>(fn: (v:T)=>U & WithEquality): Option<U>;
+
+    /**
+     * Return a new option where the element (if present) was transformed
+     * by the mapper function you give. If the option was None it'll stay None.
+     * No equality requirements.
+     */
     abstract mapStruct<U>(fn: (v:T)=>U): Option<U>;
-    abstract flatMap<U>(mapper:(v:T)=>Option<U>): Option<U>;
+
+    /**
+     * If this is a Some, calls the function you give on
+     * the item in the option and return its result.
+     * If the option is a None, return none.
+     * This is the monadic bind.
+     * Equality requirement.
+     */
+    abstract flatMap<U>(mapper:(v:T)=>Option<U&WithEquality>): Option<U>;
+
+    /**
+     * If this is a Some, calls the function you give on
+     * the item in the option and return its result.
+     * If the option is a None, return none.
+     * This is the monadic bind.
+     * No equality requirement.
+     */
+    abstract flatMapStruct<U>(mapper:(v:T)=>Option<U>): Option<U>;
+
+    /**
+     * If this is None, will return None. If it's a Some,
+     * and the contents match your predicate, return the option.
+     * If the contents don't match the predicate, return None.
+     */
     abstract filter(fn: (v:T)=>boolean): Option<T>;
+
+    /**
+     * Convert to a vector. If it's a None, it's the empty
+     * vector, if it's a Some, it's a one-element vector with
+     * the contents of the option.
+     */
     abstract toVector(): Vector<T>;
+
+    /**
+     * Two objects are equal if they represent the same value,
+     * regardless of whether they are the same object physically
+     * in memory.
+     */
     abstract equals(other: Option<T>): boolean;
+
+    /**
+     * Get a number for that object. Two different values
+     * may get the same number, but one value must always get
+     * the same number. The formula can impact performance.
+     */
     abstract hashCode(): number;
+
+    /**
+     * Get a human-friendly string representation of that value.
+     */
     abstract toString(): string;
 }
 
@@ -130,7 +237,10 @@ export class Some<T> extends Option<T> {
     mapStruct<U>(fn: (v:T)=>U): Option<U> {
         return Option.ofStruct(fn(this.value));
     }
-    flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
+    flatMap<U>(mapper:(v:T)=>Option<U&WithEquality>): Option<U> {
+        return mapper(this.value);
+    }
+    flatMapStruct<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return mapper(this.value);
     }
     filter(fn: (v:T)=>boolean): Option<T> {
@@ -185,7 +295,10 @@ export class None<T> extends Option<T> {
     mapStruct<U>(fn: (v:T)=>U): Option<U> {
         return <None<U>>none;
     }
-    flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
+    flatMap<U>(mapper:(v:T)=>Option<U&WithEquality>): Option<U> {
+        return <None<U>>none;
+    }
+    flatMapStruct<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return <None<U>>none;
     }
     filter(fn: (v:T)=>boolean): Option<T> {

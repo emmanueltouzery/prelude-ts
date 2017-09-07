@@ -36,7 +36,7 @@ describe("option transformation", () => {
         assert.ok(Option.of(5).equals(Option.of(4).flatMap(x=>Option.of(x+1))));
     });
     it("should transform with flatMap x->none", () => {
-        assert.ok(Option.none().equals(Option.of(4).flatMap(x=>Option.none())));
+        assert.ok(Option.none().equals(Option.of(4).flatMap(x=>Option.none<number>())));
     });
     it("should transform with flatMap none->none", () => {
         assert.ok(Option.none().equals(Option.none<number>().flatMap(x=>Option.of(x+1))));
