@@ -33,8 +33,9 @@ You can check the tests for examples of use, and browse the
 [API documentation](http://emmanueltouzery.github.io/prelude.ts/apidoc/).
 
 At this time most of the collections are implemented using the
-HAMT algorithm](http://en.wikipedia.org/wiki/Hash_array_mapped_trie),
+[HAMT algorithm](http://en.wikipedia.org/wiki/Hash_array_mapped_trie),
 and concretely the [hamt_plus library](https://www.npmjs.com/package/hamt_plus).
+Besides this dependency, I'll try to limit the number of dependencies.
 In addition the library is written in idiomatic javascript style, with loops
 instead of recursion, so the performance should be reasonnable.
 
@@ -46,8 +47,9 @@ This poses problems for collections, because if you have a `Set`, you don't
 want duplicate elements because of this limited definition of equality.
 
 For that reason, prelude.ts encourages you to define for your non-primitive types
-methods `equals(other: any): boolean` and `hashCode(): number`. With these
-methods, structural equality is achievable, and indeed
+methods `equals(other: any): boolean` and `hashCode(): number` (the same
+methods that [immutable.js uses](https://facebook.github.io/immutable-js/docs/#/ValueObject)).
+With these methods, structural equality is achievable, and indeed
 `Vector.of(1,2,3).equals(Vector.of(1,2,3))` is `true`. However this can only
 work if the values you put in collections have themselves properly defined equality.
 If these values don't have structural equality, then we can get no better than
