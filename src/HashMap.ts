@@ -39,14 +39,38 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
         return this.hamt.entries();
     }
 
+    /**
+     * Add a new entry in the map. If there was entry with the same
+     * key, it will be overwritten.
+     * @param k the key
+     * @param v the value
+     * No equality requirements
+     */
     putStruct(k: K & WithEquality, v: V): HashMap<K,V> {
         return new HashMap<K,V>(this.hamt.set(k,v));
     }
 
+    /**
+     * Add a new entry in the map. If there was entry with the same
+     * key, it will be overwritten.
+     * @param k the key
+     * @param v the value
+     * Equality requirements
+     */
     put(k: K & WithEquality, v: V & WithEquality): HashMap<K,V> {
         return this.putStruct(k, v);
     }
 
+    /**
+     * Add a new entry in the map; in case there was already an
+     * entry with the same key, the merge function will be invoked
+     * with the old and the new value to produce the value to take
+     * into account.
+     * @param k the key
+     * @param v the value
+     * @param merge a function to merge old and new values in case of conflict.
+     * No equality requirements
+     */
     putStructWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): HashMap<K,V> {
         return new HashMap<K,V>(this.hamt.modify(k, (curV?: V) => {
             if (curV === undefined) {
@@ -56,6 +80,16 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
         }))
     }
 
+    /**
+     * Add a new entry in the map; in case there was already an
+     * entry with the same key, the merge function will be invoked
+     * with the old and the new value to produce the value to take
+     * into account.
+     * @param k the key
+     * @param v the value
+     * @param merge a function to merge old and new values in case of conflict.
+     * Equality requirements
+     */
     putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V&WithEquality, v2: V&WithEquality) => V): HashMap<K,V> {
         return this.putStructWithMerge(k, v, merge);
     }
@@ -74,8 +108,18 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
         return this.hamt.size === 0;
     }
 
+    /**
+     * Get a Set containing all the keys in the map
+     */
     keySet(): HashSet<K> {
-        return HashSet.ofIterable<K>(Array.from<K & WithEquality>(this.hamt.keys()));
+        return HashSet.ofIterable<K>(this.hamt.keys());
+    }
+
+    /**
+     * Get a Set containing all the values in the map
+     */
+    valueSet(): HashSet<V> {
+        return HashSet.ofIterable<V>(this.hamt.values());
     }
 
     mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V> {
@@ -218,6 +262,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     keySet(): HashSet<K> {
         return HashSet.empty<K>();
+    }
+
+    valueSet(): HashSet<V> {
+        return HashSet.empty<V>();
     }
 
     mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V> {
