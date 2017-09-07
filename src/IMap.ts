@@ -68,14 +68,44 @@ export interface IMap<K,V> extends Value {
      */
     putStructWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): IMap<K,V>;
 
+    /**
+     * Return a new map where each entry was transformed
+     * by the mapper function you give. You return key,value
+     * as pairs.
+     * No equality requirements.
+     */
     mapStruct<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): IMap<K2,V2>;
 
+    /**
+     * Return a new map where each entry was transformed
+     * by the mapper function you give. You return key,value
+     * as pairs.
+     * Equality requirements.
+     */
     map<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2&WithEquality]): IMap<K2,V2>;
 
-    // these two should be uncommented but then the build time explodes
-    // mapValuesStruct<V2>(fn:(v:V)=>V2): IMap<K,V2>;
-    // mapValues<V2>(fn:(v:V)=>V2&WithEquality): IMap<K,V2>;
+    /**
+     * Return a new map where keys are the same as in this one,
+     * but values are transformed
+     * by the mapper function you give. You return key,value
+     * as pairs.
+     * No equality requirements.
+     */
+    mapValuesStruct<V2>(fn:(v:V)=>V2): IMap<K,V2>;
 
+    /**
+     * Return a new map where keys are the same as in this one,
+     * but values are transformed
+     * by the mapper function you give. You return key,value
+     * as pairs.
+     * Equality requirements.
+     */
+    mapValues<V2>(fn:(v:V)=>V2&WithEquality): IMap<K,V2>;
+
+    /**
+     * Convert this map to a vector of key,value pairs.
+     * Note that Map is already an iterable of key,value pairs!
+     */
     toVector(): Vector<[K,V]>;
 
     /**
@@ -88,5 +118,14 @@ export interface IMap<K,V> extends Value {
      */
     isEmpty(): boolean;
 
+    /**
+     * Create a new map combining the entries of this map, and
+     * the other map you give. In case an entry from this map
+     * and the other map have the same key, the merge function
+     * will be invoked to get a combined value.
+     * @param other another map to merge with this one
+     * @param merge a merge function to combine two values
+     *        in case two entries share the same key.
+     */
     mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V>;
 }

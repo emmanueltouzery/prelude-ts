@@ -122,6 +122,15 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
         return HashSet.ofIterable<V>(this.hamt.values());
     }
 
+    /**
+     * Create a new map combining the entries of this map, and
+     * the other map you give. In case an entry from this map
+     * and the other map have the same key, the merge function
+     * will be invoked to get a combined value.
+     * @param other another map to merge with this one
+     * @param merge a merge function to combine two values
+     *        in case two entries share the same key.
+     */
     mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V> {
         // the entire function could be faster
         const otherKeys = other.keySet().toArray();
@@ -133,6 +142,12 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
         return map;
     }
 
+    /**
+     * Return a new map where each entry was transformed
+     * by the mapper function you give. You return key,value
+     * as pairs.
+     * No equality requirements.
+     */
     mapStruct<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): HashMap<K2,V2> {
         return this.hamt.fold(
             (acc: HashMap<K2,V2>, value: V, key: K&WithEquality) => {
@@ -141,20 +156,44 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
             }, HashMap.empty());
     }
 
+    /**
+     * Return a new map where each entry was transformed
+     * by the mapper function you give. You return key,value
+     * as pairs.
+     * Equality requirements.
+     */
     map<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2&WithEquality]): HashMap<K2,V2> {
         return this.mapStruct(fn);
     }
 
+    /**
+     * Return a new map where keys are the same as in this one,
+     * but values are transformed
+     * by the mapper function you give. You return key,value
+     * as pairs.
+     * No equality requirements.
+     */
     mapValuesStruct<V2>(fn:(v:V)=>V2): HashMap<K,V2> {
         return this.hamt.fold(
             (acc: HashMap<K,V2>, value: V, key: K&WithEquality) =>
                 acc.putStruct(key,fn(value)), HashMap.empty());
     }
 
+    /**
+     * Return a new map where keys are the same as in this one,
+     * but values are transformed
+     * by the mapper function you give. You return key,value
+     * as pairs.
+     * Equality requirements.
+     */
     mapValues<V2>(fn:(v:V)=>V2&WithEquality): HashMap<K,V2> {
         return this.mapValuesStruct(fn);
     }
 
+    /**
+     * Convert this map to a vector of key,value pairs.
+     * Note that Map is already an iterable of key,value pairs!
+     */
     toVector(): Vector<[K,V]> {
         return this.hamt.fold(
             (acc: Vector<[K,V]>, value: V, key: K&WithEquality) =>
