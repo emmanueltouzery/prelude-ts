@@ -22,7 +22,7 @@ Option.sequence(
 Vector.of(1,2,3,4).groupBy(x => x%2) 
 // => HashMap.empty().put(0, Vector.of(2,4)).put(1, Vector.of(1,3))
 
-Vector.of(1,2,3).zip("a", "b", "c").takeWhile([k,v] => k<3)
+Vector.of(1,2,3).zip("a", "b", "c").takeWhile(([k,v]) => k<3)
 // Vector.of([1,"a"],[2,"b"])
 ```
 

@@ -199,7 +199,6 @@ export interface Seq<T> extends Value {
      */
     mkString(separator: string): string;
 
-    // https://github.com/Microsoft/TypeScript/issues/18257
     /**
      * Combine this collection with the collection you give in
      * parameter to produce a new collection which combines both,
@@ -212,7 +211,7 @@ export interface Seq<T> extends Value {
      * of both collections. Extra elements will be discarded.
      * Equality requirements.
      */
-    // zip<U>(other: Iterable<U&WithEquality>): Seq<[T,U]>;
+    zip<U>(other: Iterable<U&WithEquality>): Seq<[T,U]>;
 
     /**
      * Combine this collection with the collection you give in
@@ -226,7 +225,7 @@ export interface Seq<T> extends Value {
      * of both collections. Extra elements will be discarded.
      * No equality requirements.
      */
-    // zipStruct<U>(other: Iterable<U>): Seq<[T,U]>;
+    zipStruct<U>(other: Iterable<U>): Seq<[T,U]>;
 
     /**
      * Retrieve the element at index idx.
