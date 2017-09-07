@@ -259,6 +259,12 @@ export interface Seq<T> extends Value {
     dropRight(n:number): Seq<T>;
 
     /**
+     * Returns a new collection, discarding the elements
+     * after the first element which fails the predicate.
+     */
+    takeWhile(predicate:(x:T)=>boolean): Seq<T>;
+
+    /**
      * Convert this collection to a map. You give a function which
      * for each element in the collection returns a pair. The
      * key of the pair will be used as a key in the map, the value,

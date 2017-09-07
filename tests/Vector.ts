@@ -43,6 +43,9 @@ describe("Vector manipulation", () => {
         [], Vector.of(1,2).dropRight(3).toArray()));
     it("zips two vectors", () => assert.deepEqual(
         [[1,"a"], [2,"b"]], Vector.of(1,2,3).zip(["a","b"]).toArray()));
+    it("richer example", () => assert.deepEqual(
+        [[1,"a"],[2,"b"]], Vector.of(1,2,3)
+            .zip(["a", "b", "c"]).takeWhile(([k,v]) => k<3).toArray()));
 });
 
 describe("Vector value extraction", () => {

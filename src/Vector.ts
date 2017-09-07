@@ -411,6 +411,23 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * Returns a new collection, discarding the elements
+     * after the first element which fails the predicate.
+     */
+    takeWhile(predicate:(x:T)=>boolean): Vector<T> {
+        let h = hamt.make();
+        let newIdx = 0;
+        for (let i=0;i<this.hamt.size;i++) {
+            const v = this.hamt.get(i+this.indexShift);
+            if (!predicate(v)) {
+                break;
+            }
+            h = h.set(newIdx++, v);
+        }
+        return new Vector<T>(h, 0);
+    }
+
+    /**
      * Returns a new collection with the last
      * n elements discarded.
      * If the collection has less than n elements,
