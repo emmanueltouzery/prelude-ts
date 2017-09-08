@@ -30,14 +30,14 @@ The collections are also javascript iterables, so if you have an ES6 runtime,
 you can use the `for .. of` construct on them.
 
 You can check the tests for examples of use, and browse the
-[API documentation](http://emmanueltouzery.github.io/prelude.ts/apidoc/).
+[API documentation](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html).
 
 At this time most of the collections are implemented using the
 [HAMT algorithm](http://en.wikipedia.org/wiki/Hash_array_mapped_trie),
 and concretely the [hamt_plus library](https://www.npmjs.com/package/hamt_plus).
 Besides this dependency, I'll try to limit the number of dependencies.
 In addition the library is written in idiomatic javascript style, with loops
-instead of recursion, so the performance should be reasonnable.
+instead of recursion, so the performance should be reasonable.
 
 ## Structs and equality
 
@@ -71,6 +71,29 @@ That version compiles just fine. But now you've been warned that you can't use
 this value in a Set or as a Map key, and that equality features are not provided.
 Similary, functions such a `map` have alternate implementations such as `mapStruct`
 to warn the programmer in these cases.
+
+prelude.ts also offers some helper functions to implement the `equals` and
+`hashCode` functions for your own objects:
+[fieldsHashCode](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html#fieldshashcode)
+and [areEqual](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html#areequal).
+
+Here is an example of object using these helpers:
+
+```typescript
+class MyClass {
+    constructor(private field1:string, private field2:number) {}
+    equals(other: MyClass): boolean {
+        return areEqual(this.field1, other.field1) &&
+            areEqual(this.field2, other.field2);
+    }
+    hashCode(): number {
+        return fieldsHashCode(this.field1, this.field2);
+    }
+    toString(): string {
+        return `{field1: ${this.field1}, field2: ${this.field2}}`;
+    }
+}
+```
 
 ## Wishlist/upcoming features
 

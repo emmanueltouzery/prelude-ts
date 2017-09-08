@@ -1,6 +1,6 @@
 import { Seq } from "./Seq";
 import { WithEquality, Ordering, 
-         withEqHashCode, withEqEquals } from "./Comparison";
+         getHashCode, areEqual } from "./Comparison";
 import { HashMap} from "./HashMap";
 import { IMap } from "./IMap";
 import { Option } from "./Option";
@@ -558,7 +558,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             if (myVal === undefined || hisVal === undefined) {
                 return true;
             }
-            if (!withEqEquals(myVal, hisVal)) {
+            if (!areEqual(myVal, hisVal)) {
                 return false;
             }
         }
@@ -573,7 +573,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     hashCode(): number {
         let hash = 1;
         for (let i=0;i<this.hamt.size;i++) {
-            hash = 31 * hash + withEqHashCode(this.hamt.get(i+this.indexShift));
+            hash = 31 * hash + getHashCode(this.hamt.get(i+this.indexShift));
         }
         return hash;
     }

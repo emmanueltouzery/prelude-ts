@@ -25,7 +25,26 @@ export function hasEquals(v: WithEquality): v is HasEquals {
 }
 
 /**
- * Helper function to compute a reasonnable hashcode for strings.
+ * Helper function for your objects so you can compute
+ * a hashcode. You can pass to this function all the fields
+ * of your object that should be taken into account for the
+ * hash, and the function will return a reasonable hash code.
+ *
+ * @param fields the fields of your object to take
+ *        into account for the hashcode
+ */
+export function fieldsHashCode(...fields: any[]): number {
+    // https://stackoverflow.com/a/113600/516188
+    // https://stackoverflow.com/a/18066516/516188
+    let result = 1;
+    for (const value of fields) {
+        result = 37*result + getHashCode(value);
+    }
+    return result;
+}
+
+/**
+ * Helper function to compute a reasonable hashcode for strings.
  */
 export function stringHashCode(str: string): number {
     // https://stackoverflow.com/a/7616484/516188
@@ -40,10 +59,10 @@ export function stringHashCode(str: string): number {
 }
 
 /**
- * Equality function which tries semantic equality if possible,
- * degrades to === if not available.
+ * Equality function which tries semantic equality (using .equals())
+ * if possible, degrades to === if not available, and is also null-safe.
  */
-export function withEqEquals(obj: any|null, obj2: any|null): boolean {
+export function areEqual(obj: any|null, obj2: any|null): boolean {
     if (obj === null != obj2 === null) {
         return false;
     }
@@ -62,12 +81,15 @@ export function withEqEquals(obj: any|null, obj2: any|null): boolean {
  * for stringHashCode of the string representation if
  * not available.
  */
-export function withEqHashCode(obj: any|null): number {
+export function getHashCode(obj: any|null): number {
+    if (!obj) {
+        return 0;
+    }
     if (hasEquals(obj)) {
         return obj.hashCode();
     }
-    if (Number.isInteger(<any>obj)) {
-        return <number>obj;
+    if (typeof obj === 'number') {
+        return obj;
     }
     return stringHashCode(obj+"");
 }
@@ -77,7 +99,6 @@ export function withEqHashCode(obj: any|null): number {
  * it's a const enum, is replaced by integers in the source.
  */
 export const enum Ordering {
-
     /**
      * Lower Than
      */
@@ -89,4 +110,5 @@ export const enum Ordering {
     /**
      * Greater Than
      */
-    GT=1 };
+    GT=1
+};

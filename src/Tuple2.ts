@@ -1,5 +1,5 @@
 import { Value } from "./Value";
-import { WithEquality, withEqEquals, withEqHashCode } from "./Comparison";
+import { WithEquality, areEqual, getHashCode } from "./Comparison";
 
 /**
  * Contains a pair of two values, which may or may not have the same type.
@@ -40,8 +40,8 @@ export class Tuple2<T,U> implements Value {
      * in memory.
      */
     equals(other: Tuple2<T,U>): boolean {
-        return withEqEquals(this._fst, other._fst) &&
-            withEqEquals(this._snd, other._snd);
+        return areEqual(this._fst, other._fst) &&
+            areEqual(this._snd, other._snd);
     }
     
     /**
@@ -50,7 +50,7 @@ export class Tuple2<T,U> implements Value {
      * the same number. The formula can impact performance.
      */
     hashCode(): number {
-        return withEqHashCode(this._fst)*53 + withEqHashCode(this._snd);
+        return getHashCode(this._fst)*53 + getHashCode(this._snd);
     }
     
     /**

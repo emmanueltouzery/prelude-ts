@@ -1,7 +1,7 @@
 import { Value } from "./Value";
 import { Seq } from "./Seq";
 import { Vector } from "./Vector";
-import { WithEquality, withEqEquals, withEqHashCode } from "./Comparison";
+import { WithEquality, areEqual, getHashCode } from "./Comparison";
 
 /**
  * Expresses that a value may be present, or not.
@@ -254,10 +254,10 @@ export class Some<T> extends Option<T> {
             return false;
         }
         const someOther = <Some<T>>other;
-        return withEqEquals(this.value, someOther.value);
+        return areEqual(this.value, someOther.value);
     }
     hashCode(): number {
-        return withEqHashCode(this.value);
+        return getHashCode(this.value);
     }
     toString(): string {
         return "Some(" + this.value + ")";

@@ -1,4 +1,4 @@
-import { stringHashCode } from "../src/Comparison";
+import { areEqual, fieldsHashCode } from "../src/Comparison";
 
 /**
  * @hidden
@@ -6,13 +6,13 @@ import { stringHashCode } from "../src/Comparison";
 export class MyClass {
     constructor(private field1:string, private field2:number) {}
     equals(other: MyClass): boolean {
-        return this.field1 === other.field1 &&
-            this.field2 === other.field2;
+        return areEqual(this.field1, other.field1) &&
+            areEqual(this.field2, other.field2);
     }
     hashCode(): number {
-        return stringHashCode("" + this.field1 + this.field2);
+        return fieldsHashCode(this.field1, this.field2);
     }
     toString(): string {
-        return `{field1: ${this.field1}, field2: ${this.field2}}`
+        return `{field1: ${this.field1}, field2: ${this.field2}}`;
     }
 }

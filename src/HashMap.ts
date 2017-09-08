@@ -1,6 +1,6 @@
 import { IMap } from "./IMap";
 import { hasEquals, HasEquals, WithEquality,
-         withEqHashCode, withEqEquals } from "./Comparison";
+         getHashCode, areEqual } from "./Comparison";
 import { Option, none, None } from "./Option";
 import { HashSet } from "./HashSet";
 import { ISet } from "./ISet";
@@ -222,7 +222,7 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
             if (myVal === undefined || hisVal === undefined) {
                 return false;
             }
-            if (!withEqEquals(myVal, hisVal)) {
+            if (!areEqual(myVal, hisVal)) {
                 return false;
             }
         }
@@ -237,7 +237,7 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
     hashCode(): number {
         return this.hamt.fold(
             (acc: number, value: V, key: K & WithEquality) =>
-                withEqHashCode(key) + withEqHashCode(value), 0);
+                getHashCode(key) + getHashCode(value), 0);
     }
 
     /*
