@@ -6,6 +6,9 @@ import { areEqual, fieldsHashCode } from "../src/Comparison";
 export class MyClass {
     constructor(private field1:string, private field2:number) {}
     equals(other: MyClass): boolean {
+        if (!other) {
+            return false;
+        }
         return areEqual(this.field1, other.field1) &&
             areEqual(this.field2, other.field2);
     }

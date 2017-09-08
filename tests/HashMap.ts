@@ -45,6 +45,14 @@ describe("hashmap equality", () => {
        assert.ok(!HashMap.empty<number,String>().put(1,"t").equals(HashMap.empty<number,String>())));
     it("empty should be not be equal with non empty", () =>
        assert.ok(!HashMap.empty<number,String>().equals(HashMap.empty<number,String>().put(1,"t"))));
+    it("doesn't throw when given another type on equals", () => assert.equal(
+        false, HashMap.empty().put(1,2).equals(<any>[1,2])));
+    it("doesn't throw when given null on equals", () => assert.equal(
+        false, HashMap.empty().put(1,2).equals(<any>null)));
+    it("empty doesn't throw when given another type on equals", () => assert.equal(
+        false, HashMap.empty().equals(<any>[1,2])));
+    it("empty doesn't throw when given null on equals", () => assert.equal(
+        false, HashMap.empty().equals(<any>null)));
 })
 
 describe("hashmap - toString should be nicely formatted", () => {

@@ -99,6 +99,9 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
             // but my size is zero, after some filtering and such.
             return true;
         }
+        if (!other || !other.hamt) {
+            return false;
+        }
         if (sz !== other.hamt.size) {
             return false;
         }
@@ -174,6 +177,9 @@ class EmptyHashSet<T> extends HashSet<T> {
     }
 
     equals(other: HashSet<T>): boolean {
+        if (!other || !other.size) {
+            return false;
+        }
         return <any>other === emptyHashSet || other.size() === 0;
     }
 

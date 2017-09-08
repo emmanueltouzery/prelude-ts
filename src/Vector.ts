@@ -545,6 +545,9 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * in memory.
      */
     equals(other: Vector<T>): boolean {
+        if (!other || !other.hamt) {
+            return false;
+        }
         const sz = this.hamt.size;
         if (sz !== other.hamt.size) {
             return false;

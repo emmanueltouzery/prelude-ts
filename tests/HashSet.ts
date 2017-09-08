@@ -59,3 +59,10 @@ describe("hashset access", () => {
         assert.equal(0, total);
     })
 });
+
+describe("hashset equality", () => {
+    it("doesn't throw when given another type on equals", () => assert.equal(
+        false, HashSet.of(1).equals(<any>[1,2])));
+    it("doesn't throw when given null on equals", () => assert.equal(
+        false, HashSet.of(1).equals(<any>null)));
+});

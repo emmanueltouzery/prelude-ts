@@ -83,6 +83,9 @@ Here is an example of object using these helpers:
 class MyClass {
     constructor(private field1:string, private field2:number) {}
     equals(other: MyClass): boolean {
+        if (!other) {
+            return false;
+        }
         return areEqual(this.field1, other.field1) &&
             areEqual(this.field2, other.field2);
     }
@@ -94,6 +97,10 @@ class MyClass {
     }
 }
 ```
+
+Be careful, `equals` could be called with a parameter being in fact another class,
+so if the field names you compare with are too generic (like `id`), maybe put
+a marker to disambiguate the type.
 
 ## Wishlist/upcoming features
 

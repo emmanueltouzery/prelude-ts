@@ -206,6 +206,9 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
      * in memory.
      */
     equals(other: IMap<K,V>): boolean {
+        if (!other || !other.valueSet) {
+            return false;
+        }
         const sz = this.hamt.size;
         if (other.size() === 0 && sz === 0) {
             // we could get that i'm not the empty map
@@ -324,6 +327,9 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
     }
 
     equals(other: HashMap<K,V>): boolean {
+        if (!other || !other.valueSet) {
+            return false;
+        }
         return <any>other === emptyHashMap || other.size() === 0;
     }
 

@@ -12,6 +12,10 @@ describe("Tuple2 manipulation", () => {
         Tuple2.of(1,2).equals(Tuple2.of(1,2))));
     it("equality fails when it should", () => assert.ok(
         !Tuple2.of(1,2).equals(Tuple2.of(2,2))));
+    it("doesn't throw when given another type on equals", () => assert.equal(
+        false, Tuple2.of(1,2).equals(<any>[1,2])));
+    it("doesn't throw when given null on equals", () => assert.equal(
+        false, Tuple2.of(1,2).equals(<any>null)));
     it("map1 works", () => assert.ok(
         Tuple2.of(2,2).equals(Tuple2.of(1,2).map1(x=>x*2))));
     it("map2 works", () => assert.ok(

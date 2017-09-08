@@ -250,7 +250,9 @@ export class Some<T> extends Option<T> {
         return Vector.ofStruct(this.value);
     }
     equals(other: Option<T>): boolean {
-        if (other === <None<T>>none) {
+        // the .isSome doesn't test if it's a Some, but
+        // if the object has a field called isSome.
+        if (other === <None<T>>none || !other || !(<any>other).isSome) {
             return false;
         }
         const someOther = <Some<T>>other;

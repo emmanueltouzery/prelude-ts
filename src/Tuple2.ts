@@ -104,6 +104,9 @@ export class Tuple2<T,U> implements Value {
      * in memory.
      */
     equals(other: Tuple2<T,U>): boolean {
+        if (!other || !other._fst) {
+            return false;
+        }
         return areEqual(this._fst, other._fst) &&
             areEqual(this._snd, other._snd);
     }

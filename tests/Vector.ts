@@ -145,4 +145,8 @@ describe("Vector Value tests", () => {
         "[1, 2, 3]", Vector.of(1,2,3).toString()));
     it("has non-obviously-broken equals", () => assert.ok(
         Vector.of("a","b","c").equals(Vector.of("a", "b", "c"))));
+    it("doesn't throw when given another type on equals", () => assert.equal(
+        false, Vector.of(1).equals(<any>[1,2])));
+    it("doesn't throw when given null on equals", () => assert.equal(
+        false, Vector.of(1).equals(<any>null)));
 })

@@ -20,6 +20,14 @@ describe("option comparison", () => {
        assert.ok(!Option.none().contains(5)));
     it("should return false on contains", () =>
        assert.ok(!Option.of(6).contains(5)));
+    it("doesn't throw when given another type on equals", () => assert.equal(
+        false, Option.of(1).equals(<any>[1,2])));
+    it("doesn't throw when given null on equals", () => assert.equal(
+        false, Option.of(1).equals(<any>null)));
+    it("empty doesn't throw when given another type on equals", () => assert.equal(
+        false, Option.none().equals(<any>[1,2])));
+    it("empty doesn't throw when given null on equals", () => assert.equal(
+        false, Option.none().equals(<any>null)));
 });
 
 describe("option transformation", () => {
