@@ -51,7 +51,8 @@ methods `equals(other: any): boolean` and `hashCode(): number` (the same
 methods that [immutable.js uses](https://facebook.github.io/immutable-js/docs/#/ValueObject)).
 With these methods, structural equality is achievable, and indeed
 `Vector.of(1,2,3).equals(Vector.of(1,2,3))` is `true`. However this can only
-work if the values you put in collections have themselves properly defined equality.
+work if the values you put in collections have themselves properly defined equality
+([see how prelude.ts can help](https://github.com/emmanueltouzery/prelude.ts/wiki/Equality)).
 If these values don't have structural equality, then we can get no better than
 `===` behavior.
 
@@ -71,36 +72,6 @@ That version compiles just fine. But now you've been warned that you can't use
 this value in a Set or as a Map key, and that equality features are not provided.
 Similary, functions such a `map` have alternate implementations such as `mapStruct`
 to warn the programmer in these cases.
-
-prelude.ts also offers some helper functions to implement the `equals` and
-`hashCode` functions for your own objects:
-[fieldsHashCode](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html#fieldshashcode)
-and [areEqual](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html#areequal).
-
-Here is an example of object using these helpers:
-
-```typescript
-class MyClass {
-    constructor(private field1:string, private field2:number) {}
-    equals(other: MyClass): boolean {
-        if (!other) {
-            return false;
-        }
-        return areEqual(this.field1, other.field1) &&
-            areEqual(this.field2, other.field2);
-    }
-    hashCode(): number {
-        return fieldsHashCode(this.field1, this.field2);
-    }
-    toString(): string {
-        return `{field1: ${this.field1}, field2: ${this.field2}}`;
-    }
-}
-```
-
-Be careful, `equals` could be called with a parameter being in fact another class,
-so if the field names you compare with are too generic (like `id`), maybe put
-a marker to disambiguate the type.
 
 ## Wishlist/upcoming features
 
