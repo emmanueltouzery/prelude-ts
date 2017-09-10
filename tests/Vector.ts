@@ -1,6 +1,7 @@
 import { Vector } from "../src/Vector";
 import { HashMap } from "../src/HashMap";
 import { Option } from "../src/Option";
+import { MyClass } from "./SampleData";
 import * as assert from 'assert'
 
 describe("Vector creation", () => {
@@ -46,6 +47,16 @@ describe("Vector manipulation", () => {
     it("richer example", () => assert.deepEqual(
         [[1,"a"],[2,"b"]], Vector.of(1,2,3)
             .zip(["a", "b", "c"]).takeWhile(([k,v]) => k<3).toArray()));
+    it("distinctBy", () => assert.deepEqual(
+        [1,2,3], Vector.of(1,1,2,3,2,3,1).distinctBy(x => x).toArray()));
+    it("distinctBy for the empty vector", () => assert.deepEqual(
+        [], Vector.empty<number>().distinctBy(x => x).toArray()));
+    it("distinctBy for a single value", () => assert.deepEqual(
+        [1], Vector.of(1).distinctBy(x => x).toArray()));
+    it("distinctBy, custom equality", () => assert.deepEqual(
+        [1,0,2], Vector.of(1,0,1,2,3,2,3,1).distinctBy(x => new MyClass("hi", x%3)).toArray()));
+    it("distinctBy with prepend", () => assert.deepEqual(
+        [1,2,3], Vector.of(2,3,2,3,1).prepend(1).distinctBy(x => x).toArray()));
 });
 
 describe("Vector value extraction", () => {

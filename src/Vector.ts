@@ -4,6 +4,7 @@ import { WithEquality, Ordering,
 import { HashMap} from "./HashMap";
 import { IMap } from "./IMap";
 import { Option } from "./Option";
+import { HashSet } from "./HashSet";
 const hamt: any = require("hamt_plus");
 
 /**
@@ -549,6 +550,29 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return new Vector<T>(this.hamt.fold(
             (h:any,v:T,k:number) => h.set(sz-1-k+this.indexShift, v),
             hamt.make()), 0);
+    }
+
+    /**
+     * Remove duplicate items; elements are mapped to keys, those
+     * get compared.
+     *
+     *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
+     *     => [1,2,3]
+     */
+    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Vector<T> {
+        let keySet = HashSet.empty<U>();
+        return new Vector<T>(hamt.empty.mutate(
+            (h:any) => {
+                let targetIdx = 0;
+                for (let i=0;i<this.hamt.size;i++) {
+                    const val = this.hamt.get(i+this.indexShift);
+                    const transformedVal = keyExtractor(val);
+                    if (!keySet.contains(transformedVal)) {
+                        h.set(targetIdx++, val);
+                        keySet = keySet.add(transformedVal);
+                    }
+                }
+            }), 0);
     }
 
     /**

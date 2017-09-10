@@ -264,6 +264,15 @@ export interface Seq<T> extends Value {
     takeWhile(predicate:(x:T)=>boolean): Seq<T>;
 
     /**
+     * Remove duplicate items; elements are mapped to keys, those
+     * get compared.
+     *
+     *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
+     *     => [1,2,3]
+     */
+    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Seq<T>;
+
+    /**
      * Reverse the collection. For instance:
      *
      *     [1,2,3] => [3,2,1]
