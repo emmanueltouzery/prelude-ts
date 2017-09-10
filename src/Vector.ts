@@ -105,8 +105,8 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
-     * Get the first value of the vector, if any.
-     * returns Option.Some if the vector is not empty,
+     * Get the first value of the collection, if any.
+     * returns Option.Some if the collection is not empty,
      * Option.None if it's empty.
      */
     head(): Option<T> {
