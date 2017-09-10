@@ -6,7 +6,7 @@
 Prelude.ts is a typescript library which aims to make functional programming
 concepts accessible and productive in typescript.
 
-It provides immutable collections (Vector, Set, Map), and constructs such as
+It provides immutable collections (Vector, Set, Map, Stream), and constructs such as
 Option.
 
 ```typescript
