@@ -1,6 +1,6 @@
 {
     "name": "prelude.ts",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "A typescript functional programming library",
     "main": "dist/src/index.js",
     "typings": "dist/src/index.d.ts",
