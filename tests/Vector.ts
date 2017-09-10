@@ -1,6 +1,7 @@
 import { Vector } from "../src/Vector";
 import { HashMap } from "../src/HashMap";
 import { Option } from "../src/Option";
+import { Stream } from "../src/Stream";
 import { MyClass } from "./SampleData";
 import * as assert from 'assert'
 
@@ -44,6 +45,8 @@ describe("Vector manipulation", () => {
         [], Vector.of(1,2).dropRight(3).toArray()));
     it("zips two vectors", () => assert.deepEqual(
         [[1,"a"], [2,"b"]], Vector.of(1,2,3).zip(["a","b"]).toArray()));
+    it("zips with a stream", () => assert.deepEqual(
+        [["a",0], ["b",1]], Vector.of("a","b").zip(Stream.iterate(0,x=>x+1)).toArray()));
     it("richer example", () => assert.deepEqual(
         [[1,"a"],[2,"b"]], Vector.of(1,2,3)
             .zip(["a", "b", "c"]).takeWhile(([k,v]) => k<3).toArray()));

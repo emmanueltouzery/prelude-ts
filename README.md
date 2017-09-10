@@ -75,7 +75,6 @@ to warn the programmer in these cases.
 
 ## Wishlist/upcoming features
 
-* Stream (including infinite streams)
 * Either
 * Future, wrapping promises?
 * Non-empty vector probably
