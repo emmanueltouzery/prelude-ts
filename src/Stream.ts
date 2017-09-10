@@ -96,14 +96,35 @@ export abstract class Stream<T> implements Iterable<T> {
     abstract takeWhile(predicate: (x:T)=>boolean): Stream<T>;
 
     /**
+     * Return a new collection where each element was transformed
+     * by the mapper function you give.
+     * No equality requirements.
+     */
+    abstract mapStruct<U>(mapper:(v:T)=>U): Stream<U>;
+
+    /**
+     * Return a new collection where each element was transformed
+     * by the mapper function you give.
+     * Equality requirements.
+     */
+    abstract map<U>(mapper:(v:T)=>U&WithEquality): Stream<U>;
+
+    /**
+     * Call a predicate for each element in the collection,
+     * build a new collection holding only the elements
+     * for which the predicate returned true.
+     */
+    abstract filter(predicate:(v:T)=>boolean): Stream<T>;
+
+    /**
      * Convert to array.
-     * Don't do it only an infinite stream!
+     * Don't do it on an infinite stream!
      */
     abstract toArray(): T[];
 
     /**
      * Convert to vector.
-     * Don't do it only an infinite stream!
+     * Don't do it on an infinite stream!
      */
     abstract toVector(): Vector<T>;
 }
@@ -138,6 +159,28 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     takeWhile(predicate: (x:T)=>boolean): Stream<T> {
+        return this;
+    }
+
+    /**
+     * Return a new collection where each element was transformed
+     * by the mapper function you give.
+     * No equality requirements.
+     */
+    mapStruct<U>(mapper:(v:T)=>U): Stream<U> {
+        return <EmptyStream<U>>emptyStream;
+    }
+
+    /**
+     * Return a new collection where each element was transformed
+     * by the mapper function you give.
+     * Equality requirements.
+     */
+    map<U>(mapper:(v:T)=>U&WithEquality): Stream<U> {
+        return <EmptyStream<U>>emptyStream;
+    }
+
+    filter(predicate:(v:T)=>boolean): Stream<T> {
         return this;
     }
 
@@ -196,6 +239,22 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         }
         return new ConsStream(this.value,
                               () => this.tail().takeWhile(predicate));
+    }
+
+    mapStruct<U>(mapper:(v:T)=>U): Stream<U> {
+        return new ConsStream(mapper(this.value),
+                              () => this.tail().mapStruct(mapper));
+    }
+
+    map<U>(mapper:(v:T)=>U&WithEquality): Stream<U> {
+        return this.mapStruct(mapper);
+    }
+
+    filter(predicate:(v:T)=>boolean): Stream<T> {
+        return predicate(this.value) ?
+            new ConsStream(this.value,
+                           () => this.tail().filter(predicate)) :
+            this.tail().filter(predicate);
     }
 
     toArray(): T[] {

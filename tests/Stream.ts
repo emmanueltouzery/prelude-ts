@@ -21,4 +21,8 @@ describe("Stream basics", () => {
         Vector.of(1,2,3).equals(Stream.iterate(1, x => x+1).take(3).toVector())));
     it("implements takeWhile correctly", () => assert.deepEqual(
         [1,2,3], Stream.iterate(1, x=>x+1).takeWhile(x=>x<4).toArray()));
+    it("maps correctly", () => assert.deepEqual(
+        [4,5,7,11], Stream.iterate(1, x => x*2).map(x => x+3).take(4).toArray()));
+    it("filters correctly", () => assert.deepEqual(
+        [8,32,64,128], Stream.iterate(1, x => x*2).filter(x => x>5 && (x<15 || x > 30)).take(4).toArray()));
 });
