@@ -264,6 +264,13 @@ export interface Seq<T> extends Value {
     takeWhile(predicate:(x:T)=>boolean): Seq<T>;
 
     /**
+     * Reverse the collection. For instance:
+     *
+     *     [1,2,3] => [3,2,1]
+     */
+    reverse(): Seq<T>;
+
+    /**
      * Convert this collection to a map. You give a function which
      * for each element in the collection returns a pair. The
      * key of the pair will be used as a key in the map, the value,

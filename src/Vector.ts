@@ -540,6 +540,18 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * Reverse the collection. For instance:
+     *
+     *     [1,2,3] => [3,2,1]
+     */
+    reverse(): Vector<T> {
+        const sz = this.hamt.size;
+        return new Vector<T>(this.hamt.fold(
+            (h:any,v:T,k:number) => h.set(sz-1-k+this.indexShift, v),
+            hamt.make()), 0);
+    }
+
+    /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
      * in memory.

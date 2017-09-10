@@ -80,6 +80,12 @@ describe("Vector value extraction", () => {
         Vector.of(2,3,4).equals(Vector.of(1,2,3,4).tail())));
     it("correctly gets the tail of a vector after prepend", () => assert.ok(
         Vector.of(2,3,4).equals(Vector.of(2,3,4).prepend(1).tail())));
+    it("correctly reverses", () => assert.deepEqual(
+        [3,2,1], Vector.of(1,2,3).reverse().toArray()));
+    it("correctly reverses the empty vector", () => assert.deepEqual(
+        [], Vector.empty().reverse().toArray()));
+    it("correctly reverses also after prepend", () => assert.deepEqual(
+        [3,2,1], Vector.of(2,3).prepend(1).reverse().toArray()));
 });
 
 describe("Prepend", () => {
