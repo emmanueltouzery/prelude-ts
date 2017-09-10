@@ -40,7 +40,7 @@ export abstract class Stream<T> implements Iterable<T> {
      *     => [1,1,1,1,...]
      *
      *     Stream.continually(Math.random)
-     *     => [ 0.49884723907769635, 0.3226548779864311 ]
+     *     => [0.49884723907769635, 0.3226548779864311, ...]
      */
     static continuallyStruct<T>(fn: ()=>T): Stream<T> {
         return new ConsStream(fn(), () => Stream.continuallyStruct(fn));
@@ -54,7 +54,7 @@ export abstract class Stream<T> implements Iterable<T> {
      *     => [1,1,1,1,...]
      *
      *     Stream.continually(Math.random)
-     *     => [ 0.49884723907769635, 0.3226548779864311 ]
+     *     => [0.49884723907769635, 0.3226548779864311, ...]
      */
     static continually<T>(fn: ()=>T&WithEquality): Stream<T> {
         return Stream.continuallyStruct(fn);
