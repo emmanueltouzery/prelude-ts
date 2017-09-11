@@ -14,6 +14,9 @@ const hamt: any = require("hamt_plus");
  */
 export class Vector<T> implements Seq<T>, Iterable<T> {
     
+    /**
+     * @hidden
+     */
     protected constructor(private hamt: any, private indexShift: number) {}
 
     private static readonly emptyVector = new Vector(hamt.make(), 0);

@@ -10,6 +10,9 @@ const hamt: any = require("hamt_plus");
  */
 export class HashSet<T> implements ISet<T>, Iterable<T> {
 
+    /**
+     * @hidden
+     */
     protected constructor(private hamt: any) {}
 
     /**

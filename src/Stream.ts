@@ -195,6 +195,9 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
 
 class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
+    /**
+     * @hidden
+     */
     public constructor(protected value: T, protected _tail: ()=>Stream<T>) {
         super();
     }
