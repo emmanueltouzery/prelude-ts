@@ -77,7 +77,6 @@ describe("hashmap get", () => {
         HashSet.of("a","c").equals(HashMap.empty<string,string>().put("a","b").put("c","d").keySet())));
     it("should get empty valueSet", () => assert.ok(
         HashSet.empty<string>().equals(HashMap.empty<string,string>().valueSet())));
-    console.log(HashMap.empty<string,string>().put("a","b").put("c","d").valueSet()+"");
     it("should get non-empty valueSet", () => assert.ok(
         HashSet.of("b","d").equals(HashMap.empty<string,string>().put("a","b").put("c","d").valueSet())));
     it("supports iterator", () => {

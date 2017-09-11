@@ -66,6 +66,9 @@ describe("Vector value extraction", () => {
     it("filter works", () => assert.ok(
         Vector.of(2,4)
             .equals(Vector.of(1,2,3,4).filter(x => x%2 === 0))));
+    it("filter works with prepend", () => assert.ok(
+        Vector.of(2,4)
+            .equals(Vector.of(3,4).prepend(2).prepend(1).filter(x => x%2 === 0))));
     it("get finds when present", () => assert.ok(
         Option.of(5).equals(Vector.of(1,2,3,4,5,6).get(4))));
     it("get finds when present after prepend", () => assert.ok(
@@ -100,6 +103,11 @@ describe("Vector value extraction", () => {
         [], Vector.empty().reverse().toArray()));
     it("correctly reverses also after prepend", () => assert.deepEqual(
         [3,2,1], Vector.of(2,3).prepend(1).reverse().toArray()));
+    it("correctly partitions also after prepend", () => assert.deepEqual(
+        [[1,3,5,7],[2,4,6,8]],
+        Vector.of(2,3,4,5,6,7,8).prepend(1).partition(x => x%2!==0)
+            .map(v => v.toArray())));
+    
 });
 
 describe("Prepend", () => {

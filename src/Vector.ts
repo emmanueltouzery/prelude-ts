@@ -558,6 +558,20 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             hamt.make()), 0);
     }
 
+    partition(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>] {
+        let i1 = 0, i2 = 0;
+        let [hamt1, hamt2] = [hamt.make(), hamt.make()];
+        for (let i=0;i<this.hamt.size;i++) {
+            const val = this.hamt.get(i+this.indexShift);
+            if (predicate(val)) {
+                hamt1 = hamt1.set(i1++, val);
+            } else {
+                hamt2 = hamt2.set(i2++, val);
+            }
+        }
+        return [new Vector<T>(hamt1,0), new Vector<T>(hamt2,0)];
+    }
+
     /**
      * Remove duplicate items; elements are mapped to keys, those
      * get compared.
