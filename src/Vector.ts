@@ -564,18 +564,36 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             hamt.make()), 0);
     }
 
+    /**
+     * Returns a pair of two collections; the first one
+     * will only contain the items from this collection for
+     * which the predicate you give returns true, the second
+     * will only contain the items from this collection where
+     * the predicate returns false.
+     *
+     *     Vector.of(1,2,3,4).partition(x => x%2===0)
+     *     => [[2,4],[1,3]]
+     */
     partition(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>] {
         let i1 = 0, i2 = 0;
-        let [hamt1, hamt2] = [hamt.make(), hamt.make()];
-        for (let i=0;i<this.hamt.size;i++) {
-            const val = this.hamt.get(i+this.indexShift);
-            if (predicate(val)) {
-                hamt1 = hamt1.set(i1++, val);
-            } else {
-                hamt2 = hamt2.set(i2++, val);
-            }
-        }
-        return [new Vector<T>(hamt1,0), new Vector<T>(hamt2,0)];
+        let r: any = [null,null];
+        hamt.empty.mutate(
+            (hamt1:any) =>
+                hamt.empty.mutate((hamt2:any) => {
+                    let i1 = 0, i2 = 0;
+                    for (let i=0;i<this.hamt.size;i++) {
+                        const val = this.hamt.get(i+this.indexShift);
+                        if (predicate(val)) {
+                            hamt1.set(i1++, val);
+                        } else {
+                            hamt2.set(i2++, val);
+                        }
+                    }
+
+                    r[0] = new Vector<T>(hamt1,0);
+                    r[1] = new Vector<T>(hamt2,0);
+                }));
+        return r;
     }
 
     /**

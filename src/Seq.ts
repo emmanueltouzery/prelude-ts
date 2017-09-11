@@ -279,7 +279,6 @@ export interface Seq<T> extends Value {
      */
     reverse(): Seq<T>;
 
-
     /**
      * Returns a pair of two collections; the first one
      * will only contain the items from this collection for
