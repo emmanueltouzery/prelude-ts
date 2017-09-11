@@ -66,3 +66,14 @@ describe("hashset equality", () => {
     it("doesn't throw when given null on equals", () => assert.equal(
         false, HashSet.of(1).equals(<any>null)));
 });
+
+describe("hashset combinations", () => {
+    it("calculates the diff well", () => assert.ok(
+        HashSet.of(1,2,4).equals(HashSet.of(0,1,2,3,4).diff(HashSet.of(0,3)))));
+    it("calculates the diff from empty well", () => assert.ok(
+        HashSet.empty<number>().equals(HashSet.empty<number>().diff(HashSet.of(0,3)))));
+    it("calculates removeAll well", () => assert.ok(
+        HashSet.of(1,2,4).equals(HashSet.of(0,1,2,3,4).removeAll([0,3]))));
+    it("calculates removeAll from empty well", () => assert.ok(
+        HashSet.empty<number>().equals(HashSet.empty<number>().removeAll([0,3]))));
+})

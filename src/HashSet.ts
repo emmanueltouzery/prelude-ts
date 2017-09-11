@@ -9,7 +9,7 @@ const hamt: any = require("hamt_plus");
  * @type T the item type
  */
 export class HashSet<T> implements ISet<T>, Iterable<T> {
-    
+
     protected constructor(private hamt: any) {}
 
     /**
@@ -88,6 +88,26 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Returns a new Set containing the difference
+     * between this set and the other Set passed as parameter.
+     */
+    diff(elts: ISet<T&WithEquality>): HashSet<T> {
+        return new HashSet<T>(this.hamt.fold(
+            (acc: any, v: T&WithEquality, k: T&WithEquality) =>
+                elts.contains(k) ? acc : acc.set(k,k), hamt.empty));
+    }
+
+    /**
+     * Returns a new set with all the elements of the current
+     * Set, minus the elements of the iterable you give as a parameter.
+     * If you call this function with a HashSet as parameter,
+     * rather call 'diff', as it'll be faster.
+     */
+    removeAll(elts: Iterable<T&WithEquality>): HashSet<T> {
+        return this.diff(HashSet.ofIterable(elts));
+    }
+
+    /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
      * in memory.
@@ -159,7 +179,7 @@ class EmptyHashSet<T> extends HashSet<T> {
         }
         return new HashSet<T>(hamt.make().set(elt,elt));
     }
-    
+
     contains(elt: T & WithEquality): boolean {
         return false;
     }
@@ -174,6 +194,10 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     isEmpty(): boolean {
         return true;
+    }
+
+    diff(elts: ISet<T&WithEquality>): HashSet<T> {
+        return this;
     }
 
     equals(other: HashSet<T>): boolean {
