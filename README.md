@@ -115,6 +115,8 @@ such as typescript.
     npm test
 
     npm run-script docgen
+    
+    npm run benchmarks
 
 [npm-image]: https://img.shields.io/npm/v/prelude.ts.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/prelude.ts
