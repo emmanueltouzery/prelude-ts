@@ -177,4 +177,6 @@ describe("Vector Value tests", () => {
         false, Vector.of(1).equals(<any>[1,2])));
     it("doesn't throw when given null on equals", () => assert.equal(
         false, Vector.of(1).equals(<any>null)));
+    it("is strict with equality", () => assert.ok(
+        !Vector.of(1,2).equals(Vector.of(1, <any>undefined))));
 })

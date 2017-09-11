@@ -262,10 +262,16 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * for which the predicate returned true.
      */
     filter(predicate:(v:T)=>boolean): Vector<T> {
-        return new Vector<T>(this.hamt.fold(
-            (h:any,v:T,k:number) => predicate(v) ?
-                h.set(k-this.indexShift, v) : h,
-            hamt.make()), 0);
+        return new Vector<T>(hamt.empty.mutate(
+            (h:any) => {
+                let outputIdx = 0;
+                for (let i=0;i<this.hamt.size;i++) {
+                    const item = this.hamt.get(i+this.indexShift);
+                    if (predicate(item)) {
+                        h.set(outputIdx++, item);
+                    }
+                }
+            }), 0);
     }
 
     /**
@@ -611,11 +617,13 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         for (let i=0;i<this.hamt.size;i++) {
             const myVal: T & WithEquality|null|undefined = this.hamt.get(i+this.indexShift);
             const hisVal: T & WithEquality|null|undefined = other.hamt.get(i+other.indexShift);
-            if (myVal === undefined !== hisVal === undefined) {
+            if ((myVal === undefined) !== (hisVal === undefined)) {
                 return false;
             }
             if (myVal === undefined || hisVal === undefined) {
-                return true;
+                // they are both undefined, the || is for TS's flow analysis
+                // so he realizes none of them is undefined after this.
+                continue;
             }
             if (!areEqual(myVal, hisVal)) {
                 return false;
