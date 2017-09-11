@@ -262,10 +262,9 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * for which the predicate returned true.
      */
     filter(predicate:(v:T)=>boolean): Vector<T> {
-        let i = 0;
         return new Vector<T>(this.hamt.fold(
             (h:any,v:T,k:number) => predicate(v) ?
-                h.set(i++, v) : h,
+                h.set(k-this.indexShift, v) : h,
             hamt.make()), 0);
     }
 
