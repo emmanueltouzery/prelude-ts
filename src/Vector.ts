@@ -291,6 +291,22 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         }
         return Option.none<T>();
     }
+
+    /**
+     * Returns true if the item is in the collection,
+     * false otherwise.
+     */
+    contains(v:T&WithEquality): boolean {
+        const iterator: Iterator<T> = this.hamt.values();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (areEqual(curItem.value, v)) {
+                return true;
+            }
+            curItem = iterator.next();
+        }
+        return false;
+    }
     
     /**
      * Calls the function you give for each item in the collection,

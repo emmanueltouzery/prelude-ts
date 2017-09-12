@@ -103,6 +103,12 @@ export interface Seq<T> extends Value {
     find(predicate:(v:T)=>boolean): Option<T>;
 
     /**
+     * Returns true if the item is in the collection,
+     * false otherwise.
+     */
+    contains(v:T&WithEquality): boolean;
+
+    /**
      * Calls the function you give for each item in the collection,
      * your function returns a collection, all the collections are
      * concatenated.

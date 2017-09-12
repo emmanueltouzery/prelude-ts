@@ -73,7 +73,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      * the set, false otherwise.
      */
     contains(elt: T & WithEquality): boolean {
-        return this.hamt.get(elt) !== undefined;
+        return this.hamt.has(elt);
     }
 
     /**

@@ -179,4 +179,12 @@ describe("Vector Value tests", () => {
         false, Vector.of(1).equals(<any>null)));
     it("is strict with equality", () => assert.ok(
         !Vector.of(1,2).equals(Vector.of(1, <any>undefined))));
+    it("supports contain", () => assert.ok(
+        Vector.of(1,2,3).contains(2)));
+    it("rejects contain", () => assert.ok(
+        !Vector.of(1,2,3).contains(4)));
+    it("rejects contain, empty vector", () => assert.ok(
+        !Vector.empty().contains(4)));
+    it("supports contains, custom equality", () => assert.ok(
+        Vector.of(new MyClass("hi", 3)).contains(new MyClass("hi", 3))));
 })
