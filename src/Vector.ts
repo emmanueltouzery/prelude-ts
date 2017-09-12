@@ -127,10 +127,13 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
 
     /**
      * Get all the elements in the collection but the first one.
-     * If the collection is empty, return an empty collection.
+     * If the collection is empty, return None.
      */
-    tail(): Vector<T> {
-        return new Vector<T>(this.hamt.remove(this.indexShift), this.indexShift+1);
+    tail(): Option<Vector<T>> {
+        return this.isEmpty() ?
+            Option.none<Vector<T>>() :
+            Option.of(new Vector<T>(
+                this.hamt.remove(this.indexShift), this.indexShift+1));
     }
 
     /**

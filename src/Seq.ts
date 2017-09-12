@@ -70,9 +70,9 @@ export interface Seq<T> extends Value {
 
     /**
      * Get all the elements in the collection but the first one.
-     * If the collection is empty, return an empty collection.
+     * Option.None if it's empty.
      */
-    tail(): Seq<T>;
+    tail(): Option<Seq<T>>;
 
     /**
      * Return a new collection where each element was transformed

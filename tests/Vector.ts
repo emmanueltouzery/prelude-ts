@@ -92,11 +92,11 @@ describe("Vector value extraction", () => {
     it("correctly gets the first element also after prepend", () => assert.equal(
         1, Vector.of(4,5).prependAll(Vector.of(1,2,3)).head().getOrUndefined()));
     it("correctly gets the tail of the empty vector", () => assert.ok(
-        Vector.empty().equals(Vector.empty().tail())));
+        Vector.empty().tail().isNone()));
     it("correctly gets the tail of a simple vector", () => assert.ok(
-        Vector.of(2,3,4).equals(Vector.of(1,2,3,4).tail())));
+        Vector.of(2,3,4).equals(Vector.of(1,2,3,4).tail().getOrThrow())));
     it("correctly gets the tail of a vector after prepend", () => assert.ok(
-        Vector.of(2,3,4).equals(Vector.of(2,3,4).prepend(1).tail())));
+        Vector.of(2,3,4).equals(Vector.of(2,3,4).prepend(1).tail().getOrThrow())));
     it("correctly reverses", () => assert.deepEqual(
         [3,2,1], Vector.of(1,2,3).reverse().toArray()));
     it("correctly reverses the empty vector", () => assert.deepEqual(

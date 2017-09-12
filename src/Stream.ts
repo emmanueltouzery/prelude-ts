@@ -79,9 +79,9 @@ export abstract class Stream<T> implements Iterable<T> {
 
     /**
      * Get all the elements in the collection but the first one.
-     * If the collection is empty, return an empty collection.
+     * If the collection is empty, return None.
      */
-    abstract tail(): Stream<T>;
+    abstract tail(): Option<Stream<T>>;
 
     /**
      * Return a new stream keeping only the first n elements
@@ -150,8 +150,8 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return Option.none<T>();
     }
 
-    tail(): Stream<T> {
-        return this;
+    tail(): Option<Stream<T>> {
+        return Option.none<Stream<T>>();
     }
 
     take(n: number): Stream<T> {
@@ -210,7 +210,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
                     return { done: true, value: <any>undefined };
                 }
                 const value = item.head().getOrThrow();
-                item = item.tail();
+                item = item.tail().getOrThrow();
                 return {done: false, value};
             }
         };
@@ -224,8 +224,8 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         return Option.ofStruct(this.value);
     }
 
-    tail(): Stream<T> {
-        return this._tail();
+    tail(): Option<Stream<T>> {
+        return Option.ofStruct(this._tail());
     }
 
     take(n: number): Stream<T> {
@@ -233,7 +233,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             return <EmptyStream<T>>emptyStream;
         }
         return new ConsStream(this.value,
-                              () => this.tail().take(n-1));
+                              () => this._tail().take(n-1));
     }
 
     takeWhile(predicate: (x:T)=>boolean): Stream<T> {
@@ -241,12 +241,12 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             return <EmptyStream<T>>emptyStream;
         }
         return new ConsStream(this.value,
-                              () => this.tail().takeWhile(predicate));
+                              () => this._tail().takeWhile(predicate));
     }
 
     mapStruct<U>(mapper:(v:T)=>U): Stream<U> {
         return new ConsStream(mapper(this.value),
-                              () => this.tail().mapStruct(mapper));
+                              () => this._tail().mapStruct(mapper));
     }
 
     map<U>(mapper:(v:T)=>U&WithEquality): Stream<U> {
@@ -256,12 +256,12 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     filter(predicate:(v:T)=>boolean): Stream<T> {
         return predicate(this.value) ?
             new ConsStream(this.value,
-                           () => this.tail().filter(predicate)) :
-            this.tail().filter(predicate);
+                           () => this._tail().filter(predicate)) :
+            this._tail().filter(predicate);
     }
 
     toArray(): T[] {
-        const r = this.tail().toArray();
+        const r = this._tail().toArray();
         r.unshift(this.value);
         return r;
     }
