@@ -127,6 +127,18 @@ export interface Seq<T> extends Value {
     flatMapStruct<U>(mapper:(v:T)=>Seq<U>): Seq<U>;
 
     /**
+     * Returns true if the predicate returns true for all the
+     * elements in the collection.
+     */
+    allMatch(predicate:(v:T)=>boolean): boolean;
+
+    /**
+     * Returns true if there the predicate returns true for any
+     * element in the collection.
+     */
+    anyMatch(predicate:(v:T)=>boolean): boolean;
+
+    /**
      * Group elements in the collection using a classifier function.
      * Elements are then organized in a map. The key is the value of
      * the classifier, and in value we get the list of elements

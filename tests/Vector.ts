@@ -187,4 +187,16 @@ describe("Vector Value tests", () => {
         !Vector.empty().contains(4)));
     it("supports contains, custom equality", () => assert.ok(
         Vector.of(new MyClass("hi", 3)).contains(new MyClass("hi", 3))));
+    it("supports allMatch, positive case", () => assert.ok(
+        Vector.of(2,4,8).allMatch(x => x%2 === 0)));
+    it("supports allMatch, negative case", () => assert.ok(
+        !Vector.of(2,5,8).allMatch(x => x%2 === 0)));
+    it("supports allMatch, empty vector", () => assert.ok(
+        Vector.empty<number>().allMatch(x => x%2 === 0)));
+    it("supports anyMatch, positive case", () => assert.ok(
+        Vector.of(3,5,8).anyMatch(x => x%2 === 0)));
+    it("supports anyMatch, negative case", () => assert.ok(
+        !Vector.of(3,5,9).anyMatch(x => x%2 === 0)));
+    it("supports anyMatch, empty vector", () => assert.ok(
+        !Vector.empty<number>().anyMatch(x => x%2 === 0)));
 })

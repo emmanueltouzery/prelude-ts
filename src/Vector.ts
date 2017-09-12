@@ -297,15 +297,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * false otherwise.
      */
     contains(v:T&WithEquality): boolean {
-        const iterator: Iterator<T> = this.hamt.values();
-        let curItem = iterator.next();
-        while (!curItem.done) {
-            if (areEqual(curItem.value, v)) {
-                return true;
-            }
-            curItem = iterator.next();
-        }
-        return false;
+        return this.anyMatch(curVal => areEqual(curVal, v));
     }
     
     /**
@@ -474,6 +466,38 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             (h:any,v:T,k:number) => (sz-k+this.indexShift>n) ?
                 h.set(k-this.indexShift, v) : h,
             hamt.make()), 0);
+    }
+
+    /**
+     * Returns true if the predicate returns true for all the
+     * elements in the collection.
+     */
+    allMatch(predicate:(v:T)=>boolean): boolean {
+        const iterator: Iterator<T> = this.hamt.values();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (!predicate(curItem.value)) {
+                return false;
+            }
+            curItem = iterator.next();
+        }
+        return true;
+    }
+
+    /**
+     * Returns true if there the predicate returns true for any
+     * element in the collection.
+     */
+    anyMatch(predicate:(v:T)=>boolean): boolean {
+        const iterator: Iterator<T> = this.hamt.values();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (predicate(curItem.value)) {
+                return true;
+            }
+            curItem = iterator.next();
+        }
+        return false;
     }
 
     /**
