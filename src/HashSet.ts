@@ -29,14 +29,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      * @type T the item type
      */
     static ofIterable<T>(elts: Iterable<T & WithEquality>): HashSet<T> {
-        return new HashSet<T>(hamt.empty.mutate((h:any) => {
-                const iterator = elts[Symbol.iterator]();
-                let curItem = iterator.next();
-                while (!curItem.done) {
-                    h.set(curItem.value, curItem.value);
-                    curItem = iterator.next();
-                }
-        }));
+        return new HashSet<T>(hamt.empty).addAll(elts);
     }
 
     /**
@@ -59,6 +52,20 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      */
     add(elt: T & WithEquality): HashSet<T> {
         return new HashSet<T>(this.hamt.set(elt,elt));
+    }
+
+    /**
+     * Add multiple elements to this set.
+     */
+    addAll(elts: Iterable<T & WithEquality>): HashSet<T> {
+        return new HashSet<T>(this.hamt.mutate((h:any) => {
+            const iterator = elts[Symbol.iterator]();
+            let curItem = iterator.next();
+            while (!curItem.done) {
+                h.set(curItem.value, curItem.value);
+                curItem = iterator.next();
+            }
+        }));
     }
 
     /**
@@ -181,6 +188,13 @@ class EmptyHashSet<T> extends HashSet<T> {
             }).set(elt,elt));
         }
         return new HashSet<T>(hamt.make().set(elt,elt));
+    }
+
+    /**
+     * Add multiple elements to this set.
+     */
+    addAll(elts: Iterable<T & WithEquality>): HashSet<T> {
+        return HashSet.ofIterable(elts);
     }
 
     contains(elt: T & WithEquality): boolean {

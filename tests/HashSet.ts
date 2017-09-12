@@ -15,6 +15,10 @@ describe("hashset construction basic sanity tests", () => {
                 HashSet.empty<MyClass>()
                     .add(new MyClass("a", 1))
                     .add(new MyClass("a", 2)))));
+    it("should support addAll on a non-empty set", () => assert.ok(
+        HashSet.of(1,2,3,4).equals(HashSet.of(1,2).addAll([3,4]))));
+    it("should support addAll on an empty set", () => assert.ok(
+        HashSet.of(1,2,3,4).equals(HashSet.empty<number>().addAll([1,2,3,4]))));
 });
 
 describe("hashset conversions", () => {

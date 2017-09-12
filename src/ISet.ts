@@ -23,6 +23,11 @@ export interface ISet<T> extends Value {
     add(elt: T & WithEquality): ISet<T>;
 
     /**
+     * Add multiple elements to this set.
+     */
+    addAll(elts: Iterable<T & WithEquality>): ISet<T>;
+
+    /**
      * Returns true if the element you give is present in
      * the set, false otherwise.
      */
