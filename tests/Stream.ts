@@ -25,4 +25,14 @@ describe("Stream basics", () => {
         [4,5,7,11], Stream.iterate(1, x => x*2).map(x => x+3).take(4).toArray()));
     it("filters correctly", () => assert.deepEqual(
         [8,32,64,128], Stream.iterate(1, x => x*2).filter(x => x>5 && (x<15 || x > 30)).take(4).toArray()));
+    it("supports ofArray", () => assert.deepEqual(
+        [1,2,3], Stream.ofArray([1,2,3]).toArray()));
+    it("supports of", () => assert.deepEqual(
+        [1,2,3], Stream.of(1,2,3).toArray()));
+    it("supports append", () => assert.deepEqual(
+        [1,2,3,4], Stream.of(1,2,3).append(4).toArray()));
+    it("supports appendAll", () => assert.deepEqual(
+        [1,2,3,4,5], Stream.of(1,2,3).appendAll([4,5]).toArray()));
+    it("supports cycle", () => assert.deepEqual(
+        [1,2,3,1,2,3,1,2], Stream.of(1,2,3).cycle().take(8).toArray()));
 });
