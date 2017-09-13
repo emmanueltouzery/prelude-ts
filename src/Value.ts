@@ -18,4 +18,10 @@ export interface Value {
      * Get a human-friendly string representation of that value.
      */
     toString(): string;
+
+    /**
+     * Used by the node REPL to display values.
+     * Most of the time should be the same as toString()
+     */
+    inspect(): string;
 }

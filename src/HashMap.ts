@@ -252,6 +252,10 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
                 (acc: string[], value: V, key: K) =>
                     {acc.push(key + " => " + value); return acc;}, []).join(", ") + "}";
     }
+
+    inspect(): string {
+        return this.toString();
+    }
 }
 
 // we need to override the empty hashmap

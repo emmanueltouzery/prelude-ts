@@ -719,4 +719,8 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         }
         return r + "]";
     }
+
+    inspect(): string {
+        return this.toString();
+    }
 }

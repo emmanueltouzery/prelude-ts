@@ -168,6 +168,10 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
                 (acc: string[], value: T, key: T) =>
                     {acc.push(key+""); return acc;}, []).join(", ") + "}";
     }
+
+    inspect(): string {
+        return this.toString();
+    }
 }
 
 // we need to override the empty hashmap

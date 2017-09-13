@@ -200,6 +200,11 @@ export abstract class Option<T> implements Value {
      * Get a human-friendly string representation of that value.
      */
     abstract toString(): string;
+
+    /**
+     * Used by the node REPL to display values.
+     */
+    abstract inspect(): string;
 }
 
 /**
@@ -264,6 +269,9 @@ export class Some<T> extends Option<T> {
     toString(): string {
         return "Some(" + this.value + ")";
     }
+    inspect(): string {
+        return this.toString();
+    }
 }
 
 /**
@@ -317,6 +325,9 @@ export class None<T> extends Option<T> {
     }
     toString(): string {
         return "None()";
+    }
+    inspect(): string {
+        return this.toString();
     }
 }
 

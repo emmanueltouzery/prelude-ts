@@ -126,4 +126,8 @@ export class Tuple2<T,U> implements Value {
     toString(): string {
         return `Tuple2(${this._fst}, ${this._snd})`;
     }
+
+    inspect(): string {
+        return this.toString();
+    }
 }
