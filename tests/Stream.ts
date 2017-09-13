@@ -35,4 +35,8 @@ describe("Stream basics", () => {
         [1,2,3,4,5], Stream.of(1,2,3).appendAll([4,5]).toArray()));
     it("supports cycle", () => assert.deepEqual(
         [1,2,3,1,2,3,1,2], Stream.of(1,2,3).cycle().take(8).toArray()));
+    it("supports appendStream", () => assert.deepEqual(
+        [1,2,3,4,5,6], Stream.of(1,2,3).appendStream(Stream.of(4,5,6)).toArray()));
+    it("supports flatMap", () => assert.deepEqual(
+        [1,2,3,4,5,6], Stream.of(1,4).flatMap(x => Stream.of(x,x+1,x+2)).toArray()));
 });

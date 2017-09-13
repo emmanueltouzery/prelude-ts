@@ -26,15 +26,6 @@ export abstract class Stream<T> implements Iterable<T> {
         return Stream.ofArrayStruct(elts);
     }
 
-    // static ofIterableStruct<T>(elts: Iterable<T>): Stream<T> {
-    //     const it = elts[Symbol.iterator]();
-    //     const cur = it.next();
-    //     return cur.done ?
-    //         <EmptyStream<T>>emptyStream :
-    //         new ConsStream(cur.value,
-    //                        () => Stream.ofIterableStruct<T>({ [Symbol.iterator]: ()=>it }));
-    // }
-
     /**
      * Create a Stream from a javascript array.
      *
@@ -192,6 +183,32 @@ export abstract class Stream<T> implements Iterable<T> {
         return this.appendAllStruct(elts);
     }
 
+    /*
+     * Append another Stream at the end of this Stream.
+     *
+     * There is no function taking a javascript iterator,
+     * because iterators are stateful and Streams lazy.
+     * If we would create two Streams working on the same iterator,
+     * the streams would interact with one another.
+     * It also breaks the cycle() function.
+     * No equality requirements.
+     */
+    abstract appendStreamStruct(elts:Stream<T>): Stream<T>;
+
+    /*
+     * Append another Stream at the end of this Stream.
+     *
+     * There is no function taking a javascript iterator,
+     * because iterators are stateful and Streams lazy.
+     * If we would create two Streams working on the same iterator,
+     * the streams would interact with one another.
+     * It also breaks the cycle() function.
+     * Equality requirements.
+     */
+    appendStream(elts:Stream<T>): Stream<T> {
+        return this.appendStreamStruct(elts);
+    }
+
     /**
      * Repeat infinitely this Stream.
      * For instance:
@@ -214,6 +231,24 @@ export abstract class Stream<T> implements Iterable<T> {
      * Equality requirements.
      */
     abstract map<U>(mapper:(v:T)=>U&WithEquality): Stream<U>;
+
+    /**
+     * Calls the function you give for each item in the collection,
+     * your function returns a collection, all the collections are
+     * concatenated.
+     * This is the monadic bind.
+     * No equality requirement
+     */
+    abstract flatMapStruct<U>(mapper:(v:T)=>Stream<U>): Stream<U>;
+
+    /**
+     * Calls the function you give for each item in the collection,
+     * your function returns a collection, all the collections are
+     * concatenated.
+     * This is the monadic bind.
+     * Equality requirement
+     */
+    abstract flatMap<U>(mapper:(v:T)=>Stream<U&WithEquality>): Stream<U>;
 
     /**
      * Call a predicate for each element in the collection,
@@ -276,25 +311,27 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return Stream.ofArrayStruct(elts);
     }
 
+    appendStreamStruct(elts:Stream<T>): Stream<T> {
+        return elts;
+    }
+
     cycle(): Stream<T> {
         return <EmptyStream<T>>emptyStream;
     }
 
-    /**
-     * Return a new collection where each element was transformed
-     * by the mapper function you give.
-     * No equality requirements.
-     */
     mapStruct<U>(mapper:(v:T)=>U): Stream<U> {
         return <EmptyStream<U>>emptyStream;
     }
 
-    /**
-     * Return a new collection where each element was transformed
-     * by the mapper function you give.
-     * Equality requirements.
-     */
     map<U>(mapper:(v:T)=>U&WithEquality): Stream<U> {
+        return <EmptyStream<U>>emptyStream;
+    }
+
+    flatMapStruct<U>(mapper:(v:T)=>Stream<U>): Stream<U> {
+        return <EmptyStream<U>>emptyStream;
+    }
+
+    flatMap<U>(mapper:(v:T)=>Stream<U&WithEquality>): Stream<U> {
         return <EmptyStream<U>>emptyStream;
     }
 
@@ -376,6 +413,13 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             () => tail.appendAllStruct(elts));
     }
 
+    appendStreamStruct(elts:Stream<T>): Stream<T> {
+        const tail = this._tail();
+        return new ConsStream(
+            this.value,
+            () => tail.appendStreamStruct(elts));
+    }
+
     cycle(): Stream<T> {
         return this._cycle(this);
     }
@@ -394,6 +438,15 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     map<U>(mapper:(v:T)=>U&WithEquality): Stream<U> {
         return this.mapStruct(mapper);
+    }
+
+    flatMapStruct<U>(mapper:(v:T)=>Stream<U>): Stream<U> {
+        return mapper(this.value).appendStream(
+            this._tail().flatMapStruct(mapper));
+    }
+
+    flatMap<U>(mapper:(v:T)=>Stream<U&WithEquality>): Stream<U> {
+        return this.flatMapStruct(mapper);
     }
 
     filter(predicate:(v:T)=>boolean): Stream<T> {
