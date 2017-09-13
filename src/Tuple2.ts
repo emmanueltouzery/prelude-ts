@@ -1,5 +1,6 @@
 import { Value } from "./Value";
-import { WithEquality, areEqual, getHashCode } from "./Comparison";
+import { WithEquality, areEqual,
+         getHashCode, toStringHelper } from "./Comparison";
 
 /**
  * Contains a pair of two values, which may or may not have the same type.
@@ -124,7 +125,7 @@ export class Tuple2<T,U> implements Value {
      * Get a human-friendly string representation of that value.
      */
     toString(): string {
-        return `Tuple2(${this._fst}, ${this._snd})`;
+        return `Tuple2(${toStringHelper(this._fst)}, ${toStringHelper(this._snd)})`;
     }
 
     inspect(): string {

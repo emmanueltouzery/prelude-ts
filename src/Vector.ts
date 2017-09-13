@@ -1,6 +1,6 @@
 import { Seq } from "./Seq";
 import { WithEquality, Ordering, 
-         getHashCode, areEqual } from "./Comparison";
+         getHashCode, areEqual, toStringHelper } from "./Comparison";
 import { HashMap} from "./HashMap";
 import { IMap } from "./IMap";
 import { Option } from "./Option";
@@ -555,7 +555,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * parameter to produce a new collection which combines both,
      * in pairs. For instance:
      *
-     *     Vector.of(1,2,3).zip("a","b","c")
+     *     Vector.of(1,2,3).zip(["a","b","c"])
      *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
      *
      * The result collection will have the length of the shorter
@@ -715,7 +715,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
             if (i>0) {
                 r += ", ";
             }
-            r += "" + this.hamt.get(i+this.indexShift);
+            r += toStringHelper(this.hamt.get(i+this.indexShift));
         }
         return r + "]";
     }

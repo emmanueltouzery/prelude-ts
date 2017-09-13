@@ -1,6 +1,6 @@
 import { ISet } from "./ISet";
 import { WithEquality, hasEquals, HasEquals,
-         getHashCode, areEqual } from "./Comparison";
+         getHashCode, areEqual, toStringHelper } from "./Comparison";
 const hamt: any = require("hamt_plus");
 
 /**
@@ -166,7 +166,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
         return "{" +
             this.hamt.fold(
                 (acc: string[], value: T, key: T) =>
-                    {acc.push(key+""); return acc;}, []).join(", ") + "}";
+                    {acc.push(toStringHelper(key)); return acc;}, []).join(", ") + "}";
     }
 
     inspect(): string {

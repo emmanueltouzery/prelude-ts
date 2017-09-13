@@ -171,6 +171,10 @@ describe("Vector iteration", () => {
 describe("Vector Value tests", () => {
     it("serializes to string correctly", () => assert.equal(
         "[1, 2, 3]", Vector.of(1,2,3).toString()));
+    it("serializes to string correctly - arrays & strings", () => assert.equal(
+        "[[1,'a']]", Vector.ofStruct([1,'a']).toString()));
+    it("serializes to string correctly - custom toString", () => assert.equal(
+        "[{field1: hi, field2: 99}]", Vector.of(new MyClass("hi", 99)).toString()));
     it("has non-obviously-broken equals", () => assert.ok(
         Vector.of("a","b","c").equals(Vector.of("a", "b", "c"))));
     it("doesn't throw when given another type on equals", () => assert.equal(

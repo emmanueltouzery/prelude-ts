@@ -1,7 +1,8 @@
 import { Value } from "./Value";
 import { Seq } from "./Seq";
 import { Vector } from "./Vector";
-import { WithEquality, areEqual, getHashCode } from "./Comparison";
+import { WithEquality, areEqual,
+         getHashCode, toStringHelper } from "./Comparison";
 
 /**
  * Expresses that a value may be present, or not.
@@ -267,7 +268,7 @@ export class Some<T> extends Option<T> {
         return getHashCode(this.value);
     }
     toString(): string {
-        return "Some(" + this.value + ")";
+        return "Some(" + toStringHelper(this.value) + ")";
     }
     inspect(): string {
         return this.toString();

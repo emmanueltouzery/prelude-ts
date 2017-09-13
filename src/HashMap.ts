@@ -1,6 +1,6 @@
 import { IMap } from "./IMap";
 import { hasEquals, HasEquals, WithEquality,
-         getHashCode, areEqual } from "./Comparison";
+         getHashCode, areEqual, toStringHelper } from "./Comparison";
 import { Option, none, None } from "./Option";
 import { HashSet } from "./HashSet";
 import { ISet } from "./ISet";
@@ -250,7 +250,7 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
         return "{" +
             this.hamt.fold(
                 (acc: string[], value: V, key: K) =>
-                    {acc.push(key + " => " + value); return acc;}, []).join(", ") + "}";
+                    {acc.push(key + " => " + toStringHelper(value)); return acc;}, []).join(", ") + "}";
     }
 
     inspect(): string {
