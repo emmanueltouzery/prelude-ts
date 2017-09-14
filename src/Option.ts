@@ -177,6 +177,12 @@ export abstract class Option<T> implements Value {
     abstract filter(fn: (v:T)=>boolean): Option<T>;
 
     /**
+     * Execute a side-effecting function if the option
+     * is a Some, returns the option.
+     */
+    abstract ifPresent(fn:(v:T)=>void): Option<T>;
+
+    /**
      * Convert to a vector. If it's a None, it's the empty
      * vector, if it's a Some, it's a one-element vector with
      * the contents of the option.
@@ -252,6 +258,10 @@ export class Some<T> extends Option<T> {
     filter(fn: (v:T)=>boolean): Option<T> {
         return fn(this.value) ? this : Option.none<T>();
     }
+    ifPresent(fn:(v:T)=>void): Option<T> {
+        fn(this.value);
+        return this;
+    }
     toVector(): Vector<T> {
         return Vector.ofStruct(this.value);
     }
@@ -314,6 +324,9 @@ export class None<T> extends Option<T> {
     }
     filter(fn: (v:T)=>boolean): Option<T> {
         return <None<T>>none;
+    }
+    ifPresent(fn:(v:T)=>void): Option<T> {
+        return this;
     }
     toVector(): Vector<T> {
         return Vector.empty<T>();
