@@ -65,6 +65,18 @@ describe("hashset access", () => {
         }
         assert.equal(0, total);
     })
+    it("supports allMatch, positive case", () => assert.ok(
+        HashSet.of(2,4,8).allMatch(x => x%2 === 0)));
+    it("supports allMatch, negative case", () => assert.ok(
+        !HashSet.of(2,5,8).allMatch(x => x%2 === 0)));
+    it("supports allMatch, empty HashSet", () => assert.ok(
+        HashSet.empty<number>().allMatch(x => x%2 === 0)));
+    it("supports anyMatch, positive case", () => assert.ok(
+        HashSet.of(3,5,8).anyMatch(x => x%2 === 0)));
+    it("supports anyMatch, negative case", () => assert.ok(
+        !HashSet.of(3,5,9).anyMatch(x => x%2 === 0)));
+    it("supports anyMatch, empty HashSet", () => assert.ok(
+        !HashSet.empty<number>().anyMatch(x => x%2 === 0)));
 });
 
 describe("hashset equality", () => {

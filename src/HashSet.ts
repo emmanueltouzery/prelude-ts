@@ -118,6 +118,38 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Returns true if the predicate returns true for all the
+     * elements in the collection.
+     */
+    allMatch(predicate:(v:T)=>boolean): boolean {
+        const iterator: Iterator<T> = this.hamt.values();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (!predicate(curItem.value)) {
+                return false;
+            }
+            curItem = iterator.next();
+        }
+        return true;
+    }
+
+    /**
+     * Returns true if there the predicate returns true for any
+     * element in the collection.
+     */
+    anyMatch(predicate:(v:T)=>boolean): boolean {
+        const iterator: Iterator<T> = this.hamt.values();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (predicate(curItem.value)) {
+                return true;
+            }
+            curItem = iterator.next();
+        }
+        return false;
+    }
+
+    /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
      * in memory.
@@ -223,6 +255,14 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     diff(elts: ISet<T&WithEquality>): HashSet<T> {
         return this;
+    }
+
+    anyMatch(predicate:(v:T)=>boolean): boolean {
+        return false;
+    }
+
+    allMatch(predicate:(v:T)=>boolean): boolean {
+        return true;
     }
 
     equals(other: HashSet<T>): boolean {

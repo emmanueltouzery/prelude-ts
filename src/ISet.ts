@@ -48,6 +48,18 @@ export interface ISet<T> extends Value {
     removeAll(elts: Iterable<T&WithEquality>): ISet<T>;
 
     /**
+     * Returns true if the predicate returns true for all the
+     * elements in the collection.
+     */
+    allMatch(predicate:(v:T)=>boolean): boolean;
+
+    /**
+     * Returns true if there the predicate returns true for any
+     * element in the collection.
+     */
+    anyMatch(predicate:(v:T)=>boolean): boolean;
+
+    /**
      * Converts this set to an array
      */
     toArray(): Array<T & WithEquality>;
