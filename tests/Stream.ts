@@ -40,9 +40,44 @@ describe("Stream basics", () => {
         [1,2,3,4,5,6], Stream.of(1,2,3).appendStream(Stream.of(4,5,6)).toArray()));
     it("supports flatMap", () => assert.deepEqual(
         [1,2,3,4,5,6], Stream.of(1,4).flatMap(x => Stream.of(x,x+1,x+2)).toArray()));
+    it("correctly reverses", () => assert.deepEqual(
+        [3,2,1], Stream.of(1,2,3).reverse().toArray()));
+    it("correctly reverses the empty stream", () => assert.deepEqual(
+        [], Stream.empty().reverse().toArray()));
+    it("correctly reverses also after prepend", () => assert.deepEqual(
+        [3,2,1], Stream.of(2,3).prepend(1).reverse().toArray()));
+    it("computes the length correctly", () => assert.equal(
+        3, Stream.of(1,2,3).length()));
+    it("computes the length of the empty stream correctly", () => assert.equal(
+        0, Stream.empty().length()));
 });
 
-describe("Vector Value tests", () => {
+describe("Prepend", () => {
+    const basic = Stream.of(1,2,3,4);
+    const prepended = Stream.of(2,3,4).prepend(1);
+    it("prepends correctly", () => assert.ok(basic.equals(prepended)));
+    it("converts to array correctly", () => assert.deepEqual(
+        basic.toArray(), prepended.toArray()));
+    it("appends correctly after prepend", () => assert.ok(
+        basic.append(5).equals(prepended.append(5))));
+    it("appendsAll correctly after prepend", () => assert.ok(
+        basic.appendStream(Stream.of(5,6)).equals(prepended.appendStream(Stream.of(5,6)))));
+    it("converts to string correctly after prepend", () => assert.equal(
+        basic.toString(), prepended.toString()));
+    // it("prependsAll correctly", () => assert.deepEqual(
+    //     [1,2,3,4,5], Stream.of(4,5).prependAll(Stream.of(1,2,3)).toArray()));
+});
+
+describe("Stream iteration", () => {
+    it("foldsLeft correctly", () => assert.equal(
+        "cba!",
+        Stream.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs)));
+    it("foldsRight correctly", () => assert.equal(
+        "!cba",
+        Stream.of("a", "b", "c").foldRight("!", (x,xs) => xs+x)));
+});
+
+describe("Stream Value tests", () => {
     it("serializes to string correctly", () => assert.equal(
         "[1, 2, 3]", Stream.of(1,2,3).toString()));
     it("serializes to string correctly - arrays & strings", () => assert.equal(

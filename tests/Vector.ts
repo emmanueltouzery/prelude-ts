@@ -60,6 +60,10 @@ describe("Vector manipulation", () => {
         [1,0,2], Vector.of(1,0,1,2,3,2,3,1).distinctBy(x => new MyClass("hi", x%3)).toArray()));
     it("distinctBy with prepend", () => assert.deepEqual(
         [1,2,3], Vector.of(2,3,2,3,1).prepend(1).distinctBy(x => x).toArray()));
+    it("computes the length correctly", () => assert.equal(
+        3, Vector.of(1,2,3).length()));
+    it("computes the length of the empty vector correctly", () => assert.equal(
+        0, Vector.empty().length()));
 });
 
 describe("Vector value extraction", () => {

@@ -13,6 +13,13 @@ import { Value } from "./Value";
 export abstract class Stream<T> implements Iterable<T>, Value {
 
     /**
+     * The empty stream
+     */
+    static empty<T>(): Stream<T> {
+        return <EmptyStream<T>>emptyStream;
+    }
+
+    /**
      * Create a Stream with the elements you give.
      * No equality requirements.
      */
@@ -116,6 +123,11 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract [Symbol.iterator](): Iterator<T>;
 
     /**
+     * Get the length of the collection.
+     */
+    abstract length(): number;
+
+    /**
      * true if the collection is empty, false otherwise.
      */
     abstract isEmpty(): boolean;
@@ -144,6 +156,45 @@ export abstract class Stream<T> implements Iterable<T>, Value {
      * after the first element which fails the predicate.
      */
     abstract takeWhile(predicate: (x:T)=>boolean): Stream<T>;
+
+    /**
+     * Reduces the collection to a single value.
+     * Left-associative.
+     *
+     * Example:
+     *
+     *     Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs))
+     *     => "cba!"
+     *
+     * @param zero The initial value
+     * @param fn A function taking the previous value and
+     *           the current collection item, and returning
+     *           an updated value.
+     */
+    abstract foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U;
+
+    /**
+     * Reduces the collection to a single value.
+     * Right-associative.
+     *
+     * Example:
+     *
+     *     Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x))
+     *     => "!cba"
+     *
+     * @param zero The initial value
+     * @param fn A function taking the current collection item and
+     *           the previous value , and returning
+     *           an updated value.
+     */
+    abstract foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;
+
+    /**
+     * Reverse the collection. For instance:
+     *
+     *     [1,2,3] => [3,2,1]
+     */
+    abstract reverse(): Stream<T>;
 
     /**
      * Append an element at the end of this Stream.
@@ -210,6 +261,20 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     appendStream(elts:Stream<T>): Stream<T> {
         return this.appendStreamStruct(elts);
     }
+
+    /**
+     * Prepend an element at the beginning of the collection.
+     * Equality requirements.
+     */
+    prepend(elt: T & WithEquality): Stream<T> {
+        return this.prependStruct(elt);
+    }
+
+    /**
+     * Prepend an element at the beginning of the collection.
+     * No equality requirements.
+     */
+    abstract prependStruct(elt: T): Stream<T>;
 
     /**
      * Repeat infinitely this Stream.
@@ -308,6 +373,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         }
     }
 
+    length(): number {
+        return 0;
+    }
+
     isEmpty(): boolean {
         return true;
     }
@@ -328,6 +397,18 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return this;
     }
 
+    foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
+        return zero;
+    }
+
+    foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U {
+        return zero;
+    }
+
+    reverse(): Stream<T> {
+        return this;
+    }
+
     appendStruct(v:T): Stream<T> {
         return Stream.ofStruct(v);
     }
@@ -338,6 +419,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
 
     appendStreamStruct(elts:Stream<T>): Stream<T> {
         return elts;
+    }
+
+    prependStruct(elt: T): Stream<T> {
+        return Stream.ofStruct(elt);
     }
 
     cycle(): Stream<T> {
@@ -411,6 +496,10 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         };
     }
 
+    length(): number {
+        return this.foldLeft(0, (n, ignored) => n + 1);
+    }
+
     isEmpty(): boolean {
         return false;
     }
@@ -439,6 +528,24 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
                               () => this._tail().takeWhile(predicate));
     }
 
+    foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
+        let r = zero;
+        let curItem: Stream<T> = this;
+        while (!curItem.isEmpty()) {
+            r = fn(r, (<ConsStream<T>>curItem).value);
+            curItem = (<ConsStream<T>>curItem)._tail();
+        }
+        return r;
+    }
+
+    foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U {
+        return this.reverse().foldLeft(zero, (xs,x)=>fn(x,xs));
+    }
+
+    reverse(): Stream<T> {
+        return this.foldLeft(<Stream<T>><EmptyStream<T>>emptyStream, (xs,x) => xs.prependStruct(x));
+    }
+
     appendStruct(v:T): Stream<T> {
         const tail = this._tail();
         return new ConsStream(
@@ -458,6 +565,12 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         return new ConsStream(
             this.value,
             () => tail.appendStreamStruct(elts));
+    }
+
+    prependStruct(elt: T): Stream<T> {
+        return new ConsStream(
+            elt,
+            () => this);
     }
 
     cycle(): Stream<T> {
