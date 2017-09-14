@@ -69,6 +69,10 @@ describe("Prepend", () => {
 });
 
 describe("Stream iteration", () => {
+    it("finds items", () => 
+       Stream.of(1,2,3).find(x => x >= 2).contains(2));
+    it("doesn't find if the predicate doesn't match", () => 
+       Stream.of(1,2,3).find(x => x >= 4).isNone());
     it("foldsLeft correctly", () => assert.equal(
         "cba!",
         Stream.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs)));

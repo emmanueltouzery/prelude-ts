@@ -284,9 +284,9 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      */
     find(predicate:(v:T)=>boolean): Option<T> {
         for (let i=0;i<this.hamt.size;i++) {
-            const item = this.hamt.get(i+this.indexShift);
+            const item: T = this.hamt.get(i+this.indexShift);
             if (predicate(item)) {
-                return Option.of(item);
+                return Option.ofStruct(item);
             }
         }
         return Option.none<T>();

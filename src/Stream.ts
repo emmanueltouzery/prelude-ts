@@ -146,6 +146,13 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract tail(): Option<Stream<T>>;
 
     /**
+     * Search for an item matching the predicate you pass,
+     * return Option.Some of that element if found,
+     * Option.None otherwise.
+     */
+    abstract find(predicate:(v:T)=>boolean): Option<T>;
+
+    /**
      * Return a new stream keeping only the first n elements
      * from this stream.
      */
@@ -389,6 +396,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return Option.none<Stream<T>>();
     }
 
+    find(predicate:(v:T)=>boolean): Option<T> {
+        return Option.none<T>();
+    }
+
     take(n: number): Stream<T> {
         return this;
     }
@@ -510,6 +521,18 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     tail(): Option<Stream<T>> {
         return Option.ofStruct(this._tail());
+    }
+
+    find(predicate:(v:T)=>boolean): Option<T> {
+        let curItem: Stream<T> = this;
+        while (!curItem.isEmpty()) {
+            const item = (<ConsStream<T>>curItem).value;
+            if (predicate(item)) {
+                return Option.ofStruct(item);
+            }
+            curItem = (<ConsStream<T>>curItem)._tail();
+        }
+        return Option.none<T>();
     }
 
     take(n: number): Stream<T> {
