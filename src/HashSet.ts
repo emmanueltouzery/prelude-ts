@@ -205,6 +205,10 @@ class EmptyHashSet<T> extends HashSet<T> {
         return false;
     }
 
+    toArray(): Array<T & WithEquality> {
+        return [];
+    }
+
     [Symbol.iterator](): Iterator<T> {
         return { next: () => ({ done: true, value: <any>undefined }) };
     }

@@ -26,6 +26,9 @@ describe("hashset conversions", () => {
         assert.deepEqual([1,2,3,4], HashSet.empty<number>()
                          .add(1).add(2).add(3).add(4).toArray().sort());
     });
+    it("empty should convert to array correctly", () => {
+        assert.deepEqual([], HashSet.empty<number>().toArray());
+    });
     it("should be created correctly from an array", () => {
         assert.deepEqual(["a","b","c"], HashSet.ofIterable(["a","b","c"]).toArray().sort());
     });
