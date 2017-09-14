@@ -1,5 +1,6 @@
 import { Stream } from "../src/Stream";
 import { Vector } from "../src/Vector";
+import { MyClass} from "./SampleData";
 import * as assert from 'assert'
 
 describe("Stream basics", () => {
@@ -39,4 +40,21 @@ describe("Stream basics", () => {
         [1,2,3,4,5,6], Stream.of(1,2,3).appendStream(Stream.of(4,5,6)).toArray()));
     it("supports flatMap", () => assert.deepEqual(
         [1,2,3,4,5,6], Stream.of(1,4).flatMap(x => Stream.of(x,x+1,x+2)).toArray()));
+});
+
+describe("Vector Value tests", () => {
+    it("serializes to string correctly", () => assert.equal(
+        "[1, 2, 3]", Stream.of(1,2,3).toString()));
+    it("serializes to string correctly - arrays & strings", () => assert.equal(
+        "[[1,'a']]", Stream.ofStruct([1,'a']).toString()));
+    it("serializes to string correctly - custom toString", () => assert.equal(
+        "[{field1: hi, field2: 99}]", Stream.of(new MyClass("hi", 99)).toString()));
+    it("has non-obviously-broken equals", () => assert.ok(
+        Stream.of("a","b","c").equals(Stream.of("a", "b", "c"))));
+    it("doesn't throw when given another type on equals", () => assert.equal(
+        false, Stream.of(1).equals(<any>[1,2])));
+    it("doesn't throw when given null on equals", () => assert.equal(
+        false, Stream.of(1).equals(<any>null)));
+    it("is strict with equality", () => assert.ok(
+        !Stream.of(1,2).equals(Stream.of(1, <any>undefined))));
 });

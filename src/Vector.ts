@@ -720,6 +720,10 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         return r + "]";
     }
 
+    /**
+     * Used by the node REPL to display values.
+     * Most of the time should be the same as toString()
+     */
     inspect(): string {
         return this.toString();
     }

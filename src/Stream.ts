@@ -1,6 +1,8 @@
 import { Option } from "./Option";
 import { Vector } from "./Vector";
-import { WithEquality } from "./Comparison";
+import { WithEquality, toStringHelper,
+         getHashCode, areEqual } from "./Comparison";
+import { Value } from "./Value";
 
 // TODO extend seq?
 /**
@@ -8,7 +10,7 @@ import { WithEquality } from "./Comparison";
  *
  * Use take() for instance to reduce it to a finite stream.
  */
-export abstract class Stream<T> implements Iterable<T> {
+export abstract class Stream<T> implements Iterable<T>, Value {
 
     /**
      * Create a Stream with the elements you give.
@@ -268,6 +270,29 @@ export abstract class Stream<T> implements Iterable<T> {
      * Don't do it on an infinite stream!
      */
     abstract toVector(): Vector<T>;
+
+    /**
+     * Two objects are equal if they represent the same value,
+     * regardless of whether they are the same object physically
+     * in memory.
+     */
+    abstract equals(other: Stream<T>): boolean;
+
+    /**
+     * Get a human-friendly string representation of that value.
+     */
+    abstract toString(): string;
+
+    /**
+     * Get a number for that object. Two different values
+     * may get the same number, but one value must always get
+     * the same number. The formula can impact performance.
+     */
+    abstract hashCode(): number;
+
+    inspect(): string {
+        return this.toString();
+    }
 }
 
 class EmptyStream<T> extends Stream<T> implements Iterable<T> {
@@ -345,6 +370,21 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
 
     toVector(): Vector<T> {
         return Vector.empty<T>();
+    }
+
+    equals(other: Stream<T>): boolean {
+        if (!other) {
+            return false;
+        }
+        return other.isEmpty();
+    }
+
+    hashCode(): number {
+        return 1;
+    }
+
+    toString(): string {
+        return "[]";
     }
 }
 
@@ -464,6 +504,64 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     toVector(): Vector<T> {
         return Vector.ofIterableStruct<T>(this.toArray());
+    }
+
+    equals(other: Stream<T>): boolean {
+        if (!other || !other.tail) {
+            return false;
+        }
+        let myVal: Stream<T> = this;
+        let hisVal = other;
+        while (true) {
+            if (myVal.isEmpty() !== hisVal.isEmpty()) {
+                return false;
+            }
+            if (myVal.isEmpty()) {
+                // they are both empty, end of the stream
+                return true;
+            }
+            const myHead = (<ConsStream<T>>myVal).value;
+            const hisHead = (<ConsStream<T>>hisVal).value;
+
+            if ((myHead === undefined) !== (hisHead === undefined)) {
+                return false;
+            }
+            if (myHead === undefined || hisHead === undefined) {
+                // they are both undefined, the || is for TS's flow analysis
+                // so he realizes none of them is undefined after this.
+                continue;
+            }
+            if (!areEqual(myHead, hisHead)) {
+                return false;
+            }
+            myVal = (<ConsStream<T>>myVal)._tail();
+            hisVal = (<ConsStream<T>>hisVal)._tail();
+        }
+    }
+
+    hashCode(): number {
+        let hash = 1;
+        let curItem: Stream<T> = this;
+        while (!curItem.isEmpty()) {
+            hash = 31 * hash + getHashCode((<ConsStream<T>>curItem).value);
+            curItem = (<ConsStream<T>>curItem)._tail();
+        }
+        return hash;
+    }
+
+    toString(): string {
+        let curItem: Stream<T> = this;
+        let result = "[";
+
+        while (!curItem.isEmpty()) {
+            result += toStringHelper((<ConsStream<T>>curItem).value);
+            curItem = (<ConsStream<T>>curItem)._tail();
+            if (!curItem.isEmpty()) {
+                result += ", ";
+            }
+        }
+
+        return result + "]";
     }
 }
 
