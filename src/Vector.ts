@@ -94,9 +94,9 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
-     * Get the size (length) of the collection.
+     * Get the length of the collection.
      */
-    size(): number {
+    length(): number {
         return this.hamt.size;
     }
 

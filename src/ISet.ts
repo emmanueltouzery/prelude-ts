@@ -10,7 +10,7 @@ export interface ISet<T> extends Value {
     /**
      * Returns the number of elements in the set.
      */
-    size(): number;
+    length(): number;
 
     /**
      * true if the set is empty, false otherwise.

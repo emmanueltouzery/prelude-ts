@@ -9,9 +9,9 @@ import { Option } from "./Option";
  */
 export interface Seq<T> extends Value {
     /**
-     * Get the size (length) of the collection.
+     * Get the length of the collection.
      */
-    size(): number;
+    length(): number;
 
     /**
      * true if the collection is empty, false otherwise.

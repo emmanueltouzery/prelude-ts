@@ -97,7 +97,7 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
     /**
      * number of items in the map
      */
-    size(): number {
+    length(): number {
         return this.hamt.size;
     }
 
@@ -210,12 +210,12 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
             return false;
         }
         const sz = this.hamt.size;
-        if (other.size() === 0 && sz === 0) {
+        if (other.length() === 0 && sz === 0) {
             // we could get that i'm not the empty map
             // but my size is zero, after some filtering and such.
             return true;
         }
-        if (sz !== other.size()) {
+        if (sz !== other.length()) {
             return false;
         }
         const keys: Array<K & WithEquality> = Array.from<K & WithEquality>(this.hamt.keys());
@@ -298,7 +298,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return this.put(k,v);
     }
 
-    size(): number {
+    length(): number {
         return 0;
     }
 
@@ -334,7 +334,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         if (!other || !other.valueSet) {
             return false;
         }
-        return <any>other === emptyHashMap || other.size() === 0;
+        return <any>other === emptyHashMap || other.length() === 0;
     }
 
     hashCode(): number {

@@ -86,7 +86,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     /**
      * Returns the number of elements in the set.
      */
-    size(): number {
+    length(): number {
         return this.hamt.size;
     }
 
@@ -213,7 +213,7 @@ class EmptyHashSet<T> extends HashSet<T> {
         return { next: () => ({ done: true, value: <any>undefined }) };
     }
 
-    size(): number {
+    length(): number {
         return 0;
     }
 
@@ -226,10 +226,10 @@ class EmptyHashSet<T> extends HashSet<T> {
     }
 
     equals(other: HashSet<T>): boolean {
-        if (!other || !other.size) {
+        if (!other || !other.length) {
             return false;
         }
-        return <any>other === emptyHashSet || other.size() === 0;
+        return <any>other === emptyHashSet || other.length() === 0;
     }
 
     hashCode(): number {

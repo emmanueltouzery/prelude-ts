@@ -111,7 +111,7 @@ export interface IMap<K,V> extends Value {
     /**
      * number of items in the map
      */
-    size(): number;
+    length(): number;
 
     /**
      * true if the map is empty, false otherwise.
