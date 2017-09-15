@@ -232,6 +232,36 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;
 
     /**
+     * Combine this collection with the collection you give in
+     * parameter to produce a new collection which combines both,
+     * in pairs. For instance:
+     *
+     *     Vector.of(1,2,3).zip(["a","b","c"])
+     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
+     *
+     * The result collection will have the length of the shorter
+     * of both collections. Extra elements will be discarded.
+     * No equality requirements.
+     */
+    abstract zipStruct<U>(other: Iterable<U>): Stream<[T,U]>;
+
+    /**
+     * Combine this collection with the collection you give in
+     * parameter to produce a new collection which combines both,
+     * in pairs. For instance:
+     *
+     *     Vector.of(1,2,3).zip("a","b","c")
+     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
+     *
+     * The result collection will have the length of the shorter
+     * of both collections. Extra elements will be discarded.
+     * Equality requirements.
+     */
+    zip<U>(other: Iterable<U&WithEquality>): Stream<[T,U]> {
+        return this.zipStruct(other);
+    }
+
+    /**
      * Reverse the collection. For instance:
      *
      *     [1,2,3] => [3,2,1]
@@ -507,6 +537,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return zero;
     }
 
+    zipStruct<U>(other: Iterable<U>): Stream<[T,U]> {
+        return <EmptyStream<[T,U]>>emptyStream;
+    }
+
     reverse(): Stream<T> {
         return this;
     }
@@ -716,6 +750,25 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U {
         return this.reverse().foldLeft(zero, (xs,x)=>fn(x,xs));
+    }
+
+    zipStruct<U>(other: Iterable<U>): Stream<[T,U]> {
+        const otherIterator = other[Symbol.iterator]();
+        return ConsStream.zipStructIterator(this, otherIterator);
+    }
+
+    private static zipStructIterator<T,U>(stream: Stream<T>, otherIterator: Iterator<U>): Stream<[T,U]> {
+        let thisCurItem: Stream<T> = stream;
+        let otherCurItem = otherIterator.next();
+
+        if (thisCurItem.isEmpty() || otherCurItem.done) {
+            return <Stream<[T,U]>>emptyStream;
+        }
+
+        return new ConsStream([(<ConsStream<T>>thisCurItem).value, otherCurItem.value] as [T,U],
+                              () => ConsStream.zipStructIterator(
+                                  (<ConsStream<T>>thisCurItem)._tail(),
+                                  otherIterator));
     }
 
     reverse(): Stream<T> {

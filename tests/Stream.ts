@@ -105,6 +105,13 @@ describe("Stream iteration", () => {
         Option.none().equals(Stream.of(1,2,3).get(4))));
     it("get doesn't find when negative index", () => assert.ok(
         Option.none().equals(Stream.of(1,2,3).get(-1))));
+    it("zips with an array", () => assert.deepEqual(
+        [[1,"a"], [2,"b"]], Stream.of(1,2,3).zip(["a","b"]).toArray()));
+    it("zips with a stream", () => assert.deepEqual(
+        [["a",0], ["b",1]], Stream.of("a","b").zip(Stream.iterate(0,x=>x+1)).toArray()));
+    it("richer example", () => assert.deepEqual(
+        [[1,"a"],[2,"b"]], Stream.of(1,2,3)
+            .zip(Vector.of("a", "b", "c")).takeWhile(([k,v]) => k<3).toArray()));
 });
 
 describe("Stream Value tests", () => {
