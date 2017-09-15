@@ -3,6 +3,8 @@ import { Vector } from "./Vector";
 import { WithEquality, toStringHelper,
          getHashCode, areEqual } from "./Comparison";
 import { Value } from "./Value";
+import { IMap } from "./IMap";
+import { HashMap } from "./HashMap";
 
 // TODO extend seq?
 /**
@@ -391,6 +393,26 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract toVector(): Vector<T>;
 
     /**
+     * Convert this collection to a map. You give a function which
+     * for each element in the collection returns a pair. The
+     * key of the pair will be used as a key in the map, the value,
+     * as a value in the map. If several values get the same key,
+     * entries will be lost.
+     * Equality requirements.
+     */
+    abstract toMap<K,V>(converter:(x:T)=>[K & WithEquality,V & WithEquality]): IMap<K,V>;
+
+    /**
+     * Convert this collection to a map. You give a function which
+     * for each element in the collection returns a pair. The
+     * key of the pair will be used as a key in the map, the value,
+     * as a value in the map. If several values get the same key,
+     * entries will be lost.
+     * No equality requirements.
+     */
+    abstract toMapStruct<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V>;
+
+    /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
      * in memory.
@@ -537,6 +559,14 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
 
     toVector(): Vector<T> {
         return Vector.empty<T>();
+    }
+
+    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V & WithEquality]): IMap<K,V> {
+        return HashMap.empty<K,V>();
+    }
+
+    toMapStruct<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
+        return HashMap.empty<K,V>();
     }
 
     equals(other: Stream<T>): boolean {
@@ -777,6 +807,17 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     toVector(): Vector<T> {
         return Vector.ofIterableStruct<T>(this.toArray());
+    }
+
+    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V & WithEquality]): IMap<K,V> {
+        return this.toMapStruct(converter);
+    }
+
+    toMapStruct<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
+        return this.foldLeft(HashMap.empty<K,V>(), (acc,cur) => {
+            const converted = converter(cur);
+            return acc.putStruct(converted[0], converted[1]);
+        });
     }
 
     equals(other: Stream<T>): boolean {

@@ -2,6 +2,7 @@ import { Stream } from "../src/Stream";
 import { Vector } from "../src/Vector";
 import { Option } from "../src/Option";
 import { MyClass} from "./SampleData";
+import { HashMap} from "../src/HashMap";
 import * as assert from 'assert'
 
 describe("Stream basics", () => {
@@ -19,8 +20,6 @@ describe("Stream basics", () => {
         }
         assert.equal(7, total);
     });
-    it("converts to vector", () => assert.ok(
-        Vector.of(1,2,3).equals(Stream.iterate(1, x => x+1).take(3).toVector())));
     it("implements takeWhile correctly", () => assert.deepEqual(
         [1,2,3], Stream.iterate(1, x=>x+1).takeWhile(x=>x<4).toArray()));
     it("maps correctly", () => assert.deepEqual(
@@ -61,8 +60,6 @@ describe("Stream basics", () => {
         [4,5,6], Stream.of(1,2,3,4,5,6).drop(3).toArray()));
     it("returns an empty stream when dropping too much", () => assert.deepEqual(
         [], Stream.of(1,2).drop(3).toArray()));
-    it("mkString works", () => assert.equal(
-        "1, 2, 3", Stream.of(1,2,3).mkString(", ")));
 });
 
 describe("Prepend", () => {
@@ -122,4 +119,15 @@ describe("Stream Value tests", () => {
         false, Stream.of(1).equals(<any>null)));
     it("is strict with equality", () => assert.ok(
         !Stream.of(1,2).equals(Stream.of(1, <any>undefined))));
+});
+
+describe("Stream conversions", () => {
+    it("converts to vector", () => assert.ok(
+        Vector.of(1,2,3).equals(Stream.iterate(1, x => x+1).take(3).toVector())));
+    it("mkString works", () => assert.equal(
+        "1, 2, 3", Stream.of(1,2,3).mkString(", ")));
+    it("transforms to map", () => {
+        assert.ok(HashMap.empty<number,string>().put(1,"ok").put(2, "bad")
+                  .equals(<HashMap<number,string>>Stream.ofStruct<[number,string]>([1,"ok"],[2,"bad"]).toMap(x => x)));
+    });
 });
