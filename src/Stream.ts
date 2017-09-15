@@ -754,21 +754,15 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     zipStruct<U>(other: Iterable<U>): Stream<[T,U]> {
         const otherIterator = other[Symbol.iterator]();
-        return ConsStream.zipStructIterator(this, otherIterator);
-    }
-
-    private static zipStructIterator<T,U>(stream: Stream<T>, otherIterator: Iterator<U>): Stream<[T,U]> {
-        let thisCurItem: Stream<T> = stream;
         let otherCurItem = otherIterator.next();
 
-        if (thisCurItem.isEmpty() || otherCurItem.done) {
+        if (this.isEmpty() || otherCurItem.done) {
             return <Stream<[T,U]>>emptyStream;
         }
 
-        return new ConsStream([(<ConsStream<T>>thisCurItem).value, otherCurItem.value] as [T,U],
-                              () => ConsStream.zipStructIterator(
-                                  (<ConsStream<T>>thisCurItem)._tail(),
-                                  otherIterator));
+        return new ConsStream([(<ConsStream<T>>this).value, otherCurItem.value] as [T,U],
+                              () => (<ConsStream<T>>this)._tail().zipStruct(
+                                  { [Symbol.iterator]: ()=>otherIterator}));
     }
 
     reverse(): Stream<T> {
