@@ -1,5 +1,6 @@
 import { Stream } from "../src/Stream";
 import { Vector } from "../src/Vector";
+import { Option } from "../src/Option";
 import { MyClass} from "./SampleData";
 import * as assert from 'assert'
 
@@ -60,6 +61,8 @@ describe("Stream basics", () => {
         [4,5,6], Stream.of(1,2,3,4,5,6).drop(3).toArray()));
     it("returns an empty stream when dropping too much", () => assert.deepEqual(
         [], Stream.of(1,2).drop(3).toArray()));
+    it("mkString works", () => assert.equal(
+        "1, 2, 3", Stream.of(1,2,3).mkString(", ")));
 });
 
 describe("Prepend", () => {
@@ -89,6 +92,19 @@ describe("Stream iteration", () => {
     it("foldsRight correctly", () => assert.equal(
         "!cba",
         Stream.of("a", "b", "c").foldRight("!", (x,xs) => xs+x)));
+    it("calls forEach correctly", () => {
+        let ar: number[] = [];
+        Stream.of(1,2,3).forEach((v:number) => ar.push(v));
+        assert.deepEqual([1,2,3], ar);
+    });
+    it("get finds when present", () => assert.ok(
+        Option.of(5).equals(Stream.of(1,2,3,4,5,6).get(4))));
+    it("get finds when present after prepend", () => assert.ok(
+        Option.of(5).equals(Stream.of(2,3,4,5,6).prepend(1).get(4))));
+    it("get doesn't find when stream too short", () => assert.ok(
+        Option.none().equals(Stream.of(1,2,3).get(4))));
+    it("get doesn't find when negative index", () => assert.ok(
+        Option.none().equals(Stream.of(1,2,3).get(-1))));
 });
 
 describe("Stream Value tests", () => {

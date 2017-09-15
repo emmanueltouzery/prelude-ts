@@ -51,8 +51,9 @@ export interface Seq<T> extends Value {
 
     /**
      * Call a function for element in the collection.
+     * Return the unchanged collection.
      */
-    forEach(fn: (v:T)=>void): void;
+    forEach(fn: (v:T)=>void): Seq<T>;
 
     /**
      * Get the first value of the collection, if any.

@@ -153,6 +153,17 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract last(): Option<T>;
 
     /**
+     * Retrieve the element at index idx.
+     * Returns an option because the collection may
+     * contain less elements than the index.
+     *
+     * Careful this is going to have poor performance
+     * on Stream, which is not a good data structure
+     * for random access!
+     */
+    abstract get(idx: number): Option<T>;
+
+    /**
      * Search for an item matching the predicate you pass,
      * return Option.Some of that element if found,
      * Option.None otherwise.
@@ -354,6 +365,20 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract filter(predicate:(v:T)=>boolean): Stream<T>;
 
     /**
+     * Call a function for element in the collection.
+     */
+    abstract forEach(fn: (v:T)=>void): Stream<T>;
+
+    /**
+     * Joins elements of the collection by a separator.
+     * Example:
+     *
+     *     Vector.of(1,2,3).mkString(", ")
+     *     => "1, 2, 3"
+     */
+    abstract mkString(separator: string): string;
+
+    /**
      * Convert to array.
      * Don't do it on an infinite stream!
      */
@@ -419,6 +444,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     last(): Option<T> {
+        return Option.none<T>();
+    }
+
+    get(idx: number): Option<T> {
         return Option.none<T>();
     }
 
@@ -494,6 +523,14 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return this;
     }
 
+    forEach(fn: (v:T)=>void): Stream<T> {
+        return this;
+    }
+
+    mkString(separator: string): string {
+        return "";
+    }
+
     toArray(): T[] {
         return [];
     }
@@ -566,6 +603,20 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
                 return Option.ofStruct(item);
             }
         }
+    }
+
+    get(idx: number): Option<T> {
+        let curItem: Stream<T> = this;
+        let i=0;
+        while (!curItem.isEmpty()) {
+            if (i === idx) {
+                const item = (<ConsStream<T>>curItem).value;
+                return Option.ofStruct(item);
+            }
+            curItem = (<ConsStream<T>>curItem)._tail();
+            ++i;
+        }
+        return Option.none<T>();
     }
 
     find(predicate:(v:T)=>boolean): Option<T> {
@@ -692,6 +743,30 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             new ConsStream(this.value,
                            () => this._tail().filter(predicate)) :
             this._tail().filter(predicate);
+    }
+
+    forEach(fn: (v:T)=>void): Stream<T> {
+        let curItem: Stream<T> = this;
+        while (!curItem.isEmpty()) {
+            fn((<ConsStream<T>>curItem).value);
+            curItem = (<ConsStream<T>>curItem)._tail();
+        }
+        return this;
+    }
+
+    mkString(separator: string): string {
+        let r = "";
+        let curItem: Stream<T> = this;
+        let isNotFirst = false;
+        while (!curItem.isEmpty()) {
+            if (isNotFirst) {
+                r += separator;
+            }
+            r += (<ConsStream<T>>curItem).value.toString();
+            curItem = (<ConsStream<T>>curItem)._tail();
+            isNotFirst = true;
+        }
+        return r;
     }
 
     toArray(): T[] {

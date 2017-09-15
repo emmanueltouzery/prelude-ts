@@ -207,10 +207,11 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     /**
      * Call a function for element in the collection.
      */
-    forEach(fn: (v:T)=>void): void {
+    forEach(fn: (v:T)=>void): Vector<T> {
         for (let i=0;i<this.hamt.size;i++) {
             fn(this.hamt.get(i+this.indexShift));
         }
+        return this;
     }
 
     /**
