@@ -1,7 +1,7 @@
 import { Option } from "./Option";
 import { Vector } from "./Vector";
 import { WithEquality, toStringHelper,
-         getHashCode, areEqual } from "./Comparison";
+         getHashCode, areEqual, Ordering } from "./Comparison";
 import { Value } from "./Value";
 import { IMap } from "./IMap";
 import { HashMap } from "./HashMap";
@@ -367,6 +367,12 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract filter(predicate:(v:T)=>boolean): Stream<T>;
 
     /**
+     * Returns a new collection with elements
+     * sorted according to the comparator you give.
+     */
+    abstract sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T>;
+
+    /**
      * Call a function for element in the collection.
      */
     abstract forEach(fn: (v:T)=>void): Stream<T>;
@@ -542,6 +548,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     filter(predicate:(v:T)=>boolean): Stream<T> {
+        return this;
+    }
+
+    sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T> {
         return this;
     }
 
@@ -773,6 +783,10 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             new ConsStream(this.value,
                            () => this._tail().filter(predicate)) :
             this._tail().filter(predicate);
+    }
+
+    sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T> {
+        return Stream.ofArrayStruct<T>(this.toArray().sort(compare));
     }
 
     forEach(fn: (v:T)=>void): Stream<T> {

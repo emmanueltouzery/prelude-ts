@@ -60,6 +60,9 @@ describe("Stream basics", () => {
         [4,5,6], Stream.of(1,2,3,4,5,6).drop(3).toArray()));
     it("returns an empty stream when dropping too much", () => assert.deepEqual(
         [], Stream.of(1,2).drop(3).toArray()));
+    it("sorting works", () => assert.ok(
+        Stream.of(4,3,2,1)
+            .equals(Stream.of(1,2,3,4).sortBy((x,y) => y-x))));
 });
 
 describe("Prepend", () => {
