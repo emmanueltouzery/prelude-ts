@@ -50,6 +50,16 @@ describe("Stream basics", () => {
         3, Stream.of(1,2,3).length()));
     it("computes the length of the empty stream correctly", () => assert.equal(
         0, Stream.empty().length()));
+    it("gets the last value correctly", () => assert.equal(
+        3, Stream.of(1,2,3).last().getOrThrow()));
+    it("gets the last value correctly for an empty stream", () => assert.ok(
+        Stream.empty().last().isNone()));
+    it("correctly dropsWhile", () => assert.deepEqual(
+        [4,5,6], Stream.of(1,2,3,4,5,6).dropWhile(x=>x<4).toArray()));
+    it("correctly drops n items", () => assert.deepEqual(
+        [4,5,6], Stream.of(1,2,3,4,5,6).drop(3).toArray()));
+    it("returns an empty stream when dropping too much", () => assert.deepEqual(
+        [], Stream.of(1,2).drop(3).toArray()));
 });
 
 describe("Prepend", () => {

@@ -146,6 +146,13 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract tail(): Option<Stream<T>>;
 
     /**
+     * Get the last value of the collection, if any.
+     * returns Option.Some if the collection is not empty,
+     * Option.None if it's empty.
+     */
+    abstract last(): Option<T>;
+
+    /**
      * Search for an item matching the predicate you pass,
      * return Option.Some of that element if found,
      * Option.None otherwise.
@@ -163,6 +170,21 @@ export abstract class Stream<T> implements Iterable<T>, Value {
      * after the first element which fails the predicate.
      */
     abstract takeWhile(predicate: (x:T)=>boolean): Stream<T>;
+
+    /**
+     * Returns a new collection with the first
+     * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
+     */
+    abstract drop(n:number): Stream<T>;
+
+    /**
+     * Returns a new collection, discarding the first elements
+     * until one element fails the predicate. All elements
+     * after that point are retained.
+     */
+    abstract dropWhile(predicate:(x:T)=>boolean): Stream<T>;
 
     /**
      * Reduces the collection to a single value.
@@ -396,6 +418,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return Option.none<Stream<T>>();
     }
 
+    last(): Option<T> {
+        return Option.none<T>();
+    }
+
     find(predicate:(v:T)=>boolean): Option<T> {
         return Option.none<T>();
     }
@@ -405,6 +431,14 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     takeWhile(predicate: (x:T)=>boolean): Stream<T> {
+        return this;
+    }
+
+    drop(n:number): Stream<T> {
+        return this;
+    }
+
+    dropWhile(predicate:(x:T)=>boolean): Stream<T> {
         return this;
     }
 
@@ -523,6 +557,17 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         return Option.ofStruct(this._tail());
     }
 
+    last(): Option<T> {
+        let curItem: Stream<T> = this;
+        while (true) {
+            const item = (<ConsStream<T>>curItem).value;
+            curItem = (<ConsStream<T>>curItem)._tail();
+            if (curItem.isEmpty()) {
+                return Option.ofStruct(item);
+            }
+        }
+    }
+
     find(predicate:(v:T)=>boolean): Option<T> {
         let curItem: Stream<T> = this;
         while (!curItem.isEmpty()) {
@@ -549,6 +594,23 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         }
         return new ConsStream(this.value,
                               () => this._tail().takeWhile(predicate));
+    }
+
+    drop(n:number): Stream<T> {
+        let i = n;
+        let curItem: Stream<T> = this;
+        while (i-- > 0 && !curItem.isEmpty()) {
+            curItem = (<ConsStream<T>>curItem)._tail();
+        }
+        return curItem;
+    }
+
+    dropWhile(predicate:(x:T)=>boolean): Stream<T> {
+        let curItem: Stream<T> = this;
+        while (!curItem.isEmpty() && predicate((<ConsStream<T>>curItem).value)) {
+            curItem = (<ConsStream<T>>curItem)._tail();
+        }
+        return curItem;
     }
 
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
