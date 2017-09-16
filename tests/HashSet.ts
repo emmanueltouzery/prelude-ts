@@ -95,4 +95,9 @@ describe("hashset combinations", () => {
         HashSet.of(1,2,4).equals(HashSet.of(0,1,2,3,4).removeAll([0,3]))));
     it("calculates removeAll from empty well", () => assert.ok(
         HashSet.empty<number>().equals(HashSet.empty<number>().removeAll([0,3]))));
-})
+});
+
+describe("hashset transformations", () => {
+    it("map works", () => assert.ok(
+        HashSet.of(5,6,7).equals(HashSet.of(1,2,3).map(x=>x+4))));
+});

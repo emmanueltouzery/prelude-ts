@@ -34,6 +34,13 @@ export interface ISet<T> extends Value {
     contains(elt: T & WithEquality): boolean;
 
     /**
+     * Return a new collection where each element was transformed
+     * by the mapper function you give.
+     * The resulting set may be smaller than the source.
+     */
+    map<U>(mapper:(v:T)=>U&WithEquality): ISet<U>;
+
+    /**
      * Returns a new Set containing the difference
      * between this set and the other Set passed as parameter.
      */

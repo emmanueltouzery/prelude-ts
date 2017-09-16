@@ -77,6 +77,18 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Return a new collection where each element was transformed
+     * by the mapper function you give.
+     * The resulting set may be smaller than the source.
+     */
+    map<U>(mapper:(v:T)=>U&WithEquality): HashSet<U> {
+        return this.hamt.fold(
+            (acc: HashSet<U>, value: T&WithEquality, key: T&WithEquality) => {
+                return acc.add(mapper(value));
+            }, HashSet.empty());
+    }
+
+    /**
      * Converts this set to an array
      */
     toArray(): Array<T & WithEquality> {
@@ -235,6 +247,10 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     contains(elt: T & WithEquality): boolean {
         return false;
+    }
+
+    map<U>(mapper:(v:T)=>U&WithEquality): HashSet<U> {
+        return <EmptyHashSet<U>>emptyHashSet;
     }
 
     toArray(): Array<T & WithEquality> {
