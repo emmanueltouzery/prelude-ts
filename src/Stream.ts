@@ -852,23 +852,15 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Stream<T> {
-        return ConsStream.distinctByInternal(this, HashSet.empty<U>(), keyExtractor);
-    }
-
-    private static distinctByInternal<T,U>(
-          stream: Stream<T>, valuesSoFar: ISet<U>,
-          keyExtractor: (x:T)=>U&WithEquality): Stream<T> {
-        if (stream.isEmpty()) {
-            return <Stream<T>>emptyStream;
-        }
-        const consThis = <ConsStream<T>>stream;
-        const value = consThis.value;
-        const key = keyExtractor(value);
-        const tail = consThis._tail();
-        return valuesSoFar.contains(key) ?
-            ConsStream.distinctByInternal(tail, valuesSoFar, keyExtractor) :
-                new ConsStream(value, () => ConsStream.distinctByInternal(
-                    tail, valuesSoFar.add(key), keyExtractor));
+        let knownKeys = HashSet.empty<U>();
+        return this.filter(x => {
+            const key = keyExtractor(x);
+            const r = knownKeys.contains(key);
+            if (!r) {
+                knownKeys = knownKeys.add(key);
+            }
+            return !r;
+        });
     }
 
     forEach(fn: (v:T)=>void): Stream<T> {
