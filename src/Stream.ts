@@ -48,10 +48,10 @@ export abstract class Stream<T> implements Iterable<T>, Value {
      * No equality requirements.
      */
     static ofArrayStruct<T>(elts:T[]): Stream<T> {
-        const head = elts[0];
-        if (!head) {
+        if (elts.length === 0) {
             return <EmptyStream<T>>emptyStream;
         }
+        const head = elts[0];
         return new ConsStream(head, () => Stream.ofArrayStruct(elts.slice(1)));
     }
     
