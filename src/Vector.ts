@@ -474,6 +474,8 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * elements in the collection.
      */
     allMatch(predicate:(v:T)=>boolean): boolean {
+        // faster than using .find() because we
+        // don't have to traverse elements in order
         const iterator: Iterator<T> = this.hamt.values();
         let curItem = iterator.next();
         while (!curItem.done) {
@@ -490,6 +492,8 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * element in the collection.
      */
     anyMatch(predicate:(v:T)=>boolean): boolean {
+        // faster than using .find() because we
+        // don't have to traverse elements in order
         const iterator: Iterator<T> = this.hamt.values();
         let curItem = iterator.next();
         while (!curItem.done) {

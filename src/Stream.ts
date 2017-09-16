@@ -189,6 +189,12 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract find(predicate:(v:T)=>boolean): Option<T>;
 
     /**
+     * Returns true if the item is in the collection,
+     * false otherwise.
+     */
+    abstract contains(v:T&WithEquality): boolean;
+
+    /**
      * Return a new stream keeping only the first n elements
      * from this stream.
      */
@@ -373,6 +379,20 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract prependStruct(elt: T): Stream<T>;
 
     /**
+     * Prepend multiple elements at the beginning of the collection.
+     * Equality requirements.
+     */
+    prependAll(elts: Iterable<T&WithEquality>): Stream<T> {
+        return this.prependAllStruct(elts);
+    }
+
+    /**
+     * Prepend multiple elements at the beginning of the collection.
+     * No equality requirements.
+     */
+    abstract prependAllStruct(elts: Iterable<T>): Stream<T>;
+
+    /**
      * Repeat infinitely this Stream.
      * For instance:
      *
@@ -412,6 +432,18 @@ export abstract class Stream<T> implements Iterable<T>, Value {
      * Equality requirement
      */
     abstract flatMap<U>(mapper:(v:T)=>Stream<U&WithEquality>): Stream<U>;
+
+    /**
+     * Returns true if the predicate returns true for all the
+     * elements in the collection.
+     */
+    abstract allMatch(predicate:(v:T)=>boolean): boolean;
+
+    /**
+     * Returns true if there the predicate returns true for any
+     * element in the collection.
+     */
+    abstract anyMatch(predicate:(v:T)=>boolean): boolean;
 
     /**
      * Call a predicate for each element in the collection,
@@ -546,6 +578,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return Option.none<T>();
     }
 
+    contains(v:T&WithEquality): boolean {
+        return false;
+    }
+
     take(n: number): Stream<T> {
         return this;
     }
@@ -602,6 +638,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return Stream.ofStruct(elt);
     }
 
+    prependAllStruct(elt: Iterable<T>): Stream<T> {
+        return Stream.ofIterableStruct(elt);
+    }
+
     cycle(): Stream<T> {
         return <EmptyStream<T>>emptyStream;
     }
@@ -620,6 +660,14 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
 
     flatMap<U>(mapper:(v:T)=>Stream<U&WithEquality>): Stream<U> {
         return <EmptyStream<U>>emptyStream;
+    }
+
+    allMatch(predicate:(v:T)=>boolean): boolean {
+        return true;
+    }
+
+    anyMatch(predicate:(v:T)=>boolean): boolean {
+        return false;
     }
 
     filter(predicate:(v:T)=>boolean): Stream<T> {
@@ -750,6 +798,10 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         return Option.none<T>();
     }
 
+    contains(v:T&WithEquality): boolean {
+        return this.find(x => areEqual(x,v)).isSome();
+    }
+
     take(n: number): Stream<T> {
         if (n < 1) {
             return <EmptyStream<T>>emptyStream;
@@ -851,6 +903,10 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             () => this);
     }
 
+    prependAllStruct(elts: Iterable<T>): Stream<T> {
+        return Stream.ofIterableStruct(elts).appendAllStruct(this);
+    }
+
     cycle(): Stream<T> {
         return this._cycle(this);
     }
@@ -878,6 +934,14 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     flatMap<U>(mapper:(v:T)=>Stream<U&WithEquality>): Stream<U> {
         return this.flatMapStruct(mapper);
+    }
+
+    allMatch(predicate:(v:T)=>boolean): boolean {
+        return this.find(x => !predicate(x)).isNone();
+    }
+
+    anyMatch(predicate:(v:T)=>boolean): boolean {
+        return this.find(predicate).isSome();
     }
 
     filter(predicate:(v:T)=>boolean): Stream<T> {
