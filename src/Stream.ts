@@ -40,7 +40,7 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
     }
 
     /**
-     * Build a vector from any iterable, which means also
+     * Build a stream from any iterable, which means also
      * an array for instance.
      * @type T the item type -- no equality requirement
      */
@@ -55,7 +55,7 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
     }
 
     /**
-     * Build a vector from any iterable, which means also
+     * Build a stream from any iterable, which means also
      * an array for instance.
      * @type T the item type -- equality requirement
      */
@@ -64,7 +64,7 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
     }
 
     /**
-     * Build a vector from an array (slightly faster
+     * Build a stream from an array (slightly faster
      * than building from an iterable)
      * @type T the item type -- no equality requirement
      */
@@ -77,7 +77,7 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
     }
 
     /**
-     * Build a vector from an array (slightly faster
+     * Build a stream from an array (slightly faster
      * than building from an iterable)
      * @type T the item type -- equality requirement
      */
@@ -885,6 +885,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
+        // TODO goes twice over the list, can be optimized...
         return [this.filter(predicate), this.filter(x => !predicate(x))];
     }
 
