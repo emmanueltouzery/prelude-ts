@@ -125,6 +125,10 @@ describe("Stream filtering", () => {
         [1,0,2], Stream.of(1,0,1,2,3,2,3,1).distinctBy(x => new MyClass("hi", x%3)).toArray()));
     it("distinctBy with prepend", () => assert.deepEqual(
         [1,2,3], Stream.of(2,3,2,3,1).prepend(1).distinctBy(x => x).toArray()));
+    it("correctly partitions also after prepend", () => assert.deepEqual(
+        [[1,3,5,7],[2,4,6,8]],
+        Stream.of(2,3,4,5,6,7,8).prepend(1).partition(x => x%2!==0)
+            .map(v => v.toArray())));
 });
 
 describe("Stream Value tests", () => {

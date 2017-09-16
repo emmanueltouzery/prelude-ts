@@ -271,6 +271,18 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract reverse(): Stream<T>;
 
     /**
+     * Returns a pair of two collections; the first one
+     * will only contain the items from this collection for
+     * which the predicate you give returns true, the second
+     * will only contain the items from this collection where
+     * the predicate returns false.
+     *
+     *     Vector.of(1,2,3,4).partition(x => x%2===0)
+     *     => [[2,4],[1,3]]
+     */
+    abstract partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>];
+
+    /**
      * Append an element at the end of this Stream.
      * No equality requirements.
      */
@@ -556,6 +568,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return this;
     }
 
+    partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
+        return [Stream.empty<T>(), Stream.empty<T>()];
+    }
+
     appendStruct(v:T): Stream<T> {
         return Stream.ofStruct(v);
     }
@@ -782,6 +798,10 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     reverse(): Stream<T> {
         return this.foldLeft(<Stream<T>><EmptyStream<T>>emptyStream, (xs,x) => xs.prependStruct(x));
+    }
+
+    partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
+        return [this.filter(predicate), this.filter(x => !predicate(x))];
     }
 
     appendStruct(v:T): Stream<T> {
