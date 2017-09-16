@@ -20,12 +20,8 @@ describe("Stream basics", () => {
         }
         assert.equal(7, total);
     });
-    it("implements takeWhile correctly", () => assert.deepEqual(
-        [1,2,3], Stream.iterate(1, x=>x+1).takeWhile(x=>x<4).toArray()));
     it("maps correctly", () => assert.deepEqual(
         [4,5,7,11], Stream.iterate(1, x => x*2).map(x => x+3).take(4).toArray()));
-    it("filters correctly", () => assert.deepEqual(
-        [8,32,64,128], Stream.iterate(1, x => x*2).filter(x => x>5 && (x<15 || x > 30)).take(4).toArray()));
     it("supports ofArray", () => assert.deepEqual(
         [1,2,3], Stream.ofArray([1,2,3]).toArray()));
     it("supports of", () => assert.deepEqual(
@@ -54,12 +50,6 @@ describe("Stream basics", () => {
         3, Stream.of(1,2,3).last().getOrThrow()));
     it("gets the last value correctly for an empty stream", () => assert.ok(
         Stream.empty().last().isNone()));
-    it("correctly dropsWhile", () => assert.deepEqual(
-        [4,5,6], Stream.of(1,2,3,4,5,6).dropWhile(x=>x<4).toArray()));
-    it("correctly drops n items", () => assert.deepEqual(
-        [4,5,6], Stream.of(1,2,3,4,5,6).drop(3).toArray()));
-    it("returns an empty stream when dropping too much", () => assert.deepEqual(
-        [], Stream.of(1,2).drop(3).toArray()));
     it("sorting works", () => assert.ok(
         Stream.of(4,3,2,1)
             .equals(Stream.of(1,2,3,4).sortBy((x,y) => y-x))));
@@ -112,6 +102,29 @@ describe("Stream iteration", () => {
     it("richer example", () => assert.deepEqual(
         [[1,"a"],[2,"b"]], Stream.of(1,2,3)
             .zip(Vector.of("a", "b", "c")).takeWhile(([k,v]) => k<3).toArray()));
+});
+
+describe("Stream filtering", () => {
+    it("implements takeWhile correctly", () => assert.deepEqual(
+        [1,2,3], Stream.iterate(1, x=>x+1).takeWhile(x=>x<4).toArray()));
+    it("filters correctly", () => assert.deepEqual(
+        [8,32,64,128], Stream.iterate(1, x => x*2).filter(x => x>5 && (x<15 || x > 30)).take(4).toArray()));
+    it("correctly dropsWhile", () => assert.deepEqual(
+        [4,5,6], Stream.of(1,2,3,4,5,6).dropWhile(x=>x<4).toArray()));
+    it("correctly drops n items", () => assert.deepEqual(
+        [4,5,6], Stream.of(1,2,3,4,5,6).drop(3).toArray()));
+    it("returns an empty stream when dropping too much", () => assert.deepEqual(
+        [], Stream.of(1,2).drop(3).toArray()));
+    it("distinctBy", () => assert.deepEqual(
+        [1,2,3], Stream.of(1,1,2,3,2,3,1).distinctBy(x => x).toArray()));
+    it("distinctBy for the empty stream", () => assert.deepEqual(
+        [], Stream.empty<number>().distinctBy(x => x).toArray()));
+    it("distinctBy for a single value", () => assert.deepEqual(
+        [1], Stream.of(1).distinctBy(x => x).toArray()));
+    it("distinctBy, custom equality", () => assert.deepEqual(
+        [1,0,2], Stream.of(1,0,1,2,3,2,3,1).distinctBy(x => new MyClass("hi", x%3)).toArray()));
+    it("distinctBy with prepend", () => assert.deepEqual(
+        [1,2,3], Stream.of(2,3,2,3,1).prepend(1).distinctBy(x => x).toArray()));
 });
 
 describe("Stream Value tests", () => {

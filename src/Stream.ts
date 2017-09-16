@@ -5,6 +5,8 @@ import { WithEquality, toStringHelper,
 import { Value } from "./Value";
 import { IMap } from "./IMap";
 import { HashMap } from "./HashMap";
+import { ISet } from "./ISet";
+import { HashSet } from "./HashSet";
 
 // TODO extend seq?
 /**
@@ -403,6 +405,15 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T>;
 
     /**
+     * Remove duplicate items; elements are mapped to keys, those
+     * get compared.
+     *
+     *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
+     *     => [1,2,3]
+     */
+    abstract distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Stream<T>;
+
+    /**
      * Call a function for element in the collection.
      */
     abstract forEach(fn: (v:T)=>void): Stream<T>;
@@ -586,6 +597,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T> {
+        return this;
+    }
+
+    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Stream<T> {
         return this;
     }
 
@@ -834,6 +849,26 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T> {
         return Stream.ofArrayStruct<T>(this.toArray().sort(compare));
+    }
+
+    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Stream<T> {
+        return ConsStream.distinctByInternal(this, HashSet.empty<U>(), keyExtractor);
+    }
+
+    private static distinctByInternal<T,U>(
+          stream: Stream<T>, valuesSoFar: ISet<U>,
+          keyExtractor: (x:T)=>U&WithEquality): Stream<T> {
+        if (stream.isEmpty()) {
+            return <Stream<T>>emptyStream;
+        }
+        const consThis = <ConsStream<T>>stream;
+        const value = consThis.value;
+        const key = keyExtractor(value);
+        const tail = consThis._tail();
+        return valuesSoFar.contains(key) ?
+            ConsStream.distinctByInternal(tail, valuesSoFar, keyExtractor) :
+                new ConsStream(value, () => ConsStream.distinctByInternal(
+                    tail, valuesSoFar.add(key), keyExtractor));
     }
 
     forEach(fn: (v:T)=>void): Stream<T> {
