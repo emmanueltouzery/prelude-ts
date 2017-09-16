@@ -7,14 +7,14 @@ import { IMap } from "./IMap";
 import { HashMap } from "./HashMap";
 import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
+import { Seq } from "./Seq";
 
-// TODO extend seq?
 /**
  * A lazy, potentially infinite, sequence of values.
  *
- * Use take() for instance to reduce it to a finite stream.
+ * Use take() for instance to reduce an infinite stream to a finite one.
  */
-export abstract class Stream<T> implements Iterable<T>, Value {
+export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
 
     /**
      * The empty stream
@@ -220,6 +220,14 @@ export abstract class Stream<T> implements Iterable<T>, Value {
      * after that point are retained.
      */
     abstract dropWhile(predicate:(x:T)=>boolean): Stream<T>;
+
+    /**
+     * Returns a new collection with the last
+     * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
+     */
+    abstract dropRight(n:number): Stream<T>;
 
     /**
      * Reduces the collection to a single value.
@@ -598,6 +606,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return this;
     }
 
+    dropRight(n:number): Stream<T> {
+        return this;
+    }
+
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
         return zero;
     }
@@ -833,6 +845,12 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             curItem = (<ConsStream<T>>curItem)._tail();
         }
         return curItem;
+    }
+
+    dropRight(n:number): Stream<T> {
+        // going twice through the list...
+        const length = this.length();
+        return this.take(length-n);
     }
 
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {

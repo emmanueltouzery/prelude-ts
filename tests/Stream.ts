@@ -53,6 +53,10 @@ describe("Stream basics", () => {
     it("sorting works", () => assert.ok(
         Stream.of(4,3,2,1)
             .equals(Stream.of(1,2,3,4).sortBy((x,y) => y-x))));
+    it("correctly drops right n items", () => assert.deepEqual(
+        [1,2,3,4], Stream.of(1,2,3,4,5,6).dropRight(2).toArray()));
+    it("returns an empty stream when dropping right too much", () => assert.deepEqual(
+        [], Stream.of(1,2).dropRight(3).toArray()));
 });
 
 describe("Prepend", () => {
