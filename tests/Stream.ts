@@ -129,6 +129,9 @@ describe("Stream filtering", () => {
         [[1,3,5,7],[2,4,6,8]],
         Stream.of(2,3,4,5,6,7,8).prepend(1).partition(x => x%2!==0)
             .map(v => v.toArray())));
+    it("groupBy works", () => assert.ok(
+        HashMap.empty().put(0, Stream.of(2,4)).put(1, Stream.of(1,3))
+            .equals(Stream.of(1,2,3,4).groupBy(x => x%2))));
 });
 
 describe("Stream Value tests", () => {

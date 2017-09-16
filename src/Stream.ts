@@ -283,6 +283,14 @@ export abstract class Stream<T> implements Iterable<T>, Value {
     abstract partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>];
 
     /**
+     * Group elements in the collection using a classifier function.
+     * Elements are then organized in a map. The key is the value of
+     * the classifier, and in value we get the list of elements
+     * matching that value.
+     */
+    abstract groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Stream<T>>;
+
+    /**
      * Append an element at the end of this Stream.
      * No equality requirements.
      */
@@ -572,6 +580,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return [Stream.empty<T>(), Stream.empty<T>()];
     }
 
+    groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Stream<T>> {
+        return HashMap.empty<C,Stream<T>>();
+    }
+
     appendStruct(v:T): Stream<T> {
         return Stream.ofStruct(v);
     }
@@ -802,6 +814,15 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
         return [this.filter(predicate), this.filter(x => !predicate(x))];
+    }
+
+    groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Stream<T>> {
+        return this.foldLeft(
+            HashMap.empty<C,Stream<T>>(),
+            (acc: HashMap<C,Stream<T>>, v:T & WithEquality) =>
+                acc.putWithMerge(
+                    classifier(v), Stream.of(v),
+                    (v1:Stream<T&WithEquality>,v2:Stream<T&WithEquality>)=>v1.appendStream(v2)));
     }
 
     appendStruct(v:T): Stream<T> {
