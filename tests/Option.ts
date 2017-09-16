@@ -81,4 +81,10 @@ describe("option retrieval", () => {
        assert.deepEqual([5], Option.of(5).toVector().toArray()));
     it("should return empty on None.toVector", () =>
        assert.deepEqual([], Option.none().toVector().toArray()));
+    it("should not throw on Some.getOrThrow", () =>
+       assert.equal(5, Option.of(5).getOrThrow()));
+    it("should throw on None.getOrThrow", () =>
+       assert.throws(() => Option.none().getOrThrow()));
+    it("should throw on None.getOrThrow with custom msg", () =>
+       assert.throws(() => Option.none().getOrThrow("my custom msg"), /^my custom msg$/));
 });

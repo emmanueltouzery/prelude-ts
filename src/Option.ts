@@ -116,8 +116,10 @@ export abstract class Option<T> implements Value {
     /**
      * Get the value from this option if it's a Some, otherwise
      * throw an exception.
+     * You can optionally pass a message that'll be used as the
+     * exception message.
      */
-    abstract getOrThrow(): T;
+    abstract getOrThrow(message?: string): T;
 
     /**
      * Get the value from this option; if it's a None (no value
@@ -231,7 +233,7 @@ export class Some<T> extends Option<T> {
     orElse(other: Option<T>): Option<T> {
         return this;
     }
-    getOrThrow(): T {
+    getOrThrow(message?: string): T {
         return this.value;
     }
     contains(v: T): boolean {
@@ -298,8 +300,8 @@ export class None<T> extends Option<T> {
     orElse(other: Option<T>): Option<T> {
         return other;
     }
-    getOrThrow(): T & WithEquality {
-        throw "getOrThrow called on none!";
+    getOrThrow(message?: string): T & WithEquality {
+        throw message || "getOrThrow called on none!";
     }
     contains(v: T): boolean {
         return false;
