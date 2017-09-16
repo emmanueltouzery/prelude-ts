@@ -28,7 +28,7 @@ export abstract class Stream<T> implements Iterable<T>, Value {
      * No equality requirements.
      */
     static ofStruct<T>(...elts:T[]): Stream<T> {
-        return Stream.ofArrayStruct(elts);
+        return Stream.ofIterableStruct(elts);
     }
 
     /**
@@ -36,38 +36,52 @@ export abstract class Stream<T> implements Iterable<T>, Value {
      * Equality requirements.
      */
     static of<T>(...elts:Array<T&WithEquality>): Stream<T> {
-        return Stream.ofArrayStruct(elts);
+        return Stream.ofIterableStruct(elts);
     }
 
     /**
-     * Create a Stream from a javascript array.
-     *
-     * There is no function to create a Stream from a javascript iterator,
-     * because iterators are stateful and Streams lazy.
-     * If we would create two Streams working on the same iterator,
-     * the streams would interact with one another.
-     * It also breaks the cycle() function.
-     * No equality requirements.
+     * Build a vector from any iterable, which means also
+     * an array for instance.
+     * @type T the item type -- no equality requirement
      */
-    static ofArrayStruct<T>(elts:T[]): Stream<T> {
+    static ofIterableStruct<T>(elts: Iterable<T>): Stream<T> {
+        // need to eagerly copy the iterable. the reason
+        // is, if we would build the stream based on the iterator
+        // in the iterable, Stream.tail() would do it.next().
+        // but it.next() modifies the iterator (mutability),
+        // and you would end up with getting two different tails
+        // for the same stream if you call .tail() twice in a row
+        return Stream.ofArrayStruct(Array.from(elts));
+    }
+
+    /**
+     * Build a vector from any iterable, which means also
+     * an array for instance.
+     * @type T the item type -- equality requirement
+     */
+    static ofIterable<T>(elts: Iterable<T & WithEquality>): Stream<T> {
+        return Stream.ofIterableStruct(elts);
+    }
+
+    /**
+     * Build a vector from an array (slightly faster
+     * than building from an iterable)
+     * @type T the item type -- no equality requirement
+     */
+    static ofArrayStruct<T>(elts: Array<T>): Stream<T> {
         if (elts.length === 0) {
             return <EmptyStream<T>>emptyStream;
         }
         const head = elts[0];
         return new ConsStream(head, () => Stream.ofArrayStruct(elts.slice(1)));
     }
-    
+
     /**
-     * Create a Stream from a javascript array.
-     *
-     * There is no function to create a Stream from a javascript iterator,
-     * because iterators are stateful and Streams lazy.
-     * If we would create two Streams working on the same iterator,
-     * the streams would interact with one another.
-     * It also breaks the cycle() function.
-     * Equality requirements.
+     * Build a vector from an array (slightly faster
+     * than building from an iterable)
+     * @type T the item type -- equality requirement
      */
-    static ofArray<T>(elts: Array<T&WithEquality>): Stream<T> {
+    static ofArray<T>(elts: Array<T & WithEquality>): Stream<T> {
         return Stream.ofArrayStruct(elts);
     }
 
@@ -306,27 +320,15 @@ export abstract class Stream<T> implements Iterable<T>, Value {
 
     /*
      * Append multiple elements at the end of this Stream.
-     *
-     * There is no function taking a javascript iterator,
-     * because iterators are stateful and Streams lazy.
-     * If we would create two Streams working on the same iterator,
-     * the streams would interact with one another.
-     * It also breaks the cycle() function.
      * No equality requirements.
      */
-    abstract appendAllStruct(elts:Array<T>): Stream<T>;
+    abstract appendAllStruct(elts:Iterable<T>): Stream<T>;
 
     /*
      * Append multiple elements at the end of this Stream.
-     *
-     * There is no function taking a javascript iterator,
-     * because iterators are stateful and Streams lazy.
-     * If we would create two Streams working on the same iterator,
-     * the streams would interact with one another.
-     * It also breaks the cycle() function.
      * Equality requirements.
      */
-    appendAll(elts:Array<T>): Stream<T> {
+    appendAll(elts:Iterable<T>): Stream<T> {
         return this.appendAllStruct(elts);
     }
 
@@ -588,8 +590,8 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return Stream.ofStruct(v);
     }
 
-    appendAllStruct(elts:Array<T>): Stream<T> {
-        return Stream.ofArrayStruct(elts);
+    appendAllStruct(elts:Iterable<T>): Stream<T> {
+        return Stream.ofIterableStruct(elts);
     }
 
     appendStreamStruct(elts:Stream<T>): Stream<T> {
@@ -832,11 +834,8 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             () => tail.appendStruct(v));
     }
 
-    appendAllStruct(elts:Array<T>): Stream<T> {
-        const tail = this._tail();
-        return new ConsStream(
-            this.value,
-            () => tail.appendAllStruct(elts));
+    appendAllStruct(elts:Iterable<T>): Stream<T> {
+        return this.appendStreamStruct(Stream.ofIterableStruct(elts));
     }
 
     appendStreamStruct(elts:Stream<T>): Stream<T> {
@@ -889,7 +888,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T> {
-        return Stream.ofArrayStruct<T>(this.toArray().sort(compare));
+        return Stream.ofIterableStruct<T>(this.toArray().sort(compare));
     }
 
     distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Stream<T> {

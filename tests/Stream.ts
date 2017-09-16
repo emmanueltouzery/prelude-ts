@@ -23,7 +23,7 @@ describe("Stream basics", () => {
     it("maps correctly", () => assert.deepEqual(
         [4,5,7,11], Stream.iterate(1, x => x*2).map(x => x+3).take(4).toArray()));
     it("supports ofArray", () => assert.deepEqual(
-        [1,2,3], Stream.ofArray([1,2,3]).toArray()));
+        [1,2,3], Stream.ofIterable([1,2,3]).toArray()));
     it("supports of", () => assert.deepEqual(
         [1,2,3], Stream.of(1,2,3).toArray()));
     it("supports append", () => assert.deepEqual(
