@@ -32,12 +32,6 @@ describe("Stream basics", () => {
         [1,2,3,4,5,6], Stream.of(1,2,3).appendStream(Stream.of(4,5,6)).toArray()));
     it("supports flatMap", () => assert.deepEqual(
         [1,2,3,4,5,6], Stream.of(1,4).flatMap(x => Stream.of(x,x+1,x+2)).toArray()));
-    it("correctly reverses", () => assert.deepEqual(
-        [3,2,1], Stream.of(1,2,3).reverse().toArray()));
-    it("correctly reverses the empty stream", () => assert.deepEqual(
-        [], Stream.empty().reverse().toArray()));
-    it("correctly reverses also after prepend", () => assert.deepEqual(
-        [3,2,1], Stream.of(2,3).prepend(1).reverse().toArray()));
     it("computes the length correctly", () => assert.equal(
         3, Stream.of(1,2,3).length()));
     it("computes the length of the empty stream correctly", () => assert.equal(
@@ -46,13 +40,6 @@ describe("Stream basics", () => {
         3, Stream.of(1,2,3).last().getOrThrow()));
     it("gets the last value correctly for an empty stream", () => assert.ok(
         Stream.empty().last().isNone()));
-    it("sorting works", () => assert.ok(
-        Stream.of(4,3,2,1)
-            .equals(Stream.of(1,2,3,4).sortBy((x,y) => y-x))));
-    it("correctly drops right n items", () => assert.deepEqual(
-        [1,2,3,4], Stream.of(1,2,3,4,5,6).dropRight(2).toArray()));
-    it("returns an empty stream when dropping right too much", () => assert.deepEqual(
-        [], Stream.of(1,2).dropRight(3).toArray()));
 });
 
 describe("Stream iteration", () => {
@@ -78,12 +65,6 @@ describe("Stream filtering", () => {
         [1,2,3], Stream.iterate(1, x=>x+1).takeWhile(x=>x<4).toArray()));
     it("filters correctly", () => assert.deepEqual(
         [8,32,64,128], Stream.iterate(1, x => x*2).filter(x => x>5 && (x<15 || x > 30)).take(4).toArray()));
-    it("correctly dropsWhile", () => assert.deepEqual(
-        [4,5,6], Stream.of(1,2,3,4,5,6).dropWhile(x=>x<4).toArray()));
-    it("correctly drops n items", () => assert.deepEqual(
-        [4,5,6], Stream.of(1,2,3,4,5,6).drop(3).toArray()));
-    it("returns an empty stream when dropping too much", () => assert.deepEqual(
-        [], Stream.of(1,2).drop(3).toArray()));
     it("correctly partitions also after prepend", () => assert.deepEqual(
         [[1,3,5,7],[2,4,6,8]],
         Stream.of(2,3,4,5,6,7,8).prepend(1).partition(x => x%2!==0)

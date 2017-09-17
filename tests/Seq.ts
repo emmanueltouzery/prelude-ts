@@ -99,24 +99,43 @@ export function runTests(seqName: string,
         })
     });
     describe(seqName + " conversions", () => {
-    it("mkString works", () => assert.equal(
-        "1, 2, 3", ofStruct(1,2,3).mkString(", ")));
+        it("mkString works", () => assert.equal(
+            "1, 2, 3", ofStruct(1,2,3).mkString(", ")));
     });
     describe(seqName + " manipulation", () => {
-    it("groupBy works", () => assert.ok(
-        HashMap.empty().put(0, ofStruct(2,4)).put(1, ofStruct(1,3))
-            .equals(ofStruct(1,2,3,4).groupBy(x => x%2))));
+        it("groupBy works", () => assert.ok(
+            HashMap.empty().put(0, ofStruct(2,4)).put(1, ofStruct(1,3))
+                .equals(ofStruct(1,2,3,4).groupBy(x => x%2))));
+        it("correctly drops right n items", () => assert.deepEqual(
+            [1,2,3,4], ofStruct(1,2,3,4,5,6).dropRight(2).toArray()));
+        it("returns an empty seq when dropping right too much", () => assert.deepEqual(
+            [], ofStruct(1,2).dropRight(3).toArray()));
+        it("sorting works", () => assert.ok(
+            ofStruct(4,3,2,1)
+                .equals(ofStruct(1,2,3,4).sortBy((x,y) => y-x))));
+        it("correctly reverses", () => assert.deepEqual(
+            [3,2,1], ofStruct(1,2,3).reverse().toArray()));
+        it("correctly reverses the empty vector", () => assert.deepEqual(
+            [], empty().reverse().toArray()));
+        it("correctly reverses also after prepend", () => assert.deepEqual(
+            [3,2,1], ofStruct(2,3).prepend(1).reverse().toArray()));
     });
     describe(seqName + " filtering", () => {
-    it("distinctBy", () => assert.deepEqual(
-        [1,2,3], ofStruct(1,1,2,3,2,3,1).distinctBy(x => x).toArray()));
-    it("distinctBy for the empty seq", () => assert.deepEqual(
-        [], empty<number>().distinctBy(x => x).toArray()));
-    it("distinctBy for a single value", () => assert.deepEqual(
-        [1], ofStruct(1).distinctBy(x => x).toArray()));
-    it("distinctBy, custom equality", () => assert.deepEqual(
-        [1,0,2], ofStruct(1,0,1,2,3,2,3,1).distinctBy(x => new MyClass("hi", x%3)).toArray()));
-    it("distinctBy with prepend", () => assert.deepEqual(
-        [1,2,3], ofStruct(2,3,2,3,1).prepend(1).distinctBy(x => x).toArray()));
+        it("distinctBy", () => assert.deepEqual(
+            [1,2,3], ofStruct(1,1,2,3,2,3,1).distinctBy(x => x).toArray()));
+        it("distinctBy for the empty seq", () => assert.deepEqual(
+            [], empty<number>().distinctBy(x => x).toArray()));
+        it("distinctBy for a single value", () => assert.deepEqual(
+            [1], ofStruct(1).distinctBy(x => x).toArray()));
+        it("distinctBy, custom equality", () => assert.deepEqual(
+            [1,0,2], ofStruct(1,0,1,2,3,2,3,1).distinctBy(x => new MyClass("hi", x%3)).toArray()));
+        it("distinctBy with prepend", () => assert.deepEqual(
+            [1,2,3], ofStruct(2,3,2,3,1).prepend(1).distinctBy(x => x).toArray()));
+        it("correctly dropsWhile", () => assert.deepEqual(
+            [4,5,6], ofStruct(1,2,3,4,5,6).dropWhile(x=>x<4).toArray()));
+        it("correctly drops n items", () => assert.deepEqual(
+            [4,5,6], ofStruct(1,2,3,4,5,6).drop(3).toArray()));
+        it("returns an empty stream when dropping too much", () => assert.deepEqual(
+            [], ofStruct(1,2).drop(3).toArray()));
     });
 }
