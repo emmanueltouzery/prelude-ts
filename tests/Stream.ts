@@ -16,16 +16,6 @@ describe("Stream basics", () => {
         [1,1,1,1], Stream.continually(() => 1).take(4).toArray()));
     it("iterates from a seed", () => assert.deepEqual(
         [1,2,4,8], Stream.iterate(1, x => x*2).take(4).toArray()));
-    it("supports iterator", () => {
-        let total = 0;
-        const iterator = Stream.iterate(1,x=>x*2).take(3)[Symbol.iterator]();
-        let curItem = iterator.next();
-        while (!curItem.done) {
-            total += curItem.value;
-            curItem = iterator.next();
-        }
-        assert.equal(7, total);
-    });
     it("maps correctly", () => assert.deepEqual(
         [4,5,7,11], Stream.iterate(1, x => x*2).map(x => x+3).take(4).toArray()));
     it("supports ofArray", () => assert.deepEqual(
@@ -66,21 +56,6 @@ describe("Stream basics", () => {
 });
 
 describe("Stream iteration", () => {
-    it("finds items", () => 
-       Stream.of(1,2,3).find(x => x >= 2).contains(2));
-    it("doesn't find if the predicate doesn't match", () => 
-       Stream.of(1,2,3).find(x => x >= 4).isNone());
-    it("foldsLeft correctly", () => assert.equal(
-        "cba!",
-        Stream.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs)));
-    it("foldsRight correctly", () => assert.equal(
-        "!cba",
-        Stream.of("a", "b", "c").foldRight("!", (x,xs) => xs+x)));
-    it("calls forEach correctly", () => {
-        let ar: number[] = [];
-        Stream.of(1,2,3).forEach((v:number) => ar.push(v));
-        assert.deepEqual([1,2,3], ar);
-    });
     it("get finds when present", () => assert.ok(
         Option.of(5).equals(Stream.of(1,2,3,4,5,6).get(4))));
     it("get finds when present after prepend", () => assert.ok(

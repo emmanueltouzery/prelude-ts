@@ -7,7 +7,7 @@ import { Option } from "./Option";
  * A generic interface for list-like implementations.
  * @type T the item type
  */
-export interface Seq<T> extends Value {
+export interface Seq<T> extends Value, Iterable<T> {
     /**
      * Get the length of the collection.
      */

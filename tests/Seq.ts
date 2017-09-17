@@ -70,4 +70,31 @@ export function runTests(seqName: string,
             !empty<number>().anyMatch(x => x%2 === 0)));
     });
 
+    describe(seqName + " iteration", () => {
+        it("finds items", () =>
+           ofStruct(1,2,3).find(x => x >= 2).contains(2));
+        it("doesn't find if the predicate doesn't match", () =>
+           ofStruct(1,2,3).find(x => x >= 4).isNone());
+        it("foldsLeft correctly", () => assert.equal(
+            "cba!",
+            ofStruct("a", "b", "c").foldLeft("!", (xs,x) => x+xs)));
+        it("foldsRight correctly", () => assert.equal(
+            "!cba",
+            ofStruct("a", "b", "c").foldRight("!", (x,xs) => xs+x)));
+        it("calls forEach correctly", () => {
+            let ar: number[] = [];
+            ofStruct(1,2,3).forEach((v:number) => ar.push(v));
+            assert.deepEqual([1,2,3], ar);
+        });
+        it("supports iterator", () => {
+            let total = 0;
+            const iterator = ofStruct(1,2,3)[Symbol.iterator]();
+            let curItem = iterator.next();
+            while (!curItem.done) {
+                total += curItem.value;
+                curItem = iterator.next();
+            }
+            assert.equal(6, total);
+        })
+    });
 }

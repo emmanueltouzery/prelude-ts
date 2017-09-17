@@ -110,35 +110,10 @@ describe("Vector value extraction", () => {
 });
 
 describe("Vector iteration", () => {
-    it("calls forEach correctly", () => {
-        let ar: number[] = [];
-        Vector.of(1,2,3).forEach((v:number) => ar.push(v));
-        assert.deepEqual([1,2,3], ar);
-    });
-    it("finds items", () => 
-       Vector.of(1,2,3).find(x => x >= 2).contains(2));
-    it("doesn't find if the predicate doesn't match", () => 
-       Vector.of(1,2,3).find(x => x >= 4).isNone());
-    it("foldsLeft correctly", () => assert.equal(
-        "cba!",
-        Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs)));
-    it("foldsRight correctly", () => assert.equal(
-        "!cba",
-        Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x)));
     it("transforms to map", () => {
         assert.ok(HashMap.empty<number,string>().put(1,"ok").put(2, "bad")
                   .equals(<HashMap<number,string>>Vector.ofStruct<[number,string]>([1,"ok"],[2,"bad"]).toMap(x => x)));
     });
-    it("supports iterator", () => {
-        let total = 0;
-        const iterator = Vector.of(1,2,3)[Symbol.iterator]();
-        let curItem = iterator.next();
-        while (!curItem.done) {
-            total += curItem.value;
-            curItem = iterator.next();
-        }
-        assert.equal(6, total);
-    })
     // can get for..of in tests by changing the target to es6,
     // or enabling downlevelIteration in the tsconfig.json,
     // not doing that for now.
