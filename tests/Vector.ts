@@ -3,18 +3,10 @@ import { HashMap } from "../src/HashMap";
 import { Option } from "../src/Option";
 import { Stream } from "../src/Stream";
 import { MyClass } from "./SampleData";
+import * as SeqTest from "./Seq";
 import * as assert from 'assert'
 
-describe("Vector creation", () => {
-    it("creates from a JS array", () => assert.deepEqual(
-        ["a","b", "c"],
-        Vector.ofIterable<string>(["a","b","c"]).toArray()));
-    it("creates from a spread", () => assert.deepEqual(
-        ["a","b", "c"],
-        Vector.of("a","b","c").toArray()));
-    it("creates also with nulls", () => assert.deepEqual(
-        [1, null, 2], Vector.of(1, null, 2).toArray()));
-});
+SeqTest.runTests("Vector", Vector.ofIterable, Vector.of);
 
 describe("Vector manipulation", () => {
     it("appends correctly", () => assert.ok(
@@ -112,22 +104,6 @@ describe("Vector value extraction", () => {
         Vector.of(2,3,4,5,6,7,8).prepend(1).partition(x => x%2!==0)
             .map(v => v.toArray())));
     
-});
-
-describe("Prepend", () => {
-    const basic = Vector.of(1,2,3,4);
-    const prepended = Vector.of(2,3,4).prepend(1);
-    it("prepends correctly", () => assert.ok(basic.equals(prepended)));
-    it("converts to array correctly", () => assert.deepEqual(
-        basic.toArray(), prepended.toArray()));
-    it("appends correctly after prepend", () => assert.ok(
-        basic.append(5).equals(prepended.append(5))));
-    it("appendsAll correctly after prepend", () => assert.ok(
-        basic.appendAll(Vector.of(5,6)).equals(prepended.appendAll(Vector.of(5,6)))));
-    it("converts to string correctly after prepend", () => assert.equal(
-        basic.toString(), prepended.toString()));
-    it("prependsAll correctly", () => assert.deepEqual(
-        [1,2,3,4,5], Vector.of(4,5).prependAll(Vector.of(1,2,3)).toArray()));
 });
 
 describe("Vector iteration", () => {

@@ -3,7 +3,10 @@ import { Vector } from "../src/Vector";
 import { Option } from "../src/Option";
 import { MyClass} from "./SampleData";
 import { HashMap} from "../src/HashMap";
+import * as SeqTest from "./Seq";
 import * as assert from 'assert'
+
+SeqTest.runTests("Stream", Stream.ofIterable, Stream.of);
 
 describe("Stream basics", () => {
     it("creates a continually constant value", () => assert.deepEqual(
@@ -57,22 +60,6 @@ describe("Stream basics", () => {
         [1,2,3,4], Stream.of(1,2,3,4,5,6).dropRight(2).toArray()));
     it("returns an empty stream when dropping right too much", () => assert.deepEqual(
         [], Stream.of(1,2).dropRight(3).toArray()));
-});
-
-describe("Prepend", () => {
-    const basic = Stream.of(1,2,3,4);
-    const prepended = Stream.of(2,3,4).prepend(1);
-    it("prepends correctly", () => assert.ok(basic.equals(prepended)));
-    it("converts to array correctly", () => assert.deepEqual(
-        basic.toArray(), prepended.toArray()));
-    it("appends correctly after prepend", () => assert.ok(
-        basic.append(5).equals(prepended.append(5))));
-    it("appendsAll correctly after prepend", () => assert.ok(
-        basic.appendStream(Stream.of(5,6)).equals(prepended.appendStream(Stream.of(5,6)))));
-    it("converts to string correctly after prepend", () => assert.equal(
-        basic.toString(), prepended.toString()));
-    it("prependsAll correctly", () => assert.deepEqual(
-        [1,2,3,4,5], Stream.of(4,5).prependAll(Stream.of(1,2,3)).toArray()));
 });
 
 describe("Stream iteration", () => {
