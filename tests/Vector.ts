@@ -6,7 +6,7 @@ import { MyClass } from "./SampleData";
 import * as SeqTest from "./Seq";
 import * as assert from 'assert'
 
-SeqTest.runTests("Vector", Vector.ofIterable, Vector.of);
+SeqTest.runTests("Vector", Vector.ofIterable, Vector.ofStruct);
 
 describe("Vector manipulation", () => {
     it("appends correctly", () => assert.ok(
@@ -149,20 +149,6 @@ describe("Vector iteration", () => {
 })
 
 describe("Vector Value tests", () => {
-    it("serializes to string correctly", () => assert.equal(
-        "[1, 2, 3]", Vector.of(1,2,3).toString()));
-    it("serializes to string correctly - arrays & strings", () => assert.equal(
-        "[[1,'a']]", Vector.ofStruct([1,'a']).toString()));
-    it("serializes to string correctly - custom toString", () => assert.equal(
-        "[{field1: hi, field2: 99}]", Vector.of(new MyClass("hi", 99)).toString()));
-    it("has non-obviously-broken equals", () => assert.ok(
-        Vector.of("a","b","c").equals(Vector.of("a", "b", "c"))));
-    it("doesn't throw when given another type on equals", () => assert.equal(
-        false, Vector.of(1).equals(<any>[1,2])));
-    it("doesn't throw when given null on equals", () => assert.equal(
-        false, Vector.of(1).equals(<any>null)));
-    it("is strict with equality", () => assert.ok(
-        !Vector.of(1,2).equals(Vector.of(1, <any>undefined))));
     it("supports contain", () => assert.ok(
         Vector.of(1,2,3).contains(2)));
     it("rejects contain", () => assert.ok(

@@ -6,7 +6,7 @@ import { HashMap} from "../src/HashMap";
 import * as SeqTest from "./Seq";
 import * as assert from 'assert'
 
-SeqTest.runTests("Stream", Stream.ofIterable, Stream.of);
+SeqTest.runTests("Stream", Stream.ofIterable, Stream.ofStruct);
 
 describe("Stream basics", () => {
     it("creates a continually constant value", () => assert.deepEqual(
@@ -143,23 +143,6 @@ describe("Stream filtering", () => {
         !Stream.of(3,5,9).anyMatch(x => x%2 === 0)));
     it("supports anyMatch, empty stream", () => assert.ok(
         !Stream.empty<number>().anyMatch(x => x%2 === 0)));
-});
-
-describe("Stream Value tests", () => {
-    it("serializes to string correctly", () => assert.equal(
-        "[1, 2, 3]", Stream.of(1,2,3).toString()));
-    it("serializes to string correctly - arrays & strings", () => assert.equal(
-        "[[1,'a']]", Stream.ofStruct([1,'a']).toString()));
-    it("serializes to string correctly - custom toString", () => assert.equal(
-        "[{field1: hi, field2: 99}]", Stream.of(new MyClass("hi", 99)).toString()));
-    it("has non-obviously-broken equals", () => assert.ok(
-        Stream.of("a","b","c").equals(Stream.of("a", "b", "c"))));
-    it("doesn't throw when given another type on equals", () => assert.equal(
-        false, Stream.of(1).equals(<any>[1,2])));
-    it("doesn't throw when given null on equals", () => assert.equal(
-        false, Stream.of(1).equals(<any>null)));
-    it("is strict with equality", () => assert.ok(
-        !Stream.of(1,2).equals(Stream.of(1, <any>undefined))));
 });
 
 describe("Stream conversions", () => {
