@@ -100,6 +100,14 @@ export class Tuple2<T,U> implements Value {
     }
 
     /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<V>(converter:(x:Tuple2<T,U>)=>V): V {
+        return converter(this);
+    }
+
+    /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
      * in memory.

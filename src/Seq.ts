@@ -329,4 +329,10 @@ export interface Seq<T> extends Value, Iterable<T> {
      * No equality requirements.
      */
     toMapStruct<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V>;
+
+    /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:Seq<T>)=>U): U;
 }

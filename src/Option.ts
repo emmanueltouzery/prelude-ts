@@ -192,6 +192,14 @@ export abstract class Option<T> implements Value {
     abstract toVector(): Vector<T>;
 
     /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:Option<T>)=>U): U {
+        return converter(this);
+    }
+
+    /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
      * in memory.

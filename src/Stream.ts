@@ -522,6 +522,14 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
     abstract toMapStruct<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V>;
 
     /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:Stream<T>)=>U): U {
+        return converter(this);
+    }
+
+    /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
      * in memory.

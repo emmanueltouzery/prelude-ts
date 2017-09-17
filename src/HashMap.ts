@@ -201,6 +201,14 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
     }
 
     /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:HashMap<K,V>)=>U): U {
+        return converter(this);
+    }
+
+    /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
      * in memory.

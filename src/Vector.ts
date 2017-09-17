@@ -668,6 +668,14 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:Vector<T>)=>U): U {
+        return converter(this);
+    }
+
+    /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
      * in memory.
