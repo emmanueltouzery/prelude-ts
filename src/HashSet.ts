@@ -3,6 +3,55 @@ import { WithEquality, hasEquals, HasEquals,
          getHashCode, areEqual, toStringHelper } from "./Comparison";
 const hamt: any = require("hamt_plus");
 
+export class MutableHashSet<T> {
+
+    private muthamt: any;
+
+    /**
+     * @hidden
+     */
+    constructor(hamt?: any) {
+        if (hamt) {
+            this.muthamt = hamt.beginMutation();
+        }
+    }
+    
+    /**
+     * Add an element to this set.
+     */
+    add(elt: T & WithEquality): void {
+        if (this.muthamt === undefined) {
+            this.muthamt = hamtForElement(elt).beginMutation();
+        } else {
+            this.muthamt.set(elt,elt);
+        }
+    }
+
+    /**
+     * Returns true if the element you give is present in
+     * the set, false otherwise.
+     */
+    contains(elt: T & WithEquality): boolean {
+        return this.muthamt ? this.muthamt.has(elt) : false;
+    }
+
+    /**
+     * @hidden
+     */
+    getHamt(): any {
+        if (!this.muthamt) {
+            return this.muthamt;
+        }
+        this.muthamt.endMutation();
+        const r = this.muthamt;
+        this.muthamt = {
+            set: function() { throw "MutableHashSet is invalid after calling getHamt()"; },
+            has: function() { throw "MutableHashSet is invalid after calling getHamt()"; }
+        }
+        return r;
+    }
+}
+
 /**
  * An unordered collection of values, where no two values
  * may be equal. A value can only be present once.
@@ -161,6 +210,12 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
         return false;
     }
 
+    mutate(operation:(x:MutableHashSet<T>)=>void): HashSet<T> {
+        const mhs = new MutableHashSet<T>(this.hamt);
+        operation(mhs);
+        return new HashSet<T>(mhs.getHamt());
+    }
+
     /**
      * Transform this value to another value type.
      * Enables fluent-style programming by chaining calls.
@@ -226,6 +281,16 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 }
 
+function hamtForElement<T>(elt: T & WithEquality): any {
+    if (hasEquals(elt)) {
+        return hamt.make({
+            hash: (v: T & HasEquals) => v.hashCode(),
+            keyEq: (a: T & HasEquals, b: T & HasEquals) => a.equals(b)
+        }).set(elt,elt);
+    }
+    return hamt.make().set(elt,elt);
+}
+
 // we need to override the empty hashmap
 // because i don't know how to get the hash & keyset
 // functions for the keys without a key value to get
@@ -237,13 +302,7 @@ class EmptyHashSet<T> extends HashSet<T> {
     }
 
     add(elt: T & WithEquality): HashSet<T> {
-        if (hasEquals(elt)) {
-            return new HashSet<T>(hamt.make({
-                hash: (v: T & HasEquals) => v.hashCode(),
-                keyEq: (a: T & HasEquals, b: T & HasEquals) => a.equals(b)
-            }).set(elt,elt));
-        }
-        return new HashSet<T>(hamt.make().set(elt,elt));
+        return new HashSet<T>(hamtForElement(elt));
     }
 
     /**
@@ -287,6 +346,12 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     allMatch(predicate:(v:T)=>boolean): boolean {
         return true;
+    }
+
+    mutate(operation:(x:MutableHashSet<T>)=>void): HashSet<T> {
+        const mhs = new MutableHashSet<T>();
+        operation(mhs);
+        return new HashSet<T>(mhs.getHamt());
     }
 
     equals(other: HashSet<T>): boolean {

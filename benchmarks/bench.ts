@@ -20,5 +20,9 @@ function compare(...items: Array<[string, ()=>any]>) {
 const getArray = (length:number) => Array.from({length}, () => Math.floor(Math.random() * length));
 const array = getArray(200)
 const vec = Vector.ofIterable(array)
-compare(['Vector.filter', () => vec.filter(x => x%2===0)],
-        ['Array.filter', () => array.filter(x => x%2===0)]);
+// compare(['Vector.filter', () => vec.filter(x => x%2===0)],
+//         ['Array.filter', () => array.filter(x => x%2===0)]);
+
+const vecLessValues = vec.map(x => x%10);
+compare(['Vector.distinctBy', () => vecLessValues.distinctBy(x => x)],
+        ['Vector.distinctBy2', () => vecLessValues.distinctBy2(x => x)]);

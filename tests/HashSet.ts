@@ -100,4 +100,20 @@ describe("hashset combinations", () => {
 describe("hashset transformations", () => {
     it("map works", () => assert.ok(
         HashSet.of(5,6,7).equals(HashSet.of(1,2,3).map(x=>x+4))));
+    it("mutable changes apply", () => assert.deepEqual(
+        [5,6,7], HashSet.of(5).mutate(set => {set.add(6); set.add(7);}).toArray().sort()));
+    it("gives the context in the mutable value", () => {
+        let ok = false;
+        HashSet.of(5,6).mutate(set => { ok = set.contains(5)})
+        assert.ok(ok);
+    });
+    it("mutable changes on empty hashset apply", () => assert.ok(
+        HashSet.of(5,6,7).equals(HashSet.empty<number>().mutate(set => {set.add(5); set.add(6); set.add(7);}))));
+    it("gives the context in the empty mutable value", () => {
+        let ok = true;
+        let ok2 = false;
+        HashSet.empty<number>().mutate(set => { ok = set.contains(5); set.add(5);ok2 = set.contains(5);})
+        assert.ok(!ok);
+        assert.ok(ok2);
+    });
 });

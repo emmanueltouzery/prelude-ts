@@ -651,7 +651,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
      *     => [1,2,3]
      */
-    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Vector<T> {
+    distinctBy2<U>(keyExtractor: (x:T)=>U&WithEquality): Vector<T> {
         let keySet = HashSet.empty<U>();
         return new Vector<T>(hamt.empty.mutate(
             (h:any) => {
@@ -665,6 +665,24 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
                     }
                 }
             }), 0);
+    }
+
+    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Vector<T> {
+        let resHamt = hamt.empty;
+        HashSet.empty<U>().mutate(set => {
+            resHamt = resHamt.mutate(
+                (h:any) => {
+                    let targetIdx = 0;
+                    for (let i=0;i<this.hamt.size;i++) {
+                        const val = this.hamt.get(i+this.indexShift);
+                        const transformedVal = keyExtractor(val);
+                        if (!set.contains(transformedVal)) {
+                            h.set(targetIdx++, val);
+                            set.add(transformedVal);
+                        }
+                    }
+                })});
+        return new Vector<T>(resHamt, 0);
     }
 
     /**
