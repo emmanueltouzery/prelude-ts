@@ -1,5 +1,6 @@
 import { Seq } from "../src/Seq";
 import { HashMap } from "../src/HashMap";
+import { Stream } from "../src/Stream";
 import { Option } from "../src/Option";
 import { MyClass } from "./SampleData";
 import * as assert from 'assert'
@@ -104,6 +105,10 @@ export function runTests(seqName: string,
             "1, 2, 3", ofStruct(1,2,3).mkString(", ")));
     });
     describe(seqName + " manipulation", () => {
+        it("computes the length correctly", () => assert.equal(
+            3, ofStruct(1,2,3).length()));
+        it("computes the length of the empty seq correctly", () => assert.equal(
+            0, empty().length()));
         it("groupBy works", () => assert.ok(
             HashMap.empty().put(0, ofStruct(2,4)).put(1, ofStruct(1,3))
                 .equals(ofStruct(1,2,3,4).groupBy(x => x%2))));
@@ -120,6 +125,17 @@ export function runTests(seqName: string,
             [], empty().reverse().toArray()));
         it("correctly reverses also after prepend", () => assert.deepEqual(
             [3,2,1], ofStruct(2,3).prepend(1).reverse().toArray()));
+        it("correctly partitions also after prepend", () => assert.deepEqual(
+            [[1,3,5,7],[2,4,6,8]],
+            ofStruct(2,3,4,5,6,7,8).prepend(1).partition(x => x%2!==0)
+                .map(v => v.toArray())));
+        it("zips with an array", () => assert.deepEqual(
+            [[1,"a"], [2,"b"]], ofStruct(1,2,3).zip(["a","b"]).toArray()));
+        it("zips with a stream", () => assert.deepEqual(
+            [["a",0], ["b",1]], ofStruct("a","b").zip(Stream.iterate(0,x=>x+1)).toArray()));
+        it("richer example", () => assert.deepEqual(
+            [[1,"a"],[2,"b"]], ofStruct(1,2,3)
+                .zip(["a", "b", "c"]).takeWhile(([k,v]) => k<3).toArray()));
     });
     describe(seqName + " filtering", () => {
         it("distinctBy", () => assert.deepEqual(
@@ -148,5 +164,11 @@ export function runTests(seqName: string,
             Option.none().equals(ofStruct(1,2,3).get(4))));
         it("get doesn't find when negative index", () => assert.ok(
             Option.none().equals(ofStruct(1,2,3).get(-1))));
+        it("correctly gets the tail of the empty vector", () => assert.ok(
+            empty().tail().isNone()));
+        it("correctly gets the tail of a simple vector", () => assert.ok(
+            ofStruct(2,3,4).equals(ofStruct(1,2,3,4).tail().getOrThrow())));
+        it("correctly gets the tail of a vector after prepend", () => assert.ok(
+            ofStruct(2,3,4).equals(ofStruct(2,3,4).prepend(1).tail().getOrThrow())));
     });
 }

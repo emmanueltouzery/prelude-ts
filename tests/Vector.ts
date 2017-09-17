@@ -22,17 +22,6 @@ describe("Vector manipulation", () => {
         Vector.of(1,2,2,3,3,3,4,4,4,4)
             .equals(Vector.of(1,2,3,4).flatMap(
                 x => Vector.ofIterable(Array.from(Array(x), ()=>x))))));
-    it("zips two vectors", () => assert.deepEqual(
-        [[1,"a"], [2,"b"]], Vector.of(1,2,3).zip(["a","b"]).toArray()));
-    it("zips with a stream", () => assert.deepEqual(
-        [["a",0], ["b",1]], Vector.of("a","b").zip(Stream.iterate(0,x=>x+1)).toArray()));
-    it("richer example", () => assert.deepEqual(
-        [[1,"a"],[2,"b"]], Vector.of(1,2,3)
-            .zip(["a", "b", "c"]).takeWhile(([k,v]) => k<3).toArray()));
-    it("computes the length correctly", () => assert.equal(
-        3, Vector.of(1,2,3).length()));
-    it("computes the length of the empty vector correctly", () => assert.equal(
-        0, Vector.empty().length()));
 });
 
 describe("Vector value extraction", () => {
@@ -54,17 +43,6 @@ describe("Vector value extraction", () => {
         Vector.empty().head().isNone()));
     it("correctly gets the first element also after prepend", () => assert.equal(
         1, Vector.of(4,5).prependAll(Vector.of(1,2,3)).head().getOrUndefined()));
-    it("correctly gets the tail of the empty vector", () => assert.ok(
-        Vector.empty().tail().isNone()));
-    it("correctly gets the tail of a simple vector", () => assert.ok(
-        Vector.of(2,3,4).equals(Vector.of(1,2,3,4).tail().getOrThrow())));
-    it("correctly gets the tail of a vector after prepend", () => assert.ok(
-        Vector.of(2,3,4).equals(Vector.of(2,3,4).prepend(1).tail().getOrThrow())));
-    it("correctly partitions also after prepend", () => assert.deepEqual(
-        [[1,3,5,7],[2,4,6,8]],
-        Vector.of(2,3,4,5,6,7,8).prepend(1).partition(x => x%2!==0)
-            .map(v => v.toArray())));
-    
 });
 
 describe("Vector iteration", () => {
