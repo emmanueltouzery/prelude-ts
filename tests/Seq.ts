@@ -4,7 +4,8 @@ import * as assert from 'assert'
 
 export function runTests(seqName: string,
                          ofIterable: <T>(i:Iterable<T>)=>Seq<T>,
-                         ofStruct: <T>(...i:Array<T>)=>Seq<T>) {
+                         ofStruct: <T>(...i:Array<T>)=>Seq<T>,
+                         empty: <T>()=>Seq<T>) {
     describe(seqName + " creation", () => {
         it("creates from a JS array", () => assert.deepEqual(
             ["a","b", "c"],
@@ -47,6 +48,26 @@ export function runTests(seqName: string,
             false, ofStruct(1).equals(<any>null)));
         it("is strict with equality", () => assert.ok(
             !ofStruct(1,2).equals(ofStruct(1, <any>undefined))));
+        it("supports contain", () => assert.ok(
+            ofStruct(1,2,3).contains(2)));
+        it("rejects contain", () => assert.ok(
+            !ofStruct(1,2,3).contains(4)));
+        it("rejects contain, empty stream", () => assert.ok(
+            !empty().contains(4)));
+        it("supports contains, custom equality", () => assert.ok(
+            ofStruct(new MyClass("hi", 3)).contains(new MyClass("hi", 3))));
+        it("supports allMatch, positive case", () => assert.ok(
+            ofStruct(2,4,8).allMatch(x => x%2 === 0)));
+        it("supports allMatch, negative case", () => assert.ok(
+            !ofStruct(2,5,8).allMatch(x => x%2 === 0)));
+        it("supports allMatch, empty stream", () => assert.ok(
+            empty<number>().allMatch(x => x%2 === 0)));
+        it("supports anyMatch, positive case", () => assert.ok(
+            ofStruct(3,5,8).anyMatch(x => x%2 === 0)));
+        it("supports anyMatch, negative case", () => assert.ok(
+            !ofStruct(3,5,9).anyMatch(x => x%2 === 0)));
+        it("supports anyMatch, empty stream", () => assert.ok(
+            !empty<number>().anyMatch(x => x%2 === 0)));
     });
 
 }

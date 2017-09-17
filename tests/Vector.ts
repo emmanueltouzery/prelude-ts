@@ -6,7 +6,10 @@ import { MyClass } from "./SampleData";
 import * as SeqTest from "./Seq";
 import * as assert from 'assert'
 
-SeqTest.runTests("Vector", Vector.ofIterable, Vector.ofStruct);
+SeqTest.runTests("Vector",
+                 Vector.ofIterable,
+                 Vector.ofStruct,
+                 Vector.empty);
 
 describe("Vector manipulation", () => {
     it("appends correctly", () => assert.ok(
@@ -146,27 +149,4 @@ describe("Vector iteration", () => {
     //     }
     //     assert.equal(6, total);
     // })
-})
-
-describe("Vector Value tests", () => {
-    it("supports contain", () => assert.ok(
-        Vector.of(1,2,3).contains(2)));
-    it("rejects contain", () => assert.ok(
-        !Vector.of(1,2,3).contains(4)));
-    it("rejects contain, empty vector", () => assert.ok(
-        !Vector.empty().contains(4)));
-    it("supports contains, custom equality", () => assert.ok(
-        Vector.of(new MyClass("hi", 3)).contains(new MyClass("hi", 3))));
-    it("supports allMatch, positive case", () => assert.ok(
-        Vector.of(2,4,8).allMatch(x => x%2 === 0)));
-    it("supports allMatch, negative case", () => assert.ok(
-        !Vector.of(2,5,8).allMatch(x => x%2 === 0)));
-    it("supports allMatch, empty vector", () => assert.ok(
-        Vector.empty<number>().allMatch(x => x%2 === 0)));
-    it("supports anyMatch, positive case", () => assert.ok(
-        Vector.of(3,5,8).anyMatch(x => x%2 === 0)));
-    it("supports anyMatch, negative case", () => assert.ok(
-        !Vector.of(3,5,9).anyMatch(x => x%2 === 0)));
-    it("supports anyMatch, empty vector", () => assert.ok(
-        !Vector.empty<number>().anyMatch(x => x%2 === 0)));
 })

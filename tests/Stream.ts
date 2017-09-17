@@ -6,7 +6,10 @@ import { HashMap} from "../src/HashMap";
 import * as SeqTest from "./Seq";
 import * as assert from 'assert'
 
-SeqTest.runTests("Stream", Stream.ofIterable, Stream.ofStruct);
+SeqTest.runTests("Stream",
+                 Stream.ofIterable,
+                 Stream.ofStruct,
+                 Stream.empty);
 
 describe("Stream basics", () => {
     it("creates a continually constant value", () => assert.deepEqual(
@@ -123,26 +126,6 @@ describe("Stream filtering", () => {
     it("groupBy works", () => assert.ok(
         HashMap.empty().put(0, Stream.of(2,4)).put(1, Stream.of(1,3))
             .equals(Stream.of(1,2,3,4).groupBy(x => x%2))));
-    it("supports contain", () => assert.ok(
-        Stream.of(1,2,3).contains(2)));
-    it("rejects contain", () => assert.ok(
-        !Stream.of(1,2,3).contains(4)));
-    it("rejects contain, empty stream", () => assert.ok(
-        !Stream.empty().contains(4)));
-    it("supports contains, custom equality", () => assert.ok(
-        Stream.of(new MyClass("hi", 3)).contains(new MyClass("hi", 3))));
-    it("supports allMatch, positive case", () => assert.ok(
-        Stream.of(2,4,8).allMatch(x => x%2 === 0)));
-    it("supports allMatch, negative case", () => assert.ok(
-        !Stream.of(2,5,8).allMatch(x => x%2 === 0)));
-    it("supports allMatch, empty stream", () => assert.ok(
-        Stream.empty<number>().allMatch(x => x%2 === 0)));
-    it("supports anyMatch, positive case", () => assert.ok(
-        Stream.of(3,5,8).anyMatch(x => x%2 === 0)));
-    it("supports anyMatch, negative case", () => assert.ok(
-        !Stream.of(3,5,9).anyMatch(x => x%2 === 0)));
-    it("supports anyMatch, empty stream", () => assert.ok(
-        !Stream.empty<number>().anyMatch(x => x%2 === 0)));
 });
 
 describe("Stream conversions", () => {
