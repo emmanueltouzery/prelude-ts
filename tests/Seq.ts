@@ -18,6 +18,10 @@ export function runTests(seqName: string,
             ofStruct("a","b","c").toArray()));
         it("creates also with nulls", () => assert.deepEqual(
             [1, null, 2], ofStruct(1, null, 2).toArray()));
+        it("supports ofIterable", () => assert.deepEqual(
+            [1,2,3], ofIterable([1,2,3]).toArray()));
+        it("supports of", () => assert.deepEqual(
+            [1,2,3], ofStruct(1,2,3).toArray()));
     });
 
     describe(seqName + " prepend", () => {
@@ -74,6 +78,16 @@ export function runTests(seqName: string,
     });
 
     describe(seqName + " iteration", () => {
+        // can get for..of in tests by changing the target to es6,
+        // or enabling downlevelIteration in the tsconfig.json,
+        // not doing that for now.
+        // it("supports for of", () => {
+        //     let total = 0;
+        //     for (const x of ofStruct(1,2,3)) {
+        //         total += x;
+        //     }
+        //     assert.equal(6, total);
+        // })
         it("finds items", () =>
            ofStruct(1,2,3).find(x => x >= 2).contains(2));
         it("doesn't find if the predicate doesn't match", () =>
@@ -103,6 +117,10 @@ export function runTests(seqName: string,
     describe(seqName + " conversions", () => {
         it("mkString works", () => assert.equal(
             "1, 2, 3", ofStruct(1,2,3).mkString(", ")));
+        it("transforms to map", () => {
+            assert.ok(HashMap.empty<number,string>().put(1,"ok").put(2, "bad")
+                      .equals(<HashMap<number,string>>ofStruct<[number,string]>([1,"ok"],[2,"bad"]).toMap(x => x)));
+        });
     });
     describe(seqName + " manipulation", () => {
         it("computes the length correctly", () => assert.equal(
@@ -136,8 +154,24 @@ export function runTests(seqName: string,
         it("richer example", () => assert.deepEqual(
             [[1,"a"],[2,"b"]], ofStruct(1,2,3)
                 .zip(["a", "b", "c"]).takeWhile(([k,v]) => k<3).toArray()));
+        it("flatMap works", () => assert.ok(
+            ofStruct(1,2,2,3,3,3,4,4,4,4)
+                .equals(ofStruct(1,2,3,4).flatMap(
+                    x => ofIterable(Array.from(Array(x), ()=>x))))));
+        it("map works", () => assert.ok(
+            ofStruct(5,6,7).equals(ofStruct(1,2,3).map(x=>x+4))));
+        it("supports append", () => assert.deepEqual(
+            [1,2,3,4], ofStruct(1,2,3).append(4).toArray()));
+        it("supports appendAll", () => assert.deepEqual(
+            [1,2,3,4,5], ofStruct(1,2,3).appendAll([4,5]).toArray()));
     });
     describe(seqName + " filtering", () => {
+        it("filter works", () => assert.ok(
+            ofStruct(2,4)
+                .equals(ofStruct(1,2,3,4).filter(x => x%2 === 0))));
+        it("filter works with prepend", () => assert.ok(
+            ofStruct(2,4)
+                .equals(ofStruct(3,4).prepend(2).prepend(1).filter(x => x%2 === 0))));
         it("distinctBy", () => assert.deepEqual(
             [1,2,3], ofStruct(1,1,2,3,2,3,1).distinctBy(x => x).toArray()));
         it("distinctBy for the empty seq", () => assert.deepEqual(
@@ -170,5 +204,17 @@ export function runTests(seqName: string,
             ofStruct(2,3,4).equals(ofStruct(1,2,3,4).tail().getOrThrow())));
         it("correctly gets the tail of a vector after prepend", () => assert.ok(
             ofStruct(2,3,4).equals(ofStruct(2,3,4).prepend(1).tail().getOrThrow())));
+        it("gets the last value correctly", () => assert.equal(
+            3, ofStruct(1,2,3).last().getOrThrow()));
+        it("gets the last value correctly for an empty seq", () => assert.ok(
+            empty().last().isNone()));
+        it("correctly gets the last element also after prepend", () => assert.equal(
+            5, ofStruct(4,5).prependAll(ofStruct(1,2,3)).last().getOrUndefined()));
+        it("correctly gets the first element", () => assert.equal(
+            1, ofStruct(1,2,3,4,5).head().getOrUndefined()));
+        it("correctly gets the first element of an empty vector", () => assert.ok(
+            empty().head().isNone()));
+        it("correctly gets the first element also after prepend", () => assert.equal(
+            1, ofStruct(4,5).prependAll(ofStruct(1,2,3)).head().getOrUndefined()));
     });
 }
