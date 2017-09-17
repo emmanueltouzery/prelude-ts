@@ -1,5 +1,6 @@
 import { Seq } from "../src/Seq";
 import { HashMap } from "../src/HashMap";
+import { Option } from "../src/Option";
 import { MyClass } from "./SampleData";
 import * as assert from 'assert'
 
@@ -137,5 +138,15 @@ export function runTests(seqName: string,
             [4,5,6], ofStruct(1,2,3,4,5,6).drop(3).toArray()));
         it("returns an empty stream when dropping too much", () => assert.deepEqual(
             [], ofStruct(1,2).drop(3).toArray()));
+    });
+    describe(seqName + " value extraction", () => {
+        it("get finds when present", () => assert.ok(
+            Option.of(5).equals(ofStruct(1,2,3,4,5,6).get(4))));
+        it("get finds when present after prepend", () => assert.ok(
+            Option.of(5).equals(ofStruct(2,3,4,5,6).prepend(1).get(4))));
+        it("get doesn't find when stream too short", () => assert.ok(
+            Option.none().equals(ofStruct(1,2,3).get(4))));
+        it("get doesn't find when negative index", () => assert.ok(
+            Option.none().equals(ofStruct(1,2,3).get(-1))));
     });
 }

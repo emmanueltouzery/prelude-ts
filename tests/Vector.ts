@@ -42,14 +42,6 @@ describe("Vector value extraction", () => {
     it("filter works with prepend", () => assert.ok(
         Vector.of(2,4)
             .equals(Vector.of(3,4).prepend(2).prepend(1).filter(x => x%2 === 0))));
-    it("get finds when present", () => assert.ok(
-        Option.of(5).equals(Vector.of(1,2,3,4,5,6).get(4))));
-    it("get finds when present after prepend", () => assert.ok(
-        Option.of(5).equals(Vector.of(2,3,4,5,6).prepend(1).get(4))));
-    it("get doesn't find when vector too short", () => assert.ok(
-        Option.none().equals(Vector.of(1,2,3).get(4))));
-    it("get doesn't find when negative index", () => assert.ok(
-        Option.none().equals(Vector.of(1,2,3).get(-1))));
     it("correctly gets the last element", () => assert.equal(
         5, Vector.of(1,2,3,4,5).last().getOrUndefined()));
     it("correctly gets the last element of an empty vector", () => assert.ok(
