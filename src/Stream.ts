@@ -136,6 +136,30 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
     }
 
     /**
+     * Dual to the foldRight function. Build a collection from a seed.
+     * Takes a starting element and a function.
+     * It applies the function on the starting element; if the
+     * function returns None, it stops building the list, if it
+     * returns Some of a pair, it adds the first element to the result
+     * and takes the second element as a seed to keep going.
+     *
+     *     unfoldRight(
+     *          10, x=>Option.of(x)
+     *              .filter(x => x!==0)
+     *              .mapStruct<[number,number]>(x => [x,x-1]))
+     *     => [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+     */
+    static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Stream<U> {
+        let nextVal = fn(seed);
+        if (nextVal.isNone()) {
+            return <Stream<U>>emptyStream;
+        }
+        return new ConsStream(
+            nextVal.getOrThrow()[0],
+            ()=>Stream.unfoldRight(nextVal.getOrThrow()[1], fn));
+    }
+
+    /**
      * Implementation of the Iterator interface.
      */
     abstract [Symbol.iterator](): Iterator<T>;

@@ -9,4 +9,5 @@ import * as assert from 'assert'
 SeqTest.runTests("Vector",
                  Vector.ofIterable,
                  Vector.ofStruct,
-                 Vector.empty);
+                 Vector.empty,
+                 Vector.unfoldRight);

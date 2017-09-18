@@ -62,6 +62,32 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     static of<T>(...arr: Array<T & WithEquality>): Vector<T> {
         return Vector.ofIterable(arr);
     }
+
+    /**
+     * Dual to the foldRight function. Build a collection from a seed.
+     * Takes a starting element and a function.
+     * It applies the function on the starting element; if the
+     * function returns None, it stops building the list, if it
+     * returns Some of a pair, it adds the first element to the result
+     * and takes the second element as a seed to keep going.
+     *
+     *     unfoldRight(
+     *          10, x=>Option.of(x)
+     *              .filter(x => x!==0)
+     *              .mapStruct<[number,number]>(x => [x,x-1]))
+     *     => [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+     */
+    static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Vector<U> {
+        return new Vector<U>(hamt.empty.mutate(
+            (h:any) => {
+                let idx = 0;
+                let nextVal = fn(seed);
+                while (nextVal.isSome()) {
+                    h.set(idx++, nextVal.getOrThrow()[0]);
+                    nextVal = fn(nextVal.getOrThrow()[1]);
+                }
+            }), 0);
+    }
     
     /**
      * Implementation of the Iterator interface.

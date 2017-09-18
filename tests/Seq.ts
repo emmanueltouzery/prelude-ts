@@ -8,7 +8,8 @@ import * as assert from 'assert'
 export function runTests(seqName: string,
                          ofIterable: <T>(i:Iterable<T>)=>Seq<T>,
                          ofStruct: <T>(...i:Array<T>)=>Seq<T>,
-                         empty: <T>()=>Seq<T>) {
+                         empty: <T>()=>Seq<T>,
+                         unfoldRight: <T,U>(seed: T, fn: (x:T)=>Option<[U,T]>)=>Seq<U>) {
     describe(seqName + " creation", () => {
         it("creates from a JS array", () => assert.deepEqual(
             ["a","b", "c"],
@@ -22,6 +23,11 @@ export function runTests(seqName: string,
             [1,2,3], ofIterable([1,2,3]).toArray()));
         it("supports of", () => assert.deepEqual(
             [1,2,3], ofStruct(1,2,3).toArray()));
+        it("supports unfoldRight", () => assert.deepEqual(
+            [10,9,8,7,6,5,4,3,2,1], unfoldRight(
+                10, x=>Option.of(x)
+                    .filter(x => x!==0)
+                    .mapStruct<[number,number]>(x => [x,x-1])).toArray()));
     });
 
     describe(seqName + " prepend", () => {

@@ -9,7 +9,8 @@ import * as assert from 'assert'
 SeqTest.runTests("Stream",
                  Stream.ofIterable,
                  Stream.ofStruct,
-                 Stream.empty);
+                 Stream.empty,
+                 Stream.unfoldRight);
 
 describe("Stream basics", () => {
     it("creates a continually constant value", () => assert.deepEqual(
