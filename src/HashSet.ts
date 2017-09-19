@@ -89,6 +89,18 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Call a predicate for each element in the collection,
+     * build a new collection holding only the elements
+     * for which the predicate returned true.
+     */
+    filter(predicate:(v:T)=>boolean): HashSet<T> {
+        return this.hamt.fold(
+            (acc: HashSet<T>, value: T&WithEquality, key: T&WithEquality) =>
+                predicate(value) ? acc.add(value) : acc
+            , HashSet.empty());
+    }
+
+    /**
      * Converts this set to an array
      */
     toArray(): Array<T & WithEquality> {
@@ -215,14 +227,26 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      * Get a human-friendly string representation of that value.
      */
     toString(): string {
-        return "{" +
-            this.hamt.fold(
-                (acc: string[], value: T, key: T) =>
-                    {acc.push(toStringHelper(key)); return acc;}, []).join(", ") + "}";
+        return "{" + this.mkString(", ") + "}";
     }
 
     inspect(): string {
         return this.toString();
+    }
+
+    /**
+     * Joins elements of the collection by a separator.
+     * Example:
+     *
+     *     HashSet.of(1,2,3).mkString(", ")
+     *     => "1, 2, 3"
+     *
+     * (of course, order is not guaranteed)
+     */
+    mkString(separator: string): string {
+        return this.hamt.fold(
+            (acc: string[], value: T, key: T) =>
+                {acc.push(toStringHelper(key)); return acc;}, []).join(separator);
     }
 }
 
@@ -259,6 +283,10 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     map<U>(mapper:(v:T)=>U&WithEquality): HashSet<U> {
         return <EmptyHashSet<U>>emptyHashSet;
+    }
+
+    filter(predicate:(v:T)=>boolean): HashSet<T> {
+        return this;
     }
 
     toArray(): Array<T & WithEquality> {
@@ -300,11 +328,12 @@ class EmptyHashSet<T> extends HashSet<T> {
         return 0;
     }
 
-    /**
-     * Get a human-friendly string representation of that value.
-     */
     toString(): string {
         return "{}";
+    }
+
+    mkString(separator: string): string {
+        return "";
     }
 }
 

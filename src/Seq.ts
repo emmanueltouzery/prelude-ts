@@ -1,27 +1,13 @@
-import { Value } from "./Value";
 import { WithEquality, Ordering } from "./Comparison";
 import { IMap } from "./IMap";
 import { Option } from "./Option";
+import { Collection } from "./Collection";
 
 /**
  * A generic interface for list-like implementations.
  * @type T the item type
  */
-export interface Seq<T> extends Value, Iterable<T> {
-    /**
-     * Get the length of the collection.
-     */
-    length(): number;
-
-    /**
-     * true if the collection is empty, false otherwise.
-     */
-    isEmpty(): boolean;
-
-    /**
-     * Convert to array.
-     */
-    toArray(): Array<T>;
+export interface Seq<T> extends Collection<T> {
 
     /**
      * Append an element at the end of the collection.
@@ -90,24 +76,11 @@ export interface Seq<T> extends Value, Iterable<T> {
     map<U>(mapper:(v:T)=>U&WithEquality): Seq<U>;
 
     /**
-     * Call a predicate for each element in the collection,
-     * build a new collection holding only the elements
-     * for which the predicate returned true.
-     */
-    filter(predicate:(v:T)=>boolean): Seq<T>;
-
-    /**
      * Search for an item matching the predicate you pass,
      * return Option.Some of that element if found,
      * Option.None otherwise.
      */
     find(predicate:(v:T)=>boolean): Option<T>;
-
-    /**
-     * Returns true if the item is in the collection,
-     * false otherwise.
-     */
-    contains(v:T&WithEquality): boolean;
 
     /**
      * Calls the function you give for each item in the collection,
@@ -126,18 +99,6 @@ export interface Seq<T> extends Value, Iterable<T> {
      * No equality requirement
      */
     flatMapStruct<U>(mapper:(v:T)=>Seq<U>): Seq<U>;
-
-    /**
-     * Returns true if the predicate returns true for all the
-     * elements in the collection.
-     */
-    allMatch(predicate:(v:T)=>boolean): boolean;
-
-    /**
-     * Returns true if there the predicate returns true for any
-     * element in the collection.
-     */
-    anyMatch(predicate:(v:T)=>boolean): boolean;
 
     /**
      * Group elements in the collection using a classifier function.

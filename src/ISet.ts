@@ -1,11 +1,12 @@
 import { WithEquality } from "./Comparison";
 import { Value} from "./Value";
+import { Collection } from "./Collection";
 
 /**
  * A generic interface for set-like implementations.
  * @type T the item type
  */
-export interface ISet<T> extends Value {
+export interface ISet<T> extends Value, Collection<T> {
 
     /**
      * Returns the number of elements in the set.

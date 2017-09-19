@@ -191,6 +191,67 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
     }
 
     /**
+     * Returns true if the predicate returns true for all the
+     * elements in the collection.
+     */
+    allMatch(predicate:(k:K,v:V)=>boolean): boolean {
+        const iterator: Iterator<[K,V]> = this.hamt.entries();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (!predicate(curItem.value[0], curItem.value[1])) {
+                return false;
+            }
+            curItem = iterator.next();
+        }
+        return true;
+    }
+
+    /**
+     * Returns true if there the predicate returns true for any
+     * element in the collection.
+     */
+    anyMatch(predicate:(k:K,v:V)=>boolean): boolean {
+        const iterator: Iterator<[K,V]> = this.hamt.entries();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (predicate(curItem.value[0], curItem.value[1])) {
+                return true;
+            }
+            curItem = iterator.next();
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the item is in the collection,
+     * false otherwise.
+     */
+    contains(val: [K,V]): boolean {
+        return areEqual(this.hamt.get(val[0]), val[1]);
+    }
+
+    /**
+     * Call a predicate for each element in the collection,
+     * build a new collection holding only the elements
+     * for which the predicate returned true.
+     */
+    filter(predicate:(k:K,v:V)=>boolean): HashMap<K,V> {
+        return this.hamt.fold(
+            (acc: HashMap<K,V>, value: V, key: K&WithEquality) =>
+                predicate(key,value) ? acc.putStruct(key,value) : acc,
+            HashMap.empty());
+    }
+
+    /**
+     * Convert to array.
+     */
+    toArray(): Array<[K,V]> {
+        return this.hamt.fold(
+            (acc: [[K,V]], value: V, key: K&WithEquality) =>
+                {acc.push([key,value]); return acc; }, []);
+    }
+
+    /**
      * Convert this map to a vector of key,value pairs.
      * Note that Map is already an iterable of key,value pairs!
      */
@@ -334,6 +395,26 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return HashMap.empty<K,V2>();
     }
 
+    allMatch(predicate:(k:K,v:V)=>boolean): boolean {
+        return true;
+    }
+
+    anyMatch(predicate:(k:K,v:V)=>boolean): boolean {
+        return false;
+    }
+
+    contains(val: [K,V]): boolean {
+        return false;
+    }
+
+    filter(predicate:(k:K,v:V)=>boolean): HashMap<K,V> {
+        return this;
+    }
+
+    toArray(): Array<[K,V]> {
+        return [];
+    }
+
     toVector(): Vector<[K,V]> {
         return Vector.empty<[K,V]>();
     }
@@ -347,6 +428,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     hashCode(): number {
         return 0;
+    }
+
+    toString(): string {
+        return "";
     }
 }
 

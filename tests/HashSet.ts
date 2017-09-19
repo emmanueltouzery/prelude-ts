@@ -37,6 +37,8 @@ describe("hashset conversions", () => {
     });
     it("should be displayed in a nice format by toString", () =>
        assert.equal("{'a', 'b', 'c'}", HashSet.of("a","b","c").toString()));
+    it("converts to string using mkString", () =>
+       assert.equal("'a'|'b'|'c'", HashSet.of("a","b","c").mkString("|")));
 });
 
 describe("hashset access", () => {
@@ -95,6 +97,8 @@ describe("hashset combinations", () => {
         HashSet.of(1,2,4).equals(HashSet.of(0,1,2,3,4).removeAll([0,3]))));
     it("calculates removeAll from empty well", () => assert.ok(
         HashSet.empty<number>().equals(HashSet.empty<number>().removeAll([0,3]))));
+    it("filters correctly", () => assert.ok(
+        HashSet.of(2,4).equals(HashSet.of(1,2,3,4,5).filter(x => x%2==0))));
 });
 
 describe("hashset transformations", () => {

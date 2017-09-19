@@ -109,6 +109,11 @@ export interface IMap<K,V> extends Value {
     toVector(): Vector<[K,V]>;
 
     /**
+     * Convert to array.
+     */
+    toArray(): Array<[K,V]>;
+
+    /**
      * number of items in the map
      */
     length(): number;
@@ -134,4 +139,29 @@ export interface IMap<K,V> extends Value {
      * Enables fluent-style programming by chaining calls.
      */
     transform<U>(converter:(x:IMap<K,V>)=>U): U;
+
+    /**
+     * Returns true if the predicate returns true for all the
+     * elements in the collection.
+     */
+    allMatch(predicate:(k:K,v:V)=>boolean): boolean;
+
+    /**
+     * Returns true if there the predicate returns true for any
+     * element in the collection.
+     */
+    anyMatch(predicate:(k:K,v:V)=>boolean): boolean;
+
+    /**
+     * Returns true if the item is in the collection,
+     * false otherwise.
+     */
+    contains(val: [K,V]): boolean;
+
+    /**
+     * Call a predicate for each element in the collection,
+     * build a new collection holding only the elements
+     * for which the predicate returned true.
+     */
+    filter(predicate:(k:K,v:V)=>boolean): IMap<K,V>;
 }

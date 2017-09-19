@@ -128,4 +128,33 @@ describe("hashmap transformation", () => {
     it("should transform empty to vector", () => assert.deepEqual(
         [],
         HashMap.empty<string,number>().toVector().toArray()));
+    it("should transform non-empty to array", () => assert.deepEqual(
+        [["a",1], ["b",2]],
+        HashMap.empty<string,number>().put("a",1).put("b",2).toArray()));
+    it("should transform empty to array", () => assert.deepEqual(
+        [],
+        HashMap.empty<string,number>().toArray()));
+    it("should filter properly", () => assert.deepEqual(
+        [[1,"a"],[3,"c"]], HashMap.empty<number,string>()
+            .put(1,"a").put(2,"b").put(3,"c").put(4,"d").filter((k,v) => k%2!=0).toArray()));
+    it("should filter empty properly", () => assert.deepEqual(
+        [], HashMap.empty().toArray()));
+    it("should support allMatch, positive case", () => assert.ok(
+        HashMap.empty<number,string>().put(1,"a").put(2,"b").allMatch((k,v) => k > 0)));
+    it("should support allMatch, negative case", () => assert.ok(
+        !HashMap.empty<number,string>().put(1,"a").put(2,"b").allMatch((k,v) => k < 0)));
+    it("should support allMatch, empty map", () => assert.ok(
+        HashMap.empty<number,string>().allMatch((k,v) => k > 0)));
+    it("should support anyMatch, positive case", () => assert.ok(
+        HashMap.empty<number,string>().put(1,"a").put(-1,"b").anyMatch((k,v) => k > 0)));
+    it("should support anyMatch, negative case", () => assert.ok(
+        !HashMap.empty<number,string>().put(1,"a").put(2,"b").anyMatch((k,v) => k < 0)));
+    it("should support anyMatch, empty map", () => assert.ok(
+        !HashMap.empty<number,string>().anyMatch((k,v) => k > 0)));
+    it("should support contains, positive case", () => assert.ok(
+        HashMap.empty<number,string>().put(1,"a").put(2,"b").contains([2,"b"])));
+    it("should support contains, negative case", () => assert.ok(
+        !HashMap.empty<number,string>().put(1,"a").put(2,"b").contains([2,"c"])));
+    it("should support contains, empty map", () => assert.ok(
+        !HashMap.empty<number,string>().contains([2,"b"])));
 });
