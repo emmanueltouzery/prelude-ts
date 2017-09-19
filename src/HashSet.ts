@@ -1,4 +1,5 @@
 import { ISet } from "./ISet";
+import { Option } from "./Option";
 import { WithEquality, hasEquals, HasEquals,
          getHashCode, areEqual, toStringHelper } from "./Comparison";
 const hamt: any = require("hamt_plus");
@@ -112,6 +113,16 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      */
     length(): number {
         return this.hamt.size;
+    }
+
+    /**
+     * If the collection contains a single element,
+     * return Some of its value, otherwise return None.
+     */
+    single(): Option<T> {
+        return this.hamt.size === 1
+            ? Option.of(this.hamt.keys().next().value)
+            : Option.none();
     }
 
     /**

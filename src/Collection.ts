@@ -1,5 +1,6 @@
 import { WithEquality, Ordering } from "./Comparison";
 import { Value } from "./Value";
+import { Option } from "./Option";
 
 export interface Collection<T> extends Value, Iterable<T> {
     
@@ -42,4 +43,10 @@ export interface Collection<T> extends Value, Iterable<T> {
      * element in the collection.
      */
     anyMatch(predicate:(v:T)=>boolean): boolean;
+
+    /**
+     * If the collection contains a single element,
+     * return Some of its value, otherwise return None.
+     */
+    single(): Option<T>;
 }

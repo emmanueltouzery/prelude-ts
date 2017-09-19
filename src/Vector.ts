@@ -127,6 +127,16 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * If the collection contains a single element,
+     * return Some of its value, otherwise return None.
+     */
+    single(): Option<T> {
+        return this.hamt.size === 1
+            ? Option.of(this.hamt.get(this.indexShift))
+            : Option.none();
+    }
+
+    /**
      * true if the collection is empty, false otherwise.
      */
     isEmpty(): boolean {

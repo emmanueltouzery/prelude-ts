@@ -69,7 +69,7 @@ describe("hashmap - toString should be nicely formatted", () => {
         ""+HashMap.empty<string,MyClass>().put("key1", new MyClass('test', -1))));
 });
 
-describe("hashmap get", () => {
+describe("hashmap extract values", () => {
     it("should retrieve values", () => assert.ok(
         HashMap.empty<string,number>().put("key1", 6).get("key1").contains(6)));
     it("should not find missing values", () => assert.ok(
@@ -111,7 +111,13 @@ describe("hashmap get", () => {
         }
         assert.equal(0, total);
         assert.deepEqual([], letters);
-    })
+    });
+    it("correct returns single positive case", () => assert.deepEqual(
+        [5,"a"], HashMap.of([5,"a"]).single().getOrThrow()));
+    it("correct returns single negative case", () => assert.ok(
+        HashMap.of([5,"a"],[6,"b"]).single().isNone()));
+    it("correct returns single empty map", () => assert.ok(
+        HashMap.empty<number,string>().single().isNone()));
 });
 
 describe("hashmap transformation", () => {

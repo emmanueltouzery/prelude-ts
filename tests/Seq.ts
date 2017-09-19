@@ -222,5 +222,11 @@ export function runTests(seqName: string,
             empty().head().isNone()));
         it("correctly gets the first element also after prepend", () => assert.equal(
             1, ofStruct(4,5).prependAll(ofStruct(1,2,3)).head().getOrUndefined()));
+        it("correct returns single positive case", () => assert.equal(
+            5, ofStruct(5).single().getOrThrow()));
+        it("correct returns single negative case", () => assert.ok(
+            ofStruct(5,6).single().isNone()));
+        it("correct returns single empty seq", () => assert.ok(
+            empty().single().isNone()));
     });
 }

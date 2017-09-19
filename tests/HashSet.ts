@@ -79,6 +79,12 @@ describe("hashset access", () => {
         !HashSet.of(3,5,9).anyMatch(x => x%2 === 0)));
     it("supports anyMatch, empty HashSet", () => assert.ok(
         !HashSet.empty<number>().anyMatch(x => x%2 === 0)));
+    it("correct returns single positive case", () => assert.equal(
+        5, HashSet.of(5).single().getOrThrow()));
+    it("correct returns single negative case", () => assert.ok(
+        HashSet.of(5,6).single().isNone()));
+    it("correct returns single empty seq", () => assert.ok(
+        HashSet.empty().single().isNone()));
 });
 
 describe("hashset equality", () => {

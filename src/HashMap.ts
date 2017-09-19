@@ -154,6 +154,16 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
     }
 
     /**
+     * If the collection contains a single element,
+     * return Some of its value, otherwise return None.
+     */
+    single(): Option<[K,V]> {
+        return this.hamt.size === 1
+            ? Option.of(this.hamt.entries().next().value)
+            : Option.none();
+    }
+
+    /**
      * true if the map is empty, false otherwise.
      */
     isEmpty(): boolean {
@@ -421,6 +431,14 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     length(): number {
         return 0;
+    }
+
+    /**
+     * If the collection contains a single element,
+     * return Some of its value, otherwise return None.
+     */
+    single(): Option<[K,V]> {
+        return Option.none<[K,V]>();
     }
 
     isEmpty(): boolean {

@@ -170,6 +170,12 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
     abstract length(): number;
 
     /**
+     * If the collection contains a single element,
+     * return Some of its value, otherwise return None.
+     */
+    abstract single(): Option<T>;
+
+    /**
      * true if the collection is empty, false otherwise.
      */
     abstract isEmpty(): boolean;
@@ -594,6 +600,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return 0;
     }
 
+    single(): Option<T> {
+        return Option.none<T>();
+    }
+
     isEmpty(): boolean {
         return true;
     }
@@ -791,6 +801,12 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     length(): number {
         return this.foldLeft(0, (n, ignored) => n + 1);
+    }
+
+    single(): Option<T> {
+        return this._tail().isEmpty() ?
+            Option.ofStruct(this.value) :
+            Option.none<T>();
     }
 
     isEmpty(): boolean {
