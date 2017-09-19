@@ -345,8 +345,23 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
      * Elements are then organized in a map. The key is the value of
      * the classifier, and in value we get the list of elements
      * matching that value.
+     *
+     * also see 'Stream.arrangeBy'
      */
     abstract groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Stream<T>>;
+
+    /**
+     * Matches each element with a unique key that you extract from it.
+     * If the same key is present twice, the function will return None.
+     *
+     * also see 'Stream.groupBy'
+     */
+    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
+        // copy-pasted with Vector for now
+        return Option.of(this.groupBy(getKey).mapValues(v => v.single()))
+            .filter(map => !map.anyMatch((k,v) => v.isNone()))
+            .map(map => map.mapValuesStruct(v => v.getOrThrow()));
+    }
 
     /**
      * Append an element at the end of this Stream.

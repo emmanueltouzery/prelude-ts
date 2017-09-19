@@ -554,6 +554,8 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * Elements are then organized in a map. The key is the value of
      * the classifier, and in value we get the list of elements
      * matching that value.
+     *
+     * also see 'Vector.arrangeBy'
      */
     groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {
         return this.hamt.fold(
@@ -561,6 +563,19 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
                 acc.putWithMerge(
                     classifier(v), Vector.of(v),
                     (v1:Vector<T&WithEquality>,v2:Vector<T&WithEquality>)=>v1.appendAll(v2)), HashMap.empty());
+    }
+
+    /**
+     * Matches each element with a unique key that you extract from it.
+     * If the same key is present twice, the function will return None.
+     *
+     * also see 'Vector.groupBy'
+     */
+    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
+        // copy-pasted with Stream for now
+        return Option.of(this.groupBy(getKey).mapValues(v => v.single()))
+            .filter(map => !map.anyMatch((k,v) => v.isNone()))
+            .map(map => map.mapValuesStruct(v => v.getOrThrow()));
     }
 
     /**

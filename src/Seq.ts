@@ -105,8 +105,18 @@ export interface Seq<T> extends Collection<T> {
      * Elements are then organized in a map. The key is the value of
      * the classifier, and in value we get the list of elements
      * matching that value.
+     *
+     * also see 'Seq.arrangeBy'
      */
-    groupBy<C>(classifier: (v:T)=>C): IMap<C,Seq<T>>;
+    groupBy<C>(classifier: (v:T)=>C&WithEquality): IMap<C,Seq<T>>;
+
+    /**
+     * Matches each element with a unique key that you extract from it.
+     * If the same key is present twice, the function will return None.
+     *
+     * also see 'Seq.groupBy'
+     */
+    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>>;
 
     /**
      * Returns a new collection with elements

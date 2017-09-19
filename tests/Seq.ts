@@ -127,6 +127,14 @@ export function runTests(seqName: string,
             assert.ok(HashMap.empty<number,string>().put(1,"ok").put(2, "bad")
                       .equals(<HashMap<number,string>>ofStruct<[number,string]>([1,"ok"],[2,"bad"]).toMap(x => x)));
         });
+        it("arrangeBy works, positive case", () => assert.ok(
+            HashMap.of<string,string>(["a", "aadvark"], ["b", "baseball"]).equals(
+                ofStruct("aadvark", "baseball").arrangeBy(x => x[0]).getOrThrow())));
+        it("arrangeBy works, negative case", () => assert.ok(
+                ofStruct("aadvark", "aaseball").arrangeBy(x => x[0]).isNone()));
+        it("arrangeBy works, empty seq", () => assert.ok(
+            HashMap.empty<string,string>().equals(
+                empty<string>().arrangeBy(x => x[0]).getOrThrow())));
     });
     describe(seqName + " manipulation", () => {
         it("computes the length correctly", () => assert.equal(
