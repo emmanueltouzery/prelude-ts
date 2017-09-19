@@ -30,7 +30,9 @@ The collections are also javascript iterables, so if you have an ES6 runtime,
 you can use the `for .. of` construct on them.
 
 You can check the tests for examples of use, and browse the
-[API documentation](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html).
+**[API documentation](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html)**.
+Note that the constructors are private, and you should use static methods to build
+items, for instance `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
 
 At this time most of the collections are implemented using the
 [HAMT algorithm](http://en.wikipedia.org/wiki/Hash_array_mapped_trie),
