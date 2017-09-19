@@ -545,9 +545,22 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     /**
      * Returns a new collection with elements
      * sorted according to the comparator you give.
+     *
+     * also see 'Seq.sortOn'
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
         return Vector.ofIterableStruct<T>(this.toArray().sort(compare));
+    }
+
+    /**
+     * Give a function associating a number with
+     * elements from the collection, and the elements
+     * are sorted according to that number.
+     *
+     * also see 'Seq.sortBy'
+     */
+    sortOn(getKey: (v:T)=>number): Vector<T> {
+        return this.sortBy((x,y) => getKey(x)-getKey(y));
     }
 
     /**

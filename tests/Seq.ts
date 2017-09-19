@@ -148,9 +148,19 @@ export function runTests(seqName: string,
             [1,2,3,4], ofStruct(1,2,3,4,5,6).dropRight(2).toArray()));
         it("returns an empty seq when dropping right too much", () => assert.deepEqual(
             [], ofStruct(1,2).dropRight(3).toArray()));
-        it("sorting works", () => assert.ok(
+        it("sortBy sorting works", () => assert.ok(
             ofStruct(4,3,2,1)
                 .equals(ofStruct(1,2,3,4).sortBy((x,y) => y-x))));
+        it("sortOn sorting works", () => assert.ok(
+            ofStruct(1,2,3,4)
+                .equals(ofStruct(4,2,3,1).sortOn(x => x))));
+        it("sortOn sorting works2", () => assert.ok(
+            ofStruct(new MyClass("zz",1),
+                     new MyClass("test", 2),
+                     new MyClass("b",3))
+                .equals(ofStruct(new MyClass("test", 2),
+                                 new MyClass("zz", 1),
+                                 new MyClass("b",3)).sortOn(x => x.getField2()))));
         it("correctly reverses", () => assert.deepEqual(
             [3,2,1], ofStruct(1,2,3).reverse().toArray()));
         it("correctly reverses the empty vector", () => assert.deepEqual(
@@ -243,15 +253,14 @@ export function runTests(seqName: string,
         const shuffle2 = original.shuffle();
         const shuffle3 = original.shuffle();
         const shuffle4 = original.shuffle();
-        const numericSort = (x:number,y:number)=>x-y;
         it("should conserve all the items1", () => assert.deepEqual(
-            original.sortBy(numericSort).toArray(), shuffle1.sortBy(numericSort).toArray()));
+            original.sortOn(x=>x).toArray(), shuffle1.sortOn(x=>x).toArray()));
         it("should conserve all the items2", () => assert.deepEqual(
-            original.sortBy(numericSort).toArray(), shuffle2.sortBy(numericSort).toArray()));
+            original.sortOn(x=>x).toArray(), shuffle2.sortOn(x=>x).toArray()));
         it("should conserve all the items3", () => assert.deepEqual(
-            original.sortBy(numericSort).toArray(), shuffle3.sortBy(numericSort).toArray()));
+            original.sortOn(x=>x).toArray(), shuffle3.sortOn(x=>x).toArray()));
         it("should conserve all the items4", () => assert.deepEqual(
-            original.sortBy(numericSort).toArray(), shuffle4.sortBy(numericSort).toArray()));
+            original.sortOn(x=>x).toArray(), shuffle4.sortOn(x=>x).toArray()));
         it("should change the order of elements", () => assert.equal(false,
             original.equals(shuffle1) &&
                 original.equals(shuffle2) &&

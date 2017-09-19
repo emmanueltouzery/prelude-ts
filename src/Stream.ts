@@ -517,6 +517,17 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
     abstract sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T>;
 
     /**
+     * Give a function associating a number with
+     * elements from the collection, and the elements
+     * are sorted according to that number.
+     *
+     * also see 'Seq.sortBy'
+     */
+    sortOn(getKey: (v:T)=>number): Stream<T> {
+        return this.sortBy((x,y) => getKey(x)-getKey(y));
+    }
+
+    /**
      * Remove duplicate items; elements are mapped to keys, those
      * get compared.
      *

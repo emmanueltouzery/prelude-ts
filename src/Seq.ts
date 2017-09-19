@@ -126,8 +126,19 @@ export interface Seq<T> extends Collection<T> {
     /**
      * Returns a new collection with elements
      * sorted according to the comparator you give.
+     *
+     * also see 'Seq.sortOn'
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Seq<T>;
+
+    /**
+     * Give a function associating a number with
+     * elements from the collection, and the elements
+     * are sorted according to that number.
+     *
+     * also see 'Seq.sortBy'
+     */
+    sortOn(getKey: (v:T)=>number): Seq<T>;
 
     /**
      * Prepend an element at the beginning of the collection.
