@@ -119,6 +119,11 @@ export interface Seq<T> extends Collection<T> {
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>>;
 
     /**
+     * Randomly reorder the elements of the collection.
+     */
+    shuffle(): Seq<T>;
+
+    /**
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      */

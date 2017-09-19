@@ -8,6 +8,7 @@ import { HashMap } from "./HashMap";
 import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
 import { Seq } from "./Seq";
+import * as SeqHelpers from "./SeqHelpers";
 
 /**
  * A lazy, potentially infinite, sequence of values.
@@ -357,10 +358,14 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
      * also see 'Stream.groupBy'
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
-        // copy-pasted with Vector for now
-        return Option.of(this.groupBy(getKey).mapValues(v => v.single()))
-            .filter(map => !map.anyMatch((k,v) => v.isNone()))
-            .map(map => map.mapValuesStruct(v => v.getOrThrow()));
+        return SeqHelpers.arrangeBy<T,K>(this, getKey);
+    }
+
+    /**
+     * Randomly reorder the elements of the collection.
+     */
+    shuffle(): Stream<T> {
+        return Stream.ofIterable(SeqHelpers.shuffle(this.toArray()));
     }
 
     /**

@@ -237,4 +237,25 @@ export function runTests(seqName: string,
         it("correct returns single empty seq", () => assert.ok(
             empty().single().isNone()));
     });
+    describe(seqName + " supports shuffle", () => {
+        const original = ofStruct(1,2,3,4,5,6,7,2,9,10);
+        const shuffle1 = original.shuffle();
+        const shuffle2 = original.shuffle();
+        const shuffle3 = original.shuffle();
+        const shuffle4 = original.shuffle();
+        const numericSort = (x:number,y:number)=>x-y;
+        it("should conserve all the items1", () => assert.deepEqual(
+            original.sortBy(numericSort).toArray(), shuffle1.sortBy(numericSort).toArray()));
+        it("should conserve all the items2", () => assert.deepEqual(
+            original.sortBy(numericSort).toArray(), shuffle2.sortBy(numericSort).toArray()));
+        it("should conserve all the items3", () => assert.deepEqual(
+            original.sortBy(numericSort).toArray(), shuffle3.sortBy(numericSort).toArray()));
+        it("should conserve all the items4", () => assert.deepEqual(
+            original.sortBy(numericSort).toArray(), shuffle4.sortBy(numericSort).toArray()));
+        it("should change the order of elements", () => assert.equal(false,
+            original.equals(shuffle1) &&
+                original.equals(shuffle2) &&
+                original.equals(shuffle3) &&
+                original.equals(shuffle4)))
+    });
 }

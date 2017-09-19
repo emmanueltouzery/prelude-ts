@@ -5,6 +5,7 @@ import { HashMap} from "./HashMap";
 import { IMap } from "./IMap";
 import { Option } from "./Option";
 import { HashSet } from "./HashSet";
+import * as SeqHelpers from "./SeqHelpers";
 const hamt: any = require("hamt_plus");
 
 /**
@@ -572,10 +573,14 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * also see 'Vector.groupBy'
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
-        // copy-pasted with Stream for now
-        return Option.of(this.groupBy(getKey).mapValues(v => v.single()))
-            .filter(map => !map.anyMatch((k,v) => v.isNone()))
-            .map(map => map.mapValuesStruct(v => v.getOrThrow()));
+        return SeqHelpers.arrangeBy<T,K>(this, getKey);
+    }
+
+    /**
+     * Randomly reorder the elements of the collection.
+     */
+    shuffle(): Vector<T> {
+        return Vector.ofIterable(SeqHelpers.shuffle(this.toArray()));
     }
 
     /**
