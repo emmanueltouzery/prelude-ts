@@ -67,6 +67,12 @@ export interface ISet<T> extends Value {
     anyMatch(predicate:(v:T)=>boolean): boolean;
 
     /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:ISet<T>)=>U): U;
+
+    /**
      * Converts this set to an array
      */
     toArray(): Array<T & WithEquality>;

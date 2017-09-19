@@ -128,4 +128,10 @@ export interface IMap<K,V> extends Value {
      *        in case two entries share the same key.
      */
     mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V>;
+
+    /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:IMap<K,V>)=>U): U;
 }
