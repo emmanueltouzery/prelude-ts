@@ -26,6 +26,58 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
     }
 
     /**
+     * Build a HashMap from key-value pairs.
+     *
+     *     HashMap.of([1,"a"],[2,"b"])
+     *
+     * Equality requirements.
+     */
+    static of<K,V>(...entries: Array<[K&WithEquality, V&WithEquality]>): HashMap<K,V> {
+        return HashMap.ofIterableStruct(entries);
+    }
+
+    /**
+     * Build a HashMap from key-value pairs.
+     *
+     *     HashMap.of([1,"a"],[2,"b"])
+     *
+     * No equality requirements.
+     */
+    static ofStruct<K,V>(...entries: Array<[K&WithEquality, V]>): HashMap<K,V> {
+        return HashMap.ofIterableStruct(entries);
+    }
+
+    /**
+     * Build a HashMap from an iterable containing key-value pairs.
+     * 
+     *    HashMap.ofIterable(Vector.ofStruct<[number,string]>([1,"a"],[2,"b"]));
+     *
+     * Equality requirements.
+     */
+    static ofIterable<K,V>(entries: Iterable<[K&WithEquality, V&WithEquality]>): HashMap<K,V> {
+        return HashMap.ofIterableStruct(entries);
+    }
+
+    /**
+     * Build a HashMap from an iterable containing key-value pairs.
+     * 
+     *    HashMap.ofIterable(Vector.ofStruct<[number,string]>([1,"a"],[2,"b"]));
+     *
+     * No equality requirements.
+     */
+    static ofIterableStruct<K,V>(entries: Iterable<[K&WithEquality, V]>): HashMap<K,V> {
+        // remember we must set up the hamt with the custom equality
+        let r = HashMap.empty<K,V>();
+        const iterator = entries[Symbol.iterator]();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            r = r.putStruct(curItem.value[0], curItem.value[1]);
+            curItem = iterator.next();
+        }
+        return r;
+    }
+
+    /**
      * Get the value for the key you give, if the key is present.
      */
     get(k: K & WithEquality): Option<V> {

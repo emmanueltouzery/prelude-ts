@@ -1,5 +1,6 @@
 import { HashMap } from "../src/HashMap";
 import { HashSet } from "../src/HashSet";
+import { Vector } from "../src/Vector";
 import { MyClass} from "./SampleData";
 import * as assert from 'assert'
 
@@ -7,7 +8,6 @@ describe("hashmap construction basic sanity tests", () => {
     it("should overwrite values with the same key", () => assert.ok(
         HashMap.empty<number,String>().put(5, "test").put(5, "test1")
             .equals(HashMap.empty<number,String>().put(5, "test1"))));
-
     it("should overwrite values with the same key with custom types", () => assert.ok(
         HashMap.empty<MyClass,string>()
             .put(new MyClass("a", 1), "test")
@@ -16,7 +16,7 @@ describe("hashmap construction basic sanity tests", () => {
                 HashMap.empty<MyClass,string>()
                     .put(new MyClass("a", 1), "test1")
                     .put(new MyClass("a", 2), "test1"))));
-
+    
     it("should support map as a key itself", () => assert.ok(
         HashMap.empty<HashMap<string,number>, number>()
             .put(HashMap.empty<string,number>().put("hello", 1), 6)
@@ -27,11 +27,16 @@ describe("hashmap construction basic sanity tests", () => {
                     .put(HashMap.empty<string,number>().put("hello", 1), 7)
                     .put(HashMap.empty<string,number>().put("bye", 1), 7))));
 
+    it("should build with of", () => assert.ok(
+        HashMap.empty<number,string>().put(1,"a").put(2,"b").equals(
+            HashMap.of([1,"a"],[2,"b"]))));
+    it("should build with ofIterable", () => assert.ok(
+        HashMap.empty<number,string>().put(1,"a").put(2,"b").equals(
+            HashMap.ofIterable(Vector.ofStruct<[number,string]>([1,"a"],[2,"b"])))));
     it("should put with merge", () => assert.ok(
         HashMap.empty<number,string>()
             .put(5,"test").putWithMerge(5,"a",(a,b)=>a+b)
             .equals(HashMap.empty<number,string>().put(5, "testa"))));
-
     it("should mergeWith", () => assert.ok(
         HashMap.empty<number,string>().put(1,"a").put(2,"bc").put(3,"d")
             .equals(HashMap.empty<number,string>().put(1,"a").put(2,"b")
