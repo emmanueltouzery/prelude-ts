@@ -9,7 +9,7 @@ import { Vector } from "./Vector";
  * @type K the key type
  * @type V the value type
  */
-export interface IMap<K,V> extends Value {
+export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
 
     /**
      * Get a Set containing all the keys in the map
@@ -103,6 +103,22 @@ export interface IMap<K,V> extends Value {
     mapValues<V2>(fn:(v:V)=>V2&WithEquality): IMap<K,V2>;
 
     /**
+     * Calls the function you give for each item in the map,
+     * your function returns a map, all the maps are
+     * merged.
+     * No equality requirement
+     */
+    flatMapStruct<K2,V2>(fn:(k:K, v:V)=>Iterable<[K2&WithEquality,V2]>): IMap<K2,V2>;
+
+    /**
+     * Calls the function you give for each item in the map,
+     * your function returns a map, all the maps are
+     * merged.
+     * Equality requirement
+     */
+    flatMap<K2,V2>(fn:(k:K, v:V)=>Iterable<[K2&WithEquality,V2&WithEquality]>): IMap<K2,V2>;
+
+    /**
      * Convert this map to a vector of key,value pairs.
      * Note that Map is already an iterable of key,value pairs!
      */
@@ -132,7 +148,7 @@ export interface IMap<K,V> extends Value {
      * @param merge a merge function to combine two values
      *        in case two entries share the same key.
      */
-    mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V>;
+    mergeWith(other: Iterable<[K & WithEquality,V]>, merge:(v1: V, v2: V) => V): IMap<K,V>;
 
     /**
      * Transform this value to another value type.

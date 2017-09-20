@@ -90,6 +90,16 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Calls the function you give for each item in the set,
+     * your function returns a set, all the sets are
+     * merged.
+     */
+    flatMap<U>(mapper:(v:T)=>ISet<U&WithEquality>): HashSet<U> {
+        return this.foldLeft(HashSet.empty<U>(),
+                             (soFar,cur) => soFar.addAll(mapper(cur)));
+    }
+
+    /**
      * Call a predicate for each element in the collection,
      * build a new collection holding only the elements
      * for which the predicate returned true.

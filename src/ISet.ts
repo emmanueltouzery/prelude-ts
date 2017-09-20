@@ -42,6 +42,13 @@ export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
     map<U>(mapper:(v:T)=>U&WithEquality): ISet<U>;
 
     /**
+     * Calls the function you give for each item in the set,
+     * your function returns a set, all the sets are
+     * merged.
+     */
+    flatMap<U>(mapper:(v:T)=>ISet<U&WithEquality>): ISet<U>;
+
+    /**
      * Returns a new Set containing the difference
      * between this set and the other Set passed as parameter.
      */

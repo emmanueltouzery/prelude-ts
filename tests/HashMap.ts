@@ -127,6 +127,10 @@ describe("hashmap transformation", () => {
     it("should transform through empty map", () => assert.ok(
         HashMap.empty<number,string>().equals(
         HashMap.empty<string,number>().map((k,v) => [v*2,k]))));
+    it("flatMap works", () => assert.deepEqual(
+        [["a",1],["b",2],["c",3],["aa",5],["bb",6],["cc",7]],
+            HashMap.of<string,number>(["a",1],["b",2],["c",3])
+                .flatMap((k,v)=>HashMap.of<string,number>([k+k,v+4],[k,v])).toVector().sortOn(x=>x[1]).toArray()));
     it("should transform through mapValues", () => assert.ok(
         HashMap.empty<string,number>().put("key1",12).put("key2",6).equals(
         HashMap.empty<string,number>().put("key1",6).put("key2", 3).mapValues(v => v*2))));

@@ -406,7 +406,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      * Append multiple elements at the end of this Stream.
      * Equality requirements.
      */
-    appendAll(elts:Iterable<T>): Stream<T> {
+    appendAll(elts:Iterable<T&WithEquality>): Stream<T> {
         return this.appendAllStruct(elts);
     }
 

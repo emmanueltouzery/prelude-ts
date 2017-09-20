@@ -12,7 +12,7 @@ const hamt: any = require("hamt_plus");
  * @type K the key type
  * @type V the value type
  */
-export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]>, Foldable<[K,V]> {
+export class HashMap<K,V> implements IMap<K,V> {
 
     protected constructor(private hamt: any) {}
 
@@ -193,13 +193,13 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]>, Foldable<[K,V]>
      * @param merge a merge function to combine two values
      *        in case two entries share the same key.
      */
-    mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V> {
-        // the entire function could be faster
-        const otherKeys = other.keySet().toArray();
+    mergeWith(elts: Iterable<[K & WithEquality,V]>, merge:(v1: V, v2: V) => V): HashMap<K,V> {
+        const iterator = elts[Symbol.iterator]();
         let map: HashMap<K,V> = this;
-        for (let i=0;i<otherKeys.length;i++) {
-            const k = otherKeys[i];
-            map = map.putStructWithMerge(k, other.get(k).getOrThrow(), merge);
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            map = map.putStructWithMerge(curItem.value[0], curItem.value[1], merge);
+            curItem = iterator.next();
         }
         return map;
     }
@@ -250,6 +250,27 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]>, Foldable<[K,V]>
      */
     mapValues<V2>(fn:(v:V)=>V2&WithEquality): HashMap<K,V2> {
         return this.mapValuesStruct(fn);
+    }
+
+    /**
+     * Calls the function you give for each item in the map,
+     * your function returns a map, all the maps are
+     * merged.
+     * No equality requirement
+     */
+    flatMapStruct<K2,V2>(fn:(k:K, v:V)=>Iterable<[K2&WithEquality,V2]>): HashMap<K2,V2> {
+        return this.foldLeft(HashMap.empty<K2,V2>(),
+                             (soFar,cur) => soFar.mergeWith(fn(cur[0],cur[1]), (a,b)=>b));
+    }
+
+    /**
+     * Calls the function you give for each item in the map,
+     * your function returns a map, all the maps are
+     * merged.
+     * Equality requirement
+     */
+    flatMap<K2,V2>(fn:(k:K, v:V)=>Iterable<[K2&WithEquality,V2&WithEquality]>): HashMap<K2,V2> {
+        return this.flatMapStruct(fn);
     }
 
     /**
@@ -510,8 +531,8 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return HashSet.empty<V>();
     }
 
-    mergeWith(other: IMap<K & WithEquality,V>, merge:(v1: V, v2: V) => V): IMap<K,V> {
-        return other;
+    mergeWith(other: Iterable<[K & WithEquality,V]>, merge:(v1: V, v2: V) => V): HashMap<K,V> {
+        return HashMap.ofIterableStruct(other);
     }
 
     mapStruct<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): HashMap<K2,V2> {
