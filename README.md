@@ -27,7 +27,9 @@ Vector.of(1,2,3).zip("a", "b", "c").takeWhile(([k,v]) => k<3)
 ```
 
 The collections are also javascript iterables, so if you have an ES6 runtime,
-you can use the `for .. of` construct on them.
+you can use the `for .. of` construct on them. If you're not familiar with
+immutable collections, `list.append(newItem)` keeps `list` unchanged; `append`
+returns a new list. Immutability helps reasonning about code.
 
 You can check the tests for examples of use, and browse the
 **[API documentation](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html)**.
