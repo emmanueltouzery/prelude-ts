@@ -365,6 +365,20 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * Reduces the collection to a single value using the
+     * associative binary function you give. Since the function
+     * is associative, order of application doesn't matter.
+     *
+     * Example:
+     *
+     *     Vector.of(1,2,3).fold(0, (a,b) => a + b);
+     *     => 6
+     */
+    fold(zero:T, fn:(v1:T,v2:T)=>T): T {
+        return this.foldLeft(zero, fn);
+    }
+
+    /**
      * Reduces the collection to a single value.
      * Left-associative.
      *

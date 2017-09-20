@@ -6,7 +6,7 @@ import { Collection } from "./Collection";
  * A generic interface for set-like implementations.
  * @type T the item type
  */
-export interface ISet<T> extends Value, Collection<T> {
+export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
 
     /**
      * Returns the number of elements in the set.

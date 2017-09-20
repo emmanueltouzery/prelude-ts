@@ -12,7 +12,7 @@ const hamt: any = require("hamt_plus");
  * @type K the key type
  * @type V the value type
  */
-export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
+export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]>, Foldable<[K,V]> {
 
     protected constructor(private hamt: any) {}
 
@@ -305,6 +305,63 @@ export class HashMap<K,V> implements IMap<K,V>, Iterable<[K,V]> {
     }
 
     /**
+     * Reduces the collection to a single value using the
+     * associative binary function you give. Since the function
+     * is associative, order of application doesn't matter.
+     *
+     * Example:
+     *
+     *     HashMap.of<number,string>([1,"a"],[2,"b"],[3,"c"])
+            .fold([0,""], ([a,b],[c,d])=>[a+c, b>d?b:d])
+     *     => [6,"c"]
+     */
+    fold(zero:[K,V], fn:(v1:[K,V],v2:[K,V])=>[K,V]): [K,V] {
+        return this.foldLeft(zero, fn);
+    }
+
+    /**
+     * Reduces the collection to a single value.
+     * Left-associative.
+     * No guarantees for the order of items in a hashset!
+     *
+     * Example:
+     *
+     *     HashMap.of([1,"a"], [2,"bb"], [3,"ccc"])
+     *     .foldLeft(0, (soFar,[item,val])=>soFar+val.length))
+     *     => 6
+     *
+     * @param zero The initial value
+     * @param fn A function taking the previous value and
+     *           the current collection item, and returning
+     *           an updated value.
+     */
+    foldLeft<U>(zero: U, fn:(soFar:U,cur:[K,V])=>U): U {
+        return this.hamt.fold(
+            (acc: U, v: V, k: K&WithEquality) =>
+                fn(acc, [k,v]), zero);
+    }
+
+    /**
+     * Reduces the collection to a single value.
+     * Right-associative.
+     * No guarantees for the order of items in a hashset!
+     *
+     * Example:
+     *
+     *     HashMap.of([1,"a"], [2,"bb"], [3,"ccc"])
+     *     .foldRight(0, ([item,value],soFar)=>soFar+value.length))
+     *     => 6
+     *
+     * @param zero The initial value
+     * @param fn A function taking the current collection item and
+     *           the previous value , and returning
+     *           an updated value.
+     */
+    foldRight<U>(zero: U, fn:(cur:[K,V], soFar:U)=>U): U {
+        return this.foldLeft(zero, (cur, soFar) => fn(soFar, cur));
+    }
+
+    /**
      * Convert to array.
      */
     toArray(): Array<[K,V]> {
@@ -479,6 +536,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     filter(predicate:(k:K,v:V)=>boolean): HashMap<K,V> {
         return this;
+    }
+
+    foldLeft<U>(zero: U, fn:(soFar:U,cur:[K,V])=>U): U {
+        return zero;
     }
 
     toArray(): Array<[K,V]> {

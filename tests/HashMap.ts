@@ -168,4 +168,13 @@ describe("hashmap transformation", () => {
         !HashMap.empty<number,string>().put(1,"a").put(2,"b").contains([2,"c"])));
     it("should support contains, empty map", () => assert.ok(
         !HashMap.empty<number,string>().contains([2,"b"])));
+    it("should fold correctly", () => assert.deepEqual(
+        [6,"c"], HashMap.of<number,string>([1,"a"],[2,"b"],[3,"c"])
+            .fold([0,""], ([a,b],[c,d])=>[a+c, b>d?b:d])));
+    it("should foldLeft correctly", () => assert.equal(
+        6, HashMap.of([1,"a"], [2,"bb"], [3,"ccc"])
+            .foldLeft(0, (soFar,[item,val])=>soFar+val.length)));
+    it("should foldRight correctly", () => assert.equal(
+        6, HashMap.of([1,"a"], [2,"bb"], [3,"ccc"])
+            .foldRight(0, ([item,value],soFar)=>soFar+value.length)));
 });

@@ -15,7 +15,7 @@ import * as SeqHelpers from "./SeqHelpers";
  *
  * Use take() for instance to reduce an infinite stream to a finite one.
  */
-export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
+export abstract class Stream<T> implements Iterable<T>, Seq<T> {
 
     /**
      * The empty stream
@@ -259,6 +259,20 @@ export abstract class Stream<T> implements Iterable<T>, Value, Seq<T> {
      * returns the empty collection.
      */
     abstract dropRight(n:number): Stream<T>;
+
+    /**
+     * Reduces the collection to a single value using the
+     * associative binary function you give. Since the function
+     * is associative, order of application doesn't matter.
+     *
+     * Example:
+     *
+     *     Stream.of(1,2,3).fold(0, (a,b) => a + b);
+     *     => 6
+     */
+    fold(zero:T, fn:(v1:T,v2:T)=>T): T {
+        return this.foldLeft(zero, fn);
+    }
 
     /**
      * Reduces the collection to a single value.

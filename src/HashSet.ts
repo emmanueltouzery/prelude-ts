@@ -102,6 +102,60 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Reduces the collection to a single value using the
+     * associative binary function you give. Since the function
+     * is associative, order of application doesn't matter.
+     *
+     * Example:
+     *
+     *     HashSet.of(1,2,3).fold(0, (a,b) => a + b);
+     *     => 6
+     */
+    fold(zero:T, fn:(v1:T,v2:T)=>T): T {
+        return this.foldLeft(zero, fn);
+    }
+
+    /**
+     * Reduces the collection to a single value.
+     * Left-associative.
+     * No guarantees for the order of items in a hashset!
+     *
+     * Example:
+     *
+     *     HashSet.of("a", "bb", "ccc").foldLeft(0, (soFar,item) => soFar+item.length))
+     *     => 6
+     *
+     * @param zero The initial value
+     * @param fn A function taking the previous value and
+     *           the current collection item, and returning
+     *           an updated value.
+     */
+    foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
+        return this.hamt.fold(
+            (acc: U, v: T&WithEquality, k: T&WithEquality) =>
+                fn(acc, v), zero);
+    }
+
+    /**
+     * Reduces the collection to a single value.
+     * Right-associative.
+     * No guarantees for the order of items in a hashset!
+     *
+     * Example:
+     *
+     *     HashSet.of("a", "bb", "ccc").foldRight(0, (item,soFar) => soFar+item.length))
+     *     => 6
+     *
+     * @param zero The initial value
+     * @param fn A function taking the current collection item and
+     *           the previous value , and returning
+     *           an updated value.
+     */
+    foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U {
+        return this.foldLeft(zero, (cur, soFar) => fn(soFar, cur));
+    }
+
+    /**
      * Converts this set to an array
      */
     toArray(): Array<T & WithEquality> {
@@ -298,6 +352,10 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     filter(predicate:(v:T)=>boolean): HashSet<T> {
         return this;
+    }
+
+    foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
+        return zero;
     }
 
     toArray(): Array<T & WithEquality> {

@@ -110,4 +110,10 @@ describe("hashset combinations", () => {
 describe("hashset transformations", () => {
     it("map works", () => assert.ok(
         HashSet.of(5,6,7).equals(HashSet.of(1,2,3).map(x=>x+4))));
+    it("should fold correctly", () => assert.equal(
+        6, HashSet.of(1,2,3).fold(0, (a,b)=>a+b)));
+    it("should foldLeft correctly", () => assert.equal(
+        6, HashSet.of("a", "bb", "ccc").foldLeft(0, (soFar,item)=>soFar+item.length)));
+    it("should foldRight correctly", () => assert.equal(
+        6, HashSet.of("a", "bb", "ccc").foldRight(0, (item,soFar)=>soFar+item.length)));
 });

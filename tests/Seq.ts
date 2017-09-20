@@ -98,6 +98,8 @@ export function runTests(seqName: string,
            ofStruct(1,2,3).find(x => x >= 2).contains(2));
         it("doesn't find if the predicate doesn't match", () =>
            ofStruct(1,2,3).find(x => x >= 4).isNone());
+        it("folds correctly", () => assert.equal(
+            6, ofStruct(1,2,3).fold(0, (a,b)=>a+b)));
         it("foldsLeft correctly", () => assert.equal(
             "cba!",
             ofStruct("a", "b", "c").foldLeft("!", (xs,x) => x+xs)));
