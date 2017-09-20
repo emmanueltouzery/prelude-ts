@@ -55,6 +55,13 @@ export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
     diff(other: ISet<T&WithEquality>): ISet<T>;
 
     /**
+     * Returns a new Set containing the intersection
+     * of this set and the other Set passed as parameter
+     * (the elements which are common to both sets)
+     */
+    intersect(other: ISet<T&WithEquality>): ISet<T>;
+
+    /**
      * Returns a new set with all the elements of the current
      * Set, minus the elements of the iterable you give as a parameter.
      * If you call this function with a HashSet as parameter,

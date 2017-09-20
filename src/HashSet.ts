@@ -21,7 +21,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      * @type T the item type
      */
     static empty<T>(): HashSet<T> {
-        return <HashSet<T>>emptyHashSet;
+        return <EmptyHashSet<T>>emptyHashSet;
     }
 
     /**
@@ -207,6 +207,17 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Returns a new Set containing the intersection
+     * of this set and the other Set passed as parameter
+     * (the elements which are common to both sets)
+     */
+    intersect(other: ISet<T&WithEquality>): HashSet<T> {
+        return new HashSet<T>(this.hamt.fold(
+            (acc: any, v: T&WithEquality, k: T&WithEquality) =>
+                other.contains(k) ? acc.set(k,k) : acc, hamt.empty));
+    }
+
+    /**
      * Returns a new set with all the elements of the current
      * Set, minus the elements of the iterable you give as a parameter.
      * If you call this function with a HashSet as parameter,
@@ -263,7 +274,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      */
     equals(other: HashSet<T>): boolean {
         const sz = this.hamt.size;
-        if (other === emptyHashSet && sz === 0) {
+        if (other === <EmptyHashSet<T>>emptyHashSet && sz === 0) {
             // we could get that i'm not the empty map
             // but my size is zero, after some filtering and such.
             return true;
@@ -385,6 +396,10 @@ class EmptyHashSet<T> extends HashSet<T> {
     }
 
     diff(elts: ISet<T&WithEquality>): HashSet<T> {
+        return this;
+    }
+
+    intersect(other: ISet<T&WithEquality>): HashSet<T> {
         return this;
     }
 
