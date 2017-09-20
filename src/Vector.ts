@@ -560,7 +560,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
-     * also see 'Seq.sortOn'
+     * also see [[Vector.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
         return Vector.ofIterableStruct<T>(this.toArray().sort(compare));
@@ -571,7 +571,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * elements from the collection, and the elements
      * are sorted according to that number.
      *
-     * also see 'Seq.sortBy'
+     * also see [[Vector.sortBy]]
      */
     sortOn(getKey: (v:T)=>number): Vector<T> {
         return this.sortBy((x,y) => getKey(x)-getKey(y));
@@ -583,7 +583,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * the classifier, and in value we get the list of elements
      * matching that value.
      *
-     * also see 'Vector.arrangeBy'
+     * also see [[Vector.arrangeBy]]
      */
     groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {
         return this.hamt.fold(
@@ -597,7 +597,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * Matches each element with a unique key that you extract from it.
      * If the same key is present twice, the function will return None.
      *
-     * also see 'Vector.groupBy'
+     * also see [[Vector.groupBy]]
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
         return SeqHelpers.arrangeBy<T,K>(this, getKey);

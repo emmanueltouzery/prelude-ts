@@ -199,6 +199,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     /**
      * Returns a new Set containing the difference
      * between this set and the other Set passed as parameter.
+     * also see [[HashSet.intersect]]
      */
     diff(elts: ISet<T&WithEquality>): HashSet<T> {
         return new HashSet<T>(this.hamt.fold(
@@ -210,6 +211,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      * Returns a new Set containing the intersection
      * of this set and the other Set passed as parameter
      * (the elements which are common to both sets)
+     * also see [[HashSet.diff]]
      */
     intersect(other: ISet<T&WithEquality>): HashSet<T> {
         return new HashSet<T>(this.hamt.fold(

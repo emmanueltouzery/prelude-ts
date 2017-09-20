@@ -51,6 +51,7 @@ export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
     /**
      * Returns a new Set containing the difference
      * between this set and the other Set passed as parameter.
+     * also see [[ISet.intersect]]
      */
     diff(other: ISet<T&WithEquality>): ISet<T>;
 
@@ -58,6 +59,7 @@ export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
      * Returns a new Set containing the intersection
      * of this set and the other Set passed as parameter
      * (the elements which are common to both sets)
+     * also see [[ISet.diff]]
      */
     intersect(other: ISet<T&WithEquality>): ISet<T>;
 

@@ -361,7 +361,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      * the classifier, and in value we get the list of elements
      * matching that value.
      *
-     * also see 'Stream.arrangeBy'
+     * also see [[Stream.arrangeBy]]
      */
     abstract groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Stream<T>>;
 
@@ -369,7 +369,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      * Matches each element with a unique key that you extract from it.
      * If the same key is present twice, the function will return None.
      *
-     * also see 'Stream.groupBy'
+     * also see [[Stream.groupBy]]
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
         return SeqHelpers.arrangeBy<T,K>(this, getKey);
@@ -527,6 +527,8 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     /**
      * Returns a new collection with elements
      * sorted according to the comparator you give.
+     *
+     * also see [[Stream.sortOn]]
      */
     abstract sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T>;
 
@@ -535,7 +537,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      * elements from the collection, and the elements
      * are sorted according to that number.
      *
-     * also see 'Seq.sortBy'
+     * also see [[Stream.sortBy]]
      */
     sortOn(getKey: (v:T)=>number): Stream<T> {
         return this.sortBy((x,y) => getKey(x)-getKey(y));

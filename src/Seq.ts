@@ -106,7 +106,7 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
      * the classifier, and in value we get the list of elements
      * matching that value.
      *
-     * also see 'Seq.arrangeBy'
+     * also see [[Seq.arrangeBy]]
      */
     groupBy<C>(classifier: (v:T)=>C&WithEquality): IMap<C,Seq<T>>;
 
@@ -114,7 +114,7 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
      * Matches each element with a unique key that you extract from it.
      * If the same key is present twice, the function will return None.
      *
-     * also see 'Seq.groupBy'
+     * also see [[Seq.groupBy]]
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>>;
 
@@ -127,7 +127,7 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
-     * also see 'Seq.sortOn'
+     * also see [[Seq.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Seq<T>;
 
@@ -136,7 +136,7 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
      * elements from the collection, and the elements
      * are sorted according to that number.
      *
-     * also see 'Seq.sortBy'
+     * also see [[Seq.sortBy]]
      */
     sortOn(getKey: (v:T)=>number): Seq<T>;
 
