@@ -3,6 +3,7 @@ import { Option } from "./Option";
 import { Value } from "./Value"
 import { ISet } from "./ISet";
 import { Vector } from "./Vector";
+import { Foldable } from "./Foldable";
 
 /**
  * A generic interface for a dictionary, mapping keys to values.

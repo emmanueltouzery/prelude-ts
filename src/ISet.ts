@@ -1,6 +1,7 @@
 import { WithEquality } from "./Comparison";
 import { Value} from "./Value";
 import { Collection } from "./Collection";
+import { Foldable } from "./Foldable";
 
 /**
  * A generic interface for set-like implementations.

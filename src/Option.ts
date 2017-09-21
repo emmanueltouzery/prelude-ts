@@ -56,14 +56,14 @@ export abstract class Option<T> implements Value {
      *     Option.sequence(Vector.of(Option.of(1), Option.none()))
      *     => Option.none()
      */
-    static sequence<T>(elts:Iterable<Option<T>>): Option<Seq<T>> {
-        let r: Seq<T> = Vector.empty<T>();
+    static sequence<T>(elts:Iterable<Option<T>>): Option<Vector<T>> {
+        let r: Vector<T> = Vector.empty<T>();
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
         while (!curItem.done) {
             const v = curItem.value;
             if (v.isNone()) {
-                return <None<Seq<T>>>none;
+                return <None<Vector<T>>>none;
             }
             r = r.appendStruct(v.getOrThrow());
             curItem = iterator.next();

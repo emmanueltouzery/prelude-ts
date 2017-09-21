@@ -1,4 +1,4 @@
-interface Foldable<T> {
+export interface Foldable<T> {
 
     /**
      * Reduces the collection to a single value using the

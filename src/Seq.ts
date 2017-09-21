@@ -2,6 +2,7 @@ import { WithEquality, Ordering } from "./Comparison";
 import { IMap } from "./IMap";
 import { Option } from "./Option";
 import { Collection } from "./Collection";
+import { Foldable } from "./Foldable";
 
 /**
  * A generic interface for list-like implementations.
