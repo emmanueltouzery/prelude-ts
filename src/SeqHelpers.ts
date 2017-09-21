@@ -3,8 +3,11 @@ import { WithEquality } from "./Comparison";
 import { IMap } from "./IMap";
 import { Seq } from "./Seq";
 
-// https://stackoverflow.com/a/2450976/516188
+/**
+ * @hidden
+ */
 export function shuffle(array: any[]) {
+    // https://stackoverflow.com/a/2450976/516188
     var currentIndex = array.length, temporaryValue, randomIndex;
 
     // While there remain elements to shuffle...
@@ -23,6 +26,9 @@ export function shuffle(array: any[]) {
     return array;
 }
 
+/**
+ * @hidden
+ */
 export function arrangeBy<T,K>(seq: Seq<T>, getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
     return Option.of(seq.groupBy(getKey).mapValues(v => v.single()))
         .filter(map => !map.anyMatch((k,v) => v.isNone()))

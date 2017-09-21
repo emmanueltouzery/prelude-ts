@@ -5,6 +5,9 @@ import { Option } from "../src/Option";
 import { MyClass } from "./SampleData";
 import * as assert from 'assert'
 
+/**
+ * @hidden
+ */
 export function runTests(seqName: string,
                          ofIterable: <T>(i:Iterable<T>)=>Seq<T>,
                          ofStruct: <T>(...i:Array<T>)=>Seq<T>,
