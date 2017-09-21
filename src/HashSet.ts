@@ -1,4 +1,5 @@
 import { ISet } from "./ISet";
+import { Vector } from "./Vector";
 import { Option } from "./Option";
 import { WithEquality, hasEquals, HasEquals,
          getHashCode, areEqual, toStringHelper } from "./Comparison";
@@ -173,6 +174,13 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Converts this set to an vector
+     */
+    toVector(): Vector<T & WithEquality> {
+        return Vector.ofIterable<T&WithEquality>(this.hamt.keys());
+    }
+
+    /**
      * Returns the number of elements in the set.
      */
     length(): number {
@@ -259,6 +267,32 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
             curItem = iterator.next();
         }
         return false;
+    }
+
+    /**
+     * Returns a pair of two sets; the first one
+     * will only contain the items from this sets for
+     * which the predicate you give returns true, the second
+     * will only contain the items from this collection where
+     * the predicate returns false.
+     *
+     *     HashSet.of(1,2,3,4).partition(x => x%2===0)
+     *     => [HashSet.of(2,4), HashSet.of(1,3)]
+     */
+    partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>] {
+        let r1 = HashSet.empty<T>();
+        let r2 = HashSet.empty<T>();
+        const iterator: Iterator<T&WithEquality> = this.hamt.values();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (predicate(curItem.value)) {
+                r1 = r1.add(curItem.value);
+            } else {
+                r2 = r2.add(curItem.value);
+            }
+            curItem = iterator.next();
+        }
+        return [r1,r2];
     }
 
     /**
@@ -385,6 +419,10 @@ class EmptyHashSet<T> extends HashSet<T> {
         return [];
     }
 
+    toVector(): Vector<T & WithEquality> {
+        return Vector.empty<T&WithEquality>();
+    }
+
     [Symbol.iterator](): Iterator<T> {
         return { next: () => ({ done: true, value: <any>undefined }) };
     }
@@ -411,6 +449,10 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     allMatch(predicate:(v:T)=>boolean): boolean {
         return true;
+    }
+
+    partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>] {
+        return [this, this];
     }
 
     equals(other: HashSet<T>): boolean {

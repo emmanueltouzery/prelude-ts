@@ -85,6 +85,10 @@ describe("hashset access", () => {
         HashSet.of(5,6).single().isNone()));
     it("correct returns single empty seq", () => assert.ok(
         HashSet.empty().single().isNone()));
+    it("correctly partitions also after prepend", () => assert.deepEqual(
+        [[1,3,5,7],[2,4,6,8]],
+        HashSet.of(2,3,4,5,6,7,8).add(1).partition(x => x%2!==0)
+            .map(v => v.toVector().sortOn(x=>x).toArray())));
 });
 
 describe("hashset equality", () => {

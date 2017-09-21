@@ -255,18 +255,6 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
     reverse(): Seq<T>;
 
     /**
-     * Returns a pair of two collections; the first one
-     * will only contain the items from this collection for
-     * which the predicate you give returns true, the second
-     * will only contain the items from this collection where
-     * the predicate returns false.
-     *
-     *     Vector.of(1,2,3,4).partition(x => x%2===0)
-     *     => [[2,4],[1,3]]
-     */
-    partition(predicate:(x:T)=>boolean): [Seq<T>,Seq<T>];
-
-    /**
      * Convert this collection to a map. You give a function which
      * for each element in the collection returns a pair. The
      * key of the pair will be used as a key in the map, the value,

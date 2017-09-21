@@ -27,6 +27,18 @@ export interface Collection<T> extends Value, Iterable<T> {
     filter(predicate:(v:T)=>boolean): Collection<T>;
 
     /**
+     * Returns a pair of two collections; the first one
+     * will only contain the items from this collection for
+     * which the predicate you give returns true, the second
+     * will only contain the items from this collection where
+     * the predicate returns false.
+     *
+     *     Vector.of(1,2,3,4).partition(x => x%2===0)
+     *     => [[2,4],[1,3]]
+     */
+    partition(predicate:(x:T)=>boolean): [Collection<T>,Collection<T>];
+
+    /**
      * Returns true if the item is in the collection,
      * false otherwise.
      */

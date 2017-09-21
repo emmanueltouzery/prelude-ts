@@ -2,6 +2,7 @@ import { WithEquality } from "./Comparison";
 import { Value} from "./Value";
 import { Collection } from "./Collection";
 import { Foldable } from "./Foldable";
+import { Vector } from "./Vector";
 
 /**
  * A generic interface for set-like implementations.
@@ -94,4 +95,9 @@ export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
      * Converts this set to an array
      */
     toArray(): Array<T & WithEquality>;
+
+    /**
+     * Converts this set to an vector
+     */
+    toVector(): Vector<T & WithEquality>;
 }
