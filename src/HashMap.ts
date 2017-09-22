@@ -178,10 +178,12 @@ export class HashMap<K,V> implements IMap<K,V> {
     }
 
     /**
-     * Get a Set containing all the values in the map
+     * Get an iterable containing all the values in the map
+     * (can't return a set as we don't constrain map values
+     * to have equality in the generics type)
      */
-    valueSet(): HashSet<V> {
-        return HashSet.ofIterable<V>(this.hamt.values());
+    valueIterable(): Iterable<V> {
+        return <Iterable<V>>this.hamt.values();
     }
 
     /**
@@ -414,8 +416,8 @@ export class HashMap<K,V> implements IMap<K,V> {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    equals(other: IMap<K,V>): boolean {
-        if (!other || !other.valueSet) {
+    equals(other: IMap<K&WithEquality,V&WithEquality>): boolean {
+        if (!other || !other.valueIterable) {
             return false;
         }
         const sz = this.hamt.size;
@@ -527,8 +529,19 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return HashSet.empty<K>();
     }
 
-    valueSet(): HashSet<V> {
-        return HashSet.empty<V>();
+    valueIterable(): Iterable<V> {
+        return {
+            [Symbol.iterator](): Iterator<V> {
+                return {
+                    next(): IteratorResult<V> {
+                        return {
+                            done: true,
+                            value: <any>undefined
+                        };
+                    }
+                };
+            }
+        };
     }
 
     mergeWith(other: Iterable<[K & WithEquality,V]>, merge:(v1: V, v2: V) => V): HashMap<K,V> {
@@ -571,8 +584,8 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return Vector.empty<[K,V]>();
     }
 
-    equals(other: HashMap<K,V>): boolean {
-        if (!other || !other.valueSet) {
+    equals(other: IMap<K&WithEquality,V&WithEquality>): boolean {
+        if (!other || !other.valueIterable) {
             return false;
         }
         return <any>other === emptyHashMap || other.length() === 0;

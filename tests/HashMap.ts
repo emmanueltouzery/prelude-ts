@@ -6,8 +6,8 @@ import * as assert from 'assert'
 
 describe("hashmap construction basic sanity tests", () => {
     it("should overwrite values with the same key", () => assert.ok(
-        HashMap.empty<number,String>().put(5, "test").put(5, "test1")
-            .equals(HashMap.empty<number,String>().put(5, "test1"))));
+        HashMap.empty<number,string>().put(5, "test").put(5, "test1")
+            .equals(HashMap.empty<number,string>().put(5, "test1"))));
     it("should overwrite values with the same key with custom types", () => assert.ok(
         HashMap.empty<MyClass,string>()
             .put(new MyClass("a", 1), "test")
@@ -45,11 +45,11 @@ describe("hashmap construction basic sanity tests", () => {
 
 describe("hashmap equality", () => {
     it("empty should be equal with empty", () =>
-       assert.ok(HashMap.empty<number,String>().equals(HashMap.empty<number,String>())));
+       assert.ok(HashMap.empty<number,string>().equals(HashMap.empty<number,string>())));
     it("non empty should be not be equal with empty", () =>
-       assert.ok(!HashMap.empty<number,String>().put(1,"t").equals(HashMap.empty<number,String>())));
+       assert.ok(!HashMap.empty<number,string>().put(1,"t").equals(HashMap.empty<number,string>())));
     it("empty should be not be equal with non empty", () =>
-       assert.ok(!HashMap.empty<number,String>().equals(HashMap.empty<number,String>().put(1,"t"))));
+       assert.ok(!HashMap.empty<number,string>().equals(HashMap.empty<number,string>().put(1,"t"))));
     it("doesn't throw when given another type on equals", () => assert.equal(
         false, HashMap.empty().put(1,2).equals(<any>[1,2])));
     it("doesn't throw when given null on equals", () => assert.equal(
@@ -80,10 +80,10 @@ describe("hashmap extract values", () => {
         HashSet.empty<string>().equals(HashMap.empty<string,string>().keySet())));
     it("should get non-empty keySet", () => assert.ok(
         HashSet.of("a","c").equals(HashMap.empty<string,string>().put("a","b").put("c","d").keySet())));
-    it("should get empty valueSet", () => assert.ok(
-        HashSet.empty<string>().equals(HashMap.empty<string,string>().valueSet())));
-    it("should get non-empty valueSet", () => assert.ok(
-        HashSet.of("b","d").equals(HashMap.empty<string,string>().put("a","b").put("c","d").valueSet())));
+    it("should get empty valueIterable", () => assert.ok(
+        HashSet.empty<string>().equals(HashSet.ofIterable(HashMap.empty<string,string>().valueIterable()))));
+    it("should get non-empty valueIterable", () => assert.ok(
+        HashSet.of("b","d").equals(HashSet.ofIterable(HashMap.empty<string,string>().put("a","b").put("c","d").valueIterable()))));
     it("supports iterator", () => {
         let total = 0;
         let letters = [];

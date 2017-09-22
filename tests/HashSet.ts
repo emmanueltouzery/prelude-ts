@@ -4,8 +4,8 @@ import * as assert from 'assert'
 
 describe("hashset construction basic sanity tests", () => {
     it("should overwrite identical values", () => assert.ok(
-        HashSet.empty<String>().add("test").add("test")
-            .equals(HashSet.empty<String>().add("test"))));
+        HashSet.empty<string>().add("test").add("test")
+            .equals(HashSet.empty<string>().add("test"))));
 
     it("should overwrite identical with custom types", () => assert.ok(
         HashSet.empty<MyClass>()

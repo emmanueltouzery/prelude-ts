@@ -9,7 +9,7 @@ describe("option comparison", () => {
     it("should mark different options as not equal", () =>
        assert.ok(!Option.of(5).equals(Option.of(6))))
     it("should mark none as equals to none", () =>
-       assert.ok(Option.none().equals(Option.none())));
+       assert.ok(Option.none().equals(Option.none<string>())));
     it("should mark none and some as not equal", () =>
        assert.ok(!Option.of(5).equals(Option.none<number>())));
     it("should mark none and some as not equal", () =>

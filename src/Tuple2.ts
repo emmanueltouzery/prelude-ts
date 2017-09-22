@@ -112,7 +112,7 @@ export class Tuple2<T,U> implements Value {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    equals(other: Tuple2<T,U>): boolean {
+    equals(other: Tuple2<T&WithEquality,U&WithEquality>): boolean {
         if (!other || !other._fst) {
             return false;
         }

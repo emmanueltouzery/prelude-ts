@@ -18,9 +18,11 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
     keySet(): ISet<K>;
 
     /**
-     * Get a Set containing all the values in the map
+     * Get an iterable containing all the values in the map
+     * (can't return a set as we don't constrain map values
+     * to have equality in the generics type)
      */
-    valueSet(): ISet<V>;
+    valueIterable(): Iterable<V>;
 
     /**
      * Get the value for the key you give, if the key is present.

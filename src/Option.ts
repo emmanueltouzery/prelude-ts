@@ -204,7 +204,7 @@ export abstract class Option<T> implements Value {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    abstract equals(other: Option<T>): boolean;
+    abstract equals(other: Option<T&WithEquality>): boolean;
 
     /**
      * Get a number for that object. Two different values
@@ -275,13 +275,13 @@ export class Some<T> extends Option<T> {
     toVector(): Vector<T> {
         return Vector.ofStruct(this.value);
     }
-    equals(other: Option<T>): boolean {
+    equals(other: Option<T&WithEquality>): boolean {
         // the .isSome doesn't test if it's a Some, but
         // if the object has a field called isSome.
         if (other === <None<T>>none || !other || !(<any>other).isSome) {
             return false;
         }
-        const someOther = <Some<T>>other;
+        const someOther = <Some<T&WithEquality>>other;
         return areEqual(this.value, someOther.value);
     }
     hashCode(): number {
@@ -341,7 +341,7 @@ export class None<T> extends Option<T> {
     toVector(): Vector<T> {
         return Vector.empty<T>();
     }
-    equals(other: Option<T>): boolean {
+    equals(other: Option<T&WithEquality>): boolean {
         return other === <None<T>>none;
     }
     hashCode(): number {

@@ -763,7 +763,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    equals(other: Vector<T>): boolean {
+    equals(other: Vector<T&WithEquality>): boolean {
         if (!other || !other.hamt) {
             return false;
         }

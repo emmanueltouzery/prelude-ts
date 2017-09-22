@@ -153,7 +153,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Stream<U> {
         let nextVal = fn(seed);
         if (nextVal.isNone()) {
-            return <Stream<U>>emptyStream;
+            return <EmptyStream<U>>emptyStream;
         }
         return new ConsStream(
             nextVal.getOrThrow()[0],
@@ -807,7 +807,7 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return HashMap.empty<K,V>();
     }
 
-    equals(other: Stream<T>): boolean {
+    equals(other: Stream<T&WithEquality>): boolean {
         if (!other) {
             return false;
         }
@@ -967,7 +967,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         let otherCurItem = otherIterator.next();
 
         if (this.isEmpty() || otherCurItem.done) {
-            return <Stream<[T,U]>>emptyStream;
+            return <EmptyStream<[T,U]>>emptyStream;
         }
 
         return new ConsStream([(<ConsStream<T>>this).value, otherCurItem.value] as [T,U],
@@ -1126,7 +1126,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         });
     }
 
-    equals(other: Stream<T>): boolean {
+    equals(other: Stream<T&WithEquality>): boolean {
         if (!other || !other.tail) {
             return false;
         }
@@ -1140,8 +1140,8 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
                 // they are both empty, end of the stream
                 return true;
             }
-            const myHead = (<ConsStream<T>>myVal).value;
-            const hisHead = (<ConsStream<T>>hisVal).value;
+            const myHead = (<ConsStream<T&WithEquality>>myVal).value;
+            const hisHead = (<ConsStream<T&WithEquality>>hisVal).value;
 
             if ((myHead === undefined) !== (hisHead === undefined)) {
                 return false;
@@ -1154,8 +1154,8 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             if (!areEqual(myHead, hisHead)) {
                 return false;
             }
-            myVal = (<ConsStream<T>>myVal)._tail();
-            hisVal = (<ConsStream<T>>hisVal)._tail();
+            myVal = (<ConsStream<T&WithEquality>>myVal)._tail();
+            hisVal = (<ConsStream<T&WithEquality>>hisVal)._tail();
         }
     }
 
