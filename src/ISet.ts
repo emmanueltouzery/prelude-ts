@@ -8,7 +8,7 @@ import { Vector } from "./Vector";
  * A generic interface for set-like implementations.
  * @type T the item type
  */
-export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
+export interface ISet<T> extends Collection<T>, Foldable<T> {
 
     /**
      * Returns the number of elements in the set.
@@ -100,4 +100,6 @@ export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
      * Converts this set to an vector
      */
     toVector(): Vector<T & WithEquality>;
+
+    equals(other: ISet<T&WithEquality>): boolean;
 }

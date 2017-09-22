@@ -10,7 +10,7 @@ import { Foldable } from "./Foldable";
  * @type K the key type
  * @type V the value type
  */
-export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
+export interface IMap<K,V> extends Iterable<[K,V]>, Foldable<[K,V]> {
 
     /**
      * Get a Set containing all the keys in the map
@@ -181,4 +181,6 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
      * for which the predicate returned true.
      */
     filter(predicate:(k:K,v:V)=>boolean): IMap<K,V>;
+
+    equals(other: IMap<K&WithEquality,V&WithEquality>): boolean;
 }

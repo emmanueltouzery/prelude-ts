@@ -414,7 +414,7 @@ export class HashMap<K,V> implements IMap<K,V> {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    equals(other: IMap<K,V>): boolean {
+    equals(other: IMap<K&WithEquality,V&WithEquality>): boolean {
         if (!other || !other.valueSet) {
             return false;
         }

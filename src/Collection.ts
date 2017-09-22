@@ -1,6 +1,7 @@
 import { WithEquality, Ordering } from "./Comparison";
 import { Value } from "./Value";
 import { Option } from "./Option";
+import { Foldable } from "./Foldable";
 
 export interface Collection<T> extends Value, Iterable<T> {
     
@@ -61,4 +62,15 @@ export interface Collection<T> extends Value, Iterable<T> {
      * return Some of its value, otherwise return None.
      */
     single(): Option<T>;
+
+    /**
+     * Joins elements of the collection by a separator.
+     * Example:
+     *
+     *     Vector.of(1,2,3).mkString(", ")
+     *     => "1, 2, 3"
+     */
+    mkString(separator: string | {prefix?:string,delimiter:string,suffix?:string}): string;
+
+    equals(other: Foldable<T&WithEquality>|Collection<T&WithEquality>): boolean;
 }

@@ -101,7 +101,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
-     * Call a predicate for each element in the collection,
+     * Call a predicate for each elementin the collection,
      * build a new collection holding only the elements
      * for which the predicate returned true.
      */
@@ -308,7 +308,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    equals(other: HashSet<T>): boolean {
+    equals(other: HashSet<T&WithEquality>): boolean {
         const sz = this.hamt.size;
         if (other === <EmptyHashSet<T>>emptyHashSet && sz === 0) {
             // we could get that i'm not the empty map
@@ -455,7 +455,7 @@ class EmptyHashSet<T> extends HashSet<T> {
         return [this, this];
     }
 
-    equals(other: HashSet<T>): boolean {
+    equals(other: HashSet<T&WithEquality>): boolean {
         if (!other || !other.length) {
             return false;
         }

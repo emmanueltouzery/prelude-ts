@@ -166,15 +166,6 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
     prependAllStruct(elts: Iterable<T>): Seq<T>;
 
     /**
-     * Joins elements of the collection by a separator.
-     * Example:
-     *
-     *     Vector.of(1,2,3).mkString(", ")
-     *     => "1, 2, 3"
-     */
-    mkString(separator: string): string;
-
-    /**
      * Combine this collection with the collection you give in
      * parameter to produce a new collection which combines both,
      * in pairs. For instance:
@@ -279,4 +270,6 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
      * Enables fluent-style programming by chaining calls.
      */
     transform<U>(converter:(x:Seq<T>)=>U): U;
+
+    equals(other: Foldable<T&WithEquality>|Collection<T&WithEquality>): boolean;
 }

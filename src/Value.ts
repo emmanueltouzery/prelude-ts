@@ -5,6 +5,8 @@ export interface Value {
      * regardless of whether they are the same object physically
      * in memory.
      */
+    // I experimented with 'other: this' but had issues with interfaces
+    // like Seq, Foldable, Collection.
     equals(other: any /*TODO*/): boolean;
 
     /**

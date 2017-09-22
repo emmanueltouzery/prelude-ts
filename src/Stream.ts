@@ -611,7 +611,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    abstract equals(other: Stream<T>): boolean;
+    abstract equals(other: Stream<T&WithEquality>): boolean;
 
     /**
      * Get a human-friendly string representation of that value.

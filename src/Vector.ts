@@ -429,7 +429,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      *     Vector.of(1,2,3).mkString(", ")
      *     => "1, 2, 3"
      */
-    mkString(separator: string): string {
+    mkString(separator: string | {prefix?:string,delimiter:string,suffix?:string}): string {
         let r = "";
         for (let i=0;i<this.hamt.size;i++) {
             if (i>0) {
@@ -763,7 +763,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    equals(other: Vector<T>): boolean {
+    equals(other: Vector<T&WithEquality>): boolean {
         if (!other || !other.hamt) {
             return false;
         }
