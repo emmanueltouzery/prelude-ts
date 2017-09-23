@@ -25,3 +25,13 @@ export function setContractViolationAction(action: (msg:string)=>void) {
 export function reportContractViolation(msg: string): void {
     preludeTsContractViolationCb(msg);
 }
+
+/**
+ * @hidden
+ */
+export function contractTrueEquality(context: string, val: any) {
+    if (val.hasTrueEquality && (!val.hasTrueEquality())) {
+        reportContractViolation(
+            context + ": element doesn't support true equality: " + val);
+    }
+}

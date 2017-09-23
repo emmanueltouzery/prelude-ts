@@ -3,7 +3,7 @@ import { Vector } from "./Vector";
 import { Option } from "./Option";
 import { WithEquality, hasEquals, HasEquals, 
          getHashCode, areEqual, toStringHelper } from "./Comparison";
-import { reportContractViolation } from "./Contract";
+import { contractTrueEquality } from "./Contract";
 const hamt: any = require("hamt_plus");
 
 /**
@@ -65,12 +65,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
             const iterator = elts[Symbol.iterator]();
             let curItem = iterator.next();
             if (!curItem.done) {
-                if ((<any>curItem.value).hasTrueEquality &&
-                    (!(<any>curItem.value).hasTrueEquality())) {
-                    reportContractViolation(
-                        "Error building a HashSet: element doesn't support true equality: " +
-                            curItem.value);
-                }
+                contractTrueEquality("Error building a HashSet", curItem.value);
             }
             while (!curItem.done) {
                 h.set(curItem.value, curItem.value);
@@ -392,9 +387,7 @@ class EmptyHashSet<T> extends HashSet<T> {
     }
 
     add(elt: T & WithEquality): HashSet<T> {
-        if ((<any>elt).hasTrueEquality && (!(<any>elt).hasTrueEquality())) {
-            reportContractViolation("Error building a HashSet: element doesn't support true equality: " + elt);
-        }
+        contractTrueEquality("Error building a HashSet", elt);
         if (hasEquals(elt)) {
             return new HashSet<T>(hamt.make({
                 hash: (v: T & HasEquals) => v.hashCode(),

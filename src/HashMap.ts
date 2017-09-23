@@ -1,7 +1,7 @@
 import { IMap } from "./IMap";
 import { hasEquals, HasEquals, WithEquality,
          getHashCode, areEqual, toStringHelper } from "./Comparison";
-import { reportContractViolation } from "./Contract"
+import { contractTrueEquality } from "./Contract"
 import { Option, none, None } from "./Option";
 import { HashSet } from "./HashSet";
 import { ISet } from "./ISet";
@@ -417,11 +417,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
     }
 
     put(k: K & WithEquality, v: V): HashMap<K,V> {
-        if ((<any>k).hasTrueEquality &&
-            (!(<any>k).hasTrueEquality())) {
-            reportContractViolation(
-                "Error building a HashMap: key doesn't support true equality: " + k);
-        }
+        contractTrueEquality("Error building a HashMap", k);
         if (hasEquals(k)) {
             return new HashMap<K,V>(hamt.make({
                 hash: (v: K & HasEquals) => v.hashCode(),
