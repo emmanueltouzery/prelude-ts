@@ -3,6 +3,7 @@ import { Seq } from "./Seq";
 import { Vector } from "./Vector";
 import { WithEquality, areEqual, hasTrueEquality,
          getHashCode, toStringHelper } from "./Comparison";
+import { contractTrueEquality} from "./Contract";
 
 /**
  * Expresses that a value may be present, or not.
@@ -84,7 +85,7 @@ export abstract class Option<T> implements Value {
      */
     hasTrueEquality(): boolean {
         return this.flatMap(
-            x => (<any>x).hasTrueEquality ?
+            x => (x && (<any>x).hasTrueEquality) ?
                 Option.of((<any>x).hasTrueEquality()) :
                 hasTrueEquality(x))
             .getOrElse(true);
@@ -241,6 +242,7 @@ export class Some<T> extends Option<T> {
             return false;
         }
         const someOther = <Some<T&WithEquality>>other;
+        contractTrueEquality("Option.equals", this, someOther);
         return areEqual(this.value, someOther.value);
     }
     hashCode(): number {

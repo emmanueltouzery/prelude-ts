@@ -29,9 +29,11 @@ export function reportContractViolation(msg: string): void {
 /**
  * @hidden
  */
-export function contractTrueEquality(context: string, val: any) {
-    if (val.hasTrueEquality && (!val.hasTrueEquality())) {
-        reportContractViolation(
-            context + ": element doesn't support true equality: " + val);
+export function contractTrueEquality(context: string, ...vals: Array<any>) {
+    for (const val of vals) {
+        if (val && val.hasTrueEquality && (!val.hasTrueEquality())) {
+            reportContractViolation(
+                context + ": element doesn't support true equality: " + val);
+        }
     }
 }

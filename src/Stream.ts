@@ -2,6 +2,7 @@ import { Option } from "./Option";
 import { Vector } from "./Vector";
 import { WithEquality, toStringHelper,
          getHashCode, areEqual, Ordering } from "./Comparison";
+import { contractTrueEquality } from "./Contract";
 import { Value } from "./Value";
 import { IMap } from "./IMap";
 import { HashMap } from "./HashMap";
@@ -962,6 +963,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         if (!other || !other.tail) {
             return false;
         }
+        contractTrueEquality("Stream.equals", this, other);
         let myVal: Stream<T> = this;
         let hisVal = other;
         while (true) {

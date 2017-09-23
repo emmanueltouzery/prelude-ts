@@ -28,6 +28,8 @@ describe("option comparison", () => {
         false, Option.none().equals(<any>[1,2])));
     it("empty doesn't throw when given null on equals", () => assert.equal(
         false, Option.none().equals(<any>null)));
+    it("should throw when comparing options without true equality", () => assert.throws(
+        () => Option.of(Vector.of([1])).equals(Option.of(Vector.of([1])))));
 });
 
 describe("option transformation", () => {

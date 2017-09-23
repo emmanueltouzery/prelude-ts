@@ -325,6 +325,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
         if (sz !== other.hamt.size) {
             return false;
         }
+        contractTrueEquality("HashSet.equals", this, other);
         const keys: Array<T & WithEquality> = Array.from<T & WithEquality>(this.hamt.keys());
         for (let k of keys) {
             const hisVal: T & WithEquality|null|undefined = other.hamt.get(k);

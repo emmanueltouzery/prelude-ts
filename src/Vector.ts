@@ -1,6 +1,7 @@
 import { Seq } from "./Seq";
 import { WithEquality, Ordering,
          getHashCode, areEqual, toStringHelper } from "./Comparison";
+import { contractTrueEquality } from "./Contract";
 import { HashMap} from "./HashMap";
 import { IMap } from "./IMap";
 import { Option } from "./Option";
@@ -668,6 +669,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         if (sz !== other.hamt.size) {
             return false;
         }
+        contractTrueEquality("Vector.equals", this, other);
         for (let i=0;i<this.hamt.size;i++) {
             const myVal: T & WithEquality|null|undefined = this.hamt.get(i+this.indexShift);
             const hisVal: T & WithEquality|null|undefined = other.hamt.get(i+other.indexShift);

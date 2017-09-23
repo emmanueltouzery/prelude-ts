@@ -349,6 +349,7 @@ export class HashMap<K,V> implements IMap<K,V> {
         if (!other || !other.valueIterable) {
             return false;
         }
+        contractTrueEquality("HashMap.equals", this, other);
         const sz = this.hamt.size;
         if (other.length() === 0 && sz === 0) {
             // we could get that i'm not the empty map
@@ -425,6 +426,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
             }).set(k,v));
         }
         return new HashMap<K,V>(hamt.make().set(k,v));
+    }
+
+    hasTrueEquality(): boolean {
+        return true;
     }
 
     putWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): HashMap<K,V> {

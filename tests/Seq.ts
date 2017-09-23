@@ -66,6 +66,8 @@ export function runTests(seqName: string,
             !of(1,2).equals(of(1, <any>undefined))));
         it("supports contain", () => assert.ok(
             of(1,2,3).contains(2)));
+        it("should throw when using contains without true equality", () => assert.throws(
+            () => of(Option.of([1])).contains(Option.of([1]))));
         it("rejects contain", () => assert.ok(
             !of(1,2,3).contains(4)));
         it("rejects contain, empty stream", () => assert.ok(

@@ -2,6 +2,7 @@ import { Value } from "./Value";
 import { Option } from "./Option";
 import { WithEquality, areEqual,
          getHashCode, toStringHelper } from "./Comparison";
+import { contractTrueEquality } from "./Contract";
 
 /**
  * Contains a pair of two values, which may or may not have the same type.
@@ -89,6 +90,7 @@ export class Tuple2<T,U> implements Value {
         if (!other || !other._fst) {
             return false;
         }
+        contractTrueEquality("Tuple2.equals", this, other);
         return areEqual(this._fst, other._fst) &&
             areEqual(this._snd, other._snd);
     }
