@@ -1,5 +1,5 @@
 import { IMap } from "./IMap";
-import { hasEquals, HasEquals, WithEquality,
+import { hasEquals, HasEquals, WithEquality, reportContractViolation,
          getHashCode, areEqual, toStringHelper } from "./Comparison";
 import { Option, none, None } from "./Option";
 import { HashSet } from "./HashSet";
@@ -70,8 +70,14 @@ export class HashMap<K,V> implements IMap<K,V> {
      * @hidden
      */
     hasTrueEquality(): boolean {
+        // for true equality, need both key & value to have true
+        // equality. but i can't check when they're in an array,
+        // as array doesn't have true equality => extract them
+        // and check them separately.
         return Option.of(this.hamt.entries().next().value)
-            .hasTrueEquality();
+            .map(x => x[0]).hasTrueEquality() &&
+            Option.of(this.hamt.entries().next().value)
+            .map(x => x[1]).hasTrueEquality()
     }
 
     /**
@@ -410,6 +416,11 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
     }
 
     put(k: K & WithEquality, v: V): HashMap<K,V> {
+        if ((<any>k).hasTrueEquality &&
+            (!(<any>k).hasTrueEquality())) {
+            reportContractViolation(
+                "Error building a HashMap: key doesn't support true equality: " + k);
+        }
         if (hasEquals(k)) {
             return new HashMap<K,V>(hamt.make({
                 hash: (v: K & HasEquals) => v.hashCode(),

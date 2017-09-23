@@ -1,6 +1,9 @@
 import { HashMap } from "../src/HashMap";
 import { HashSet } from "../src/HashSet";
 import { Vector } from "../src/Vector";
+import { Option } from "../src/Option";
+import { Stream } from "../src/Stream";
+import { Tuple2 } from "../src/Tuple2";
 import { MyClass} from "./SampleData";
 import * as assert from 'assert'
 
@@ -58,6 +61,18 @@ describe("hashmap equality", () => {
         false, HashMap.empty().equals(<any>[1,2])));
     it("empty doesn't throw when given null on equals", () => assert.equal(
         false, HashMap.empty().equals(<any>null)));
+    it("should refuse keys which don't offer true equality", () => assert.throws(
+        () => HashMap.of([Vector.of([1]),"value"])));
+    it("should refuse keys which don't offer true equality (vector)", () => assert.throws(
+        () => HashMap.empty().put(Vector.of(Vector.of([1])),"value")));
+    it("should refuse keys which don't offer true equality (stream)", () => assert.throws(
+        () => HashMap.of([Stream.of([1]), "value"])));
+    it("should refuse keys which don't offer true equality (option)", () => assert.throws(
+        () => HashMap.of([Option.of([1]), "value"])));
+    it("should refuse keys which don't offer true equality (tuple2)", () => assert.throws(
+        () => HashMap.of([Tuple2.of(1,Vector.of([1])), "value"])));
+    it("should refuse keys which don't offer true equality (hashmap)", () => assert.throws(
+        () => HashMap.of([HashMap.of(["a",[1]]), "value"])));
 })
 
 describe("hashmap - toString should be nicely formatted", () => {
