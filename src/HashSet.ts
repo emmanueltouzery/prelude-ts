@@ -1,8 +1,9 @@
 import { ISet } from "./ISet";
 import { Vector } from "./Vector";
 import { Option } from "./Option";
-import { WithEquality, hasEquals, HasEquals, reportContractViolation,
+import { WithEquality, hasEquals, HasEquals, 
          getHashCode, areEqual, toStringHelper } from "./Comparison";
+import { reportContractViolation } from "./Contract";
 const hamt: any = require("hamt_plus");
 
 /**

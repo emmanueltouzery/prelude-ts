@@ -1,6 +1,7 @@
 import { IMap } from "./IMap";
-import { hasEquals, HasEquals, WithEquality, reportContractViolation,
+import { hasEquals, HasEquals, WithEquality,
          getHashCode, areEqual, toStringHelper } from "./Comparison";
+import { reportContractViolation } from "./Contract"
 import { Option, none, None } from "./Option";
 import { HashSet } from "./HashSet";
 import { ISet } from "./ISet";

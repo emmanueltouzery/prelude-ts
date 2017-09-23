@@ -6,3 +6,4 @@ export * from "./Tuple2";
 export * from "./Value";
 export * from "./Comparison";
 export * from "./Stream";
+export * from "./Contract";

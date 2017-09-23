@@ -43,7 +43,7 @@ Besides this dependency, I'll try to limit the number of dependencies.
 In addition the library is written in idiomatic javascript style, with loops
 instead of recursion, so the performance should be reasonable.
 
-## Structs and equality
+## Set, Map and equality
 
 Javascript doesn't have structural equality, except for primitive types.
 So, `1 === 1` is true. But `[1] === [1]` is not, and neither `{a:1} === {a:1}`.
@@ -61,21 +61,21 @@ If these values don't have structural equality, then we can get no better than
 `===` behavior.
 
 prelude.ts attempts to assist the programmer with this; it tries to encourage
-the developer to do the right thing. First, it'll refuse types without properly
-defined equality in Sets and in Maps keys. Second, it has a special terminology
-for types without properly defined equality: 'structs'.
-When you operate with for instance a `Vector`, you'll have to explicitely say
-when you deal with structs. So `Vector.of([1])` will not compile.
-You get (a longer version of) this message:
+the developer to do the right thing. First, it'll refuse types without obviously properly
+defined equality in Sets and in Maps keys, so `HashSet.of([1])`, 
+or `Vector.of([1]).equals(Vector.of([2]))` will not compile.
+For both of these, you get (a longer version of) this message:
 
     Type 'number[]' is not assignable to type 'HasEquals'.
       Property 'equals' is missing in type 'number[]'.
 
-So the solution is to use a struct-oriented function: `Vector.ofStruct([1])`.
-That version compiles just fine. But now you've been warned that you can't use
-this value in a Set or as a Map key, and that equality features are not provided.
-Similary, functions such a `map` have alternate implementations such as `mapStruct`
-to warn the programmer in these cases.
+But in some less obvious cases, we can't detect the issue at compile-time, so
+prelude.ts will reject the code at runtime; for instance if you call
+`HashSet.of(Vector.of([1]))` you'll get an exception at runtime:
+
+    Error building a HashSet: element doesn't support true equality: Vector([1])
+    
+(this behavior is [customizable](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html#setContractViolationAction)).
 
 ## Wishlist/upcoming features
 
