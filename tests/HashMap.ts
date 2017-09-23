@@ -32,7 +32,7 @@ describe("hashmap construction basic sanity tests", () => {
             HashMap.of([1,"a"],[2,"b"]))));
     it("should build with ofIterable", () => assert.ok(
         HashMap.empty<number,string>().put(1,"a").put(2,"b").equals(
-            HashMap.ofIterable(Vector.ofStruct<[number,string]>([1,"a"],[2,"b"])))));
+            HashMap.ofIterable(Vector.of<[number,string]>([1,"a"],[2,"b"])))));
     it("should put with merge", () => assert.ok(
         HashMap.empty<number,string>()
             .put(5,"test").putWithMerge(5,"a",(a,b)=>a+b)

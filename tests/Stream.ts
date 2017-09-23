@@ -8,7 +8,7 @@ import * as assert from 'assert'
 
 SeqTest.runTests("Stream",
                  Stream.ofIterable,
-                 Stream.ofStruct,
+                 Stream.of,
                  Stream.empty,
                  Stream.unfoldRight);
 

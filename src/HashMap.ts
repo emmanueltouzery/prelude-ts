@@ -30,32 +30,10 @@ export class HashMap<K,V> implements IMap<K,V> {
      *
      *     HashMap.of([1,"a"],[2,"b"])
      *
-     * Equality requirements.
-     */
-    static of<K,V>(...entries: Array<[K&WithEquality, V&WithEquality]>): HashMap<K,V> {
-        return HashMap.ofIterableStruct(entries);
-    }
-
-    /**
-     * Build a HashMap from key-value pairs.
-     *
-     *     HashMap.of([1,"a"],[2,"b"])
-     *
      * No equality requirements.
      */
-    static ofStruct<K,V>(...entries: Array<[K&WithEquality, V]>): HashMap<K,V> {
-        return HashMap.ofIterableStruct(entries);
-    }
-
-    /**
-     * Build a HashMap from an iterable containing key-value pairs.
-     * 
-     *    HashMap.ofIterable(Vector.ofStruct<[number,string]>([1,"a"],[2,"b"]));
-     *
-     * Equality requirements.
-     */
-    static ofIterable<K,V>(entries: Iterable<[K&WithEquality, V&WithEquality]>): HashMap<K,V> {
-        return HashMap.ofIterableStruct(entries);
+    static of<K,V>(...entries: Array<[K&WithEquality, V]>): HashMap<K,V> {
+        return HashMap.ofIterable(entries);
     }
 
     /**
@@ -65,13 +43,13 @@ export class HashMap<K,V> implements IMap<K,V> {
      *
      * No equality requirements.
      */
-    static ofIterableStruct<K,V>(entries: Iterable<[K&WithEquality, V]>): HashMap<K,V> {
+    static ofIterable<K,V>(entries: Iterable<[K&WithEquality, V]>): HashMap<K,V> {
         // remember we must set up the hamt with the custom equality
         let r = HashMap.empty<K,V>();
         const iterator = entries[Symbol.iterator]();
         let curItem = iterator.next();
         while (!curItem.done) {
-            r = r.putStruct(curItem.value[0], curItem.value[1]);
+            r = r.put(curItem.value[0], curItem.value[1]);
             curItem = iterator.next();
         }
         return r;
@@ -98,19 +76,8 @@ export class HashMap<K,V> implements IMap<K,V> {
      * @param v the value
      * No equality requirements
      */
-    putStruct(k: K & WithEquality, v: V): HashMap<K,V> {
+    put(k: K & WithEquality, v: V): HashMap<K,V> {
         return new HashMap<K,V>(this.hamt.set(k,v));
-    }
-
-    /**
-     * Add a new entry in the map. If there was entry with the same
-     * key, it will be overwritten.
-     * @param k the key
-     * @param v the value
-     * Equality requirements
-     */
-    put(k: K & WithEquality, v: V & WithEquality): HashMap<K,V> {
-        return this.putStruct(k, v);
     }
 
     /**
@@ -123,27 +90,13 @@ export class HashMap<K,V> implements IMap<K,V> {
      * @param merge a function to merge old and new values in case of conflict.
      * No equality requirements
      */
-    putStructWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): HashMap<K,V> {
+    putWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): HashMap<K,V> {
         return new HashMap<K,V>(this.hamt.modify(k, (curV?: V) => {
             if (curV === undefined) {
                 return v;
             }
             return merge(curV, v);
         }))
-    }
-
-    /**
-     * Add a new entry in the map; in case there was already an
-     * entry with the same key, the merge function will be invoked
-     * with the old and the new value to produce the value to take
-     * into account.
-     * @param k the key
-     * @param v the value
-     * @param merge a function to merge old and new values in case of conflict.
-     * Equality requirements
-     */
-    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V&WithEquality, v2: V&WithEquality) => V): HashMap<K,V> {
-        return this.putStructWithMerge(k, v, merge);
     }
 
     /**
@@ -200,7 +153,7 @@ export class HashMap<K,V> implements IMap<K,V> {
         let map: HashMap<K,V> = this;
         let curItem = iterator.next();
         while (!curItem.done) {
-            map = map.putStructWithMerge(curItem.value[0], curItem.value[1], merge);
+            map = map.putWithMerge(curItem.value[0], curItem.value[1], merge);
             curItem = iterator.next();
         }
         return map;
@@ -212,22 +165,12 @@ export class HashMap<K,V> implements IMap<K,V> {
      * as pairs.
      * No equality requirements.
      */
-    mapStruct<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): HashMap<K2,V2> {
+    map<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): HashMap<K2,V2> {
         return this.hamt.fold(
             (acc: HashMap<K2,V2>, value: V, key: K&WithEquality) => {
                 const [newk,newv] = fn(key, value);
-                return acc.putStruct(newk,newv);
+                return acc.put(newk,newv);
             }, HashMap.empty());
-    }
-
-    /**
-     * Return a new map where each entry was transformed
-     * by the mapper function you give. You return key,value
-     * as pairs.
-     * Equality requirements.
-     */
-    map<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2&WithEquality]): HashMap<K2,V2> {
-        return this.mapStruct(fn);
     }
 
     /**
@@ -237,21 +180,10 @@ export class HashMap<K,V> implements IMap<K,V> {
      * as pairs.
      * No equality requirements.
      */
-    mapValuesStruct<V2>(fn:(v:V)=>V2): HashMap<K,V2> {
+    mapValues<V2>(fn:(v:V)=>V2): HashMap<K,V2> {
         return this.hamt.fold(
             (acc: HashMap<K,V2>, value: V, key: K&WithEquality) =>
-                acc.putStruct(key,fn(value)), HashMap.empty());
-    }
-
-    /**
-     * Return a new map where keys are the same as in this one,
-     * but values are transformed
-     * by the mapper function you give. You return key,value
-     * as pairs.
-     * Equality requirements.
-     */
-    mapValues<V2>(fn:(v:V)=>V2&WithEquality): HashMap<K,V2> {
-        return this.mapValuesStruct(fn);
+                acc.put(key,fn(value)), HashMap.empty());
     }
 
     /**
@@ -260,19 +192,9 @@ export class HashMap<K,V> implements IMap<K,V> {
      * merged.
      * No equality requirement
      */
-    flatMapStruct<K2,V2>(fn:(k:K, v:V)=>Iterable<[K2&WithEquality,V2]>): HashMap<K2,V2> {
+    flatMap<K2,V2>(fn:(k:K, v:V)=>Iterable<[K2&WithEquality,V2]>): HashMap<K2,V2> {
         return this.foldLeft(HashMap.empty<K2,V2>(),
                              (soFar,cur) => soFar.mergeWith(fn(cur[0],cur[1]), (a,b)=>b));
-    }
-
-    /**
-     * Calls the function you give for each item in the map,
-     * your function returns a map, all the maps are
-     * merged.
-     * Equality requirement
-     */
-    flatMap<K2,V2>(fn:(k:K, v:V)=>Iterable<[K2&WithEquality,V2&WithEquality]>): HashMap<K2,V2> {
-        return this.flatMapStruct(fn);
     }
 
     /**
@@ -311,7 +233,7 @@ export class HashMap<K,V> implements IMap<K,V> {
      * Returns true if the item is in the collection,
      * false otherwise.
      */
-    contains(val: [K,V]): boolean {
+    contains(val: [K&WithEquality,V&WithEquality]): boolean {
         return areEqual(this.hamt.get(val[0]), val[1]);
     }
 
@@ -323,7 +245,7 @@ export class HashMap<K,V> implements IMap<K,V> {
     filter(predicate:(k:K,v:V)=>boolean): HashMap<K,V> {
         return this.hamt.fold(
             (acc: HashMap<K,V>, value: V, key: K&WithEquality) =>
-                predicate(key,value) ? acc.putStruct(key,value) : acc,
+                predicate(key,value) ? acc.put(key,value) : acc,
             HashMap.empty());
     }
 
@@ -400,7 +322,7 @@ export class HashMap<K,V> implements IMap<K,V> {
     toVector(): Vector<[K,V]> {
         return this.hamt.fold(
             (acc: Vector<[K,V]>, value: V, key: K&WithEquality) =>
-                acc.appendStruct([key,value]), Vector.empty());
+                acc.append([key,value]), Vector.empty());
     }
 
     /**
@@ -487,7 +409,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return { next: () => ({ done: true, value: <any>undefined }) };
     }
 
-    putStruct(k: K & WithEquality, v: V): HashMap<K,V> {
+    put(k: K & WithEquality, v: V): HashMap<K,V> {
         if (hasEquals(k)) {
             return new HashMap<K,V>(hamt.make({
                 hash: (v: K & HasEquals) => v.hashCode(),
@@ -497,15 +419,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return new HashMap<K,V>(hamt.make().set(k,v));
     }
 
-    put(k: K & WithEquality, v: V & WithEquality): HashMap<K,V> {
-        return this.putStruct(k,v);
-    }
-
-    putStructWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): HashMap<K,V> {
-        return this.putStruct(k,v);
-    }
-
-    putWithMerge(k: K & WithEquality, v: V & WithEquality, merge: (v1: V&WithEquality, v2: V&WithEquality) => V): HashMap<K,V> {
+    putWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): HashMap<K,V> {
         return this.put(k,v);
     }
 
@@ -545,14 +459,14 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
     }
 
     mergeWith(other: Iterable<[K & WithEquality,V]>, merge:(v1: V, v2: V) => V): HashMap<K,V> {
-        return HashMap.ofIterableStruct(other);
+        return HashMap.ofIterable(other);
     }
 
-    mapStruct<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): HashMap<K2,V2> {
+    map<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): HashMap<K2,V2> {
         return HashMap.empty<K2,V2>();
     }
 
-    mapValuesStruct<V2>(fn:(v:V)=>V2): HashMap<K,V2> {
+    mapValues<V2>(fn:(v:V)=>V2): HashMap<K,V2> {
         return HashMap.empty<K,V2>();
     }
 
@@ -564,7 +478,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return false;
     }
 
-    contains(val: [K,V]): boolean {
+    contains(val: [K&WithEquality,V&WithEquality]): boolean {
         return false;
     }
 

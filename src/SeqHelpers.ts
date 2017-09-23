@@ -32,5 +32,5 @@ export function shuffle(array: any[]) {
 export function arrangeBy<T,K>(seq: Seq<T>, getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
     return Option.of(seq.groupBy(getKey).mapValues(v => v.single()))
         .filter(map => !map.anyMatch((k,v) => v.isNone()))
-        .map(map => map.mapValuesStruct(v => v.getOrThrow()));
+        .map(map => map.mapValues(v => v.getOrThrow()));
 }

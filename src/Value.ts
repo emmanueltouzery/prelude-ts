@@ -1,3 +1,5 @@
+import { WithEquality } from "./Comparison";
+
 export interface Value {
 
     /**
@@ -5,7 +7,7 @@ export interface Value {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    equals(other: any /*TODO*/): boolean;
+    equals(other: any&WithEquality /*TODO*/): boolean; // I experimented with 'this' for the other type but had issues with interfaces
 
     /**
      * Get a number for that object. Two different values

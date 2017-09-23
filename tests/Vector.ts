@@ -8,6 +8,6 @@ import * as assert from 'assert'
 
 SeqTest.runTests("Vector",
                  Vector.ofIterable,
-                 Vector.ofStruct,
+                 Vector.of,
                  Vector.empty,
                  Vector.unfoldRight);

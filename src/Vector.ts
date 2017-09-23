@@ -35,32 +35,15 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * an array for instance.
      * @type T the item type -- no equality requirement
      */
-    static ofIterableStruct<T>(elts: Iterable<T>): Vector<T> {
-        return (<Vector<T>>Vector.emptyVector).appendAllStruct(elts);
-    }
-
-    /**
-     * Build a vector from any iterable, which means also
-     * an array for instance.
-     * @type T the item type -- equality requirement
-     */
-    static ofIterable<T>(elts: Iterable<T & WithEquality>): Vector<T> {
-        return Vector.ofIterableStruct(elts);
+    static ofIterable<T>(elts: Iterable<T>): Vector<T> {
+        return (<Vector<T>>Vector.emptyVector).appendAll(elts);
     }
 
     /**
      * Build a vector from a series of items (any number, as parameters)
      * @type T the item type -- no equality requirement
      */
-    static ofStruct<T>(...arr: Array<T>): Vector<T> {
-        return Vector.ofIterableStruct(arr);
-    }
-
-    /**
-     * Build a vector from a series of items (any number, as parameters)
-     * @type T the item type -- equality requirement
-     */
-    static of<T>(...arr: Array<T & WithEquality>): Vector<T> {
+    static of<T>(...arr: Array<T>): Vector<T> {
         return Vector.ofIterable(arr);
     }
 
@@ -177,48 +160,20 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * Append an element at the end of the collection.
      * No equality requirements.
      */
-    appendStruct(elt: T): Vector<T> {
+    append(elt: T): Vector<T> {
         return new Vector<T>(this.hamt.set(this.hamt.size+this.indexShift, elt), this.indexShift);
-    }
-
-    /**
-     * Append an element at the end of the collection.
-     * Equality requirements.
-     */
-    append(elt: T & WithEquality): Vector<T> {
-        return this.appendStruct(elt);
     }
 
     /**
      * Prepend an element at the beginning of the collection.
      * No equality requirements.
      */
-    prependStruct(elt: T): Vector<T> {
+    prepend(elt: T): Vector<T> {
         const newIndexShift = this.indexShift - 1;
         return new Vector<T>(this.hamt.set(newIndexShift, elt), newIndexShift);
     }
 
     /**
-     * Prepend an element at the beginning of the collection.
-     * Equality requirements.
-     */
-    prepend(elt: T & WithEquality): Vector<T> {
-        return this.prependStruct(elt);
-    }
-
-    /**
-     * Prepend multiple elements at the beginning of the collection.
-     * Equality requirements.
-     *
-     * This method requires Array.from()
-     * You may need to polyfill it =>
-     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
-     */
-    prependAll(elts: Iterable<T & WithEquality>): Vector<T> {
-        return this.prependAllStruct(elts);
-    }
-
-    /**
      * Prepend multiple elements at the beginning of the collection.
      * No equality requirements.
      *
@@ -226,7 +181,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * You may need to polyfill it =>
      * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
      */
-    prependAllStruct(elts: Iterable<T>): Vector<T> {
+    prependAll(elts: Iterable<T>): Vector<T> {
         // could optimize if i'm 100% the other one is a Vector...
         // (no need for in-order get, i can take all the keys in any order)
         //
@@ -256,7 +211,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * Note that arrays are also iterables.
      * No equality requirements.
      */
-    appendAllStruct(elts: Iterable<T>): Vector<T> {
+    appendAll(elts: Iterable<T>): Vector<T> {
         return new Vector<T>(this.hamt.mutate(
             (h:any) => {
                 const iterator = elts[Symbol.iterator]();
@@ -269,32 +224,14 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
-     * Append multiple elements at the end of the collection.
-     * Note that arrays are also iterables.
-     * Equality requirements.
-     */
-    appendAll(elts: Iterable<T&WithEquality>): Vector<T> {
-        return this.appendAllStruct(elts);
-    }
-
-    /**
      * Return a new collection where each element was transformed
      * by the mapper function you give.
      * No equality requirements.
      */
-    mapStruct<U>(mapper:(v:T)=>U): Vector<U> {
+    map<U>(mapper:(v:T)=>U): Vector<U> {
         return new Vector<U>(this.hamt.fold(
             (acc: any, v:T & WithEquality, k:number) => acc.set(k-this.indexShift, mapper(v)),
             hamt.empty), 0);
-    }
-
-    /**
-     * Return a new collection where each element was transformed
-     * by the mapper function you give.
-     * Equality requirements.
-     */
-    map<U>(mapper:(v:T)=>U&WithEquality): Vector<U> {
-        return this.mapStruct(mapper);
     }
 
     /**
@@ -345,23 +282,12 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * This is the monadic bind.
      * No equality requirement
      */
-    flatMapStruct<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
+    flatMap<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
         var r:Array<U> = [];
         for (let i=0;i<this.hamt.size;i++) {
             r = r.concat(mapper(this.hamt.get(i+this.indexShift)).toArray());
         }
-        return Vector.ofIterableStruct<U>(r);
-    }
-
-    /**
-     * Calls the function you give for each item in the collection,
-     * your function returns a collection, all the collections are
-     * concatenated.
-     * This is the monadic bind.
-     * Equality requirement
-     */
-    flatMap<U>(mapper:(v:T)=>Vector<U&WithEquality>): Vector<U> {
-        return this.flatMapStruct(mapper);
+        return Vector.ofIterable<U>(r);
     }
 
     /**
@@ -563,7 +489,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * also see [[Vector.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
-        return Vector.ofIterableStruct<T>(this.toArray().sort(compare));
+        return Vector.ofIterable<T>(this.toArray().sort(compare));
     }
 
     /**
@@ -616,25 +542,13 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * key of the pair will be used as a key in the map, the value,
      * as a value in the map. If several values get the same key,
      * entries will be lost.
-     * Equality requirements.
-     */
-    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V & WithEquality]): IMap<K,V> {
-        return this.toMapStruct(converter);
-    }
-
-    /**
-     * Convert this collection to a map. You give a function which
-     * for each element in the collection returns a pair. The
-     * key of the pair will be used as a key in the map, the value,
-     * as a value in the map. If several values get the same key,
-     * entries will be lost.
      * No equality requirements.
      */
-    toMapStruct<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
+    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
         return this.hamt.fold(
             (acc: HashMap<K,V>, value:T, k:number) => {
                 const converted = converter(value);
-                return acc.putStruct(converted[0], converted[1]);
+                return acc.put(converted[0], converted[1]);
             }, HashMap.empty());
     }
 
@@ -650,7 +564,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * of both collections. Extra elements will be discarded.
      * No equality requirements.
      */
-    zipStruct<U>(other: Iterable<U>): Vector<[T,U]> {
+    zip<U>(other: Iterable<U>): Vector<[T,U]> {
         return new Vector<[T,U]>(hamt.empty.mutate(
             (h:any) => {
                 let i = 0;
@@ -665,22 +579,6 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
                     otherCurItem = otherIterator.next();
                 }
             }), 0);
-    }
-
-    /**
-     * Combine this collection with the collection you give in
-     * parameter to produce a new collection which combines both,
-     * in pairs. For instance:
-     *
-     *     Vector.of(1,2,3).zip("a","b","c")
-     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
-     *
-     * The result collection will have the length of the shorter
-     * of both collections. Extra elements will be discarded.
-     * Equality requirements.
-     */
-    zip<U>(other: Iterable<U&WithEquality>): Vector<[T,U]> {
-        return this.zipStruct(other);
     }
 
     /**

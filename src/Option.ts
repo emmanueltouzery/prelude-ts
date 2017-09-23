@@ -65,7 +65,7 @@ export abstract class Option<T> implements Value {
             if (v.isNone()) {
                 return <None<Vector<T>>>none;
             }
-            r = r.appendStruct(v.getOrThrow());
+            r = r.append(v.getOrThrow());
             curItem = iterator.next();
         }
         return Option.ofStruct(r);
@@ -131,7 +131,7 @@ export abstract class Option<T> implements Value {
      * Returns true if the option is a Some and contains the
      * value you give, false otherwise.
      */
-    abstract contains(v: T|null): boolean;
+    abstract contains(v: T&WithEquality): boolean;
 
     /**
      * Get the value contained in the option if it's a Some,
@@ -244,7 +244,7 @@ export class Some<T> extends Option<T> {
     getOrThrow(message?: string): T {
         return this.value;
     }
-    contains(v: T): boolean {
+    contains(v: T&WithEquality): boolean {
         return v === this.value;
     }
     getOrUndefined(): T | undefined {
@@ -273,7 +273,7 @@ export class Some<T> extends Option<T> {
         return this;
     }
     toVector(): Vector<T> {
-        return Vector.ofStruct(this.value);
+        return Vector.of(this.value);
     }
     equals(other: Option<T&WithEquality>): boolean {
         // the .isSome doesn't test if it's a Some, but
@@ -311,7 +311,7 @@ export class None<T> extends Option<T> {
     getOrThrow(message?: string): T & WithEquality {
         throw message || "getOrThrow called on none!";
     }
-    contains(v: T): boolean {
+    contains(v: T&WithEquality): boolean {
         return false;
     }
     getOrUndefined(): T|undefined {
