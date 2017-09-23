@@ -12,14 +12,12 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
 
     /**
      * Append an element at the end of the collection.
-     * No equality requirements.
      */
     append(elt: T): Seq<T>;
 
     /**
      * Append multiple elements at the end of the collection.
      * Note that arrays are also iterables.
-     * No equality requirements.
      */
     appendAll(elts: Iterable<T>): Seq<T>;
 
@@ -52,7 +50,6 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
     /**
      * Return a new collection where each element was transformed
      * by the mapper function you give.
-     * No equality requirements.
      */
     map<U>(mapper:(v:T)=>U): Seq<U>;
 
@@ -68,7 +65,6 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
      * your function returns a collection, all the collections are
      * concatenated.
      * This is the monadic bind.
-     * No equality requirement
      */
     flatMap<U>(mapper:(v:T)=>Seq<U>): Seq<U>;
 
@@ -114,13 +110,11 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
 
     /**
      * Prepend an element at the beginning of the collection.
-     * Equality requirements.
      */
     prepend(elt: T): Seq<T>;
 
     /**
      * Prepend multiple elements at the beginning of the collection.
-     * No equality requirements.
      */
     prependAll(elts: Iterable<T>): Seq<T>;
 
@@ -143,7 +137,6 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
      *
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
-     * No equality requirements.
      */
     zip<U>(other: Iterable<U>): Seq<[T,U]>;
 
@@ -205,7 +198,6 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
      * key of the pair will be used as a key in the map, the value,
      * as a value in the map. If several values get the same key,
      * entries will be lost.
-     * No equality requirements.
      */
     toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V>;
 

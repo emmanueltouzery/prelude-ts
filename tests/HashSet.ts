@@ -1,4 +1,9 @@
 import { HashSet } from "../src/HashSet";
+import { Vector } from "../src/Vector";
+import { Stream } from "../src/Stream";
+import { Option } from "../src/Option";
+import { Tuple2 } from "../src/Tuple2";
+import { HashMap } from "../src/HashMap";
 import { MyClass} from "./SampleData";
 import * as assert from 'assert'
 
@@ -96,6 +101,18 @@ describe("hashset equality", () => {
         false, HashSet.of(1).equals(<any>[1,2])));
     it("doesn't throw when given null on equals", () => assert.equal(
         false, HashSet.of(1).equals(<any>null)));
+    it("should refuse elements which don't offer true equality", () => assert.throws(
+        () => HashSet.of(Vector.of([1]))));
+    it("should refuse elements which don't offer true equality (vector)", () => assert.throws(
+        () => HashSet.empty().add(Vector.of(Vector.of([1])))));
+    it("should refuse elements which don't offer true equality (stream)", () => assert.throws(
+        () => HashSet.of(Stream.of([1]))));
+    it("should refuse elements which don't offer true equality (option)", () => assert.throws(
+        () => HashSet.of(Option.of([1]))));
+    it("should refuse elements which don't offer true equality (tuple2)", () => assert.throws(
+        () => HashSet.of(Tuple2.of(1,Vector.of([1])))));
+    it("should refuse elements which don't offer true equality (hashmap)", () => assert.throws(
+        () => HashSet.of(HashMap.of(["a",[1]]))));
 });
 
 describe("hashset combinations", () => {

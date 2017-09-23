@@ -1,5 +1,5 @@
 import { Option } from "./Option";
-import { WithEquality } from "./Comparison";
+import { WithEquality, hasTrueEquality } from "./Comparison";
 import { IMap } from "./IMap";
 import { Seq } from "./Seq";
 
@@ -33,4 +33,11 @@ export function arrangeBy<T,K>(seq: Seq<T>, getKey: (v:T)=>K&WithEquality): Opti
     return Option.of(seq.groupBy(getKey).mapValues(v => v.single()))
         .filter(map => !map.anyMatch((k,v) => v.isNone()))
         .map(map => map.mapValues(v => v.getOrThrow()));
+}
+
+/**
+ * @hidden
+ */
+export function seqHasTrueEquality<T>(seq: Seq<T>): boolean {
+    return seq.find(x => x!=null).hasTrueEquality();
 }

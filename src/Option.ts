@@ -1,7 +1,7 @@
 import { Value } from "./Value";
 import { Seq } from "./Seq";
 import { Vector } from "./Vector";
-import { WithEquality, areEqual,
+import { WithEquality, areEqual, hasTrueEquality,
          getHashCode, toStringHelper } from "./Comparison";
 
 /**
@@ -14,23 +14,8 @@ export abstract class Option<T> implements Value {
      * T gives a some
      * undefined gives a none
      * null gives a some
-     * Equality requirements.
      */
-    static of<T>(v: T & WithEquality|undefined): Option<T> {
-        if (v === undefined) {
-            return <None<T>>none;
-        }
-        return new Some(v);
-    }
-
-    /**
-     * Builds an optional value.
-     * T gives a some
-     * undefined gives a none
-     * null gives a some
-     * No equality requirements.
-     */
-    static ofStruct<T>(v: T|undefined): Option<T> {
+    static of<T>(v: T|undefined): Option<T> {
         if (v === undefined) {
             return <None<T>>none;
         }
@@ -68,7 +53,7 @@ export abstract class Option<T> implements Value {
             r = r.append(v.getOrThrow());
             curItem = iterator.next();
         }
-        return Option.ofStruct(r);
+        return Option.of(r);
     }
 
     /**
@@ -77,22 +62,9 @@ export abstract class Option<T> implements Value {
      * in a function that operates on options of these values ('lifts'
      * the function). The 2 is because it works on functions taking two
      * parameters.
-     * Equality requirements.
      */
-    static liftA2<T,U,V>(fn:(v1:T,v2:U)=>V&WithEquality): (p1:Option<T>, p2:Option<U>)=>Option<V> {
+    static liftA2<T,U,V>(fn:(v1:T,v2:U)=>V): (p1:Option<T>, p2:Option<U>) => Option<V> {
         return (p1,p2) => p1.flatMap(a1 => p2.map(a2 => fn(a1,a2)));
-    }
-
-    /**
-     * Applicative lifting for Option.
-     * Takes a function which operates on basic values, and turns it
-     * in a function that operates on options of these values ('lifts'
-     * the function). The 2 is because it works on functions taking two
-     * parameters.
-     * No equality requirements.
-     */
-    static liftA2Struct<T,U,V>(fn:(v1:T,v2:U)=>V): (p1:Option<T>, p2:Option<U>) => Option<V> {
-        return (p1,p2) => p1.flatMapStruct(a1 => p2.mapStruct(a2 => fn(a1,a2)));
     }
 
     /**
@@ -106,6 +78,17 @@ export abstract class Option<T> implements Value {
      * false otherwise (it's a Some)
      */
     abstract isNone(): boolean;
+
+    /**
+     * @hidden
+     */
+    hasTrueEquality(): boolean {
+        return this.flatMap(
+            x => (<any>x).hasTrueEquality ?
+                Option.of((<any>x).hasTrueEquality()) :
+                hasTrueEquality(x))
+            .getOrElse(true);
+    }
 
     /**
      * Combines two options. If this option is a Some, returns it.
@@ -142,34 +125,16 @@ export abstract class Option<T> implements Value {
     /**
      * Return a new option where the element (if present) was transformed
      * by the mapper function you give. If the option was None it'll stay None.
-     * Equality requirements.
      */
-    abstract map<U>(fn: (v:T)=>U & WithEquality): Option<U>;
-
-    /**
-     * Return a new option where the element (if present) was transformed
-     * by the mapper function you give. If the option was None it'll stay None.
-     * No equality requirements.
-     */
-    abstract mapStruct<U>(fn: (v:T)=>U): Option<U>;
+    abstract map<U>(fn: (v:T)=>U): Option<U>;
 
     /**
      * If this is a Some, calls the function you give on
      * the item in the option and return its result.
      * If the option is a None, return none.
      * This is the monadic bind.
-     * Equality requirement.
      */
-    abstract flatMap<U>(mapper:(v:T)=>Option<U&WithEquality>): Option<U>;
-
-    /**
-     * If this is a Some, calls the function you give on
-     * the item in the option and return its result.
-     * If the option is a None, return none.
-     * This is the monadic bind.
-     * No equality requirement.
-     */
-    abstract flatMapStruct<U>(mapper:(v:T)=>Option<U>): Option<U>;
+    abstract flatMap<U>(mapper:(v:T)=>Option<U>): Option<U>;
 
     /**
      * If this is None, will return None. If it's a Some,
@@ -253,16 +218,10 @@ export class Some<T> extends Option<T> {
     getOrElse(alt: T): T {
         return this.value;
     }
-    map<U>(fn: (v:T)=>U & WithEquality): Option<U> {
+    map<U>(fn: (v:T)=>U): Option<U> {
         return Option.of(fn(this.value));
     }
-    mapStruct<U>(fn: (v:T)=>U): Option<U> {
-        return Option.ofStruct(fn(this.value));
-    }
-    flatMap<U>(mapper:(v:T)=>Option<U&WithEquality>): Option<U> {
-        return mapper(this.value);
-    }
-    flatMapStruct<U>(mapper:(v:T)=>Option<U>): Option<U> {
+    flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return mapper(this.value);
     }
     filter(fn: (v:T)=>boolean): Option<T> {
@@ -320,16 +279,10 @@ export class None<T> extends Option<T> {
     getOrElse(alt: T & WithEquality): T & WithEquality {
         return alt;
     }
-    map<U>(fn: (v:T)=>U & WithEquality): Option<U> {
+    map<U>(fn: (v:T)=>U): Option<U> {
         return <None<U>>none;
     }
-    mapStruct<U>(fn: (v:T)=>U): Option<U> {
-        return <None<U>>none;
-    }
-    flatMap<U>(mapper:(v:T)=>Option<U&WithEquality>): Option<U> {
-        return <None<U>>none;
-    }
-    flatMapStruct<U>(mapper:(v:T)=>Option<U>): Option<U> {
+    flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return <None<U>>none;
     }
     filter(fn: (v:T)=>boolean): Option<T> {

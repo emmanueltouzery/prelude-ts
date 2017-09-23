@@ -1,4 +1,5 @@
 import { Value } from "./Value";
+import { Option } from "./Option";
 import { WithEquality, areEqual,
          getHashCode, toStringHelper } from "./Comparison";
 
@@ -16,34 +17,24 @@ export class Tuple2<T,U> implements Value {
 
     /**
      * Build a pair of value from both values.
-     * Equality requirements.
      */
-    static of<T,U>(fst: T & WithEquality, snd: U & WithEquality) {
-        return new Tuple2(fst,snd);
-    }
-
-    /**
-     * Build a pair of value from both values.
-     * No equality requirements.
-     */
-    static ofStruct<T,U>(fst: T, snd: U) {
+    static of<T,U>(fst: T, snd: U) {
         return new Tuple2(fst,snd);
     }
 
     /**
      * Build a tuple2 from javascript pair.
-     * Equality requirements.
      */
-    static ofArray<T,U>(pair: [T & WithEquality, U & WithEquality]): Tuple2<T,U> {
+    static ofArray<T,U>(pair: [T, U]): Tuple2<T,U> {
         return new Tuple2(pair[0], pair[1]);
     }
 
     /**
-     * Build a tuple2 from javascript pair.
-     * No equality requirements.
+     * @hidden
      */
-    static ofArrayStruct<T,U>(pair: [T, U]): Tuple2<T,U> {
-        return new Tuple2(pair[0], pair[1]);
+    hasTrueEquality(): boolean {
+        return Option.of(this.fst()).hasTrueEquality() &&
+            Option.of(this.snd()).hasTrueEquality();
     }
 
     /**
@@ -62,33 +53,15 @@ export class Tuple2<T,U> implements Value {
 
     /**
      * Maps the first component of this tuple to a new value.
-     * Equality requirements.
      */
-    map1<V>(fn: (v:T)=>V&WithEquality): Tuple2<V,U> {
-        return new Tuple2(fn(this._fst), this._snd);
-    }
-
-    /**
-     * Maps the first component of this tuple to a new value.
-     * No equality requirements.
-     */
-    map1Struct<V>(fn: (v:T)=>V): Tuple2<V,U> {
+    map1<V>(fn: (v:T)=>V): Tuple2<V,U> {
         return new Tuple2(fn(this._fst), this._snd);
     }
 
     /**
      * Maps the second component of this tuple to a new value.
-     * Equality requirements.
      */
-    map2<V>(fn: (v:U)=>V&WithEquality): Tuple2<T,V> {
-        return new Tuple2(this._fst, fn(this._snd));
-    }
-
-    /**
-     * Maps the second component of this tuple to a new value.
-     * No equality requirements.
-     */
-    map2Struct<V>(fn: (v:U)=>V): Tuple2<T,V> {
+    map2<V>(fn: (v:U)=>V): Tuple2<T,V> {
         return new Tuple2(this._fst, fn(this._snd));
     }
 

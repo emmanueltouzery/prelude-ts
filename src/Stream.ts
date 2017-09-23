@@ -26,7 +26,6 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
 
     /**
      * Create a Stream with the elements you give.
-     * No equality requirements.
      */
     static of<T>(...elts:T[]): Stream<T> {
         return Stream.ofIterable(elts);
@@ -35,7 +34,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     /**
      * Build a stream from any iterable, which means also
      * an array for instance.
-     * @type T the item type -- no equality requirement
+     * @type T the item type
      */
     static ofIterable<T>(elts: Iterable<T>): Stream<T> {
         // need to eagerly copy the iterable. the reason
@@ -50,7 +49,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     /**
      * Build a stream from an array (slightly faster
      * than building from an iterable)
-     * @type T the item type -- no equality requirement
+     * @type T the item type
      */
     static ofArray<T>(elts: Array<T>): Stream<T> {
         if (elts.length === 0) {
@@ -62,7 +61,6 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
 
     /**
      * Build an infinite stream from a seed and a transformation function.
-     * No equality requirements.
      *
      *     Stream.iterate(1, x => x*2)
      *     => [1,2,4,8,...]
@@ -73,7 +71,6 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
 
     /**
      * Build an infinite stream by calling repeatedly a function.
-     * Equality requirements.
      *
      *     Stream.continually(() => 1)
      *     => [1,1,1,1,...]
@@ -96,7 +93,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      *     unfoldRight(
      *          10, x=>Option.of(x)
      *              .filter(x => x!==0)
-     *              .mapStruct<[number,number]>(x => [x,x-1]))
+     *              .map<[number,number]>(x => [x,x-1]))
      *     => [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
      */
     static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Stream<U> {
@@ -107,6 +104,13 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
         return new ConsStream(
             nextVal.getOrThrow()[0],
             ()=>Stream.unfoldRight(nextVal.getOrThrow()[1], fn));
+    }
+
+    /**
+     * @hidden
+     */
+    hasTrueEquality(): boolean {
+        return SeqHelpers.seqHasTrueEquality<T>(this);
     }
 
     /**
@@ -265,7 +269,6 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      *
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
-     * No equality requirements.
      */
     abstract zip<U>(other: Iterable<U>): Stream<[T,U]>;
 
@@ -317,13 +320,11 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
 
     /**
      * Append an element at the end of this Stream.
-     * No equality requirements.
      */
     abstract append(v:T): Stream<T>;
 
     /*
      * Append multiple elements at the end of this Stream.
-     * No equality requirements.
      */
     abstract appendAll(elts:Iterable<T>): Stream<T>;
 
@@ -335,19 +336,16 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      * If we would create two Streams working on the same iterator,
      * the streams would interact with one another.
      * It also breaks the cycle() function.
-     * No equality requirements.
      */
     abstract appendStream(elts:Stream<T>): Stream<T>;
 
     /**
      * Prepend an element at the beginning of the collection.
-     * No equality requirements.
      */
     abstract prepend(elt: T): Stream<T>;
 
     /**
      * Prepend multiple elements at the beginning of the collection.
-     * No equality requirements.
      */
     abstract prependAll(elts: Iterable<T>): Stream<T>;
 
@@ -363,7 +361,6 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     /**
      * Return a new collection where each element was transformed
      * by the mapper function you give.
-     * No equality requirements.
      */
     abstract map<U>(mapper:(v:T)=>U): Stream<U>;
 
@@ -372,7 +369,6 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      * your function returns a collection, all the collections are
      * concatenated.
      * This is the monadic bind.
-     * No equality requirement
      */
     abstract flatMap<U>(mapper:(v:T)=>Stream<U>): Stream<U>;
 
@@ -455,7 +451,6 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      * key of the pair will be used as a key in the map, the value,
      * as a value in the map. If several values get the same key,
      * entries will be lost.
-     * No equality requirements.
      */
     abstract toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V>;
 
@@ -701,7 +696,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     single(): Option<T> {
         return this._tail().isEmpty() ?
-            Option.ofStruct(this.value) :
+            Option.of(this.value) :
             Option.none<T>();
     }
 
@@ -710,11 +705,11 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     head(): Option<T> {
-        return Option.ofStruct(this.value);
+        return Option.of(this.value);
     }
 
     tail(): Option<Stream<T>> {
-        return Option.ofStruct(this._tail());
+        return Option.of(this._tail());
     }
 
     last(): Option<T> {
@@ -723,7 +718,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             const item = (<ConsStream<T>>curItem).value;
             curItem = (<ConsStream<T>>curItem)._tail();
             if (curItem.isEmpty()) {
-                return Option.ofStruct(item);
+                return Option.of(item);
             }
         }
     }
@@ -734,7 +729,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         while (!curItem.isEmpty()) {
             if (i === idx) {
                 const item = (<ConsStream<T>>curItem).value;
-                return Option.ofStruct(item);
+                return Option.of(item);
             }
             curItem = (<ConsStream<T>>curItem)._tail();
             ++i;
@@ -747,7 +742,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         while (!curItem.isEmpty()) {
             const item = (<ConsStream<T>>curItem).value;
             if (predicate(item)) {
-                return Option.ofStruct(item);
+                return Option.of(item);
             }
             curItem = (<ConsStream<T>>curItem)._tail();
         }

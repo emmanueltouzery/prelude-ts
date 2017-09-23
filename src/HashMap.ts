@@ -30,7 +30,6 @@ export class HashMap<K,V> implements IMap<K,V> {
      *
      *     HashMap.of([1,"a"],[2,"b"])
      *
-     * No equality requirements.
      */
     static of<K,V>(...entries: Array<[K&WithEquality, V]>): HashMap<K,V> {
         return HashMap.ofIterable(entries);
@@ -39,9 +38,7 @@ export class HashMap<K,V> implements IMap<K,V> {
     /**
      * Build a HashMap from an iterable containing key-value pairs.
      * 
-     *    HashMap.ofIterable(Vector.ofStruct<[number,string]>([1,"a"],[2,"b"]));
-     *
-     * No equality requirements.
+     *    HashMap.ofIterable(Vector.of<[number,string]>([1,"a"],[2,"b"]));
      */
     static ofIterable<K,V>(entries: Iterable<[K&WithEquality, V]>): HashMap<K,V> {
         // remember we must set up the hamt with the custom equality
@@ -70,11 +67,18 @@ export class HashMap<K,V> implements IMap<K,V> {
     }
 
     /**
+     * @hidden
+     */
+    hasTrueEquality(): boolean {
+        return Option.of(this.hamt.entries().next().value)
+            .hasTrueEquality();
+    }
+
+    /**
      * Add a new entry in the map. If there was entry with the same
      * key, it will be overwritten.
      * @param k the key
      * @param v the value
-     * No equality requirements
      */
     put(k: K & WithEquality, v: V): HashMap<K,V> {
         return new HashMap<K,V>(this.hamt.set(k,v));
@@ -88,7 +92,6 @@ export class HashMap<K,V> implements IMap<K,V> {
      * @param k the key
      * @param v the value
      * @param merge a function to merge old and new values in case of conflict.
-     * No equality requirements
      */
     putWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): HashMap<K,V> {
         return new HashMap<K,V>(this.hamt.modify(k, (curV?: V) => {
@@ -163,7 +166,6 @@ export class HashMap<K,V> implements IMap<K,V> {
      * Return a new map where each entry was transformed
      * by the mapper function you give. You return key,value
      * as pairs.
-     * No equality requirements.
      */
     map<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): HashMap<K2,V2> {
         return this.hamt.fold(
@@ -178,7 +180,6 @@ export class HashMap<K,V> implements IMap<K,V> {
      * but values are transformed
      * by the mapper function you give. You return key,value
      * as pairs.
-     * No equality requirements.
      */
     mapValues<V2>(fn:(v:V)=>V2): HashMap<K,V2> {
         return this.hamt.fold(
@@ -190,7 +191,6 @@ export class HashMap<K,V> implements IMap<K,V> {
      * Calls the function you give for each item in the map,
      * your function returns a map, all the maps are
      * merged.
-     * No equality requirement
      */
     flatMap<K2,V2>(fn:(k:K, v:V)=>Iterable<[K2&WithEquality,V2]>): HashMap<K2,V2> {
         return this.foldLeft(HashMap.empty<K2,V2>(),

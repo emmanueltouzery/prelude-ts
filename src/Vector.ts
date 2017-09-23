@@ -1,5 +1,5 @@
 import { Seq } from "./Seq";
-import { WithEquality, Ordering, 
+import { WithEquality, Ordering,
          getHashCode, areEqual, toStringHelper } from "./Comparison";
 import { HashMap} from "./HashMap";
 import { IMap } from "./IMap";
@@ -14,7 +14,7 @@ const hamt: any = require("hamt_plus");
  * @type T the item type
  */
 export class Vector<T> implements Seq<T>, Iterable<T> {
-    
+
     /**
      * @hidden
      */
@@ -33,7 +33,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     /**
      * Build a vector from any iterable, which means also
      * an array for instance.
-     * @type T the item type -- no equality requirement
+     * @type T the item type
      */
     static ofIterable<T>(elts: Iterable<T>): Vector<T> {
         return (<Vector<T>>Vector.emptyVector).appendAll(elts);
@@ -41,7 +41,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
 
     /**
      * Build a vector from a series of items (any number, as parameters)
-     * @type T the item type -- no equality requirement
+     * @type T the item type
      */
     static of<T>(...arr: Array<T>): Vector<T> {
         return Vector.ofIterable(arr);
@@ -58,7 +58,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      *     unfoldRight(
      *          10, x=>Option.of(x)
      *              .filter(x => x!==0)
-     *              .mapStruct<[number,number]>(x => [x,x-1]))
+     *              .map<[number,number]>(x => [x,x-1]))
      *     => [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
      */
     static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Vector<U> {
@@ -104,6 +104,13 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * @hidden
+     */
+    hasTrueEquality(): boolean {
+        return SeqHelpers.seqHasTrueEquality<T>(this);
+    }
+
+    /**
      * Get the length of the collection.
      */
     length(): number {
@@ -133,7 +140,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * Option.None if it's empty.
      */
     head(): Option<T> {
-        return Option.ofStruct(this.hamt.get(this.indexShift));
+        return Option.of(this.hamt.get(this.indexShift));
     }
 
     /**
@@ -142,7 +149,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * Option.None if it's empty.
      */
     last(): Option<T> {
-        return Option.ofStruct(this.hamt.get(this.hamt.size+this.indexShift-1));
+        return Option.of(this.hamt.get(this.hamt.size+this.indexShift-1));
     }
 
     /**
@@ -158,7 +165,6 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
 
     /**
      * Append an element at the end of the collection.
-     * No equality requirements.
      */
     append(elt: T): Vector<T> {
         return new Vector<T>(this.hamt.set(this.hamt.size+this.indexShift, elt), this.indexShift);
@@ -166,7 +172,6 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
 
     /**
      * Prepend an element at the beginning of the collection.
-     * No equality requirements.
      */
     prepend(elt: T): Vector<T> {
         const newIndexShift = this.indexShift - 1;
@@ -175,7 +180,6 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
 
     /**
      * Prepend multiple elements at the beginning of the collection.
-     * No equality requirements.
      *
      * This method requires Array.from()
      * You may need to polyfill it =>
@@ -209,7 +213,6 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     /**
      * Append multiple elements at the end of the collection.
      * Note that arrays are also iterables.
-     * No equality requirements.
      */
     appendAll(elts: Iterable<T>): Vector<T> {
         return new Vector<T>(this.hamt.mutate(
@@ -226,7 +229,6 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     /**
      * Return a new collection where each element was transformed
      * by the mapper function you give.
-     * No equality requirements.
      */
     map<U>(mapper:(v:T)=>U): Vector<U> {
         return new Vector<U>(this.hamt.fold(
@@ -261,7 +263,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
         for (let i=0;i<this.hamt.size;i++) {
             const item: T = this.hamt.get(i+this.indexShift);
             if (predicate(item)) {
-                return Option.ofStruct(item);
+                return Option.of(item);
             }
         }
         return Option.none<T>();
@@ -280,7 +282,6 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * your function returns a collection, all the collections are
      * concatenated.
      * This is the monadic bind.
-     * No equality requirement
      */
     flatMap<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
         var r:Array<U> = [];
@@ -542,7 +543,6 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * key of the pair will be used as a key in the map, the value,
      * as a value in the map. If several values get the same key,
      * entries will be lost.
-     * No equality requirements.
      */
     toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
         return this.hamt.fold(
@@ -562,7 +562,6 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      *
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
-     * No equality requirements.
      */
     zip<U>(other: Iterable<U>): Vector<[T,U]> {
         return new Vector<[T,U]>(hamt.empty.mutate(

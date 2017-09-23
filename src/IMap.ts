@@ -34,7 +34,6 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
      * key, it will be overwritten.
      * @param k the key
      * @param v the value
-     * No equality requirements
      */
     put(k: K & WithEquality, v: V): IMap<K,V>;
 
@@ -46,7 +45,6 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
      * @param k the key
      * @param v the value
      * @param merge a function to merge old and new values in case of conflict.
-     * No equality requirements
      */
     putWithMerge(k: K & WithEquality, v: V, merge: (v1: V, v2: V) => V): IMap<K,V>;
 
@@ -54,7 +52,6 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
      * Return a new map where each entry was transformed
      * by the mapper function you give. You return key,value
      * as pairs.
-     * No equality requirements.
      */
     map<K2,V2>(fn:(k:K&WithEquality, v:V)=>[K2&WithEquality,V2]): IMap<K2,V2>;
 
@@ -63,7 +60,6 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
      * but values are transformed
      * by the mapper function you give. You return key,value
      * as pairs.
-     * No equality requirements.
      */
     mapValues<V2>(fn:(v:V)=>V2): IMap<K,V2>;
 
@@ -71,7 +67,6 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
      * Calls the function you give for each item in the map,
      * your function returns a map, all the maps are
      * merged.
-     * No equality requirement
      */
     flatMap<K2,V2>(fn:(k:K, v:V)=>Iterable<[K2&WithEquality,V2]>): IMap<K2,V2>;
 
