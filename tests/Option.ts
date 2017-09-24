@@ -1,6 +1,7 @@
 import { Option } from "../src/Option";
 import { Vector } from "../src/Vector";
 import { Seq } from "../src/Seq";
+import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
 
 describe("option comparison", () => {
@@ -30,6 +31,14 @@ describe("option comparison", () => {
         false, Option.none().equals(<any>null)));
     it("should throw when comparing options without true equality", () => assert.throws(
         () => Option.of(Vector.of([1])).equals(Option.of(Vector.of([1])))));
+    it("should fail compilation on an obviously bad equality test", () =>
+       assertFailCompile(
+           "Option.of([1]).equals(Option.of([1]))", "Argument of type \'" +
+               "Option<number[]>\' is not assignable to parameter"));
+    it("should fail compilation on an obviously bad contains test", () =>
+       assertFailCompile(
+           "Option.of([1]).contains([1])",
+           "Argument of type \'number[]\' is not assignable to parameter"));
 });
 
 describe("option transformation", () => {
