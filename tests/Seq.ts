@@ -3,6 +3,7 @@ import { HashMap } from "../src/HashMap";
 import { Stream } from "../src/Stream";
 import { Option } from "../src/Option";
 import { MyClass } from "./SampleData";
+import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
 
 /**
@@ -86,6 +87,14 @@ export function runTests(seqName: string,
             !of(3,5,9).anyMatch(x => x%2 === 0)));
         it("supports anyMatch, empty stream", () => assert.ok(
             !empty<number>().anyMatch(x => x%2 === 0)));
+        it("should fail compilation on an obviously bad equality test", () =>
+           assertFailCompile(
+               seqName + ".of([1]).equals(" + seqName + ".of([1]))", "Argument of type \'" +
+                   seqName + "<number[]>\' is not assignable to parameter"));
+        it("should fail compilation on an obviously bad contains test", () =>
+           assertFailCompile(
+               seqName + ".of([1]).contains([1])",
+               "Argument of type \'number[]\' is not assignable to parameter"));
     });
 
     describe(seqName + " iteration", () => {

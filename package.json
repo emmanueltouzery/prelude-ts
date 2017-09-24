@@ -18,7 +18,8 @@
         "@types/mocha": "2.2.41",
         "mocha": "3.4.2",
         "typedoc": "0.7.2",
-        "benchmark": "2.1.4"
+        "benchmark": "2.1.4",
+        "typescript": "next"
     },
     "keywords": [
         "typescript",
@@ -33,7 +34,7 @@
     },
     "homepage": "https://github.com/emmanueltouzery/prelude.ts#readme",
     "scripts": {
-        "test": "tsc && ./node_modules/mocha/bin/mocha ./dist/tests/*.js",
+        "test": "tsc && ./node_modules/mocha/bin/mocha --timeout 10000 ./dist/tests/*.js",
         "clean": "rm -Rf ./dist",
         "docgen": "./node_modules/typedoc/bin/typedoc --mode file --out apidoc --excludePrivate --excludeExternals --excludeNotExported --ignoreCompilerErrors src/index.ts",
         "benchmarks": "tsc && node ./dist/benchmarks/bench.js"

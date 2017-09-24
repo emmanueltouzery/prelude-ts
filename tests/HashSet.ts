@@ -5,6 +5,7 @@ import { Option } from "../src/Option";
 import { Tuple2 } from "../src/Tuple2";
 import { HashMap } from "../src/HashMap";
 import { MyClass} from "./SampleData";
+import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
 
 describe("hashset construction basic sanity tests", () => {
@@ -113,6 +114,9 @@ describe("hashset equality", () => {
         () => HashSet.of(Tuple2.of(1,Vector.of([1])))));
     it("should refuse elements which don't offer true equality (hashmap)", () => assert.throws(
         () => HashSet.of(HashMap.of(["a",[1]]))));
+    it("should fail compilation on an obviously bad key type", () =>
+       assertFailCompile(
+           "HashSet.of([1])", "Argument of type \'number[]\' is not assignable to parameter"));
 });
 
 describe("hashset combinations", () => {
