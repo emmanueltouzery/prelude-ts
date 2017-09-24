@@ -5,6 +5,7 @@ import { Option } from "../src/Option";
 import { Stream } from "../src/Stream";
 import { Tuple2 } from "../src/Tuple2";
 import { MyClass} from "./SampleData";
+import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
 
 describe("hashmap construction basic sanity tests", () => {
@@ -73,6 +74,9 @@ describe("hashmap equality", () => {
         () => HashMap.of([Tuple2.of(1,Vector.of([1])), "value"])));
     it("should refuse keys which don't offer true equality (hashmap)", () => assert.throws(
         () => HashMap.of([HashMap.of(["a",[1]]), "value"])));
+    it("should fail compilation on an obviously bad key type", () =>
+       assertFailCompile(
+           "HashMap.of([[1], 'test'])", "Argument of type \'[number[], string]\' is not assignable to parameter"));
 })
 
 describe("hashmap - toString should be nicely formatted", () => {

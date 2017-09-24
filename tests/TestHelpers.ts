@@ -29,6 +29,7 @@ export function assertFailCompile(contents: string, expectedMsg: string): void {
     fs.writeFileSync(
         TMP_FILENAME, "import { HashSet } from './dist/src/HashSet';" +
             " import { Stream } from './dist/src/Stream';" +
+            " import { HashMap } from './dist/src/HashMap';" +
             " import { Option } from './dist/src/Option';" +
             " import { Vector } from './dist/src/Vector';" + contents);
     const tsProgram = ts.createProgram([TMP_FILENAME], {target:ts.ScriptTarget.ES2016});
