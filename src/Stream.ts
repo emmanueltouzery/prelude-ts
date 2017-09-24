@@ -1005,7 +1005,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     toString(): string {
         let curItem: Stream<T> = this;
-        let result = "[";
+        let result = "Stream(";
 
         while (!curItem.isEmpty()) {
             result += toStringHelper((<ConsStream<T>>curItem).value);
@@ -1015,7 +1015,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             }
         }
 
-        return result + "]";
+        return result + ")";
     }
 }
 

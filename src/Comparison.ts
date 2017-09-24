@@ -121,10 +121,10 @@ export function hasTrueEquality(val: any): Option<boolean> {
  * @hidden
  */
 export function toStringHelper(obj: any|null): string {
-    switch (obj.constructor) {
-    case Array:
+    if (Array.isArray(obj)) {
         return "[" + obj.map(toStringHelper) + "]"
-    case String:
+    }
+    if (typeof obj === "string") {
         return "'" + obj + "'";
     }
     return obj+"";

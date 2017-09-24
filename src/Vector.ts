@@ -705,14 +705,14 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * Get a human-friendly string representation of that value.
      */
     toString(): string {
-        let r = "[";
+        let r = "Vector(";
         for (let i=0;i<this.hamt.size;i++) {
             if (i>0) {
                 r += ", ";
             }
             r += toStringHelper(this.hamt.get(i+this.indexShift));
         }
-        return r + "]";
+        return r + ")";
     }
 
     /**
