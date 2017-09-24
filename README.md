@@ -1,5 +1,6 @@
 # prelude.ts
 [![NPM version][npm-image]][npm-url]
+[![Tests][circleci-image]][circleci-url]
 
 ## Intro
 
@@ -124,3 +125,5 @@ such as typescript.
 
 [npm-image]: https://img.shields.io/npm/v/prelude.ts.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/prelude.ts
+[circleci-image]: https://circleci.com/gh/emmanueltouzery/prelude.ts.svg?style=shield&circle-token=6d8b74ef7ea7d1c204e77c4f88b05348682b4161
+[circleci-url]: https://circleci.com/gh/emmanueltouzery/prelude.ts
