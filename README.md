@@ -12,14 +12,14 @@ Option.
 ```typescript
 Vector.of(1,2,3)
   .map(x => x*2)
-  .head() 
+  .head()
 // => Option.of(2)
 
 Option.sequence(
   Vector.of(Option.of(1), Option.of(2)))
 // => Option.of(Vector.of(1,2))
 
-Vector.of(1,2,3,4).groupBy(x => x%2) 
+Vector.of(1,2,3,4).groupBy(x => x%2)
 // => HashMap.of([0, Vector.of(2,4)],[1, Vector.of(1,3)])
 
 Vector.of(1,2,3).zip("a", "b", "c").takeWhile(([k,v]) => k<3)
@@ -62,7 +62,7 @@ If these values don't have structural equality, then we can get no better than
 
 prelude.ts attempts to assist the programmer with this; it tries to encourage
 the developer to do the right thing. First, it'll refuse types without obviously properly
-defined equality in Sets and in Maps keys, so `HashSet.of([1])`, 
+defined equality in Sets and in Maps keys, so `HashSet.of([1])`,
 or `Vector.of([1]).equals(Vector.of([2]))` will not compile.
 For both of these, you get (a longer version of) this message:
 
@@ -74,8 +74,8 @@ prelude.ts will reject the code at runtime; for instance if you call
 `HashSet.of(Vector.of([1]))` you'll get an exception at runtime:
 
     Error building a HashSet: element doesn't support true equality: Vector([1])
-    
-(this behavior is [customizable](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html#setContractViolationAction)).
+
+(this behavior is [customizable](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html#setcontractviolationaction)).
 
 ## Wishlist/upcoming features
 
@@ -96,7 +96,7 @@ such as typescript.
 
 ## Alternatives and Influences
 
-* [monet.js](https://monet.github.io/monet.js/) -- only has the `List` and 
+* [monet.js](https://monet.github.io/monet.js/) -- only has the `List` and
   `Option` collections, implemented in functional-style ES5.
 * [immutables.js](https://facebook.github.io/immutable-js/) -- doesn't have the
   `Option` concept, the types can be clunky.
@@ -119,7 +119,7 @@ such as typescript.
     npm test
 
     npm run-script docgen
-    
+
     npm run benchmarks
 
 [npm-image]: https://img.shields.io/npm/v/prelude.ts.svg?style=flat-square
