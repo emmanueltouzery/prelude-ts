@@ -19,7 +19,7 @@
         "mocha": "3.4.2",
         "typedoc": "0.7.2",
         "benchmark": "2.1.4",
-        "typescript": "next",
+        "typescript": "2.3.4",
         "browserify": "14.4.0"
     },
     "keywords": [
