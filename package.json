@@ -19,7 +19,8 @@
         "mocha": "3.4.2",
         "typedoc": "0.7.2",
         "benchmark": "2.1.4",
-        "typescript": "next"
+        "typescript": "next",
+        "browserify": "14.4.0"
     },
     "keywords": [
         "typescript",
@@ -34,6 +35,7 @@
     },
     "homepage": "https://github.com/emmanueltouzery/prelude.ts#readme",
     "scripts": {
+        "prepublish": "tsc && node ./node_modules/browserify/bin/cmd.js -s prelude_ts dist/src/index.js -o dist/src/prelude_ts.js",
         "test": "tsc && ./node_modules/mocha/bin/mocha --timeout 10000 ./dist/tests/*.js",
         "clean": "rm -Rf ./dist",
         "docgen": "./node_modules/typedoc/bin/typedoc --mode file --out apidoc --excludePrivate --excludeExternals --excludeNotExported --ignoreCompilerErrors src/index.ts",
