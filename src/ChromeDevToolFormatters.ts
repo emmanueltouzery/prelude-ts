@@ -7,6 +7,8 @@ interface ElementHandler {
     getBody(elt:any): any;
 }
 
+const olStyle = "list-style-type:none; padding-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 12px";
+
 class VectorHandler implements ElementHandler {
     isElement(object:any): boolean {
         return object.hashCode && object.equals && object.hamt && Number.isInteger(object.indexShift);
@@ -19,7 +21,7 @@ class VectorHandler implements ElementHandler {
     }
     getBody(elt:any): any {
         return ["ol",
-                {"style":"list-style-type:none; padding-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 12px"},
+                {"style":olStyle},
                 ...elt.toArray().map((x:any,idx:number) => ["li",{},
                                                                ["span",{"style":"color: rgb(136, 19, 145);"},idx+": "],
                                                                ["object", {"object":x}]])];
@@ -41,7 +43,7 @@ class StreamHandler implements ElementHandler {
     }
     getBody(elt:any): any {
         return ["ol",
-                {"style":"list-style-type:none; padding-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 12px"},
+                {"style":olStyle},
                 ...elt.toArray().map((x:any,idx:number) => ["li",{},
                                                                ["span",{"style":"color: rgb(136, 19, 145);"},idx+": "],
                                                                ["object", {"object":x}]])];
@@ -60,14 +62,42 @@ class HashSetHandler implements ElementHandler {
     }
     getBody(elt:any): any {
         return ["ol",
-                {"style":"list-style-type:none; padding-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 12px"},
+                {"style":olStyle},
                 ...elt.toArray().map((x:any,idx:number) => ["li",{},
                                                                ["span",{"style":"color: rgb(136, 19, 145);"},idx+": "],
                                                                ["object", {"object":x}]])];
     }
 }
 
-const handlers = [new VectorHandler(), new StreamHandler(), new HashSetHandler()];
+class HashMapHandler implements ElementHandler {
+    isElement(object:any): boolean {
+        return object.hashCode && object.equals && object.hamt && object.valueIterable;
+    }
+    getHeader(object:any): any {
+        return ["span", {}, "HashMap(" + object.length() + ")"];
+    }
+    hasBody(elt:any): boolean {
+        return !elt.isEmpty();
+    }
+    getBody(elt:any): any {
+        return ["ol",
+                {"style":olStyle},
+                ...elt.toArray().map((kv:any,idx:number) => {
+                    // using object.create to avoid the __proto__ in the GUI
+                    const obj = Object.create(null);
+                    obj.key = kv[0];
+                    obj.value = kv[1];
+                    return ["li",{},
+                            ["span",{"style":"color: rgb(136, 19, 145);"},idx+": "],
+                            ["object", {"object":obj}]];
+                })];
+    }
+}
+
+const handlers = [new VectorHandler(),
+                  new StreamHandler(),
+                  new HashSetHandler(),
+                  new HashMapHandler()];
 
 function getHandler(object: any): ElementHandler|undefined {
     return handlers.find(h => h.isElement(object));
