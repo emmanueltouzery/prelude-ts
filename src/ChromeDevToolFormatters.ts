@@ -26,7 +26,48 @@ class VectorHandler implements ElementHandler {
     }
 }
 
-const handlers = [new VectorHandler()];
+// not going to behave well with infinite streams...
+class StreamHandler implements ElementHandler {
+    isElement(object:any): boolean {
+        return object.hashCode && object.equals && object.sortBy && object.toVector;
+    }
+    getHeader(object:any): any {
+        // not displaying the length for streams in case
+        // of infinite streams. the user can expand if needed.
+        return ["span", {}, "Stream(?)"];
+    }
+    hasBody(elt:any): boolean {
+        return !elt.isEmpty();
+    }
+    getBody(elt:any): any {
+        return ["ol",
+                {"style":"list-style-type:none; padding-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 12px"},
+                ...elt.toArray().map((x:any,idx:number) => ["li",{},
+                                                               ["span",{"style":"color: rgb(136, 19, 145);"},idx+": "],
+                                                               ["object", {"object":x}]])];
+    }
+}
+
+class HashSetHandler implements ElementHandler {
+    isElement(object:any): boolean {
+        return object.hashCode && object.equals && object.hamt && object.intersect;
+    }
+    getHeader(object:any): any {
+        return ["span", {}, "HashSet(" + object.length() + ")"];
+    }
+    hasBody(elt:any): boolean {
+        return !elt.isEmpty();
+    }
+    getBody(elt:any): any {
+        return ["ol",
+                {"style":"list-style-type:none; padding-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 12px"},
+                ...elt.toArray().map((x:any,idx:number) => ["li",{},
+                                                               ["span",{"style":"color: rgb(136, 19, 145);"},idx+": "],
+                                                               ["object", {"object":x}]])];
+    }
+}
+
+const handlers = [new VectorHandler(), new StreamHandler(), new HashSetHandler()];
 
 function getHandler(object: any): ElementHandler|undefined {
     return handlers.find(h => h.isElement(object));
