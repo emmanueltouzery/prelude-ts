@@ -238,6 +238,26 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * Apply the mapper function on every element of this collection.
+     * The mapper function returns an Option; if the Option is a Some,
+     * the value it contains is added to the result Collection, if it's
+     * a None, the value is discarded.
+     */
+    mapOption<U>(mapper:(v:T)=>Option<U>): Vector<U> {
+        return new Vector<U>(hamt.empty.mutate(
+            (h:any) => {
+                let outputIdx = 0;
+                for (let i=0;i<this.hamt.size;i++) {
+                    const item = this.hamt.get(i+this.indexShift);
+                    const val = mapper(item);
+                    if (val.isSome()) {
+                        h.set(outputIdx++, val.getOrThrow());
+                    }
+                }
+            }), 0);
+    }
+
+    /**
      * Call a predicate for each element in the collection,
      * build a new collection holding only the elements
      * for which the predicate returned true.

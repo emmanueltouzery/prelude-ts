@@ -95,6 +95,20 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Apply the mapper function on every element of this collection.
+     * The mapper function returns an Option; if the Option is a Some,
+     * the value it contains is added to the result Collection, if it's
+     * a None, the value is discarded.
+     */
+    mapOption<U>(mapper:(v:T)=>Option<U&WithEquality>): HashSet<U> {
+        return this.hamt.fold(
+            (acc: HashSet<U>, value: T&WithEquality, key: T&WithEquality) => {
+                const val = mapper(value);
+                return val.isSome() ? acc.add(val.getOrThrow()) : acc
+            }, HashSet.empty());
+    }
+
+    /**
      * Calls the function you give for each item in the set,
      * your function returns a set, all the sets are
      * merged.
@@ -410,6 +424,10 @@ class EmptyHashSet<T> extends HashSet<T> {
     }
 
     map<U>(mapper:(v:T)=>U&WithEquality): HashSet<U> {
+        return <EmptyHashSet<U>>emptyHashSet;
+    }
+
+    mapOption<U>(mapper:(v:T)=>Option<U&WithEquality>): HashSet<U> {
         return <EmptyHashSet<U>>emptyHashSet;
     }
 

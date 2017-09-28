@@ -141,6 +141,9 @@ describe("hashset transformations", () => {
         HashSet.of(5,6,7).equals(HashSet.of(1,2,3).map(x=>x+4))));
     it("flatMap works", () => assert.ok(
         HashSet.of(5,6,7,-5,-6,-7).equals(HashSet.of(1,2,3).flatMap(x=>HashSet.of(x+4,-x-4)))));
+    it("mapOption works", () => assert.ok(
+        HashSet.of(3,5,7).equals(HashSet.of(1,2,3,4,5,6).mapOption(
+            x => x%2==0 ? Option.of(x+1):Option.none<number>()))));
     it("should fold correctly", () => assert.equal(
         6, HashSet.of(1,2,3).fold(0, (a,b)=>a+b)));
     it("should foldLeft correctly", () => assert.equal(

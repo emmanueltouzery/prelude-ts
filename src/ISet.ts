@@ -3,6 +3,7 @@ import { Value} from "./Value";
 import { Collection } from "./Collection";
 import { Foldable } from "./Foldable";
 import { Vector } from "./Vector";
+import { Option } from "./Option";
 
 /**
  * A generic interface for set-like implementations.
@@ -42,6 +43,14 @@ export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
      * The resulting set may be smaller than the source.
      */
     map<U>(mapper:(v:T)=>U&WithEquality): ISet<U>;
+
+    /**
+     * Apply the mapper function on every element of this collection.
+     * The mapper function returns an Option; if the Option is a Some,
+     * the value it contains is added to the result Collection, if it's
+     * a None, the value is discarded.
+     */
+    mapOption<U>(mapper:(v:T)=>Option<U&WithEquality>): ISet<U>;
 
     /**
      * Calls the function you give for each item in the set,

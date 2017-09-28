@@ -367,6 +367,14 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     abstract map<U>(mapper:(v:T)=>U): Stream<U>;
 
     /**
+     * Apply the mapper function on every element of this collection.
+     * The mapper function returns an Option; if the Option is a Some,
+     * the value it contains is added to the result Collection, if it's
+     * a None, the value is discarded.
+     */
+    abstract mapOption<U>(mapper:(v:T)=>Option<U>): Stream<U>;
+
+    /**
      * Calls the function you give for each item in the collection,
      * your function returns a collection, all the collections are
      * concatenated.
@@ -606,6 +614,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     map<U>(mapper:(v:T)=>U): Stream<U> {
+        return <EmptyStream<U>>emptyStream;
+    }
+
+    mapOption<U>(mapper:(v:T)=>Option<U>): Stream<U> {
         return <EmptyStream<U>>emptyStream;
     }
 
@@ -881,6 +893,14 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     map<U>(mapper:(v:T)=>U): Stream<U> {
         return new ConsStream(mapper(this.value),
                               Lazy.of(() => this._tail.get().map(mapper)));
+    }
+
+    mapOption<U>(mapper:(v:T)=>Option<U>): Stream<U> {
+        const mapped = mapper(this.value);
+        return mapped.isSome() ?
+            new ConsStream(mapped.getOrThrow(),
+                           Lazy.of(() => this._tail.get().mapOption(mapper))) :
+            this._tail.get().mapOption(mapper);
     }
 
     flatMap<U>(mapper:(v:T)=>Stream<U>): Stream<U> {

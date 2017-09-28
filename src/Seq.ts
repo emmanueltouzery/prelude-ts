@@ -54,6 +54,14 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
     map<U>(mapper:(v:T)=>U): Seq<U>;
 
     /**
+     * Apply the mapper function on every element of this collection.
+     * The mapper function returns an Option; if the Option is a Some,
+     * the value it contains is added to the result Collection, if it's
+     * a None, the value is discarded.
+     */
+    mapOption<U>(mapper:(v:T)=>Option<U>): Seq<U>;
+
+    /**
      * Search for an item matching the predicate you pass,
      * return Option.Some of that element if found,
      * Option.None otherwise.

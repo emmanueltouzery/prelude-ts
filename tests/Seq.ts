@@ -194,6 +194,9 @@ export function runTests(seqName: string,
                     x => ofIterable(Array.from(Array(x), ()=>x))))));
         it("map works", () => assert.ok(
             of(5,6,7).equals(of(1,2,3).map(x=>x+4))));
+        it("mapOption works", () => assert.deepEqual(
+            [3,5,7],of(1,2,3,4,5,6).mapOption(
+                x => x%2==0 ? Option.of(x+1):Option.none()).toArray()));
         it("supports append", () => assert.deepEqual(
             [1,2,3,4], of(1,2,3).append(4).toArray()));
         it("supports appendAll", () => assert.deepEqual(
