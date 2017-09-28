@@ -31,3 +31,27 @@ describe("Stream filtering", () => {
     it("filters lazily correctly", () => assert.deepEqual(
         [8,32,64,128], Stream.iterate(1, x => x*2).filter(x => x>5 && (x<15 || x > 30)).take(4).toArray()));
 });
+
+describe("Stream toString", () => {
+    it("implements toString correctly on infinite streams", () => assert.equal(
+        "Stream(1, 2, ?)", (() => {
+            const s = Stream.iterate(1, x=>x+1);
+            const a = s.get(0);
+            const b = s.get(1);
+            return s.toString();
+        })()));
+    it("implements toString ok on fully-evaluated", () => assert.equal(
+        "Stream(1, 2, 3)", (()=> {
+            const s = Stream.iterate(1,x=>x+1).take(3);
+            s.length();
+            return s.toString();
+        })()));
+    it("implements toString ok on fully-lazy", () => assert.equal(
+        "Stream(1, ?)", Stream.iterate(1,x=>x+1).take(3)));
+    it("serializes to string correctly", () => assert.equal(
+        "Stream(1, ?)", Stream.of(1,2,3).toString()));
+    it("serializes to string correctly - arrays & strings", () => assert.equal(
+        "Stream([1,'a'], ?)", Stream.of([1,'a']).toString()));
+    it("serializes to string correctly - custom toString", () => assert.equal(
+        "Stream({field1: hi, field2: 99}, ?)", Stream.of(new MyClass("hi", 99)).toString()));
+});

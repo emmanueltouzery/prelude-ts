@@ -51,12 +51,6 @@ export function runTests(seqName: string,
     });
 
     describe(seqName + " Value tests", () => {
-        it("serializes to string correctly", () => assert.equal(
-            seqName + "(1, 2, 3)", of(1,2,3).toString()));
-        it("serializes to string correctly - arrays & strings", () => assert.equal(
-            seqName + "([1,'a'])", of([1,'a']).toString()));
-        it("serializes to string correctly - custom toString", () => assert.equal(
-            seqName + "({field1: hi, field2: 99})", of(new MyClass("hi", 99)).toString()));
         it("has non-obviously-broken equals", () => assert.ok(
             of("a","b","c").equals(of("a", "b", "c"))));
         it("doesn't throw when given another type on equals", () => assert.equal(

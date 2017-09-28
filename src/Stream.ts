@@ -9,6 +9,7 @@ import { HashMap } from "./HashMap";
 import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
 import { Seq } from "./Seq";
+import { Lazy } from "./Lazy";
 import * as SeqHelpers from "./SeqHelpers";
 
 /**
@@ -57,7 +58,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
             return <EmptyStream<T>>emptyStream;
         }
         const head = elts[0];
-        return new ConsStream(head, () => Stream.ofArray(elts.slice(1)));
+        return new ConsStream(head, Lazy.of(() => Stream.ofArray(elts.slice(1))));
     }
 
     /**
@@ -67,7 +68,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      *     => [1,2,4,8,...]
      */
     static iterate<T>(seed:T, fn: (v:T)=>T): Stream<T> {
-        return new ConsStream(seed, ()=>Stream.iterate(fn(seed), fn));
+        return new ConsStream(seed, Lazy.of(()=>Stream.iterate(fn(seed), fn)));
     }
 
     /**
@@ -80,7 +81,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      *     => [0.49884723907769635, 0.3226548779864311, ...]
      */
     static continually<T>(fn: ()=>T): Stream<T> {
-        return new ConsStream(fn(), () => Stream.continually(fn));
+        return new ConsStream(fn(), Lazy.of(() => Stream.continually(fn)));
     }
 
     /**
@@ -104,7 +105,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
         }
         return new ConsStream(
             nextVal.getOrThrow()[0],
-            ()=>Stream.unfoldRight(nextVal.getOrThrow()[1], fn));
+            Lazy.of(()=>Stream.unfoldRight(nextVal.getOrThrow()[1], fn)));
     }
 
     /**
@@ -673,7 +674,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     /**
      * @hidden
      */
-    public constructor(protected value: T, protected _tail: ()=>Stream<T>) {
+    public constructor(protected value: T, protected _tail: Lazy<Stream<T>>) {
         super();
     }
 
@@ -696,7 +697,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     single(): Option<T> {
-        return this._tail().isEmpty() ?
+        return this._tail.get().isEmpty() ?
             Option.of(this.value) :
             Option.none<T>();
     }
@@ -710,14 +711,14 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     tail(): Option<Stream<T>> {
-        return Option.of(this._tail());
+        return Option.of(this._tail.get());
     }
 
     last(): Option<T> {
         let curItem: Stream<T> = this;
         while (true) {
             const item = (<ConsStream<T>>curItem).value;
-            curItem = (<ConsStream<T>>curItem)._tail();
+            curItem = (<ConsStream<T>>curItem)._tail.get();
             if (curItem.isEmpty()) {
                 return Option.of(item);
             }
@@ -732,7 +733,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
                 const item = (<ConsStream<T>>curItem).value;
                 return Option.of(item);
             }
-            curItem = (<ConsStream<T>>curItem)._tail();
+            curItem = (<ConsStream<T>>curItem)._tail.get();
             ++i;
         }
         return Option.none<T>();
@@ -745,7 +746,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             if (predicate(item)) {
                 return Option.of(item);
             }
-            curItem = (<ConsStream<T>>curItem)._tail();
+            curItem = (<ConsStream<T>>curItem)._tail.get();
         }
         return Option.none<T>();
     }
@@ -759,7 +760,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             return <EmptyStream<T>>emptyStream;
         }
         return new ConsStream(this.value,
-                              () => this._tail().take(n-1));
+                              Lazy.of(() => this._tail.get().take(n-1)));
     }
 
     takeWhile(predicate: (x:T)=>boolean): Stream<T> {
@@ -767,14 +768,14 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             return <EmptyStream<T>>emptyStream;
         }
         return new ConsStream(this.value,
-                              () => this._tail().takeWhile(predicate));
+                              Lazy.of(() => this._tail.get().takeWhile(predicate)));
     }
 
     drop(n:number): Stream<T> {
         let i = n;
         let curItem: Stream<T> = this;
         while (i-- > 0 && !curItem.isEmpty()) {
-            curItem = (<ConsStream<T>>curItem)._tail();
+            curItem = (<ConsStream<T>>curItem)._tail.get();
         }
         return curItem;
     }
@@ -782,7 +783,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     dropWhile(predicate:(x:T)=>boolean): Stream<T> {
         let curItem: Stream<T> = this;
         while (!curItem.isEmpty() && predicate((<ConsStream<T>>curItem).value)) {
-            curItem = (<ConsStream<T>>curItem)._tail();
+            curItem = (<ConsStream<T>>curItem)._tail.get();
         }
         return curItem;
     }
@@ -798,7 +799,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         let curItem: Stream<T> = this;
         while (!curItem.isEmpty()) {
             r = fn(r, (<ConsStream<T>>curItem).value);
-            curItem = (<ConsStream<T>>curItem)._tail();
+            curItem = (<ConsStream<T>>curItem)._tail.get();
         }
         return r;
     }
@@ -816,8 +817,8 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         }
 
         return new ConsStream([(<ConsStream<T>>this).value, otherCurItem.value] as [T,U],
-                              () => (<ConsStream<T>>this)._tail().zip(
-                                  { [Symbol.iterator]: ()=>otherIterator}));
+                              Lazy.of(() => (<ConsStream<T>>this)._tail.get().zip(
+                                  { [Symbol.iterator]: ()=>otherIterator})));
     }
 
     reverse(): Stream<T> {
@@ -839,10 +840,10 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     append(v:T): Stream<T> {
-        const tail = this._tail();
+        const tail = this._tail.get();
         return new ConsStream(
             this.value,
-            () => tail.append(v));
+            Lazy.of(()=>tail.append(v)));
     }
 
     appendAll(elts:Iterable<T>): Stream<T> {
@@ -850,16 +851,16 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     appendStream(elts:Stream<T>): Stream<T> {
-        const tail = this._tail();
+        const tail = this._tail.get();
         return new ConsStream(
             this.value,
-            () => tail.appendStream(elts));
+            Lazy.of(() => tail.appendStream(elts)));
     }
 
     prepend(elt: T): Stream<T> {
         return new ConsStream(
             elt,
-            () => this);
+            Lazy.of(()=>this));
     }
 
     prependAll(elts: Iterable<T>): Stream<T> {
@@ -871,20 +872,20 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     private _cycle(toRepeat: Stream<T>): Stream<T> {
-        const tail = this._tail();
+        const tail = this._tail.get();
         return new ConsStream(
             this.value,
-            () => tail.isEmpty() ? toRepeat.cycle() : (<ConsStream<T>>tail)._cycle(toRepeat));
+            Lazy.of(() => tail.isEmpty() ? toRepeat.cycle() : (<ConsStream<T>>tail)._cycle(toRepeat)));
     }
 
     map<U>(mapper:(v:T)=>U): Stream<U> {
         return new ConsStream(mapper(this.value),
-                              () => this._tail().map(mapper));
+                              Lazy.of(() => this._tail.get().map(mapper)));
     }
 
     flatMap<U>(mapper:(v:T)=>Stream<U>): Stream<U> {
         return mapper(this.value).appendStream(
-            this._tail().flatMap(mapper));
+            this._tail.get().flatMap(mapper));
     }
 
     allMatch(predicate:(v:T)=>boolean): boolean {
@@ -898,8 +899,8 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     filter(predicate:(v:T)=>boolean): Stream<T> {
         return predicate(this.value) ?
             new ConsStream(this.value,
-                           () => this._tail().filter(predicate)) :
-            this._tail().filter(predicate);
+                           Lazy.of(() => this._tail.get().filter(predicate))) :
+            this._tail.get().filter(predicate);
     }
 
     sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T> {
@@ -922,7 +923,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         let curItem: Stream<T> = this;
         while (!curItem.isEmpty()) {
             fn((<ConsStream<T>>curItem).value);
-            curItem = (<ConsStream<T>>curItem)._tail();
+            curItem = (<ConsStream<T>>curItem)._tail.get();
         }
         return this;
     }
@@ -936,14 +937,14 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
                 r += separator;
             }
             r += (<ConsStream<T>>curItem).value.toString();
-            curItem = (<ConsStream<T>>curItem)._tail();
+            curItem = (<ConsStream<T>>curItem)._tail.get();
             isNotFirst = true;
         }
         return r;
     }
 
     toArray(): T[] {
-        const r = this._tail().toArray();
+        const r = this._tail.get().toArray();
         r.unshift(this.value);
         return r;
     }
@@ -988,8 +989,8 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
             if (!areEqual(myHead, hisHead)) {
                 return false;
             }
-            myVal = (<ConsStream<T&WithEquality>>myVal)._tail();
-            hisVal = (<ConsStream<T&WithEquality>>hisVal)._tail();
+            myVal = (<ConsStream<T&WithEquality>>myVal)._tail.get();
+            hisVal = (<ConsStream<T&WithEquality>>hisVal)._tail.get();
         }
     }
 
@@ -998,7 +999,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         let curItem: Stream<T> = this;
         while (!curItem.isEmpty()) {
             hash = 31 * hash + getHashCode((<ConsStream<T>>curItem).value);
-            curItem = (<ConsStream<T>>curItem)._tail();
+            curItem = (<ConsStream<T>>curItem)._tail.get();
         }
         return hash;
     }
@@ -1009,7 +1010,12 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
         while (!curItem.isEmpty()) {
             result += toStringHelper((<ConsStream<T>>curItem).value);
-            curItem = (<ConsStream<T>>curItem)._tail();
+            const tail = (<ConsStream<T>>curItem)._tail;
+            if (!tail.isEvaluated()) {
+                result += ", ?";
+                break;
+            }
+            curItem = tail.get();
             if (!curItem.isEmpty()) {
                 result += ", ";
             }
