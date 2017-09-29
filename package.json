@@ -33,7 +33,7 @@
     },
     "homepage": "https://github.com/emmanueltouzery/prelude.ts#readme",
     "scripts": {
-        "prepublish": "tsc && node ./node_modules/browserify/bin/cmd.js -s prelude_ts dist/src/index.js -o dist/src/prelude_ts.js && node ./node_modules/browserify/bin/cmd.js -s prelude_ts_object_formatters dist/src/ChromeDevToolFormatters.js -o dist/src/chrome_dev_tools_formatters.js && ./node_modules/uglify-js/bin/uglifyjs --compress --mangle --output dist/src/prelude_ts.min.js -- dist/src/prelude_ts.js",
+        "prepublish": "scripts/prepublish.sh",
         "test": "tsc && ./node_modules/mocha/bin/mocha --timeout 10000 ./dist/tests/*.js",
         "clean": "rm -Rf ./dist",
         "docgen": "./node_modules/typedoc/bin/typedoc --mode file --out apidoc --excludePrivate --excludeExternals --excludeNotExported --ignoreCompilerErrors src/index.ts",
