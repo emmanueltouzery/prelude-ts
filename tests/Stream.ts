@@ -36,8 +36,7 @@ describe("Stream toString", () => {
     it("implements toString correctly on infinite streams", () => assert.equal(
         "Stream(1, 2, ?)", (() => {
             const s = Stream.iterate(1, x=>x+1);
-            const a = s.get(0);
-            const b = s.get(1);
+            s.get(1);
             return s.toString();
         })()));
     it("implements toString ok on fully-evaluated", () => assert.equal(
