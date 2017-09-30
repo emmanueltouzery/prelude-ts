@@ -9,6 +9,14 @@ interface ElementHandler {
 
 const olStyle = "list-style-type:none; padding-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-left: 12px";
 
+function getWithToArrayBody(elt: any): any {
+    return ["ol",
+            {"style":olStyle},
+            ...elt.toArray().map((x:any,idx:number) => ["li",{},
+                                                        ["span",{"style":"color: rgb(136, 19, 145);"},idx+": "],
+                                                        ["object", {"object":x}]])];
+}
+
 class VectorHandler implements ElementHandler {
     isElement(object:any): boolean {
         return object.hashCode && object.equals && object.hamt && Number.isInteger(object.indexShift);
@@ -19,19 +27,13 @@ class VectorHandler implements ElementHandler {
     hasBody(elt:any): boolean {
         return !elt.isEmpty();
     }
-    getBody(elt:any): any {
-        return ["ol",
-                {"style":olStyle},
-                ...elt.toArray().map((x:any,idx:number) => ["li",{},
-                                                               ["span",{"style":"color: rgb(136, 19, 145);"},idx+": "],
-                                                               ["object", {"object":x}]])];
-    }
+    getBody = getWithToArrayBody
 }
 
 // not going to behave well with infinite streams...
 class StreamHandler implements ElementHandler {
     isElement(object:any): boolean {
-        return object.hashCode && object.equals && object.sortBy && object.toVector;
+        return object.hashCode && object.equals && object.sortBy && object.cycle && object.toVector;
     }
     getHeader(object:any): any {
         // not displaying the length for streams in case
@@ -41,13 +43,22 @@ class StreamHandler implements ElementHandler {
     hasBody(elt:any): boolean {
         return !elt.isEmpty();
     }
-    getBody(elt:any): any {
-        return ["ol",
-                {"style":olStyle},
-                ...elt.toArray().map((x:any,idx:number) => ["li",{},
-                                                               ["span",{"style":"color: rgb(136, 19, 145);"},idx+": "],
-                                                               ["object", {"object":x}]])];
+    getBody = getWithToArrayBody
+}
+
+class ListHandler implements ElementHandler {
+    isElement(object:any): boolean {
+        return object.hashCode && object.equals && object.sortBy && object.toVector;
     }
+    getHeader(object:any): any {
+        // not displaying the length for streams in case
+        // of infinite streams. the user can expand if needed.
+        return ["span", {}, "List(" + object.length() + ")"];
+    }
+    hasBody(elt:any): boolean {
+        return !elt.isEmpty();
+    }
+    getBody = getWithToArrayBody
 }
 
 class HashSetHandler implements ElementHandler {
@@ -60,13 +71,7 @@ class HashSetHandler implements ElementHandler {
     hasBody(elt:any): boolean {
         return !elt.isEmpty();
     }
-    getBody(elt:any): any {
-        return ["ol",
-                {"style":olStyle},
-                ...elt.toArray().map((x:any,idx:number) => ["li",{},
-                                                               ["span",{"style":"color: rgb(136, 19, 145);"},idx+": "],
-                                                               ["object", {"object":x}]])];
-    }
+    getBody = getWithToArrayBody
 }
 
 class HashMapHandler implements ElementHandler {
@@ -96,6 +101,7 @@ class HashMapHandler implements ElementHandler {
 
 const handlers = [new VectorHandler(),
                   new StreamHandler(),
+                  new ListHandler(),
                   new HashSetHandler(),
                   new HashMapHandler()];
 
