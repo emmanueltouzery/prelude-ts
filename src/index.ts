@@ -6,6 +6,7 @@
 export * from "./Option";
 export * from "./Lazy";
 export * from "./Vector";
+export * from "./List";
 export * from "./HashMap";
 export * from "./HashSet";
 export * from "./Tuple2";
