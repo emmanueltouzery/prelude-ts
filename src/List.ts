@@ -12,9 +12,14 @@ import { Seq } from "./Seq";
 import * as SeqHelpers from "./SeqHelpers";
 
 /**
- * A lazy, potentially infinite, sequence of values.
+ * A sequence of values, organized in-memory as a strict linked list.
+ * Each element has an head (value) and a tail (the rest of the list).
  *
- * Use take() for instance to reduce an infinite stream to a finite one.
+ * Random access is expensive, appending is expensive, prepend or getting
+ * the tail of the list is very cheap.
+ * If you often need random access you should rather use [[Vector]].
+ * Avoid appending at the end of the list in a loop, prefer prepending and
+ * then reversing the list.
  */
 export abstract class List<T> implements Iterable<T>, Seq<T> {
 
@@ -64,12 +69,14 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      */
     static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): List<U> {
         let nextVal = fn(seed);
-        if (nextVal.isNone()) {
-            return <EmptyList<U>>emptyList;
+        let result = <EmptyList<U>>emptyList;
+        while (!nextVal.isNone()) {
+            result = new ConsList(
+                nextVal.getOrThrow()[0],
+                result);
+            nextVal = fn(nextVal.getOrThrow()[1]);
         }
-        return new ConsList(
-            nextVal.getOrThrow()[0],
-            List.unfoldRight(nextVal.getOrThrow()[1], fn));
+        return result.reverse();
     }
 
     /**
@@ -293,11 +300,6 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * Append multiple elements at the end of this List.
      */
     abstract appendAll(elts:Iterable<T>): List<T>;
-
-    /*
-     * Append another List at the end of this List.
-     */
-    abstract appendList(elts:List<T>): List<T>;
 
     /**
      * Prepend an element at the beginning of the collection.
@@ -546,20 +548,12 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
         return List.ofIterable(elts);
     }
 
-    appendList(elts:List<T>): List<T> {
-        return elts;
-    }
-
     prepend(elt: T): List<T> {
         return new ConsList(elt, this);
     }
 
     prependAll(elt: Iterable<T>): List<T> {
         return List.ofIterable(elt);
-    }
-
-    cycle(): List<T> {
-        return <EmptyList<T>>emptyList;
     }
 
     map<U>(mapper:(v:T)=>U): List<U> {
@@ -717,19 +711,24 @@ class ConsList<T> extends List<T> implements Iterable<T> {
     }
 
     take(n: number): List<T> {
-        if (n < 1) {
-            return <EmptyList<T>>emptyList;
+        let result = <EmptyList<T>>emptyList;
+        let curItem: List<T> = this;
+        let i = 0;
+        while (i++ < n && (!curItem.isEmpty())) {
+            result = new ConsList((<ConsList<T>>curItem).value, result);
+            curItem = (<ConsList<T>>curItem)._tail;
         }
-        return new ConsList(this.value,
-                            this._tail.take(n-1));
+        return result.reverse();
     }
 
     takeWhile(predicate: (x:T)=>boolean): List<T> {
-        if (!predicate(this.value)) {
-            return <EmptyList<T>>emptyList;
+        let result = <EmptyList<T>>emptyList;
+        let curItem: List<T> = this;
+        while ((!curItem.isEmpty()) && predicate((<ConsList<T>>curItem).value)) {
+            result = new ConsList((<ConsList<T>>curItem).value, result);
+            curItem = (<ConsList<T>>curItem)._tail;
         }
-        return new ConsList(this.value,
-                            this._tail.takeWhile(predicate));
+        return result.reverse();
     }
 
     drop(n:number): List<T> {
@@ -773,13 +772,16 @@ class ConsList<T> extends List<T> implements Iterable<T> {
         const otherIterator = other[Symbol.iterator]();
         let otherCurItem = otherIterator.next();
 
-        if (this.isEmpty() || otherCurItem.done) {
-            return <EmptyList<[T,U]>>emptyList;
-        }
+        let curItem: List<T> = this;
+        let result = <EmptyList<[T,U]>>emptyList;
 
-        return new ConsList([(<ConsList<T>>this).value, otherCurItem.value] as [T,U],
-                              (<ConsList<T>>this)._tail.zip(
-                                  { [Symbol.iterator]: ()=>otherIterator}));
+        while ((!curItem.isEmpty()) && (!otherCurItem.done)) {
+            result = new ConsList(
+                [(<ConsList<T>>curItem).value, otherCurItem.value] as [T,U], result);
+            curItem = (<ConsList<T>>curItem)._tail;
+            otherCurItem = otherIterator.next();
+        }
+        return result.reverse();
     }
 
     reverse(): List<T> {
@@ -797,7 +799,7 @@ class ConsList<T> extends List<T> implements Iterable<T> {
             (acc: HashMap<C,List<T>>, v:T & WithEquality) =>
                 acc.putWithMerge(
                     classifier(v), List.of(v),
-                    (v1:List<T&WithEquality>,v2:List<T&WithEquality>)=>v1.appendList(v2)));
+                    (v1:List<T&WithEquality>,v2:List<T&WithEquality>)=>v1.appendAll(v2)));
     }
 
     append(v:T): List<T> {
@@ -807,13 +809,7 @@ class ConsList<T> extends List<T> implements Iterable<T> {
     }
 
     appendAll(elts:Iterable<T>): List<T> {
-        return this.appendList(List.ofIterable(elts));
-    }
-
-    appendList(elts:List<T>): List<T> {
-        return new ConsList(
-            this.value,
-            this._tail.appendList(elts));
+        return List.ofIterable(elts).prependAll(<List<T>>this);
     }
 
     prepend(elt: T): List<T> {
@@ -821,24 +817,40 @@ class ConsList<T> extends List<T> implements Iterable<T> {
     }
 
     prependAll(elts: Iterable<T>): List<T> {
-        return List.ofIterable(elts).appendAll(this);
+        let leftToAdd = List.ofIterable(elts).reverse();
+        let result: List<T> = this;
+        while (!leftToAdd.isEmpty()) {
+            result = new ConsList((<ConsList<T>>leftToAdd).value, result);
+            leftToAdd = (<ConsList<T>>leftToAdd)._tail;
+        }
+        return result;
     }
 
     map<U>(mapper:(v:T)=>U): List<U> {
-        return new ConsList(mapper(this.value),
-                              this._tail.map(mapper));
+        let curItem: List<T> = this;
+        let result = <EmptyList<U>>emptyList;
+        while (!curItem.isEmpty()) {
+            result = new ConsList(mapper((<ConsList<T>>curItem).value), result);
+            curItem = (<ConsList<T>>curItem)._tail;
+        }
+        return result.reverse();
     }
 
     mapOption<U>(mapper:(v:T)=>Option<U>): List<U> {
-        const mapped = mapper(this.value);
-        return mapped.isSome() ?
-            new ConsList(mapped.getOrThrow(),
-                           this._tail.mapOption(mapper)) :
-            this._tail.mapOption(mapper);
+        let curItem: List<T> = this;
+        let result = <EmptyList<U>>emptyList;
+        while (!curItem.isEmpty()) {
+            const mapped = mapper((<ConsList<T>>curItem).value);
+            if (mapped.isSome()) {
+                result = new ConsList(mapped.getOrThrow(), result);
+            }
+            curItem = (<ConsList<T>>curItem)._tail;
+        }
+        return result.reverse();
     }
 
     flatMap<U>(mapper:(v:T)=>List<U>): List<U> {
-        return mapper(this.value).appendList(
+        return mapper(this.value).appendAll(
             this._tail.flatMap(mapper));
     }
 
@@ -851,10 +863,15 @@ class ConsList<T> extends List<T> implements Iterable<T> {
     }
 
     filter(predicate:(v:T)=>boolean): List<T> {
-        return predicate(this.value) ?
-            new ConsList(this.value,
-                           this._tail.filter(predicate)) :
-            this._tail.filter(predicate);
+        let curItem: List<T> = this;
+        let result = <EmptyList<T>>emptyList;
+        while (!curItem.isEmpty()) {
+            if (predicate((<ConsList<T>>curItem).value)) {
+                result = new ConsList((<ConsList<T>>curItem).value, result);
+            }
+            curItem = (<ConsList<T>>curItem)._tail;
+        }
+        return result.reverse();
     }
 
     sortBy(compare: (v1:T,v2:T)=>Ordering): List<T> {
