@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <script src="../dist/src/prelude_ts.min.js"></script>
+        <script src="../dist/src/chrome_dev_tools_formatters.js"></script>
+        <script>
+         const v = prelude_ts.List.of(
+             {x:1,y:[1,2,3]},
+             prelude_ts.Tuple2.of(prelude_ts.Option.none(), prelude_ts.Option.of({x:2,y:1})),
+             prelude_ts.Stream.iterate(1,x=>x+1).take(5),3);
+         const v1 = prelude_ts.HashMap.of(
+             ["a",{x:1,y:prelude_ts.Vector.of(1,2)}],
+             ["b",{x:2,y:prelude_ts.Vector.empty()}]);
+         alert(v1.toString());
+        </script>
+    </head>
+    <body>
+    </body>
+</html>

@@ -80,6 +80,14 @@ prelude.ts will reject the code at runtime; for instance if you call
 
 ## Installation
 
+Typescript must know about `Iterable`, an ES6 feature (but present in most browsers)
+to compile prelude.ts. If you target ES5, a minimum change to your tsconfig.json
+could be to add:
+
+    "lib": ["DOM", "ES5", "ScriptHost", "es2015.iterable"]
+
+(compared to the default es5 settings it only adds 'es2015.iterable')
+
 ### Using in nodejs
 
 Just add the dependency in your `package.json` and start using it (like
@@ -99,7 +107,6 @@ include the relevant one in your index.html in script tags:
 ```html
 <script src="node_modules/prelude.ts/dist/src/prelude_ts.min.js"></script>
 ```
-(the minified JS file is 42kb as of 0.3.1)
 
 You shouldn't have an issue to import prelude.ts in your application, but if you use
 modules it gets a little more complicated; One solution if you use them is to create
