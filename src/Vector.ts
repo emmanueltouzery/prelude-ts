@@ -611,9 +611,11 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      */
     reverse(): Vector<T> {
         const sz = this.hamt.size;
-        return new Vector<T>(this.hamt.fold(
-            (h:any,v:T,k:number) => h.set(sz-1-k+this.indexShift, v),
-            hamt.make()), 0);
+        const basis = sz-1+this.indexShift;
+        return new Vector<T>(hamt.empty.mutate((hamt2:any) => 
+            this.hamt.fold(
+                (h:any,v:T,k:number) => h.set(basis-k, v),
+                hamt2)), 0);
     }
 
     /**
