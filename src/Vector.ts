@@ -232,9 +232,12 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * by the mapper function you give.
      */
     map<U>(mapper:(v:T)=>U): Vector<U> {
-        return new Vector<U>(this.hamt.fold(
-            (acc: any, v:T & WithEquality, k:number) => acc.set(k-this.indexShift, mapper(v)),
-            hamt.empty), 0);
+        return new Vector<U>(hamt.empty.mutate(
+            (h_:any) => {
+                this.hamt.fold(
+                    (acc: any, v:T & WithEquality, k:number) => acc.set(k-this.indexShift, mapper(v)),
+                    h_)
+            }), 0);
     }
 
     /**
