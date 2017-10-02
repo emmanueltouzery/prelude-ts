@@ -59,3 +59,12 @@ compare(['Vector.appendAll', () => vec.appendAll(vec)],
 compare(['Vector.prependAll', () => vec.prependAll(vec)],
         ['Array.prependAll', () => array.concat(array)],
         ['List.prependAll', () => list.prependAll(list)]);
+
+compare(['Vector.foldLeft', () => vec.foldLeft(0, (acc,i)=>acc+i)],
+        ['Array.foldLeft', () => array.reduce((acc,i)=>acc+i)],
+        ['immList.foldLeft', () => immList.reduce((acc,i)=>acc+i,0)],
+        ['List.foldLeft', () => vec.foldLeft(0, (acc,i)=>acc+i)]);
+
+compare(['Vector.foldRight', () => vec.foldRight(0, (i,acc)=>acc+i)],
+        ['immList.foldRight', () => immList.reduceRight((acc,i)=>acc+i,0)],
+        ['List.foldRight', () => vec.foldRight(0, (i,acc)=>acc+i)]);
