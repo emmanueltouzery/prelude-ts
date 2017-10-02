@@ -851,8 +851,13 @@ class ConsList<T> extends List<T> implements Iterable<T> {
     }
 
     flatMap<U>(mapper:(v:T)=>List<U>): List<U> {
-        return mapper(this.value).appendAll(
-            this._tail.flatMap(mapper));
+        let curItem: List<T> = this;
+        let result = <EmptyList<U>>emptyList;
+        while (!curItem.isEmpty()) {
+            result = result.prependAll(mapper((<ConsList<T>>curItem).value).reverse());
+            curItem = (<ConsList<T>>curItem)._tail;
+        }
+        return result.reverse();
     }
 
     allMatch(predicate:(v:T)=>boolean): boolean {
