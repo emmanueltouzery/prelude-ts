@@ -84,7 +84,9 @@ Typescript must know about `Iterable`, an ES6 feature (but present in most brows
 to compile prelude.ts. If you target ES5, a minimum change to your tsconfig.json
 could be to add:
 
-    "lib": ["DOM", "ES5", "ScriptHost", "es2015.iterable"]
+```json
+"lib": ["DOM", "ES5", "ScriptHost", "es2015.iterable"]
+```
 
 (compared to the default es5 settings it only adds 'es2015.iterable')
 
