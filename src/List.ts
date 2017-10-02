@@ -799,7 +799,8 @@ class ConsList<T> extends List<T> implements Iterable<T> {
             (acc: HashMap<C,List<T>>, v:T & WithEquality) =>
                 acc.putWithMerge(
                     classifier(v), List.of(v),
-                    (v1:List<T&WithEquality>,v2:List<T&WithEquality>)=>v1.appendAll(v2)));
+                    (v1:List<T&WithEquality>,v2:List<T&WithEquality>)=>v1.prependAll(v2)))
+            .mapValues(l => l.reverse());
     }
 
     append(v:T): List<T> {
