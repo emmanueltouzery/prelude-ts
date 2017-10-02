@@ -18,7 +18,8 @@
         "benchmark": "2.1.4",
         "typescript": "2.5.3",
         "browserify": "14.4.0",
-        "uglify-js": "3.1.2"
+        "uglify-js": "3.1.2",
+        "immutable": "4.0.0-rc.3"
     },
     "keywords": [
         "typescript",

@@ -2,6 +2,7 @@ const Benchmark: any = require('benchmark');
 
 import { Vector } from "../src/Vector"
 import { List } from "../src/List"
+import * as imm from 'immutable';
 
 function compare(...items: Array<[string, ()=>any]>) {
     const benchSuite: any = new Benchmark.Suite;
@@ -22,29 +23,37 @@ const getArray = (length:number) => Array.from({length}, () => Math.floor(Math.r
 const array = getArray(200);
 const vec = Vector.ofIterable(array);
 const list = List.ofIterable(array);
+const immList = imm.List(array);
 compare(['Vector.filter', () => vec.filter(x => x%2===0)],
         ['Array.filter', () => array.filter(x => x%2===0)],
+        ['immList.filter', () => immList.filter(x => x%2===0)],
         ['List.filter', () => list.filter(x => x%2===0)]);
 
 compare(['Vector.map', () => vec.map(x => x*2)],
         ['Array.map', () => array.map(x => x*2)],
+        ['immList.map', () => immList.map(x => x*2)],
         ['List.map', () => list.map(x => x*2)]);
 
 compare(['Vector.ofIterable', () => Vector.ofIterable(array)],
-        ['List.ofIterable', () => List.ofIterable(array)]);
+        ['List.ofIterable', () => List.ofIterable(array)],
+        ['immList.ofIterable', () => imm.List(array)]);
 
 compare(['Vector.flatMap', () => vec.flatMap(x => Vector.of(1,2))],
-        ['List.flatMap', () => list.flatMap(x => List.of(1,2))]);
+        ['List.flatMap', () => list.flatMap(x => List.of(1,2))],
+        ['immList.flatMap', () => immList.flatMap(x => imm.List([1,2]))]);
 
 compare(['Vector.reverse', () => vec.reverse()],
         ['Array.reverse', () => array.reverse()],
+        ['immList.reverse', () => immList.reverse()],
         ['List.reverse', () => list.reverse()]);
 
 compare(['Vector.groupBy', () => vec.groupBy(x => x%2)],
-        ['List.groupBy', () => list.groupBy(x => x%2)]);
+        ['List.groupBy', () => list.groupBy(x => x%2)],
+        ['immList.groupBy', () => immList.groupBy(x => x%2)]);
 
 compare(['Vector.appendAll', () => vec.appendAll(vec)],
         ['Array.appendAll', () => array.concat(array)],
+        ['immList.appendAll', () => immList.concat(immList)],
         ['List.appendAll', () => list.appendAll(list)]);
 
 compare(['Vector.prependAll', () => vec.prependAll(vec)],
