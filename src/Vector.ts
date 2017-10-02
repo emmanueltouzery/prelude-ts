@@ -30,7 +30,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     static empty<T>(): Vector<T> {
         return <Vector<T>>Vector.emptyVector;
     }
-    
+
     /**
      * Build a vector from any iterable, which means also
      * an array for instance.
@@ -73,7 +73,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
                 }
             }), 0);
     }
-    
+
     /**
      * Implementation of the Iterator interface.
      */
@@ -300,7 +300,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     contains(v:T&WithEquality): boolean {
         return this.anyMatch(curVal => areEqual(curVal, v));
     }
-    
+
     /**
      * Calls the function you give for each item in the collection,
      * your function returns a collection, all the collections are
@@ -538,10 +538,12 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      */
     groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {
         return this.hamt.fold(
-            (acc: HashMap<C,Vector<T>>, v:T & WithEquality, k:number) =>
+            (acc: HashMap<C,any>, v:T & WithEquality, k:number) =>
                 acc.putWithMerge(
-                    classifier(v), Vector.of(v),
-                    (v1:Vector<T&WithEquality>,v2:Vector<T&WithEquality>)=>v1.appendAll(v2)), HashMap.empty());
+                    classifier(v), hamt.beginMutation(hamt.make()).set(0,v),
+                    (v1:any,v2:any)=>
+                        v1.set(v1.size, v2.get(0))), HashMap.empty())
+            .mapValues((h:any) => new Vector<T>(h.endMutation(), 0));
     }
 
     /**
@@ -612,7 +614,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     reverse(): Vector<T> {
         const sz = this.hamt.size;
         const basis = sz-1+this.indexShift;
-        return new Vector<T>(hamt.empty.mutate((hamt2:any) => 
+        return new Vector<T>(hamt.empty.mutate((hamt2:any) =>
             this.hamt.fold(
                 (h:any,v:T,k:number) => h.set(basis-k, v),
                 hamt2)), 0);
