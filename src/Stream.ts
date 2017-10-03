@@ -10,6 +10,7 @@ import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
 import { Seq } from "./Seq";
 import { Lazy } from "./Lazy";
+import { List } from "./List";
 import * as SeqHelpers from "./SeqHelpers";
 
 /**
@@ -463,6 +464,13 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      * entries will be lost.
      */
     abstract toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V>;
+
+    /**
+     * Convert this collection to a list.
+     */
+    toList(): List<T> {
+        return List.ofIterable(this);
+    }
 
     /**
      * Transform this value to another value type.

@@ -6,6 +6,7 @@ import { HashMap} from "./HashMap";
 import { IMap } from "./IMap";
 import { Option } from "./Option";
 import { HashSet } from "./HashSet";
+import { List } from "./List";
 import * as SeqHelpers from "./SeqHelpers";
 const hamt: any = require("hamt_plus");
 
@@ -576,6 +577,13 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
                 const converted = converter(value);
                 return acc.put(converted[0], converted[1]);
             }, HashMap.empty());
+    }
+
+    /**
+     * Convert this collection to a list.
+     */
+    toList(): List<T> {
+        return List.ofIterable(this);
     }
 
     /**
