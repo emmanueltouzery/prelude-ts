@@ -246,6 +246,14 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Returns a new set with the element you give removed
+     * if it was present in the set.
+     */
+    remove(elt: T&WithEquality): HashSet<T> {
+        return new HashSet<T>(this.hamt.remove(elt));
+    }
+
+    /**
      * Returns a new set with all the elements of the current
      * Set, minus the elements of the iterable you give as a parameter.
      * If you call this function with a HashSet as parameter,
@@ -477,6 +485,10 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>] {
         return [this, this];
+    }
+
+    remove(elt: T&WithEquality): HashSet<T> {
+        return this;
     }
 
     equals(other: HashSet<T>): boolean {

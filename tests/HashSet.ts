@@ -132,6 +132,12 @@ describe("hashset combinations", () => {
         HashSet.of(1,2,4).equals(HashSet.of(0,1,2,3,4).removeAll([0,3]))));
     it("calculates removeAll from empty well", () => assert.ok(
         HashSet.empty<number>().equals(HashSet.empty<number>().removeAll([0,3]))));
+    it("calculates remove well", () => assert.ok(
+        HashSet.of(0,1,2,4).equals(HashSet.of(0,1,2,3,4).remove(3))));
+    it("calculates remove well event if item not present", () => assert.ok(
+        HashSet.of(0,1,2,3,4).equals(HashSet.of(0,1,2,3,4).remove(5))));
+    it("calculates remove from empty well", () => assert.ok(
+        HashSet.empty<number>().equals(HashSet.empty<number>().remove(3))));
     it("filters correctly", () => assert.ok(
         HashSet.of(2,4).equals(HashSet.of(1,2,3,4,5).filter(x => x%2==0))));
 });
