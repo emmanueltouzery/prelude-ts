@@ -22,6 +22,12 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
     appendAll(elts: Iterable<T>): Seq<T>;
 
     /**
+     * Removes the first element matching the predicate
+     * (use [[Seq.filter]] to remove all elements matching a predicate)
+     */
+    removeFirst(predicate: (v:T)=>boolean): Seq<T>;
+
+    /**
      * Call a function for element in the collection.
      * Return the unchanged collection.
      */

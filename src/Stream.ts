@@ -331,6 +331,12 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      */
     abstract appendAll(elts:Iterable<T>): Stream<T>;
 
+    /**
+     * Removes the first element matching the predicate
+     * (use [[Stream.filter]] to remove all elements matching a predicate)
+     */
+    abstract removeFirst(predicate: (v:T)=>boolean): Stream<T>;
+
     /*
      * Append another Stream at the end of this Stream.
      *
@@ -605,6 +611,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return Stream.ofIterable(elts);
     }
 
+    removeFirst(predicate: (x:T)=>boolean): Stream<T> {
+        return this;
+    }
+
     appendStream(elts:Stream<T>): Stream<T> {
         return elts;
     }
@@ -868,6 +878,14 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     appendAll(elts:Iterable<T>): Stream<T> {
         return this.appendStream(Stream.ofIterable(elts));
+    }
+
+    removeFirst(predicate: (x:T)=>boolean): Stream<T> {
+        const tail = this._tail.get();
+        return predicate(this.value) ?
+            tail :
+            new ConsStream(this.value,
+                           Lazy.of(()=>tail.removeFirst(predicate)));
     }
 
     appendStream(elts:Stream<T>): Stream<T> {

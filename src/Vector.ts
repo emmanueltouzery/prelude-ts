@@ -229,6 +229,25 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * Removes the first element matching the predicate
+     * (use [[Seq.filter]] to remove all elements matching a predicate)
+     */
+    removeFirst(predicate: (v:T)=>boolean): Vector<T> {
+        return new Vector<T>(hamt.empty.mutate(
+            (h:any) => {
+                let found = false;
+                for (let i=0;i<this.hamt.size;i++) {
+                    const item = this.hamt.get(i+this.indexShift);
+                    if (predicate(item) && !found) {
+                        found = true;
+                    } else {
+                        h.set(h.size, item);
+                    }
+                }
+            }), 0);
+    }
+
+    /**
      * Return a new collection where each element was transformed
      * by the mapper function you give.
      */
@@ -250,12 +269,11 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     mapOption<U>(mapper:(v:T)=>Option<U>): Vector<U> {
         return new Vector<U>(hamt.empty.mutate(
             (h:any) => {
-                let outputIdx = 0;
                 for (let i=0;i<this.hamt.size;i++) {
                     const item = this.hamt.get(i+this.indexShift);
                     const val = mapper(item);
                     if (val.isSome()) {
-                        h.set(outputIdx++, val.getOrThrow());
+                        h.set(h.size, val.getOrThrow());
                     }
                 }
             }), 0);
@@ -269,11 +287,10 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     filter(predicate:(v:T)=>boolean): Vector<T> {
         return new Vector<T>(hamt.empty.mutate(
             (h:any) => {
-                let outputIdx = 0;
                 for (let i=0;i<this.hamt.size;i++) {
                     const item = this.hamt.get(i+this.indexShift);
                     if (predicate(item)) {
-                        h.set(outputIdx++, item);
+                        h.set(h.size, item);
                     }
                 }
             }), 0);

@@ -302,6 +302,12 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
     abstract appendAll(elts:Iterable<T>): List<T>;
 
     /**
+     * Removes the first element matching the predicate
+     * (use [[Seq.filter]] to remove all elements matching a predicate)
+     */
+    abstract removeFirst(predicate: (v:T)=>boolean): List<T>;
+
+    /**
      * Prepend an element at the beginning of the collection.
      */
     abstract prepend(elt: T): List<T>;
@@ -546,6 +552,10 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
 
     appendAll(elts:Iterable<T>): List<T> {
         return List.ofIterable(elts);
+    }
+
+    removeFirst(predicate: (x:T)=>boolean): List<T> {
+        return this;
     }
 
     prepend(elt: T): List<T> {
@@ -812,6 +822,21 @@ class ConsList<T> extends List<T> implements Iterable<T> {
 
     appendAll(elts:Iterable<T>): List<T> {
         return List.ofIterable(elts).prependAll(<List<T>>this);
+    }
+
+    removeFirst(predicate: (x:T)=>boolean): List<T> {
+        let curItem: List<T> = this;
+        let result = <EmptyList<T>>emptyList;
+        let removed = false;
+        while (!curItem.isEmpty()) {
+            if (predicate((<ConsList<T>>curItem).value) && !removed) {
+                removed = true;
+            } else {
+                result = new ConsList((<ConsList<T>>curItem).value, result);
+            }
+            curItem = (<ConsList<T>>curItem)._tail;
+        }
+        return result.reverse();
     }
 
     prepend(elt: T): List<T> {
