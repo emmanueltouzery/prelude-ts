@@ -246,6 +246,17 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
     abstract zip<U>(other: Iterable<U>): List<[T,U]>;
 
     /**
+     * Combine this collection with the index of the elements
+     * in it. Handy if you need the index when you map on
+     * the collection for instance:
+     *
+     *     List.of("a","b").zipWithIndex().map([v,idx] => ...)
+     */
+    zipWithIndex(): List<[T,number]> {
+        return <List<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
+    }
+
+    /**
      * Reverse the collection. For instance:
      *
      *     [1,2,3] => [3,2,1]
@@ -288,7 +299,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * Randomly reorder the elements of the collection.
      */
     shuffle(): List<T> {
-        return List.ofIterable(SeqHelpers.shuffle(this.toArray()));
+        return List.ofIterable<T>(SeqHelpers.shuffle(this.toArray()));
     }
 
     /**

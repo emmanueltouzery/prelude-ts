@@ -632,6 +632,17 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * Combine this collection with the index of the elements
+     * in it. Handy if you need the index when you map on
+     * the collection for instance:
+     *
+     *     Vector.of("a","b").zipWithIndex().map([v,idx] => ...)
+     */
+    zipWithIndex(): Vector<[T,number]> {
+        return <Vector<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
+    }
+
+    /**
      * Reverse the collection. For instance:
      *
      *     [1,2,3] => [3,2,1]

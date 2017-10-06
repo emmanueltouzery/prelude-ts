@@ -2,6 +2,7 @@ import { Option } from "./Option";
 import { WithEquality, hasTrueEquality } from "./Comparison";
 import { IMap } from "./IMap";
 import { Seq } from "./Seq";
+import { Stream } from "./Stream";
 
 /**
  * @hidden
@@ -40,4 +41,11 @@ export function arrangeBy<T,K>(seq: Seq<T>, getKey: (v:T)=>K&WithEquality): Opti
  */
 export function seqHasTrueEquality<T>(seq: Seq<T>): boolean {
     return seq.find(x => x!=null).hasTrueEquality();
+}
+
+/**
+ * @hidden
+ */
+export function zipWithIndex<T>(seq: Seq<T>): Seq<[T,number]> {
+    return seq.zip<number>(Stream.iterate(0,i=>i+1));
 }

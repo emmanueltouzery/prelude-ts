@@ -276,6 +276,17 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     abstract zip<U>(other: Iterable<U>): Stream<[T,U]>;
 
     /**
+     * Combine this collection with the index of the elements
+     * in it. Handy if you need the index when you map on
+     * the collection for instance:
+     *
+     *     Stream.of("a","b").zipWithIndex().map([v,idx] => ...)
+     */
+    zipWithIndex(): Stream<[T,number]> {
+        return <Stream<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
+    }
+
+    /**
      * Reverse the collection. For instance:
      *
      *     [1,2,3] => [3,2,1]

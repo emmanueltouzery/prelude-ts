@@ -155,6 +155,15 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
     zip<U>(other: Iterable<U>): Seq<[T,U]>;
 
     /**
+     * Combine this collection with the index of the elements
+     * in it. Handy if you need the index when you map on
+     * the collection for instance:
+     *
+     *     Vector.of("a","b").zipWithIndex().map([v,idx] => ...)
+     */
+    zipWithIndex(): Seq<[T,number]>;
+
+    /**
      * Retrieve the element at index idx.
      * Returns an option because the collection may
      * contain less elements than the index.
