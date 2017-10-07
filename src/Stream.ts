@@ -294,6 +294,14 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     abstract reverse(): Stream<T>;
 
     /**
+     * Split the collection at a specific index.
+     *
+     *     Stream.of(1,2,3,4,5).splitAt(3)
+     *     => [Stream.of(1,2,3), Stream.of(4,5)]
+     */
+    abstract splitAt(index:number): [Stream<T>,Stream<T>];
+
+    /**
      * Returns a pair of two collections; the first one
      * will only contain the items from this collection for
      * which the predicate you give returns true, the second
@@ -606,6 +614,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return this;
     }
 
+    splitAt(index:number): [Stream<T>,Stream<T>] {
+        return [this, this];
+    }
+
     partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
         return [Stream.empty<T>(), Stream.empty<T>()];
     }
@@ -864,6 +876,10 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     reverse(): Stream<T> {
         return this.foldLeft(<Stream<T>><EmptyStream<T>>emptyStream, (xs,x) => xs.prepend(x));
+    }
+
+    splitAt(index:number): [Stream<T>,Stream<T>] {
+        return [this.take(index), this.drop(index)];
     }
 
     partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {

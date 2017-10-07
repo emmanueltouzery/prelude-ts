@@ -232,6 +232,18 @@ export function runTests(seqName: string,
             [0,1,2,3,4], of(0,1,2,3,4).removeFirst(Predicates.equals(5)).toArray()));
         it("calculates removeFirst from empty well", () => assert.ok(
             empty<number>().equals(empty<number>().removeFirst(x => x === 3))));
+        it("handles a simple splitAt", () => assert.deepEqual(
+            [[1,2,3],[4,5]], of(1,2,3,4,5).splitAt(3).map(x=>x.toArray())));
+        it("handles a simple splitAt 2", () => assert.deepEqual(
+            [[1],[2,3]], of(1,2,3).splitAt(1).map(x=>x.toArray())));
+        it("handles splitAt with empty second list", () => assert.deepEqual(
+            [[1,2,3],[]], of(1,2,3).splitAt(3).map(x=>x.toArray())));
+        it("handles splitAt with empty first list", () => assert.deepEqual(
+            [[],[1,2,3]], of(1,2,3).splitAt(0).map(x=>x.toArray())));
+        it("handles splitAt with out of bounds 1", () => assert.deepEqual(
+            [[],[1,2,3]], of(1,2,3).splitAt(-1).map(x=>x.toArray())));
+        it("handles splitAt with out of bounds 2", () => assert.deepEqual(
+            [[1,2,3],[]], of(1,2,3).splitAt(4).map(x=>x.toArray())));
     });
     describe(seqName + " value extraction", () => {
         it("get finds when present", () => assert.ok(

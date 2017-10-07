@@ -216,6 +216,14 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
     reverse(): Seq<T>;
 
     /**
+     * Split the collection at a specific index.
+     *
+     *     List.of(1,2,3,4,5).splitAt(3)
+     *     => [List.of(1,2,3), List.of(4,5)]
+     */
+    splitAt(index:number): [Seq<T>,Seq<T>];
+
+    /**
      * Convert this collection to a map. You give a function which
      * for each element in the collection returns a pair. The
      * key of the pair will be used as a key in the map, the value,

@@ -657,6 +657,32 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * Split the collection at a specific index.
+     *
+     *     Vector.of(1,2,3,4,5).splitAt(3)
+     *     => [Vector.of(1,2,3), Vector.of(4,5)]
+     */
+    splitAt(index:number): [Vector<T>,Vector<T>] {
+        let r: any = [null,null];
+        hamt.empty.mutate(
+            (hamt1:any) =>
+                hamt.empty.mutate((hamt2:any) => {
+                    for (let i=0;i<this.hamt.size;i++) {
+                        const val = this.hamt.get(i+this.indexShift);
+                        if (i<index) {
+                            hamt1.set(hamt1.size, val);
+                        } else {
+                            hamt2.set(hamt2.size, val);
+                        }
+                    }
+
+                    r[0] = new Vector<T>(hamt1,0);
+                    r[1] = new Vector<T>(hamt2,0);
+                }));
+        return r;
+    }
+
+    /**
      * Returns a pair of two collections; the first one
      * will only contain the items from this collection for
      * which the predicate you give returns true, the second
@@ -667,18 +693,16 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      *     => [[2,4],[1,3]]
      */
     partition(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>] {
-        let i1 = 0, i2 = 0;
         let r: any = [null,null];
         hamt.empty.mutate(
             (hamt1:any) =>
                 hamt.empty.mutate((hamt2:any) => {
-                    let i1 = 0, i2 = 0;
                     for (let i=0;i<this.hamt.size;i++) {
                         const val = this.hamt.get(i+this.indexShift);
                         if (predicate(val)) {
-                            hamt1.set(i1++, val);
+                            hamt1.set(hamt1.size, val);
                         } else {
-                            hamt2.set(i2++, val);
+                            hamt2.set(hamt2.size, val);
                         }
                     }
 

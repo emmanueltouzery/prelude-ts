@@ -264,6 +264,14 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
     abstract reverse(): List<T>;
 
     /**
+     * Split the collection at a specific index.
+     *
+     *     List.of(1,2,3,4,5).splitAt(3)
+     *     => [List.of(1,2,3), List.of(4,5)]
+     */
+    abstract splitAt(index:number): [List<T>,List<T>];
+
+    /**
      * Returns a pair of two collections; the first one
      * will only contain the items from this collection for
      * which the predicate you give returns true, the second
@@ -549,6 +557,10 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
         return this;
     }
 
+    splitAt(index:number): [List<T>,List<T>] {
+        return [this, this];
+    }
+
     partition(predicate:(x:T)=>boolean): [List<T>,List<T>] {
         return [List.empty<T>(), List.empty<T>()];
     }
@@ -807,6 +819,10 @@ class ConsList<T> extends List<T> implements Iterable<T> {
 
     reverse(): List<T> {
         return this.foldLeft(<List<T>><EmptyList<T>>emptyList, (xs,x) => xs.prepend(x));
+    }
+
+    splitAt(index:number): [List<T>,List<T>] {
+        return [this.take(index), this.drop(index)];
     }
 
     partition(predicate:(x:T)=>boolean): [List<T>,List<T>] {
