@@ -3,6 +3,7 @@ import { Option } from "./Option";
 import { Value } from "./Value"
 import { ISet } from "./ISet";
 import { Vector } from "./Vector";
+import { List } from "./List";
 import { Foldable } from "./Foldable";
 
 /**
@@ -75,6 +76,12 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
      * Note that Map is already an iterable of key,value pairs!
      */
     toVector(): Vector<[K,V]>;
+
+    /**
+     * Convert this map to a List of key,value pairs.
+     * Note that Map is already an iterable of key,value pairs!
+     */
+    toList(): List<[K,V]>;
 
     /**
      * Convert to array.

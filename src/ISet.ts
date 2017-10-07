@@ -3,6 +3,7 @@ import { Value} from "./Value";
 import { Collection } from "./Collection";
 import { Foldable } from "./Foldable";
 import { Vector } from "./Vector";
+import { List } from "./List";
 import { Option } from "./Option";
 
 /**
@@ -109,4 +110,9 @@ export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
      * Converts this set to an vector
      */
     toVector(): Vector<T & WithEquality>;
+
+    /**
+     * Converts this set to an list
+     */
+    toList(): List<T & WithEquality>;
 }

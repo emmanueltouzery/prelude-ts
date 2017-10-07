@@ -1,5 +1,6 @@
 import { ISet } from "./ISet";
 import { Vector } from "./Vector";
+import { List } from "./List";
 import { Option } from "./Option";
 import { WithEquality, hasEquals, HasEquals, 
          getHashCode, areEqual, toStringHelper } from "./Comparison";
@@ -196,6 +197,13 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      */
     toVector(): Vector<T & WithEquality> {
         return Vector.ofIterable<T&WithEquality>(this.hamt.keys());
+    }
+
+    /**
+     * Converts this set to an list
+     */
+    toList(): List<T & WithEquality> {
+        return List.ofIterable<T&WithEquality>(this.hamt.keys());
     }
 
     /**
@@ -453,6 +461,10 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     toVector(): Vector<T & WithEquality> {
         return Vector.empty<T&WithEquality>();
+    }
+
+    toList(): List<T & WithEquality> {
+        return List.empty<T&WithEquality>();
     }
 
     [Symbol.iterator](): Iterator<T> {

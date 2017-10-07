@@ -1,6 +1,7 @@
 import { HashMap } from "../src/HashMap";
 import { HashSet } from "../src/HashSet";
 import { Vector } from "../src/Vector";
+import { List } from "../src/List";
 import { Option } from "../src/Option";
 import { Stream } from "../src/Stream";
 import { Tuple2 } from "../src/Tuple2";
@@ -200,4 +201,7 @@ describe("hashmap transformation", () => {
     it("should foldRight correctly", () => assert.equal(
         6, HashMap.of([1,"a"], [2,"bb"], [3,"ccc"])
             .foldRight(0, ([item,value],soFar)=>soFar+value.length)));
+    it("should convert to list correctly", () => assert.ok(
+        List.of(Tuple2.of("a",5),Tuple2.of("b",6)).equals(
+            HashMap.of<string,number>(["a",5],["b",6]).toList().map(Tuple2.ofArray))));
 });

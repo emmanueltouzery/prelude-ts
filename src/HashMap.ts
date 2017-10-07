@@ -6,6 +6,7 @@ import { Option, none, None } from "./Option";
 import { HashSet } from "./HashSet";
 import { ISet } from "./ISet";
 import { Vector } from "./Vector";
+import { List } from "./List";
 const hamt: any = require("hamt_plus");
 
 /**
@@ -333,6 +334,14 @@ export class HashMap<K,V> implements IMap<K,V> {
     }
 
     /**
+     * Convert this map to a list of key,value pairs.
+     * Note that Map is already an iterable of key,value pairs!
+     */
+    toList(): List<[K,V]> {
+        return List.ofIterable(this);
+    }
+
+    /**
      * Transform this value to another value type.
      * Enables fluent-style programming by chaining calls.
      */
@@ -509,6 +518,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     toVector(): Vector<[K,V]> {
         return Vector.empty<[K,V]>();
+    }
+
+    toList(): List<[K,V]> {
+        return List.empty<[K,V]>();
     }
 
     equals(other: IMap<K&WithEquality,V&WithEquality>): boolean {
