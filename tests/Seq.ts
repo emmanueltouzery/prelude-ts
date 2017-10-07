@@ -244,6 +244,12 @@ export function runTests(seqName: string,
             [[],[1,2,3]], of(1,2,3).splitAt(-1).map(x=>x.toArray())));
         it("handles splitAt with out of bounds 2", () => assert.deepEqual(
             [[1,2,3],[]], of(1,2,3).splitAt(4).map(x=>x.toArray())));
+        it("handles a regular span", () => assert.deepEqual(
+            [[1,2],[3,4,5]], of(1,2,3,4,5).span(i=>i<3).map(x=>x.toArray())));
+        it("handles a span matching everything", () => assert.deepEqual(
+            [[1,2,3,4,5],[]], of(1,2,3,4,5).span(i=>i<9).map(x=>x.toArray())));
+        it("handles a span matching nothing", () => assert.deepEqual(
+            [[],[1,2,3,4,5]], of(1,2,3,4,5).span(i=>i<0).map(x=>x.toArray())));
     });
     describe(seqName + " value extraction", () => {
         it("get finds when present", () => assert.ok(

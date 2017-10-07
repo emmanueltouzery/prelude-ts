@@ -264,6 +264,17 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
     abstract reverse(): List<T>;
 
     /**
+     * Takes a predicate; returns a pair of collections.
+     * The first one is the longest prefix of this collection
+     * which satisfies the predicate, and the second collection
+     * is the remainder of the collection.
+     *
+     *    List.of(1,2,3,4,5,6).span(x => x <3)
+     *    => [List.of(1,2), List.of(3,4,5,6)]
+     */
+    abstract span(predicate:(x:T)=>boolean): [List<T>,List<T>];
+
+    /**
      * Split the collection at a specific index.
      *
      *     List.of(1,2,3,4,5).splitAt(3)
@@ -557,6 +568,10 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
         return this;
     }
 
+    span(predicate:(x:T)=>boolean): [List<T>,List<T>] {
+        return [this, this];
+    }
+
     splitAt(index:number): [List<T>,List<T>] {
         return [this, this];
     }
@@ -819,6 +834,16 @@ class ConsList<T> extends List<T> implements Iterable<T> {
 
     reverse(): List<T> {
         return this.foldLeft(<List<T>><EmptyList<T>>emptyList, (xs,x) => xs.prepend(x));
+    }
+
+    span(predicate:(x:T)=>boolean): [List<T>,List<T>] {
+        let first = <EmptyList<T>>emptyList;
+        let curItem: List<T> = this;
+        while ((!curItem.isEmpty()) && predicate((<ConsList<T>>curItem).value)) {
+            first = new ConsList((<ConsList<T>>curItem).value, first);
+            curItem = (<ConsList<T>>curItem)._tail;
+        }
+        return [first.reverse(), curItem];
     }
 
     splitAt(index:number): [List<T>,List<T>] {

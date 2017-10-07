@@ -657,6 +657,20 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
+     * Takes a predicate; returns a pair of collections.
+     * The first one is the longest prefix of this collection
+     * which satisfies the predicate, and the second collection
+     * is the remainder of the collection.
+     *
+     *    Vector.of(1,2,3,4,5,6).span(x => x <3)
+     *    => [Vector.of(1,2), Vector.of(3,4,5,6)]
+     */
+    span(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>] {
+        const first = this.takeWhile(predicate);
+        return [first, this.drop(first.length())];
+    }
+
+    /**
      * Split the collection at a specific index.
      *
      *     Vector.of(1,2,3,4,5).splitAt(3)

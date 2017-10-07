@@ -294,6 +294,17 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     abstract reverse(): Stream<T>;
 
     /**
+     * Takes a predicate; returns a pair of collections.
+     * The first one is the longest prefix of this collection
+     * which satisfies the predicate, and the second collection
+     * is the remainder of the collection.
+     *
+     *    Stream.of(1,2,3,4,5,6).span(x => x <3)
+     *    => [Stream.of(1,2), Stream.of(3,4,5,6)]
+     */
+    abstract span(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>];
+
+    /**
      * Split the collection at a specific index.
      *
      *     Stream.of(1,2,3,4,5).splitAt(3)
@@ -614,6 +625,10 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return this;
     }
 
+    span(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
+        return [this, this];
+    }
+
     splitAt(index:number): [Stream<T>,Stream<T>] {
         return [this, this];
     }
@@ -876,6 +891,10 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
 
     reverse(): Stream<T> {
         return this.foldLeft(<Stream<T>><EmptyStream<T>>emptyStream, (xs,x) => xs.prepend(x));
+    }
+
+    span(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
+        return [this.takeWhile(predicate), this.dropWhile(predicate)];
     }
 
     splitAt(index:number): [Stream<T>,Stream<T>] {

@@ -216,6 +216,17 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
     reverse(): Seq<T>;
 
     /**
+     * Takes a predicate; returns a pair of collections.
+     * The first one is the longest prefix of this collection
+     * which satisfies the predicate, and the second collection
+     * is the remainder of the collection.
+     *
+     *    List.of(1,2,3,4,5,6).span(x => x <3)
+     *    => [List.of(1,2), List.of(3,4,5,6)]
+     */
+    span(predicate:(x:T)=>boolean): [Seq<T>,Seq<T>];
+
+    /**
      * Split the collection at a specific index.
      *
      *     List.of(1,2,3,4,5).splitAt(3)
