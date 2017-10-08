@@ -254,15 +254,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     isSubsetOf(other: ISet<T&WithEquality>): boolean {
-        const iterator: Iterator<T&WithEquality> = this.hamt.values();
-        let curItem = iterator.next();
-        while (!curItem.done) {
-            if (!other.contains(curItem.value)) {
-                return false;
-            }
-            curItem = iterator.next();
-        }
-        return true;
+        return this.allMatch((x:T&WithEquality) => other.contains(x));
     }
 
     /**
