@@ -51,7 +51,7 @@ export abstract class Either<L,R> implements Value {
             r = r.append(v.getOrThrow());
             curItem = iterator.next();
         }
-        return Either.right(r);
+        return Either.right<L,Vector<R>>(r);
     }
 
     /**
