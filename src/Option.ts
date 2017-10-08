@@ -144,7 +144,7 @@ export abstract class Option<T> implements Value {
 
     /**
      * Execute a side-effecting function if the option
-     * is a Some, returns the option.
+     * is a Some; returns the option.
      */
     abstract ifPresent(fn:(v:T)=>void): Option<T>;
 

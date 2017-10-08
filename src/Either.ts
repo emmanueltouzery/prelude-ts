@@ -97,6 +97,18 @@ export abstract class Either<L,R> implements Value {
     abstract bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T>;
 
     /**
+     * Execute a side-effecting function if the either
+     * is a right; returns the either.
+     */
+    abstract ifRight(fn: (x:R)=>void): Either<L,R>;
+
+    /**
+     * Execute a side-effecting function if the either
+     * is a left; returns the either.
+     */
+    abstract ifLeft(fn: (x:L)=>void): Either<L,R>;
+
+    /**
      * If this either is a right, return its value, else throw
      * an exception.
      * You can optionally pass a message that'll be used as the
@@ -203,6 +215,15 @@ class Left<L,R> extends Either<L,R> {
         return new Left<S,T>(fnL(this.value));
     }
 
+    ifRight(fn: (x:R)=>void): Either<L,R> {
+        return this;
+    }
+
+    ifLeft(fn: (x:L)=>void): Either<L,R> {
+        fn(this.value);
+        return this;
+    }
+
     getOrThrow(message?: string): R {
         throw message || "Left.getOrThrow called!";
     }
@@ -278,6 +299,15 @@ class Right<L,R> extends Either<L,R> {
 
     bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T> {
         return new Right<S,T>(fnR(this.value));
+    }
+
+    ifRight(fn: (x:R)=>void): Either<L,R> {
+        fn(this.value);
+        return this;
+    }
+
+    ifLeft(fn: (x:L)=>void): Either<L,R> {
+        return this;
     }
 
     getOrThrow(message?: string): R {
