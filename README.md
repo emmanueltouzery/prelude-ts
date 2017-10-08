@@ -93,13 +93,6 @@ could be to add:
 
 (compared to the default es5 settings it only adds 'es2015.iterable')
 
-### Using in nodejs
-
-Just add the dependency in your `package.json` and start using it (like
-`import { Vector } from "prelude.ts";`).
-Everything should work, including type-checking. Prelude.ts also provides
-pretty-printing in the node REPL.
-
 You shouldn't have an issue to import prelude.ts in your application, but if you use
 modules it gets a little more complicated; One solution if you use them is to create
 an `imports.d.ts` file with the following contents:
@@ -117,6 +110,13 @@ import Vector = prelude_ts.Vector;
 ```
 
 To get the values without namespace.
+
+### Using in nodejs
+
+Just add the dependency in your `package.json` and start using it (like
+`import { Vector } from "prelude.ts";`).
+Everything should work, including type-checking. Prelude.ts also provides
+pretty-printing in the node REPL.
 
 ### Using in the browser
 
