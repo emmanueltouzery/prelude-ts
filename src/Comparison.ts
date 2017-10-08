@@ -105,7 +105,24 @@ export function getHashCode(obj: any|null): number {
         }
         return smi(h);
     }
-    return stringHashCode(obj+"");
+    const val = obj+"";
+    return val.length > STRING_HASH_CACHE_MIN_STRLEN ?
+        cachedHashString(val) :
+        stringHashCode(val);
+}
+
+function cachedHashString(string: string) {
+    let hashed = stringHashCache[string];
+    if (hashed === undefined) {
+        hashed = stringHashCode(string);
+        if (STRING_HASH_CACHE_SIZE === STRING_HASH_CACHE_MAX_SIZE) {
+            STRING_HASH_CACHE_SIZE = 0;
+            stringHashCache = {};
+        }
+        STRING_HASH_CACHE_SIZE++;
+        stringHashCache[string] = hashed;
+    }
+    return hashed;
 }
 
 // v8 has an optimization for storing 31-bit signed numbers.
@@ -113,8 +130,13 @@ export function getHashCode(obj: any|null): number {
 // This function drops the highest order bit in a signed number, maintaining
 // the sign bit. (taken from immutablejs)
 function smi(i32: number): number {
-  return ((i32 >>> 1) & 0x40000000) | (i32 & 0xbfffffff);
+    return ((i32 >>> 1) & 0x40000000) | (i32 & 0xbfffffff);
 }
+
+const STRING_HASH_CACHE_MIN_STRLEN = 16;
+const STRING_HASH_CACHE_MAX_SIZE = 255;
+let STRING_HASH_CACHE_SIZE = 0;
+let stringHashCache: {[key:string]:number} = {};
 
 /**
  * @hidden
