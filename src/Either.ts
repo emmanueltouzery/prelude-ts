@@ -97,6 +97,12 @@ export abstract class Either<L,R> implements Value {
     abstract bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T>;
 
     /**
+     * Combines two eithers. If this either is a right, returns it.
+     * If it's a left, returns the other one.
+     */
+    abstract orElse(other: Either<L,R>): Either<L,R>;
+
+    /**
      * Execute a side-effecting function if the either
      * is a right; returns the either.
      */
@@ -121,6 +127,20 @@ export abstract class Either<L,R> implements Value {
      * the value you give.
      */
     abstract getOrElse(other: R): R;
+
+    /**
+     * If this either is a left, return its value, else throw
+     * an exception.
+     * You can optionally pass a message that'll be used as the
+     * exception message.
+     */
+    abstract getLeftOrThrow(message?: string): L;
+
+    /**
+     * If this either is a left, return its value, else return
+     * the value you give.
+     */
+    abstract getLeftOrElse(other: L): L;
 
     /**
      * Convert this either to an option, conceptually dropping
@@ -215,6 +235,10 @@ class Left<L,R> extends Either<L,R> {
         return new Left<S,T>(fnL(this.value));
     }
 
+    orElse(other: Either<L,R>): Either<L,R> {
+        return other;
+    }
+
     ifRight(fn: (x:R)=>void): Either<L,R> {
         return this;
     }
@@ -230,6 +254,14 @@ class Left<L,R> extends Either<L,R> {
 
     getOrElse(other: R): R {
         return other;
+    }
+
+    getLeftOrThrow(message?: string): L {
+        return this.value;
+    }
+
+    getLeftOrElse(other: L): L {
+        return this.value;
     }
 
     toOption(): Option<R> {
@@ -286,7 +318,7 @@ class Right<L,R> extends Either<L,R> {
     }
 
     map<U>(fn: (x:R)=>U): Either<L,U> {
-        return new Right(fn(this.value));
+        return new Right<L,U>(fn(this.value));
     }
 
     flatMap<U>(fn: (x:R)=>Either<L,U>): Either<L,U> {
@@ -299,6 +331,10 @@ class Right<L,R> extends Either<L,R> {
 
     bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T> {
         return new Right<S,T>(fnR(this.value));
+    }
+
+    orElse(other: Either<L,R>): Either<L,R> {
+        return this;
     }
 
     ifRight(fn: (x:R)=>void): Either<L,R> {
@@ -316,6 +352,14 @@ class Right<L,R> extends Either<L,R> {
 
     getOrElse(other: R): R {
         return this.value;
+    }
+
+    getLeftOrThrow(message?: string): L {
+        throw message || "Left.getOrThrow called!";
+    }
+
+    getLeftOrElse(other: L): L {
+        return other;
     }
 
     toOption(): Option<R> {
