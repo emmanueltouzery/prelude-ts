@@ -253,6 +253,18 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
                 other.contains(k) ? acc.set(k,k) : acc, hamt.empty));
     }
 
+    isSubsetOf(other: ISet<T&WithEquality>): boolean {
+        const iterator: Iterator<T&WithEquality> = this.hamt.values();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (!other.contains(curItem.value)) {
+                return false;
+            }
+            curItem = iterator.next();
+        }
+        return true;
+    }
+
     /**
      * Returns a new set with the element you give removed
      * if it was present in the set.

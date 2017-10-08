@@ -140,6 +140,10 @@ describe("hashset combinations", () => {
         HashSet.empty<number>().equals(HashSet.empty<number>().remove(3))));
     it("filters correctly", () => assert.ok(
         HashSet.of(2,4).equals(HashSet.of(1,2,3,4,5).filter(x => x%2==0))));
+    it("confirms subset when correct", () =>
+       assert.ok(HashSet.of(1,2,3).isSubsetOf(HashSet.of(0,1,2,3,4))));
+    it("rejects subset when it should", () =>
+       assert.ok(!HashSet.of(1,2,3,5).isSubsetOf(HashSet.of(0,1,2,3,4))));
 });
 
 describe("hashset transformations", () => {

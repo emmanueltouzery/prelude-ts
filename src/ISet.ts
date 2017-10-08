@@ -76,6 +76,13 @@ export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
     intersect(other: ISet<T&WithEquality>): ISet<T>;
 
     /**
+     * Returns whether this set is a subset of the
+     * set you give as parameter (will return true
+     * also if both sets are equal)
+     */
+    isSubsetOf(other: ISet<T&WithEquality>): boolean;
+
+    /**
      * Returns a new set with all the elements of the current
      * Set, minus the elements of the iterable you give as a parameter.
      * If you call this function with a HashSet as parameter,
