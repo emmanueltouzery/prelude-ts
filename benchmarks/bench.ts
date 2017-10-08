@@ -3,6 +3,7 @@ const Benchmark: any = require('benchmark');
 import { Vector } from "../src/Vector"
 import { List } from "../src/List"
 import * as imm from 'immutable';
+const hamt: any = require("hamt_plus");
 
 function compare(...items: Array<[string, ()=>any]>) {
     const benchSuite: any = new Benchmark.Suite;
@@ -23,6 +24,15 @@ const getArray = (length:number) => Array.from({length}, () => Math.floor(Math.r
 const length = 200;
 const array = getArray(length);
 const vec = Vector.ofIterable(array);
+const rawhamt = hamt.empty.mutate(
+    (h:any) => {
+        const iterator = array[Symbol.iterator]();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            h.set(h.size, curItem.value);
+            curItem = iterator.next();
+        }
+    });
 const list = List.ofIterable(array);
 const immList = imm.List(array);
 compare(['Vector.filter', () => vec.filter(x => x%2===0)],
@@ -36,10 +46,30 @@ compare(['Vector.map', () => vec.map(x => x*2)],
         ['List.map', () => list.map(x => x*2)]);
 
 compare(['Vector.ofIterable', () => Vector.ofIterable(array)],
+        ['rawhamt.build from iterable', () => {
+            hamt.empty.mutate(
+                (h:any) => {
+                    const iterator = array[Symbol.iterator]();
+                    let curItem = iterator.next();
+                    while (!curItem.done) {
+                        h.set(h.size, curItem.value);
+                        curItem = iterator.next();
+                    }
+                })
+        }],
+        ['rawhamt.build from array', () => {
+            hamt.empty.mutate(
+                (h:any) => {
+                    for (let i=0;i<array.length;i++) {
+                        h.set(i, array[i]);
+                    }
+                })
+        }],
         ['List.ofIterable', () => List.ofIterable(array)],
         ['immList.ofIterable', () => imm.List(array)]);
 
 compare(['Vector.get(i)', () => vec.get(length/2)],
+        ['rawhamt.get(i)', () => rawhamt.get(length/2)],
         ['List.get(i)', () => list.get(length/2)],
         ['Array.get(i)', () => array[length/2]],
         ['immList.get(i)', () => immList.get(length/2)]);
