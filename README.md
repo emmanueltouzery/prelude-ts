@@ -8,7 +8,8 @@ Prelude.ts is a typescript library which aims to make functional programming
 concepts accessible and productive in typescript.
 
 It provides [persistent](https://en.wikipedia.org/wiki/Persistent_data_structure)
-immutable collections (Vector, Set, Map, Stream), and constructs such as Option.
+immutable collections (Vector, Set, Map, Stream), and constructs such as Option,
+Either and Predicate.
 
 ```typescript
 Vector.of(1,2,3)
@@ -138,10 +139,9 @@ then you can get
 
 ## Wishlist/upcoming features
 
-* Either
 * Future, wrapping promises?
 * Non-empty vector probably
-* many more functions on existing classes
+* More functions on existing classes
 
 ## Out of scope for prelude.ts
 

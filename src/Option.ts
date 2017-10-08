@@ -1,6 +1,7 @@
 import { Value } from "./Value";
 import { Seq } from "./Seq";
 import { Vector } from "./Vector";
+import { Either } from "./Either";
 import { WithEquality, areEqual, hasTrueEquality,
          getHashCode, toStringHelper } from "./Comparison";
 import { contractTrueEquality} from "./Contract";
@@ -155,6 +156,12 @@ export abstract class Option<T> implements Value {
     abstract toVector(): Vector<T>;
 
     /**
+     * Convert to an either. You must provide a left value
+     * in case this is a None.
+     */
+    abstract toEither<L>(left: L): Either<L,T>;
+
+    /**
      * Transform this value to another value type.
      * Enables fluent-style programming by chaining calls.
      */
@@ -184,7 +191,9 @@ export abstract class Option<T> implements Value {
     /**
      * Used by the node REPL to display values.
      */
-    abstract inspect(): string;
+    inspect(): string {
+        return this.toString();
+    }
 }
 
 /**
@@ -232,6 +241,9 @@ export class Some<T> extends Option<T> {
     toVector(): Vector<T> {
         return Vector.of(this.value);
     }
+    toEither<L>(left: L): Either<L,T> {
+        return Either.right(this.value);
+    }
     equals(other: Option<T&WithEquality>): boolean {
         // the .isSome doesn't test if it's a Some, but
         // if the object has a field called isSome.
@@ -247,9 +259,6 @@ export class Some<T> extends Option<T> {
     }
     toString(): string {
         return "Some(" + toStringHelper(this.value) + ")";
-    }
-    inspect(): string {
-        return this.toString();
     }
 }
 
@@ -293,6 +302,9 @@ export class None<T> extends Option<T> {
     toVector(): Vector<T> {
         return Vector.empty<T>();
     }
+    toEither<L>(left: L): Either<L,T> {
+        return Either.left<L,T>(left);
+    }
     equals(other: Option<T&WithEquality>): boolean {
         return other === <None<T>>none;
     }
@@ -301,9 +313,6 @@ export class None<T> extends Option<T> {
     }
     toString(): string {
         return "None()";
-    }
-    inspect(): string {
-        return this.toString();
     }
 }
 
