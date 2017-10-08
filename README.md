@@ -7,8 +7,8 @@
 Prelude.ts is a typescript library which aims to make functional programming
 concepts accessible and productive in typescript.
 
-It provides immutable collections (Vector, Set, Map, Stream), and constructs such as
-Option.
+It provides [persistent](https://en.wikipedia.org/wiki/Persistent_data_structure)
+immutable collections (Vector, Set, Map, Stream), and constructs such as Option.
 
 ```typescript
 Vector.of(1,2,3)
@@ -25,6 +25,9 @@ Vector.of(1,2,3,4).groupBy(x => x%2)
 
 Vector.of(1,2,3).zip("a", "b", "c").takeWhile(([k,v]) => k<3)
 // Vector.of([1,"a"],[2,"b"])
+
+HashMap.of(["a",1],["b",2]).get("a")
+// Option.of(1)
 ```
 
 The collections are also javascript iterables, so if you have an ES6 runtime,
@@ -97,19 +100,6 @@ Just add the dependency in your `package.json` and start using it (like
 Everything should work, including type-checking. Prelude.ts also provides
 pretty-printing in the node REPL.
 
-### Using in the browser
-
-Add the dependency in your `package.json`; Typescript should automatically
-register the type definitions.
-
-The npm package contains the files `dist/src/prelude_ts.js`, `dist/src/prelude_ts.min.js`,
-which are UMD bundles; they work with other module systems and set `prelude_ts`
-as a window global if no module system is found.
-include the relevant one in your index.html in script tags:
-```html
-<script src="node_modules/prelude.ts/dist/src/prelude_ts.min.js"></script>
-```
-
 You shouldn't have an issue to import prelude.ts in your application, but if you use
 modules it gets a little more complicated; One solution if you use them is to create
 an `imports.d.ts` file with the following contents:
@@ -127,6 +117,19 @@ import Vector = prelude_ts.Vector;
 ```
 
 To get the values without namespace.
+
+### Using in the browser
+
+Add the dependency in your `package.json`; Typescript should automatically
+register the type definitions.
+
+The npm package contains the files `dist/src/prelude_ts.js`, `dist/src/prelude_ts.min.js`,
+which are UMD bundles; they work with other module systems and set `prelude_ts`
+as a window global if no module system is found.
+include the relevant one in your index.html in script tags:
+```html
+<script src="node_modules/prelude.ts/dist/src/prelude_ts.min.js"></script>
+```
 
 Finally, if you also include `dist/src/chrome_dev_tools_formatters.js` through
 a `script` tag, and [enable Chrome custom formatters](http://bit.ly/object-formatters),
