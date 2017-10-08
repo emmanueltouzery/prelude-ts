@@ -1,5 +1,6 @@
 import { Either } from "../src/Either";
 import { Vector } from "../src/Vector";
+import { Seq } from "../src/Seq";
 import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
 
@@ -61,6 +62,23 @@ describe("either transformation", () => {
         assert.ok(Either.left(4).equals(
             Either.left<number,number>(4).flatMap(x=>Either.right<number,number>(x+1))));
     });
+    it("should apply bimap on the left value", () =>
+       assert.ok(Either.left(4).equals(
+           Either.left<number,number>(3).bimap(x=>x+1,x=>x-1))));
+    it("should apply bimap on the right value", () =>
+       assert.ok(Either.right(2).equals(
+           Either.right<number,number>(3).bimap(x=>x+1,x=>x-1))));
+});
+
+describe("Either helpers", () => {
+    it("should do sequence when all are right", () =>
+       assert.ok(
+           Either.right(<Seq<number>>Vector.of(1,2,3)).equals(
+               Either.sequence(Vector.of(Either.right(1), Either.right(2), Either.right(3))))));
+    it("should fail sequence when some are left", () =>
+       assert.ok(
+           Either.left(2).equals(
+               Either.sequence(Vector.of(Either.right(1), Either.left(2), Either.left(3))))));
 });
 
 describe("either retrieval", () => {

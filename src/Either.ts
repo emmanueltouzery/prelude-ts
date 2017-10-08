@@ -28,6 +28,33 @@ export abstract class Either<L,R> implements Value {
     }
 
     /**
+     * Turns a list of eithers in an either containing a list of items.
+     * Useful in many contexts.
+     *
+     *     Either.sequence(Vector.of(Either.right(1),Either.right(2)))
+     *     => Either.right(Vector.of(1,2))
+     *
+     * But if a single element is None, everything is discarded:
+     *
+     *     Either.sequence(Vector.of(Either.right(1), Either.left(2), Either.left(3)))
+     *     => Either.left(2)
+     */
+    static sequence<L,R>(elts:Iterable<Either<L,R>>): Either<L,Vector<R>> {
+        let r = Vector.empty<R>();
+        const iterator = elts[Symbol.iterator]();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            const v = curItem.value;
+            if (v.isLeft()) {
+                return <any>v;
+            }
+            r = r.append(v.getOrThrow());
+            curItem = iterator.next();
+        }
+        return Either.right(r);
+    }
+
+    /**
      * Returns true if this is either is a left, false otherwise.
      */
     abstract isLeft(): boolean;
@@ -62,6 +89,12 @@ export abstract class Either<L,R> implements Value {
      * of the function, else return this.
      */
     abstract mapLeft<U>(fn: (x:L)=>U): Either<U,R>;
+
+    /**
+     * Map the either: you give a function to apply to the value,
+     * a function in case it's a left, a function in case it's a right.
+     */
+    abstract bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T>;
 
     /**
      * If this either is a right, return its value, else throw
@@ -163,7 +196,11 @@ class Left<L,R> extends Either<L,R> {
     }
 
     mapLeft<U>(fn: (x:L)=>U): Either<U,R> {
-        return new Left(fn(this.value));
+        return new Left<U,R>(fn(this.value));
+    }
+
+    bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T> {
+        return new Left<S,T>(fnL(this.value));
     }
 
     getOrThrow(message?: string): R {
@@ -237,6 +274,10 @@ class Right<L,R> extends Either<L,R> {
 
     mapLeft<U>(fn: (x:L)=>U): Either<U,R> {
         return <any>this;
+    }
+
+    bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T> {
+        return new Right<S,T>(fnR(this.value));
     }
 
     getOrThrow(message?: string): R {
