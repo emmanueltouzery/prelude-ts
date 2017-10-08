@@ -91,9 +91,29 @@ export function getHashCode(obj: any|null): number {
         return obj.hashCode();
     }
     if (typeof obj === 'number') {
-        return obj;
+        // this is the hashcode implementation for numbers from immutablejs
+        if (obj !== obj || obj === Infinity) {
+            return 0;
+        }
+        let h = obj | 0;
+        if (h !== obj) {
+            h ^= obj * 0xffffffff;
+        }
+        while (obj > 0xffffffff) {
+            obj /= 0xffffffff;
+            h ^= obj;
+        }
+        return smi(h);
     }
     return stringHashCode(obj+"");
+}
+
+// v8 has an optimization for storing 31-bit signed numbers.
+// Values which have either 00 or 11 as the high order bits qualify.
+// This function drops the highest order bit in a signed number, maintaining
+// the sign bit. (taken from immutablejs)
+function smi(i32: number): number {
+  return ((i32 >>> 1) & 0x40000000) | (i32 & 0xbfffffff);
 }
 
 /**

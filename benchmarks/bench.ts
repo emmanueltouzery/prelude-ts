@@ -20,7 +20,8 @@ function compare(...items: Array<[string, ()=>any]>) {
 
 // https://stackoverflow.com/a/43044960/516188
 const getArray = (length:number) => Array.from({length}, () => Math.floor(Math.random() * length));
-const array = getArray(200);
+const length = 200;
+const array = getArray(length);
 const vec = Vector.ofIterable(array);
 const list = List.ofIterable(array);
 const immList = imm.List(array);
@@ -37,6 +38,11 @@ compare(['Vector.map', () => vec.map(x => x*2)],
 compare(['Vector.ofIterable', () => Vector.ofIterable(array)],
         ['List.ofIterable', () => List.ofIterable(array)],
         ['immList.ofIterable', () => imm.List(array)]);
+
+compare(['Vector.get(i)', () => vec.get(length/2)],
+        ['List.get(i)', () => list.get(length/2)],
+        ['Array.get(i)', () => array[length/2]],
+        ['immList.get(i)', () => immList.get(length/2)]);
 
 compare(['Vector.flatMap', () => vec.flatMap(x => Vector.of(1,2))],
         ['List.flatMap', () => list.flatMap(x => List.of(1,2))],

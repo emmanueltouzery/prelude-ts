@@ -17,10 +17,7 @@ export abstract class Option<T> implements Value {
      * null gives a some
      */
     static of<T>(v: T|undefined): Option<T> {
-        if (v === undefined) {
-            return <None<T>>none;
-        }
-        return new Some(v);
+        return (v === undefined) ? <None<T>>none : new Some(v);
     }
 
     /**
