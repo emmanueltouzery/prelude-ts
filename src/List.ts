@@ -847,7 +847,14 @@ class ConsList<T> extends List<T> implements Iterable<T> {
     }
 
     splitAt(index:number): [List<T>,List<T>] {
-        return [this.take(index), this.drop(index)];
+        let first = <EmptyList<T>>emptyList;
+        let curItem: List<T> = this;
+        let i = 0;
+        while (i++ < index && (!curItem.isEmpty())) {
+            first = new ConsList((<ConsList<T>>curItem).value, first);
+            curItem = (<ConsList<T>>curItem)._tail;
+        }
+        return [first.reverse(), curItem];
     }
 
     partition(predicate:(x:T)=>boolean): [List<T>,List<T>] {
