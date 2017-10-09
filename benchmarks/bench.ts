@@ -4,6 +4,7 @@ import { Vector } from "../src/Vector"
 import { List } from "../src/List"
 import * as imm from 'immutable';
 const hamt: any = require("hamt_plus");
+const hamtBase: any = require("hamt");
 
 function compare(...items: Array<[string, ()=>any]>) {
     const benchSuite: any = new Benchmark.Suite;
@@ -33,6 +34,14 @@ const rawhamt = hamt.empty.mutate(
             curItem = iterator.next();
         }
     });
+let rawhamtBase = hamtBase.empty;
+const iterator = array[Symbol.iterator]();
+let curItem = iterator.next();
+while (!curItem.done) {
+    rawhamtBase = rawhamtBase.set(rawhamtBase.size, curItem.value);
+    curItem = iterator.next();
+}
+
 const list = List.ofIterable(array);
 const immList = imm.List(array);
 compare(['Vector.filter', () => vec.filter(x => x%2===0)],
@@ -65,11 +74,21 @@ compare(['Vector.ofIterable', () => Vector.ofIterable(array)],
                     }
                 })
         }],
+        ['rawhamtBase.build from iterable', () => {
+            let rawhamtBase = hamtBase.empty;
+            const iterator = array[Symbol.iterator]();
+            let curItem = iterator.next();
+            while (!curItem.done) {
+                rawhamtBase = rawhamtBase.set(rawhamtBase.size, curItem.value);
+                curItem = iterator.next();
+            }
+        }],
         ['List.ofIterable', () => List.ofIterable(array)],
         ['immList.ofIterable', () => imm.List(array)]);
 
 compare(['Vector.get(i)', () => vec.get(length/2)],
         ['rawhamt.get(i)', () => rawhamt.get(length/2)],
+        ['rawhamtBase.get(i)', () => rawhamtBase.get(length/2)],
         ['List.get(i)', () => list.get(length/2)],
         ['Array.get(i)', () => array[length/2]],
         ['immList.get(i)', () => immList.get(length/2)]);
