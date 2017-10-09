@@ -94,24 +94,6 @@ could be to add:
 
 (compared to the default es5 settings it only adds 'es2015.iterable')
 
-You shouldn't have an issue to import prelude.ts in your application, but if you use
-modules it gets a little more complicated; One solution if you use them is to create
-an `imports.d.ts` file with the following contents:
-
-```typescript
-// https://github.com/Microsoft/TypeScript/issues/3180#issuecomment-283007750
-import * as _P from 'prelude.ts';
-export as namespace prelude_ts;
-export = _P;
-```
-
-Then in a `.ts` file of your application, outside of a module, you can do:
-```typescript
-import Vector = prelude_ts.Vector;
-```
-
-To get the values without namespace.
-
 ### Using in nodejs
 
 Just add the dependency in your `package.json` and start using it (like
@@ -131,6 +113,25 @@ include the relevant one in your index.html in script tags:
 ```html
 <script src="node_modules/prelude.ts/dist/src/prelude_ts.min.js"></script>
 ```
+
+You shouldn't have an issue to import prelude.ts in your application, but if you use
+modules it gets a little more complicated; One solution if you use them is to create
+an `imports.d.ts` file with the following contents:
+
+```typescript
+// https://github.com/Microsoft/TypeScript/issues/3180#issuecomment-283007750
+import * as _P from 'prelude.ts';
+export as namespace prelude_ts;
+export = _P;
+```
+
+Then in a `.ts` file of your application, outside of a module, you can do:
+```typescript
+import Vector = prelude_ts.Vector;
+```
+
+To get the values without namespace.
+
 
 Finally, if you also include `dist/src/chrome_dev_tools_formatters.js` through
 a `script` tag, and [enable Chrome custom formatters](http://bit.ly/object-formatters),
