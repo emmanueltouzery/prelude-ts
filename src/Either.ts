@@ -10,6 +10,8 @@ import { contractTrueEquality} from "./Contract";
  * Represents an alternative between two value types.
  * A "left" value which is also conceptually tied to a failure,
  * or a "right" value which is conceptually tied to success.
+ * @type L the "left" item type 'failure'
+ * @type R the "right" item type 'success'
  */
 export abstract class Either<L,R> implements Value {
     
