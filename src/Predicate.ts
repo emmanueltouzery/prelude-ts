@@ -43,7 +43,7 @@ export interface Predicate<T> {
  * The Predicates class offers some helper functions to deal
  * with [[Predicate]].
  */
-export class Predicates<T> {
+export class Predicates {
 
     /**
      * Take a predicate function and lift it to become a [[Predicate]]
