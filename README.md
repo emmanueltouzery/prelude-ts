@@ -140,6 +140,8 @@ then you can get
 
 ## Wishlist/upcoming features
 
+* Function helpers (compose/andThen, curry)
+* Validation
 * Future, wrapping promises?
 * Non-empty vector probably
 * More functions on existing classes
