@@ -8,6 +8,8 @@ import { List } from "./List";
  * The Predicate interface offers normal function-calling, to make sure that the
  * predicate holds (just call predicate(x)), but also some helper methods to
  * deal with logical operations between propositions.
+ *
+ * You can build predicates using [[Predicates]].
  */
 export interface Predicate<T> {
 
@@ -41,7 +43,10 @@ export interface Predicate<T> {
 
 /**
  * The Predicates class offers some helper functions to deal
- * with [[Predicate]].
+ * with [[Predicate]] including the ability to build [[Predicate]]
+ * from functions using [[Predicates.lift]], some builtin predicates
+ * like [[Predicates.isIn]], and the ability to combine to combine
+ * Predicates like with [[Predicates.allOf]].
  */
 export class Predicates {
 
