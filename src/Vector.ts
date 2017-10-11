@@ -536,14 +536,14 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     }
 
     /**
-     * Give a function associating a number with
+     * Give a function associating a number or a string with
      * elements from the collection, and the elements
-     * are sorted according to that number.
+     * are sorted according to that value.
      *
      * also see [[Vector.sortBy]]
      */
-    sortOn(getKey: (v:T)=>number): Vector<T> {
-        return this.sortBy((x,y) => getKey(x)-getKey(y));
+    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Vector<T> {
+        return <Vector<T>>SeqHelpers.sortOn<T>(this, getKey);
     }
 
     /**

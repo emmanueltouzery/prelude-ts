@@ -397,14 +397,14 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
     abstract sortBy(compare: (v1:T,v2:T)=>Ordering): List<T>;
 
     /**
-     * Give a function associating a number with
+     * Give a function associating a number or a string with
      * elements from the collection, and the elements
-     * are sorted according to that number.
+     * are sorted according to that value.
      *
      * also see [[List.sortBy]]
      */
-    sortOn(getKey: (v:T)=>number): List<T> {
-        return this.sortBy((x,y) => getKey(x)-getKey(y));
+    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): List<T> {
+        return <List<T>>SeqHelpers.sortOn<T>(this, getKey);
     }
 
     /**

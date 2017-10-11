@@ -12,6 +12,9 @@ export class MyClass {
         return areEqual(this.field1, other.field1) &&
             areEqual(this.field2, other.field2);
     }
+    getField1(): string {
+        return this.field1;
+    }
     getField2(): number {
         return this.field2;
     }

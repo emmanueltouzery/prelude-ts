@@ -172,6 +172,16 @@ export function runTests(seqName: string,
                 .equals(of(new MyClass("test", 2),
                                  new MyClass("zz", 1),
                                  new MyClass("b",3)).sortOn(x => x.getField2()))));
+        it("sortOn sorting works with strings too", () => assert.ok(
+            of(1,2,3,4)
+                .equals(of(4,2,3,1).sortOn(x => x+""))));
+        it("sortOn sorting works with strings too 2", () => assert.ok(
+            of(new MyClass("b",3),
+               new MyClass("test", 2),
+               new MyClass("zz",1))
+                .equals(of(new MyClass("test", 2),
+                                 new MyClass("zz", 1),
+                                 new MyClass("b",3)).sortOn(x => x.getField1()))));
         it("correctly reverses", () => assert.deepEqual(
             [3,2,1], of(1,2,3).reverse().toArray()));
         it("correctly reverses the empty vector", () => assert.deepEqual(

@@ -447,14 +447,14 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     abstract sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T>;
 
     /**
-     * Give a function associating a number with
+     * Give a function associating a number or a string with
      * elements from the collection, and the elements
-     * are sorted according to that number.
+     * are sorted according to that value.
      *
      * also see [[Stream.sortBy]]
      */
-    sortOn(getKey: (v:T)=>number): Stream<T> {
-        return this.sortBy((x,y) => getKey(x)-getKey(y));
+    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Stream<T> {
+        return <Stream<T>>SeqHelpers.sortOn<T>(this, getKey);
     }
 
     /**

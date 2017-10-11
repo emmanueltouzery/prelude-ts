@@ -114,13 +114,13 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
     sortBy(compare: (v1:T,v2:T)=>Ordering): Seq<T>;
 
     /**
-     * Give a function associating a number with
+     * Give a function associating a number or a string with
      * elements from the collection, and the elements
-     * are sorted according to that number.
+     * are sorted according to that value.
      *
      * also see [[Seq.sortBy]]
      */
-    sortOn(getKey: (v:T)=>number): Seq<T>;
+    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Seq<T>;
 
     /**
      * Prepend an element at the beginning of the collection.

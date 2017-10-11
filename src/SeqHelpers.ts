@@ -49,3 +49,17 @@ export function seqHasTrueEquality<T>(seq: Seq<T>): boolean {
 export function zipWithIndex<T>(seq: Seq<T>): Seq<[T,number]> {
     return seq.zip<number>(Stream.iterate(0,i=>i+1));
 }
+
+/**
+ * @hidden
+ */
+export function sortOn<T>(seq: Seq<T>, getKey: ((v:T)=>number)|((v:T)=>string)): Seq<T> {
+    return seq.sortBy((x,y) => {
+        const a = getKey(x);
+        const b = getKey(y);
+        if (a === b) {
+            return 0;
+        }
+        return a>b?1:-1;
+    });
+}
