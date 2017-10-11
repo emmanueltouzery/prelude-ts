@@ -34,7 +34,7 @@ export class HashMap<K,V> implements IMap<K,V> {
      *
      */
     static of<K,V>(...entries: Array<[K&WithEquality, V]>): HashMap<K,V> {
-        return HashMap.ofIterable(entries);
+        return HashMap.ofIterable<K,V>(entries);
     }
 
     /**
@@ -90,6 +90,13 @@ export class HashMap<K,V> implements IMap<K,V> {
      */
     put(k: K & WithEquality, v: V): HashMap<K,V> {
         return new HashMap<K,V>(this.hamt.set(k,v));
+    }
+
+    /**
+     * Return a new map with the key you give removed.
+     */
+    remove(k: K&WithEquality): HashMap<K,V> {
+        return new HashMap<K,V>(this.hamt.remove(k));
     }
 
     /**
@@ -435,6 +442,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
             }).set(k,v));
         }
         return new HashMap<K,V>(hamt.make().set(k,v));
+    }
+
+    remove(k: K&WithEquality): HashMap<K,V> {
+        return this;
     }
 
     hasTrueEquality(): boolean {

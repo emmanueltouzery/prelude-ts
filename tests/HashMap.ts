@@ -46,6 +46,15 @@ describe("hashmap construction basic sanity tests", () => {
         HashMap.empty<number,string>().put(1,"a").put(2,"bc").put(3,"d")
             .equals(HashMap.empty<number,string>().put(1,"a").put(2,"b")
                     .mergeWith(HashMap.empty<number,string>().put(2,"c").put(3,"d"), (v1,v2)=>v1+v2))));
+    it("should remove keys", () => assert.ok(
+        HashMap.of<number,string>([2,"b"]).equals(
+            HashMap.of<number,string>([1,"a"],[2,"b"]).remove(1))));
+    it("should allow to remove an inexisting key", () => assert.ok(
+        HashMap.of<number,string>([1,"a"],[2,"b"]).equals(
+            HashMap.of<number,string>([1,"a"],[2,"b"]).remove(3))));
+    it("should allow to remove from the empty map", () => assert.ok(
+        HashMap.empty<number,string>().equals(
+            HashMap.of<number,string>().remove(1))));
 });
 
 describe("hashmap equality", () => {

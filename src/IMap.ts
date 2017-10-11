@@ -38,6 +38,12 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
      */
     put(k: K & WithEquality, v: V): IMap<K,V>;
 
+
+    /**
+     * Return a new map with the key you give removed.
+     */
+    remove(k: K&WithEquality): IMap<K,V>;
+
     /**
      * Add a new entry in the map; in case there was already an
      * entry with the same key, the merge function will be invoked
