@@ -38,7 +38,7 @@
         "prepublish": "scripts/prepublish.sh",
         "test": "tsc && ./node_modules/mocha/bin/mocha --timeout 10000 ./dist/tests/*.js",
         "clean": "rm -Rf ./dist",
-        "docgen": "./scripts/make_doc.sh",
+        "docgen": "tsc && ./scripts/make_doc.sh",
         "benchmarks": "tsc && node ./dist/benchmarks/bench.js"
     }
 }

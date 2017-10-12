@@ -35,6 +35,8 @@ find apidoc -name "*.html" -exec sed -i 's/Module/File/g' \{\} \;
 mv apidoc/modules apidoc/files
 find apidoc -name "*.html" -exec sed -i 's/modules/files/g' \{\} \;
 
+node dist/scripts/make_doc_extra.js
+
 # we're happy with the output now, revert the changes I made
 # to the files to make typedoc think they're external modules
 git reset --hard HEAD
