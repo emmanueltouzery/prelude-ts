@@ -302,7 +302,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      *
      * also see [[List.arrangeBy]]
      */
-    abstract groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,List<T>>;
+    abstract groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,List<T>>;
 
     /**
      * Matches each element with a unique key that you extract from it.
@@ -580,7 +580,7 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
         return [List.empty<T>(), List.empty<T>()];
     }
 
-    groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,List<T>> {
+    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,List<T>> {
         return HashMap.empty<C,List<T>>();
     }
 
@@ -862,13 +862,13 @@ class ConsList<T> extends List<T> implements Iterable<T> {
         return [this.filter(predicate), this.filter(x => !predicate(x))];
     }
 
-    groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,List<T>> {
+    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,List<T>> {
         return this.foldLeft(
             HashMap.empty<C,List<T>>(),
-            (acc: HashMap<C,List<T>>, v:T & WithEquality) =>
+            (acc: HashMap<C,List<T>>, v:T) =>
                 acc.putWithMerge(
                     classifier(v), List.of(v),
-                    (v1:List<T&WithEquality>,v2:List<T&WithEquality>)=>
+                    (v1:List<T>,v2:List<T>)=>
                         v1.prepend(v2.single().getOrThrow())))
             .mapValues(l => l.reverse());
     }

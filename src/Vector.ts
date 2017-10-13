@@ -554,9 +554,9 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      *
      * also see [[Vector.arrangeBy]]
      */
-    groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Vector<T>> {
+    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Vector<T>> {
         return this.hamt.fold(
-            (acc: HashMap<C,any>, v:T & WithEquality, k:number) =>
+            (acc: HashMap<C,any>, v:T, k:number) =>
                 acc.putWithMerge(
                     classifier(v), hamt.beginMutation(hamt.make()).set(0,v),
                     (v1:any,v2:any)=>

@@ -332,7 +332,7 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      *
      * also see [[Stream.arrangeBy]]
      */
-    abstract groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Stream<T>>;
+    abstract groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Stream<T>>;
 
     /**
      * Matches each element with a unique key that you extract from it.
@@ -637,7 +637,7 @@ class EmptyStream<T> extends Stream<T> implements Iterable<T> {
         return [Stream.empty<T>(), Stream.empty<T>()];
     }
 
-    groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Stream<T>> {
+    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Stream<T>> {
         return HashMap.empty<C,Stream<T>>();
     }
 
@@ -906,13 +906,13 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         return [this.filter(predicate), this.filter(x => !predicate(x))];
     }
 
-    groupBy<C>(classifier: (v:T & WithEquality)=>C & WithEquality): HashMap<C,Stream<T>> {
+    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Stream<T>> {
         return this.foldLeft(
             HashMap.empty<C,Stream<T>>(),
-            (acc: HashMap<C,Stream<T>>, v:T & WithEquality) =>
+            (acc: HashMap<C,Stream<T>>, v:T) =>
                 acc.putWithMerge(
                     classifier(v), Stream.of(v),
-                    (v1:Stream<T&WithEquality>,v2:Stream<T&WithEquality>)=>v1.appendStream(v2)));
+                    (v1:Stream<T>,v2:Stream<T>)=>v1.appendStream(v2)));
     }
 
     append(v:T): Stream<T> {
