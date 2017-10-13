@@ -91,8 +91,7 @@ if (!missingElements.isEmpty()) {
 CATEGORIES.forEach(([name,elements]) => {
     newIndexContent += getSectionHeader(name);
     const elts = elements.toList();
-    const rows = elts.map(elt => liRows.get(elt).getOrThrow())
-        .zip(elts).sortOn(x=>x[1]).map(x=>x[0]);
+    const rows = elts.sortOn(x=>x).map(elt => liRows.get(elt).getOrThrow());
     newIndexContent += rows.mkString("\n");
     newIndexContent += getSectionFooter();
 });
