@@ -66,7 +66,7 @@ export class Predicates {
      * Return a [[Predicate]] checking whether a value is equal to the
      * value you give as parameter.
      */
-    static equals<T extends WithEquality>(other: T&WithEquality): Predicate<T&WithEquality> {
+    static equals<T>(other: T&WithEquality): Predicate<T&WithEquality> {
         return Predicates.lift(x => areEqual(other, x));
     }
 
@@ -74,7 +74,7 @@ export class Predicates {
      * Return a [[Predicate]] checking whether a value is contained in the
      * list of values you give as parameter.
      */
-    static isIn<T extends WithEquality>(others: Iterable<T&WithEquality>): Predicate<T&WithEquality> {
+    static isIn<T>(others: Iterable<T&WithEquality>): Predicate<T&WithEquality> {
         return Predicates.lift<T&WithEquality>(x => List.ofIterable(others).contains(x));
     }
 
