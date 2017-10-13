@@ -254,7 +254,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     isSubsetOf(other: ISet<T&WithEquality>): boolean {
-        return this.allMatch((x:T&WithEquality) => other.contains(x));
+        return this.allMatch((x:T) => other.contains(<T&WithEquality>x));
     }
 
     /**
