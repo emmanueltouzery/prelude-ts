@@ -1,6 +1,7 @@
 const Benchmark: any = require('benchmark');
 
 import { Vector } from "../src/Vector"
+import { Vector2 } from "../src/Vector2"
 import { List } from "../src/List"
 import * as imm from 'immutable';
 const hamt: any = require("hamt_plus");
@@ -22,9 +23,10 @@ function compare(...items: Array<[string, ()=>any]>) {
 
 // https://stackoverflow.com/a/43044960/516188
 const getArray = (length:number) => Array.from({length}, () => Math.floor(Math.random() * length));
-const length = 200;
+const length = 2000;
 const array = getArray(length);
 const vec = Vector.ofIterable(array);
+const vec2 = Vector2.ofIterable(array);
 const rawhamt = hamt.empty.mutate(
     (h:any) => {
         const iterator = array[Symbol.iterator]();
@@ -55,6 +57,7 @@ compare(['Vector.map', () => vec.map(x => x*2)],
         ['List.map', () => list.map(x => x*2)]);
 
 compare(['Vector.ofIterable', () => Vector.ofIterable(array)],
+        ['Vector2.ofIterable', () => Vector2.ofIterable(array)],
         ['rawhamt.build from iterable', () => {
             hamt.empty.mutate(
                 (h:any) => {
@@ -87,6 +90,7 @@ compare(['Vector.ofIterable', () => Vector.ofIterable(array)],
         ['immList.ofIterable', () => imm.List(array)]);
 
 compare(['Vector.get(i)', () => vec.get(length/2)],
+        ['Vector2.get(i)', () => vec2.get(length/2)],
         ['rawhamt.get(i)', () => rawhamt.get(length/2)],
         ['rawhamtBase.get(i)', () => rawhamtBase.get(length/2)],
         ['List.get(i)', () => list.get(length/2)],
