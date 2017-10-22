@@ -1,5 +1,7 @@
 import { Option } from "./Option";
-import { WithEquality, areEqual } from "./Comparison";
+import { WithEquality, areEqual, getHashCode,
+         toStringHelper } from "./Comparison";
+import { Collection } from "./Collection";
 
 const nodeBits = 5;
 const nodeSize = (1<<nodeBits); // 32
@@ -8,7 +10,7 @@ const nodeBitmask = nodeSize - 1;
 
 // Implementation of a bit-mapped vector trie.
 // Based on https://github.com/graue/immutable-vector from Scott Feeney.
-export class Vector2<T> {
+export class Vector2<T> implements Collection<T> {
 
     // _contents will be undefined only if length===0
     protected constructor(private _contents: any[]|undefined,
@@ -376,19 +378,68 @@ export class Vector2<T> {
 
     // // TODO: See if equals and toArray are faster using a traversal.
 
-    // equals(other:Vector2<T>): boolean {
-    //     let val;
-    //     if (this.length !== other.length) return false;
-    //     for (let i = 0; i < this.length; i++) {
-    //         val = this.get(i);
-    //         if (ImmutableVector.isImmutableVector(val)) {
-    //             if (!val.equals(other.get(i))) return false;
-    //         } else {
-    //             if (val !== other.get(i)) return false;
-    //         }
-    //     }
-    //     return true;
-    // }
+    /**
+     * Two objects are equal if they represent the same value,
+     * regardless of whether they are the same object physically
+     * in memory.
+     */
+    equals(other:Vector2<T&WithEquality>): boolean {
+        if (!other || !other._maxShift) {
+            return false;
+        }
+        if (this.length !== other.length) return false;
+        for (let i = 0; i < this._length; i++) {
+            const myVal: T & WithEquality|null|undefined = <T&WithEquality>this.internalGet(i);
+            const hisVal: T & WithEquality|null|undefined = other.internalGet(i);
+            if ((myVal === undefined) !== (hisVal === undefined)) {
+                return false;
+            }
+            if (myVal === undefined || hisVal === undefined) {
+                // they are both undefined, the || is for TS's flow analysis
+                // so he realizes none of them is undefined after this.
+                continue;
+            }
+            if (!areEqual(myVal, hisVal)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Get a number for that object. Two different values
+     * may get the same number, but one value must always get
+     * the same number. The formula can impact performance.
+     */
+    hashCode(): number {
+        let hash = 1;
+        for (let i=0;i<this._length;i++) {
+            hash = 31 * hash + getHashCode(this.internalGet(i));
+        }
+        return hash;
+    }
+
+    /**
+     * Get a human-friendly string representation of that value.
+     */
+    toString(): string {
+        let r = "Vector2(";
+        for (let i=0;i<this._length;i++) {
+            if (i>0) {
+                r += ", ";
+            }
+            r += toStringHelper(this.internalGet(i));
+        }
+        return r + ")";
+    }
+
+    /**
+     * Used by the node REPL to display values.
+     * Most of the time should be the same as toString()
+     */
+    inspect(): string {
+        return this.toString();
+    }
 
     toArray(): T[] {
         let out = [];
