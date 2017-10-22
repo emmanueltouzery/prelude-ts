@@ -186,6 +186,37 @@ export class Vector2<T> {
         return popped;
     }
 
+    /**
+     * Search for an item matching the predicate you pass,
+     * return Option.Some of that element if found,
+     * Option.None otherwise.
+     */
+    find(predicate:(v:T)=>boolean): Option<T> {
+        for (let i=0;i<this._length;i++) {
+            const item = <T>this.internalGet(i);
+            if (predicate(item)) {
+                return Option.of(item);
+            }
+        }
+        return Option.none<T>();
+    }
+
+    /**
+     * Returns true if the predicate returns true for all the
+     * elements in the collection.
+     */
+    allMatch(predicate:(v:T)=>boolean): boolean {
+        return this.find(x => !predicate(x)).isNone();
+    }
+
+    /**
+     * Returns true if there the predicate returns true for any
+     * element in the collection.
+     */
+    anyMatch(predicate:(v:T)=>boolean): boolean {
+        return this.find(predicate).isSome();
+    }
+
     // let ImmutableVectorSlice = require('./ImmutableVectorSlice');
 
     // slice(begin: number, end: number): Vector2<T> {

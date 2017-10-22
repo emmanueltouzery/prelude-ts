@@ -58,6 +58,13 @@ compare(['Vector.map', () => vec.map(x => x*2)],
         ['immList.map', () => immList.map(x => x*2)],
         ['List.map', () => list.map(x => x*2)]);
 
+const atThreeQuarters = array[array.length*3/4];
+compare(['Vector.find', () => vec.find(x => x===atThreeQuarters)],
+        ['Vector2.find', () => vec2.find(x => x===atThreeQuarters)],
+        ['Array.find', () => array.find(x => x===atThreeQuarters)],
+        ['immList.find', () => immList.find(x => x===atThreeQuarters)],
+        ['List.find', () => list.find(x => x===atThreeQuarters)]);
+
 compare(['Vector.ofIterable', () => Vector.ofIterable(array)],
         ['Vector2.ofIterable', () => Vector2.ofArray(array)],
         ['rawhamt.build from iterable', () => {
