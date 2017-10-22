@@ -227,7 +227,6 @@ export class Vector2<T> {
     forEach(fun:(x:T)=>void):Vector2<T> {
         let iter = this[Symbol.iterator]();
         let step;
-        let index = 0;
         while (!(step = iter.next()).done) {
             fun.call(step.value);
         }
@@ -238,7 +237,6 @@ export class Vector2<T> {
         let iter = this[Symbol.iterator]();
         let out = Vector2.empty<U>();
         let step;
-        let index = 0;
         while (!(step = iter.next()).done) {
             out = out.push(fun.call(step.value));
         }
@@ -249,7 +247,6 @@ export class Vector2<T> {
         let iter = this[Symbol.iterator]();
         let out = Vector2.empty<T>();
         let step;
-        let index = 0;
         while (!(step = iter.next()).done) {
             if (fun.call(step.value)) {
                 out = out.push(step.value);
