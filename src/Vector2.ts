@@ -610,6 +610,24 @@ export class Vector2<T> implements Collection<T> {
     }
 
     /**
+     * Joins elements of the collection by a separator.
+     * Example:
+     *
+     *     Vector2.of(1,2,3).mkString(", ")
+     *     => "1, 2, 3"
+     */
+    mkString(separator: string): string {
+        let r = "";
+        for (let i=0;i<this._length;i++) {
+            if (i>0) {
+                r += separator;
+            }
+            r += (<T>this.internalGet(i)).toString();
+        }
+        return r;
+    }
+
+    /**
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
