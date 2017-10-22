@@ -376,6 +376,14 @@ export class Vector2<T> implements Collection<T> {
     //     return -1;
     // }
 
+    /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:Vector2<T>)=>U): U {
+        return converter(this);
+    }
+
     // // TODO: See if equals and toArray are faster using a traversal.
 
     /**
