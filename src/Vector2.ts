@@ -75,7 +75,7 @@ export class Vector2<T> {
     // Cannot be called on the empty vector!! It would crash
     //
     // TODO the action callback is costing lots of performance on node6.11.3 at least
-    // on a loop calling push() which map() is doing for instance, as evidenced by the poor benchmarks.
+    // on a loop calling append() which map() is doing for instance, as evidenced by the poor benchmarks.
     private internalSet(index: number, action: (ar:T[],idx:number)=>void): Vector2<T> {
         let newVec = this.cloneVec();
         // next line will crash on empty vector
@@ -103,7 +103,7 @@ export class Vector2<T> {
         return this.internalSet(index, (ar,idx)=>ar[idx]=val);
     }
 
-    push(val:T): Vector2<T> {
+    append(val:T): Vector2<T> {
         if (this._length === 0) {
             return Vector2.ofArray<T>([val]);
         } else if (this._length < (nodeSize << this._maxShift)) {
@@ -245,7 +245,7 @@ export class Vector2<T> {
         let out = Vector2.empty<U>();
         let step;
         while (!(step = iter.next()).done) {
-            out = out.push(fun.call(step.value));
+            out = out.append(fun.call(step.value));
         }
         return out;
     }
@@ -256,7 +256,7 @@ export class Vector2<T> {
         let step;
         while (!(step = iter.next()).done) {
             if (fun.call(step.value)) {
-                out = out.push(step.value);
+                out = out.append(step.value);
             }
         }
         return out;
