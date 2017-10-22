@@ -2,6 +2,7 @@ import { Option } from "./Option";
 import { WithEquality, areEqual, getHashCode,
          toStringHelper } from "./Comparison";
 import { Collection } from "./Collection";
+import * as SeqHelpers from "./SeqHelpers";
 
 const nodeBits = 5;
 const nodeSize = (1<<nodeBits); // 32
@@ -141,8 +142,22 @@ export class Vector2<T> implements Collection<T> {
         }
     }
 
+    /**
+     * Get the first value of the collection, if any.
+     * returns Option.Some if the collection is not empty,
+     * Option.None if it's empty.
+     */
     head(): Option<T> {
         return this.get(0);
+    }
+
+    /**
+     * Get the last value of the collection, if any.
+     * returns Option.Some if the collection is not empty,
+     * Option.None if it's empty.
+     */
+    last(): Option<T> {
+        return Option.of(this.internalGet(this._length+-1));
     }
 
     tail(): Vector2<T> {
@@ -375,6 +390,13 @@ export class Vector2<T> implements Collection<T> {
     //     }
     //     return -1;
     // }
+
+    /**
+     * Randomly reorder the elements of the collection.
+     */
+    shuffle(): Vector2<T> {
+        return Vector2.ofArray(SeqHelpers.shuffle(this.toArray()));
+    }
 
     /**
      * Transform this value to another value type.
