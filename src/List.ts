@@ -970,15 +970,7 @@ class ConsList<T> extends List<T> implements Iterable<T> {
     }
 
     distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): List<T> {
-        let knownKeys = HashSet.empty<U>();
-        return this.filter(x => {
-            const key = keyExtractor(x);
-            const r = knownKeys.contains(key);
-            if (!r) {
-                knownKeys = knownKeys.add(key);
-            }
-            return !r;
-        });
+        return <List<T>>SeqHelpers.distinctBy(this, keyExtractor);
     }
 
     forEach(fn: (v:T)=>void): List<T> {

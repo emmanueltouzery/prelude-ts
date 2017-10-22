@@ -2,7 +2,9 @@ import { Option } from "./Option";
 import { WithEquality, hasTrueEquality } from "./Comparison";
 import { IMap } from "./IMap";
 import { Seq } from "./Seq";
+import { Collection } from "./Collection";
 import { Stream } from "./Stream";
+import { HashSet } from "./HashSet";
 
 /**
  * @hidden
@@ -61,5 +63,20 @@ export function sortOn<T>(seq: Seq<T>, getKey: ((v:T)=>number)|((v:T)=>string)):
             return 0;
         }
         return a>b?1:-1;
+    });
+}
+
+/**
+ * @hidden
+ */
+export function distinctBy<T,U>(seq: Collection<T>, keyExtractor: (x:T)=>U&WithEquality): Collection<T> {
+    let knownKeys = HashSet.empty<U>();
+    return seq.filter(x => {
+        const key = keyExtractor(x);
+        const r = knownKeys.contains(key);
+        if (!r) {
+            knownKeys = knownKeys.add(key);
+        }
+        return !r;
     });
 }
