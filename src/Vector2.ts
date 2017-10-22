@@ -193,8 +193,6 @@ export class Vector2<T> implements Collection<T> {
             return Vector2.empty<T>();
         }
 
-        // If the last leaf node will remain non-empty after popping,
-        // simply set last element to null (to allow GC).
         if ((this._length & nodeBitmask) !== 1) {
             popped = this.internalSet(this._length - 1, (ar,idx)=>ar.pop());
         }
@@ -225,6 +223,33 @@ export class Vector2<T> implements Collection<T> {
         }
         popped._length--;
         return popped;
+    }
+
+    /**
+     * Returns a new collection with the first
+     * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
+     */
+    drop(n:number): Vector2<T> {
+        let r: Vector2<T> = this;
+        for (let i=0;i<n;i++) {
+            r = r.tail();
+        }
+        return r;
+    }
+
+    /**
+     * Returns a new collection, discarding the first elements
+     * until one element fails the predicate. All elements
+     * after that point are retained.
+     */
+    dropWhile(predicate:(x:T)=>boolean): Vector2<T> {
+        let r: Vector2<T> = this;
+        while (r._length > 0 && predicate(<T>r.internalGet(0))) {
+            r = r.tail();
+        }
+        return r;
     }
 
     /**
