@@ -20,21 +20,18 @@ export class Vector2<T> {
 
     static ofArray<T>(data: T[]): Vector2<T> {
         let nodes = [];
-        let lowerNodes;
-        let node;
-        let i;
         let depth = 1;
 
-        for (i = 0; i < data.length; i += nodeSize) {
-            node = data.slice(i, i + nodeSize);
+        for (let i = 0; i < data.length; i += nodeSize) {
+            const node = data.slice(i, i + nodeSize);
             nodes.push(node);
         }
 
         while(nodes.length > 1) {
-            lowerNodes = nodes;
+            let lowerNodes:any[] = nodes;
             nodes = [];
-            for (i = 0; i < lowerNodes.length; i += nodeSize) {
-                node = lowerNodes.slice(i, i + nodeSize);
+            for (let i = 0; i < lowerNodes.length; i += nodeSize) {
+                const node = lowerNodes.slice(i, i + nodeSize);
                 nodes.push(node);
             }
             depth++;
@@ -44,15 +41,6 @@ export class Vector2<T> {
         const length = data ? data.length : 0;
         const _maxShift = _contents ? nodeBits * (depth - 1) : 0;
         return new Vector2<T>(_contents, length, _maxShift);
-    }
-
-    fromArray(arrayLike:T[]): Vector2<T> {
-        const len = arrayLike.length >>> 0;
-        let vec = Vector2.empty<T>();
-        for (let i = 0; i < len; i++) {
-            vec = vec.push(arrayLike[i]);
-        }
-        return vec;
     }
 
     private cloneVec(): Vector2<T> {
