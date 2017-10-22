@@ -1,7 +1,8 @@
 import { Option } from "./Option";
 import { HashMap } from "./HashMap";
+import { IMap } from "./IMap";
 import { WithEquality, areEqual, getHashCode,
-         toStringHelper } from "./Comparison";
+         toStringHelper, Ordering } from "./Comparison";
 import { Collection } from "./Collection";
 import * as SeqHelpers from "./SeqHelpers";
 
@@ -179,7 +180,7 @@ export class Vector2<T> implements Collection<T> {
      * Option.None if it's empty.
      */
     last(): Option<T> {
-        return Option.of(this.internalGet(this._length+-1));
+        return Option.of(this.internalGet(this._length-1));
     }
 
     tail(): Vector2<T> {
@@ -542,6 +543,41 @@ export class Vector2<T> implements Collection<T> {
      */
     inspect(): string {
         return this.toString();
+    }
+
+    /**
+     * Returns a new collection with elements
+     * sorted according to the comparator you give.
+     *
+     * also see [[Vector2.sortOn]]
+     */
+    sortBy(compare: (v1:T,v2:T)=>Ordering): Vector2<T> {
+        return Vector2.ofArray<T>(this.toArray().sort(compare));
+    }
+
+    /**
+     * Give a function associating a number or a string with
+     * elements from the collection, and the elements
+     * are sorted according to that value.
+     *
+     * also see [[Vector2.sortBy]]
+     */
+    // sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Vector2<T> {
+    //     return <Vector2<T>>SeqHelpers.sortOn<T>(this, getKey);
+    // }
+
+    /**
+     * Convert this collection to a map. You give a function which
+     * for each element in the collection returns a pair. The
+     * key of the pair will be used as a key in the map, the value,
+     * as a value in the map. If several values get the same key,
+     * entries will be lost.
+     */
+    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
+        return this.foldLeft(HashMap.empty<K,V>(), (acc,cur) => {
+            const converted = converter(cur);
+            return acc.put(converted[0], converted[1]);
+        });
     }
 
     toArray(): T[] {
