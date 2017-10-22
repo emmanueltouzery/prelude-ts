@@ -73,6 +73,9 @@ export class Vector2<T> {
     // OK to call with index === vec.length (an append) as long as vector
     // length is not a (nonzero) power of the branching factor (32, 1024, ...).
     // Cannot be called on the empty vector!! It would crash
+    //
+    // TODO the action callback is costing lots of performance on node6.11.3 at least
+    // on a loop calling push() which map() is doing for instance, as evidenced by the poor benchmarks.
     private internalSet(index: number, action: (ar:T[],idx:number)=>void): Vector2<T> {
         let newVec = this.cloneVec();
         // next line will crash on empty vector
