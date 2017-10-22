@@ -1,4 +1,5 @@
 import { Option } from "./Option";
+import { HashMap } from "./HashMap";
 import { WithEquality, areEqual, getHashCode,
          toStringHelper } from "./Comparison";
 import { Collection } from "./Collection";
@@ -20,6 +21,10 @@ export class Vector2<T> implements Collection<T> {
 
     static empty<T>(): Vector2<T> {
         return Vector2.ofArray([]);
+    }
+
+    static of<T>(...data: T[]): Vector2<T> {
+        return Vector2.ofArray(data);
     }
 
     static ofArray<T>(data: T[]): Vector2<T> {
@@ -89,7 +94,8 @@ export class Vector2<T> implements Collection<T> {
     // Cannot be called on the empty vector!! It would crash
     //
     // TODO the action callback is costing lots of performance on node6.11.3 at least
-    // on a loop calling append() which map() is doing for instance, as evidenced by the poor benchmarks.
+    // on a loop calling append() which map() and groupBy() are doing for instance,
+    // as evidenced by the poor benchmarks.
     private internalSet(index: number, action: (ar:T[],idx:number)=>void): Vector2<T> {
         let newVec = this.cloneVec();
         // next line will crash on empty vector
@@ -256,6 +262,24 @@ export class Vector2<T> implements Collection<T> {
      */
     contains(v:T&WithEquality): boolean {
         return this.find(x => areEqual(x,v)).isSome();
+    }
+
+    /**
+     * Group elements in the collection using a classifier function.
+     * Elements are then organized in a map. The key is the value of
+     * the classifier, and in value we get the list of elements
+     * matching that value.
+     *
+     * also see [[Vector2.arrangeBy]]
+     */
+    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Vector2<T>> {
+        return this.foldLeft(
+            HashMap.empty<C,Vector2<T>>(),
+            (acc: HashMap<C,Vector2<T>>, v:T) =>
+                acc.putWithMerge(
+                    classifier(v), Vector2.of(v),
+                    (v1:Vector2<T>,v2:Vector2<T>)=>
+                        v1.append(v2.single().getOrThrow())));
     }
 
     // let ImmutableVectorSlice = require('./ImmutableVectorSlice');

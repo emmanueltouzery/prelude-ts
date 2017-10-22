@@ -116,6 +116,7 @@ compare(['Vector.reverse', () => vec.reverse()],
         ['List.reverse', () => list.reverse()]);
 
 compare(['Vector.groupBy', () => vec.groupBy(x => x%2)],
+        ['Vector2.groupBy', () => vec2.groupBy(x => x%2)],
         ['List.groupBy', () => list.groupBy(x => x%2)],
         ['immList.groupBy', () => immList.groupBy(x => x%2)]);
 
