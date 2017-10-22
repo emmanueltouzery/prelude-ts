@@ -11,7 +11,7 @@ export class Vector2<T> {
 
     // _contents will be undefined only if length===0
     protected constructor(private _contents: any[]|undefined,
-                          private length: number,
+                          private _length: number,
                           private _maxShift: number) {}
 
     static empty<T>(): Vector2<T> {
@@ -43,12 +43,16 @@ export class Vector2<T> {
         return new Vector2<T>(_contents, length, _maxShift);
     }
 
+    length(): number {
+        return this._length;
+    }
+
     private cloneVec(): Vector2<T> {
-        return new Vector2<T>(this._contents, this.length, this._maxShift);
+        return new Vector2<T>(this._contents, this._length, this._maxShift);
     }
 
     private internalGet(index: number): T|undefined {
-        if (index >= 0 && index < this.length) {
+        if (index >= 0 && index < this._length) {
             let shift = this._maxShift;
             let node = this._contents;
             while (shift > 0 && node) {
@@ -90,23 +94,23 @@ export class Vector2<T> {
     }
 
     set(index: number, val: T): Vector2<T> {
-        if (index >= this.length || index < 0) {
+        if (index >= this._length || index < 0) {
             throw new Error('setting past end of vector is not implemented');
         }
         return this.internalSet(index, (ar,idx)=>ar[idx]=val);
     }
 
     push(val:T): Vector2<T> {
-        if (this.length === 0) {
+        if (this._length === 0) {
             return Vector2.ofArray<T>([val]);
-        } else if (this.length < (nodeSize << this._maxShift)) {
-            const newVec = this.internalSet(this.length, (ar,idx)=>ar[idx]=val);
-            newVec.length++;
+        } else if (this._length < (nodeSize << this._maxShift)) {
+            const newVec = this.internalSet(this._length, (ar,idx)=>ar[idx]=val);
+            newVec._length++;
             return newVec;
         } else {
             // We'll need a new root node.
             const newVec = this.cloneVec();
-            newVec.length++;
+            newVec._length++;
             newVec._maxShift += nodeBits;
             let node:any[] = [];
             newVec._contents = [this._contents, node];
@@ -124,22 +128,22 @@ export class Vector2<T> {
     pop(): Vector2<T> {
         let popped;
 
-        if (this.length === 0) {
+        if (this._length === 0) {
             return this;
         }
-        if (this.length === 1) {
+        if (this._length === 1) {
             return Vector2.empty<T>();
         }
 
         // If the last leaf node will remain non-empty after popping,
         // simply set last element to null (to allow GC).
-        if ((this.length & nodeBitmask) !== 1) {
-            popped = this.internalSet(this.length - 1, (ar,idx)=>ar.pop());
+        if ((this._length & nodeBitmask) !== 1) {
+            popped = this.internalSet(this._length - 1, (ar,idx)=>ar.pop());
         }
         // If the length is a power of the branching factor plus one,
         // reduce the tree's depth and install the root's first child as
         // the new root.
-        else if (this.length - 1 === nodeSize << (this._maxShift - nodeBits)) {
+        else if (this._length - 1 === nodeSize << (this._maxShift - nodeBits)) {
             popped = this.cloneVec();
             popped._contents = (<any[]>this._contents)[0]; // length>0 => _contents!==undefined
             popped._maxShift = this._maxShift - nodeBits;
@@ -152,7 +156,7 @@ export class Vector2<T> {
             // of the function => ok to cast to any[]
             let node = popped._contents = (<any[]>popped._contents).slice();
             let shift = this._maxShift;
-            let removedIndex = this.length - 1;
+            let removedIndex = this._length - 1;
 
             while (shift > nodeBits) { // i.e., Until we get to lowest non-leaf node.
                 let localIndex = (removedIndex >> shift) & nodeBitmask;
@@ -161,7 +165,7 @@ export class Vector2<T> {
             }
             node[(removedIndex >> shift) & nodeBitmask] = null;
         }
-        popped.length--;
+        popped._length--;
         return popped;
     }
 
@@ -198,7 +202,7 @@ export class Vector2<T> {
                 let vec = _vec;
                 let shift;
 
-                if (_index === vec.length - 1) {
+                if (_index === vec._length - 1) {
                     return {done: true, value: <any>undefined};
                 }
 
@@ -302,7 +306,7 @@ export class Vector2<T> {
 
     toArray(): T[] {
         let out = [];
-        for (let i = 0; i < this.length; i++) {
+        for (let i = 0; i < this._length; i++) {
             out.push(<T>this.internalGet(i));
         }
         return out;
