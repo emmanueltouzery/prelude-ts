@@ -375,7 +375,7 @@ export class Vector2<T> implements Collection<T> {
         let iter = this[Symbol.iterator]();
         let step;
         while (!(step = iter.next()).done) {
-            fun.call(step.value);
+            fun(step.value);
         }
         return this;
     }
@@ -385,7 +385,7 @@ export class Vector2<T> implements Collection<T> {
         let out = Vector2.empty<U>();
         let step;
         while (!(step = iter.next()).done) {
-            out = out.append(fun.call(step.value));
+            out = out.append(fun(step.value));
         }
         return out;
     }
@@ -395,8 +395,27 @@ export class Vector2<T> implements Collection<T> {
         let out = Vector2.empty<T>();
         let step;
         while (!(step = iter.next()).done) {
-            if (fun.call(step.value)) {
+            if (fun(step.value)) {
                 out = out.append(step.value);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Apply the mapper function on every element of this collection.
+     * The mapper function returns an Option; if the Option is a Some,
+     * the value it contains is added to the result Collection, if it's
+     * a None, the value is discarded.
+     */
+    mapOption<U>(mapper:(v:T)=>Option<U>): Vector2<U> {
+        let iter = this[Symbol.iterator]();
+        let out = Vector2.empty<U>();
+        let step;
+        while (!(step = iter.next()).done) {
+            const v = mapper(step.value);
+            if (v.isSome()) {
+                out = out.append(v.getOrThrow());
             }
         }
         return out;
