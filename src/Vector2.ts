@@ -669,4 +669,50 @@ export class Vector2<T> implements Collection<T> {
         }
         return out;
     };
+
+    /**
+     * Combine this collection with the collection you give in
+     * parameter to produce a new collection which combines both,
+     * in pairs. For instance:
+     *
+     *     Vector2.of(1,2,3).zip(["a","b","c"])
+     *     => Vector2.of([1,"a"], [2,"b"], [3,"c"])
+     *
+     * The result collection will have the length of the shorter
+     * of both collections. Extra elements will be discarded.
+     */
+    zip<U>(other: Iterable<U>): Vector2<[T,U]> {
+        let r = Vector2.empty<[T,U]>();
+        const thisIterator = this[Symbol.iterator]();
+        const otherIterator = other[Symbol.iterator]();
+        let thisCurItem = thisIterator.next();
+        let otherCurItem = otherIterator.next();
+
+        while (!thisCurItem.done && !otherCurItem.done) {
+            r.append([thisCurItem.value, otherCurItem.value]);
+            thisCurItem = thisIterator.next();
+            otherCurItem = otherIterator.next();
+        }
+        return r;
+    }
+
+    /**
+     * Combine this collection with the index of the elements
+     * in it. Handy if you need the index when you map on
+     * the collection for instance:
+     *
+     *     Vector2.of("a","b").zipWithIndex().map([v,idx] => ...)
+     */
+    // zipWithIndex(): Vector2<[T,number]> {
+    //     return <Vector2<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
+    // }
+
+    // dropRight
+    // prepend
+    // prependAll
+    // removeFirst
+    // reverse
+    // span
+    // splitAt
+    // takeWhile
 }
