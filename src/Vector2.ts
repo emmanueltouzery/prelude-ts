@@ -59,21 +59,17 @@ export class Vector2<T> {
         return new Vector2<T>(this._contents, this.length, this._maxShift);
     }
 
-    internalGet(index: number): T|undefined {
+    private internalGet(index: number): T|undefined {
         if (index >= 0 && index < this.length) {
             let shift = this._maxShift;
             let node = this._contents;
-            if (!node) {
-                return undefined;
-            }
             while (shift > 0 && node) {
                 node = node[(index >> shift) & nodeBitmask];
                 shift -= nodeBits;
             }
-            if (!node) {
-                return undefined;
-            }
-            return node[index & nodeBitmask];
+            // cast should be OK as we check bounds
+            // at the beginning of the method
+            return (<any>node)[index & nodeBitmask];
         }
         return undefined;
     }
