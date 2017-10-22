@@ -47,6 +47,10 @@ export class Vector2<T> {
         return this._length;
     }
 
+    isEmpty(): boolean {
+        return this._length === 0;
+    }
+
     private cloneVec(): Vector2<T> {
         return new Vector2<T>(this._contents, this._length, this._maxShift);
     }
@@ -68,6 +72,12 @@ export class Vector2<T> {
 
     get(index: number): Option<T> {
         return Option.of(this.internalGet(index));
+    }
+
+    single(): Option<T> {
+        return this._length === 1 ?
+            this.head() :
+            Option.none<T>();
     }
 
     // OK to call with index === vec.length (an append) as long as vector
@@ -126,6 +136,10 @@ export class Vector2<T> {
             node[0] = val;
             return newVec;
         }
+    }
+
+    head(): Option<T> {
+        return this.get(0);
     }
 
     tail(): Vector2<T> {
