@@ -1000,15 +1000,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Stream<T> {
-        let knownKeys = HashSet.empty<U>();
-        return this.filter(x => {
-            const key = keyExtractor(x);
-            const r = knownKeys.contains(key);
-            if (!r) {
-                knownKeys = knownKeys.add(key);
-            }
-            return !r;
-        });
+        return <Stream<T>>SeqHelpers.distinctBy(this, keyExtractor);
     }
 
     forEach(fn: (v:T)=>void): Stream<T> {
