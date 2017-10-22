@@ -262,13 +262,27 @@ export class Vector2<T> {
         return out;
     }
 
-    reduce<U>(fun:(soFar:U,cur:T)=>U, init:U):U {
+    /**
+     * Reduces the collection to a single value using the
+     * associative binary function you give. Since the function
+     * is associative, order of application doesn't matter.
+     *
+     * Example:
+     *
+     *     Vector.of(1,2,3).fold(0, (a,b) => a + b);
+     *     => 6
+     */
+    fold(zero:T, fn:(v1:T,v2:T)=>T): T {
+        return this.foldLeft(zero, fn);
+    }
+
+    foldLeft<U>(zero:U, fn:(soFar:U,cur:T)=>U):U {
         let iter = this[Symbol.iterator]();
         let step;
         let index = 0;
-        let acc = init;
+        let acc = zero;
         while (!(step = iter.next()).done) {
-            acc = fun(acc, step.value);
+            acc = fn(acc, step.value);
         }
         return acc;
     }
