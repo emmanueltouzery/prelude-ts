@@ -13,6 +13,7 @@ const nodeBitmask = nodeSize - 1;
 
 // Implementation of a bit-mapped vector trie.
 // Based on https://github.com/graue/immutable-vector from Scott Feeney.
+// TODO optimize all the methods doing append() in a loop!
 export class Vector2<T> implements Collection<T> {
 
     // _contents will be undefined only if length===0
@@ -697,6 +698,19 @@ export class Vector2<T> implements Collection<T> {
     }
 
     /**
+     * Reverse the collection. For instance:
+     *
+     *     [1,2,3] => [3,2,1]
+     */
+    reverse(): Vector2<T> {
+        let r = Vector2.empty<T>();
+        for (let i=this._length-1;i>=0;i--) {
+            r.append(<T>this.internalGet(i));
+        }
+        return r;
+    }
+
+    /**
      * Combine this collection with the index of the elements
      * in it. Handy if you need the index when you map on
      * the collection for instance:
@@ -711,7 +725,6 @@ export class Vector2<T> implements Collection<T> {
     // prepend
     // prependAll
     // removeFirst
-    // reverse
     // span
     // splitAt
     // takeWhile
