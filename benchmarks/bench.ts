@@ -23,10 +23,10 @@ function compare(...items: Array<[string, ()=>any]>) {
 
 // https://stackoverflow.com/a/43044960/516188
 const getArray = (length:number) => Array.from({length}, () => Math.floor(Math.random() * length));
-const length = 2000;
+const length = 200;
 const array = getArray(length);
 const vec = Vector.ofIterable(array);
-const vec2 = Vector2.ofIterable(array);
+const vec2 = Vector2.ofArray(array);
 const rawhamt = hamt.empty.mutate(
     (h:any) => {
         const iterator = array[Symbol.iterator]();
@@ -57,7 +57,7 @@ compare(['Vector.map', () => vec.map(x => x*2)],
         ['List.map', () => list.map(x => x*2)]);
 
 compare(['Vector.ofIterable', () => Vector.ofIterable(array)],
-        ['Vector2.ofIterable', () => Vector2.ofIterable(array)],
+        ['Vector2.ofIterable', () => Vector2.ofArray(array)],
         ['rawhamt.build from iterable', () => {
             hamt.empty.mutate(
                 (h:any) => {
