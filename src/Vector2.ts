@@ -1,4 +1,5 @@
 import { Option } from "./Option";
+import { WithEquality, areEqual } from "./Comparison";
 
 const nodeBits = 5;
 const nodeSize = (1<<nodeBits); // 32
@@ -215,6 +216,29 @@ export class Vector2<T> {
      */
     anyMatch(predicate:(v:T)=>boolean): boolean {
         return this.find(predicate).isSome();
+    }
+
+    /**
+     * Returns a pair of two collections; the first one
+     * will only contain the items from this collection for
+     * which the predicate you give returns true, the second
+     * will only contain the items from this collection where
+     * the predicate returns false.
+     *
+     *     Vector.of(1,2,3,4).partition(x => x%2===0)
+     *     => [[2,4],[1,3]]
+     */
+    partition(predicate:(x:T)=>boolean): [Vector2<T>,Vector2<T>] {
+        // TODO goes twice over the list, can be optimized...
+        return [this.filter(predicate), this.filter(x => !predicate(x))];
+    }
+
+    /**
+     * Returns true if the item is in the collection,
+     * false otherwise.
+     */
+    contains(v:T&WithEquality): boolean {
+        return this.find(x => areEqual(x,v)).isSome();
     }
 
     // let ImmutableVectorSlice = require('./ImmutableVectorSlice');
