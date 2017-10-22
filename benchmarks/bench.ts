@@ -47,11 +47,13 @@ while (!curItem.done) {
 const list = List.ofIterable(array);
 const immList = imm.List(array);
 compare(['Vector.filter', () => vec.filter(x => x%2===0)],
+        ['Vector2.filter', () => vec2.filter(x => x%2===0)],
         ['Array.filter', () => array.filter(x => x%2===0)],
         ['immList.filter', () => immList.filter(x => x%2===0)],
         ['List.filter', () => list.filter(x => x%2===0)]);
 
 compare(['Vector.map', () => vec.map(x => x*2)],
+        ['Vector2.map', () => vec2.map(x => x*2)],
         ['Array.map', () => array.map(x => x*2)],
         ['immList.map', () => immList.map(x => x*2)],
         ['List.map', () => list.map(x => x*2)]);
