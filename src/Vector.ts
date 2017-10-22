@@ -15,7 +15,7 @@ const hamt: any = require("hamt_plus");
  * O(1) access, append, prepend.
  * @type T the item type
  */
-export class Vector<T> implements Seq<T>, Iterable<T> {
+export class Vector<T> implements Seq<T> {
 
     /**
      * @hidden
