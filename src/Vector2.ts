@@ -423,6 +423,23 @@ export class Vector2<T> implements Collection<T> {
     }
 
     /**
+     * Calls the function you give for each item in the collection,
+     * your function returns a collection, all the collections are
+     * concatenated.
+     * This is the monadic bind.
+     */
+    flatMap<U>(mapper:(v:T)=>Vector2<U>): Vector2<U> {
+        let iter = this[Symbol.iterator]();
+        let out = Vector2.empty<U>();
+        let step;
+        while (!(step = iter.next()).done) {
+            const v = mapper(step.value);
+            out = out.appendAll(v);
+        }
+        return out;
+    }
+
+    /**
      * Reduces the collection to a single value using the
      * associative binary function you give. Since the function
      * is associative, order of application doesn't matter.
