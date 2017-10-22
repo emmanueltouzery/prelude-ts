@@ -489,6 +489,28 @@ export class Vector2<T> implements Collection<T> {
         return acc;
     }
 
+    /**
+     * Reduces the collection to a single value.
+     * Right-associative.
+     *
+     * Example:
+     *
+     *     Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x))
+     *     => "!cba"
+     *
+     * @param zero The initial value
+     * @param fn A function taking the current collection item and
+     *           the previous value , and returning
+     *           an updated value.
+     */
+    foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U {
+        let r = zero;
+        for (let i=this._length-1;i>=0;i--) {
+            r = fn(<T>this.internalGet(i), r);
+        }
+        return r;
+    }
+
     // indexOf(element:T, fromIndex:number): number {
     //     if (fromIndex === undefined) {
     //         fromIndex = 0;
