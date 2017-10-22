@@ -19,11 +19,11 @@ export class Vector2<T> {
     }
 
     static ofArray<T>(data: T[]): Vector2<T> {
-        var nodes = [];
-        var lowerNodes;
-        var node;
-        var i;
-        var depth = 1;
+        let nodes = [];
+        let lowerNodes;
+        let node;
+        let i;
+        let depth = 1;
 
         for (i = 0; i < data.length; i += nodeSize) {
             node = data.slice(i, i + nodeSize);
@@ -49,7 +49,7 @@ export class Vector2<T> {
     fromArray(arrayLike:T[]): Vector2<T> {
         const len = arrayLike.length >>> 0;
         let vec = Vector2.empty<T>();
-        for (var i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
             vec = vec.push(arrayLike[i]);
         }
         return vec;
@@ -82,12 +82,12 @@ export class Vector2<T> {
     // length is not a (nonzero) power of the branching factor (32, 1024, ...).
     // Cannot be called on the empty vector!! It would crash
     private internalSet(index: number, action: (ar:T[],idx:number)=>void): Vector2<T> {
-        var newVec = this.cloneVec();
+        let newVec = this.cloneVec();
         // next line will crash on empty vector
-        var node = newVec._contents = (<any[]>this._contents).slice();
-        var shift = this._maxShift;
+        let node = newVec._contents = (<any[]>this._contents).slice();
+        let shift = this._maxShift;
         while (shift > 0) {
-            var childIndex = (index >> shift) & nodeBitmask;
+            let childIndex = (index >> shift) & nodeBitmask;
             if (node[childIndex]) {
                 node[childIndex] = node[childIndex].slice();
             } else {
@@ -122,8 +122,8 @@ export class Vector2<T> {
             newVec._maxShift += nodeBits;
             let node:any[] = [];
             newVec._contents = [this._contents, node];
-            var depth = newVec._maxShift / nodeBits + 1;
-            for (var i = 2; i < depth; i++) {
+            let depth = newVec._maxShift / nodeBits + 1;
+            for (let i = 2; i < depth; i++) {
                 const newNode: any[] = [];
                 node.push(newNode);
                 node = newNode;
@@ -134,7 +134,7 @@ export class Vector2<T> {
     }
 
     pop(): Vector2<T> {
-        var popped;
+        let popped;
 
         if (this.length === 0) {
             return this;
@@ -162,12 +162,12 @@ export class Vector2<T> {
 
             // we know the vector is not empty, there is a if at the top
             // of the function => ok to cast to any[]
-            var node = popped._contents = (<any[]>popped._contents).slice();
-            var shift = this._maxShift;
-            var removedIndex = this.length - 1;
+            let node = popped._contents = (<any[]>popped._contents).slice();
+            let shift = this._maxShift;
+            let removedIndex = this.length - 1;
 
             while (shift > nodeBits) { // i.e., Until we get to lowest non-leaf node.
-                var localIndex = (removedIndex >> shift) & nodeBitmask;
+                let localIndex = (removedIndex >> shift) & nodeBitmask;
                 node = node[localIndex] = node[localIndex].slice();
                 shift -= nodeBits;
             }
@@ -177,7 +177,7 @@ export class Vector2<T> {
         return popped;
     }
 
-    // var ImmutableVectorSlice = require('./ImmutableVectorSlice');
+    // let ImmutableVectorSlice = require('./ImmutableVectorSlice');
 
     // slice(begin: number, end: number): Vector2<T> {
     //     if (typeof end !== 'number' || end > this.length) end = this.length;
@@ -207,8 +207,8 @@ export class Vector2<T> {
                 //  _stack: Path we traveled to current node, as [node, local index]
                 //          pairs, starting from root node, not including leaf.
 
-                var vec = _vec;
-                var shift;
+                let vec = _vec;
+                let shift;
 
                 if (_index === vec.length - 1) {
                     return {done: true, value: <any>undefined};
@@ -217,7 +217,7 @@ export class Vector2<T> {
                 if (_index > 0 && (_index & nodeBitmask) === nodeSize - 1) {
                     // Using the stack, go back up the tree, stopping when we reach a node
                     // whose children we haven't fully iterated over.
-                    var step;
+                    let step;
                     while ((step = _stack.pop())[1] === nodeSize - 1) ;
                     step[1]++;
                     _stack.push(step);
@@ -237,9 +237,9 @@ export class Vector2<T> {
     }
 
     forEach(fun:(x:T)=>void):Vector2<T> {
-        var iter = this[Symbol.iterator]();
-        var step;
-        var index = 0;
+        let iter = this[Symbol.iterator]();
+        let step;
+        let index = 0;
         while (!(step = iter.next()).done) {
             fun.call(step.value);
         }
@@ -247,10 +247,10 @@ export class Vector2<T> {
     }
 
     map<U>(fun:(x:T)=>U): Vector2<U> {
-        var iter = this[Symbol.iterator]();
-        var out = Vector2.empty<U>();
-        var step;
-        var index = 0;
+        let iter = this[Symbol.iterator]();
+        let out = Vector2.empty<U>();
+        let step;
+        let index = 0;
         while (!(step = iter.next()).done) {
             out = out.push(fun.call(step.value));
         }
@@ -287,9 +287,9 @@ export class Vector2<T> {
     //     } else {
     //         fromIndex >>>= 0;
     //     }
-    //     var isImmutableCollection = ImmutableVector.isImmutableVector(element);
-    //     for (var index = fromIndex; index < this.length; index++) {
-    //         var val = this.get(index);
+    //     let isImmutableCollection = ImmutableVector.isImmutableVector(element);
+    //     for (let index = fromIndex; index < this.length; index++) {
+    //         let val = this.get(index);
     //         if (isImmutableCollection) {
     //             if (element.equals(this.get(index))) return index;
     //         } else {
@@ -302,9 +302,9 @@ export class Vector2<T> {
     // // TODO: See if equals and toArray are faster using a traversal.
 
     // equals(other:Vector2<T>): boolean {
-    //     var val;
+    //     let val;
     //     if (this.length !== other.length) return false;
-    //     for (var i = 0; i < this.length; i++) {
+    //     for (let i = 0; i < this.length; i++) {
     //         val = this.get(i);
     //         if (ImmutableVector.isImmutableVector(val)) {
     //             if (!val.equals(other.get(i))) return false;
@@ -316,8 +316,8 @@ export class Vector2<T> {
     // }
 
     toArray(): T[] {
-        var out = [];
-        for (var i = 0; i < this.length; i++) {
+        let out = [];
+        for (let i = 0; i < this.length; i++) {
             out.push(<T>this.internalGet(i));
         }
         return out;
