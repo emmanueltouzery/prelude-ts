@@ -128,7 +128,7 @@ export class Vector2<T> {
         }
     }
 
-    pop(): Vector2<T> {
+    tail(): Vector2<T> {
         let popped;
 
         if (this._length === 0) {
