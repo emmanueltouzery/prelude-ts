@@ -149,6 +149,22 @@ export class Vector2<T> implements Collection<T> {
     }
 
     /**
+     * Append multiple elements at the end of the collection.
+     * Note that arrays are also iterables.
+     */
+    appendAll(elts: Iterable<T>): Vector2<T> {
+        // TODO performance disaster
+        const iterator = elts[Symbol.iterator]();
+        let curItem = iterator.next();
+        let result: Vector2<T> = this;
+        while (!curItem.done) {
+            result = result.append(curItem.value);
+            curItem = iterator.next();
+        }
+        return result;
+    }
+
+    /**
      * Get the first value of the collection, if any.
      * returns Option.Some if the collection is not empty,
      * Option.None if it's empty.
@@ -280,6 +296,20 @@ export class Vector2<T> implements Collection<T> {
                     classifier(v), Vector2.of(v),
                     (v1:Vector2<T>,v2:Vector2<T>)=>
                         v1.append(v2.single().getOrThrow())));
+    }
+
+    /**
+     * Matches each element with a unique key that you extract from it.
+     * If the same key is present twice, the function will return None.
+     *
+     * also see [[Vector2.groupBy]]
+     */
+    // arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
+    //     return SeqHelpers.arrangeBy<T,K>(this, getKey);
+    // }
+
+    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Vector2<T> {
+        return <Vector2<T>>SeqHelpers.distinctBy(this, keyExtractor);
     }
 
     // let ImmutableVectorSlice = require('./ImmutableVectorSlice');
