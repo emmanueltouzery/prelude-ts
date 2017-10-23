@@ -98,7 +98,7 @@ export class Vector2<T> implements Collection<T> {
     // TODO the action callback is costing lots of performance on node6.11.3 at least
     // on a loop calling append() which map() and groupBy() are doing for instance,
     // as evidenced by the poor benchmarks.
-    private internalSet(index: number, action: (ar:T[],idx:number)=>void): Vector2<T> {
+    private internalSet(index: number, val: T|null): Vector2<T> {
         let newVec = this.cloneVec();
         // next line will crash on empty vector
         let node = newVec._contents = (<any[]>this._contents).slice();
@@ -114,7 +114,7 @@ export class Vector2<T> implements Collection<T> {
             node = node[childIndex];
             shift -= nodeBits;
         }
-        action(node, index & nodeBitmask);
+        node[index & nodeBitmask] = val;
         return newVec;
     }
 
@@ -122,14 +122,14 @@ export class Vector2<T> implements Collection<T> {
         if (index >= this._length || index < 0) {
             throw new Error('setting past end of vector is not implemented');
         }
-        return this.internalSet(index, (ar,idx)=>ar[idx]=val);
+        return this.internalSet(index, val);
     }
 
     append(val:T): Vector2<T> {
         if (this._length === 0) {
             return Vector2.ofArray<T>([val]);
         } else if (this._length < (nodeSize << this._maxShift)) {
-            const newVec = this.internalSet(this._length, (ar,idx)=>ar[idx]=val);
+            const newVec = this.internalSet(this._length, val);
             newVec._length++;
             return newVec;
         } else {
@@ -184,7 +184,7 @@ export class Vector2<T> implements Collection<T> {
         return Option.of(this.internalGet(this._length-1));
     }
 
-    tail(): Vector2<T> {
+    init(): Vector2<T> {
         let popped;
 
         if (this._length === 0) {
@@ -195,7 +195,7 @@ export class Vector2<T> implements Collection<T> {
         }
 
         if ((this._length & nodeBitmask) !== 1) {
-            popped = this.internalSet(this._length - 1, (ar,idx)=>ar.pop());
+            popped = this.internalSet(this._length - 1, null);
         }
         // If the length is a power of the branching factor plus one,
         // reduce the tree's depth and install the root's first child as
@@ -232,26 +232,26 @@ export class Vector2<T> implements Collection<T> {
      * If the collection has less than n elements,
      * returns the empty collection.
      */
-    drop(n:number): Vector2<T> {
-        let r: Vector2<T> = this;
-        for (let i=0;i<n;i++) {
-            r = r.tail();
-        }
-        return r;
-    }
+    // drop(n:number): Vector2<T> {
+    //     let r: Vector2<T> = this;
+    //     for (let i=0;i<n;i++) {
+    //         r = r.tail();
+    //     }
+    //     return r;
+    // }
 
     /**
      * Returns a new collection, discarding the first elements
      * until one element fails the predicate. All elements
      * after that point are retained.
      */
-    dropWhile(predicate:(x:T)=>boolean): Vector2<T> {
-        let r: Vector2<T> = this;
-        while (r._length > 0 && predicate(<T>r.internalGet(0))) {
-            r = r.tail();
-        }
-        return r;
-    }
+    // dropWhile(predicate:(x:T)=>boolean): Vector2<T> {
+    //     let r: Vector2<T> = this;
+    //     while (r._length > 0 && predicate(<T>r.internalGet(0))) {
+    //         r = r.tail();
+    //     }
+    //     return r;
+    // }
 
     /**
      * Search for an item matching the predicate you pass,
