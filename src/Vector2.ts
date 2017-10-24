@@ -765,11 +765,11 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      *     [1,2,3] => [3,2,1]
      */
     reverse(): Vector2<T> {
-        let r = Vector2.empty<T>();
-        for (let i=this._length-1;i>=0;i--) {
-            r = r.append(<T>this.internalGet(i));
-        }
-        return r;
+        return Vector2.empty<T>().mutate(mutVec => {
+            for (let i=this._length-1;i>=0;i--) {
+                mutVec.append(<T>this.internalGet(i));
+            }
+        });
     }
 
     /**
