@@ -46,7 +46,7 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      * @type T the item type
      */
     static of<T>(...arr: Array<T>): Vector<T> {
-        return Vector.ofIterable(arr);
+        return Vector.ofIterable<T>(arr);
     }
 
     /**
