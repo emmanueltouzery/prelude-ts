@@ -12,7 +12,7 @@ const nodeSize = (1<<nodeBits); // 32
 const nodeBitmask = nodeSize - 1;
 
 interface MutableVector2<T> {
-    append:(x:T)=>void; // don't call on an empty vector!!!
+    append:(x:T)=>void;
 }
 
 // Implementation of a bit-mapped vector trie.
@@ -79,8 +79,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         fn({
             append: (val:T) => {
                 const index = this._length;
-                // next line will crash on empty vector
-                let node = <any[]>this._contents;
+                let node = this._contents || (this._contents = new Array(nodeSize));
                 let shift = this._maxShift;
                 while (shift > 0) {
                     let childIndex = (index >> shift) & nodeBitmask;
@@ -220,6 +219,9 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         if (curItem.done) {
             return this;
         }
+        // first need to create a new Vector2 through the first append
+        // call, and then we can mutate that new Vector2, otherwise
+        // we'll mutate the receiver which is a big no-no!!
         return this.append(curItem.value).mutate(mutVec => {
             curItem = iterator.next();
             while (!curItem.done) {
@@ -466,11 +468,8 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     map<U>(fun:(x:T)=>U): Vector2<U> {
         let iter = this[Symbol.iterator]();
-        let step = iter.next();
-        if (step.done) {
-            return Vector2.empty<U>();
-        }
-        return Vector2.of(fun(step.value)).mutate(mutVec => {
+        return Vector2.empty<U>().mutate(mutVec => {
+            let step;
             while (!(step = iter.next()).done) {
                 mutVec.append(fun(step.value));
             }
@@ -479,14 +478,14 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     filter(fun:(x:T)=>boolean): Vector2<T> {
         let iter = this[Symbol.iterator]();
-        let out = Vector2.empty<T>();
-        let step;
-        while (!(step = iter.next()).done) {
-            if (fun(step.value)) {
-                out = out.append(step.value);
+        return Vector2.empty<T>().mutate(mutVec => {
+            let step;
+            while (!(step = iter.next()).done) {
+                if (fun(step.value)) {
+                    mutVec.append(step.value);
+                }
             }
-        }
-        return out;
+        });
     }
 
     /**
