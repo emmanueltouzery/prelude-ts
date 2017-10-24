@@ -215,7 +215,6 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * Note that arrays are also iterables.
      */
     appendAll(elts: Iterable<T>): Vector2<T> {
-        // TODO performance disaster
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
         if (curItem.done) {
@@ -467,12 +466,15 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     map<U>(fun:(x:T)=>U): Vector2<U> {
         let iter = this[Symbol.iterator]();
-        let out = Vector2.empty<U>();
-        let step;
-        while (!(step = iter.next()).done) {
-            out = out.append(fun(step.value));
+        let step = iter.next();
+        if (step.done) {
+            return Vector2.empty<U>();
         }
-        return out;
+        return Vector2.of(fun(step.value)).mutate(mutVec => {
+            while (!(step = iter.next()).done) {
+                mutVec.append(fun(step.value));
+            }
+        });
     }
 
     filter(fun:(x:T)=>boolean): Vector2<T> {
