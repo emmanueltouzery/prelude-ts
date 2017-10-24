@@ -1,6 +1,7 @@
 import { Option } from "./Option";
 import { HashMap } from "./HashMap";
 import { IMap } from "./IMap";
+import { Seq } from "./Seq";
 import { WithEquality, areEqual, getHashCode,
          toStringHelper, Ordering } from "./Comparison";
 import { Collection } from "./Collection";
@@ -14,7 +15,7 @@ const nodeBitmask = nodeSize - 1;
 // Implementation of a bit-mapped vector trie.
 // Based on https://github.com/graue/immutable-vector from Scott Feeney.
 // TODO optimize all the methods doing append() in a loop!
-export class Vector2<T> implements Collection<T> {
+export class Vector2<T> implements Collection<T>, Seq<T> {
 
     // _contents will be undefined only if length===0
     protected constructor(private _contents: any[]|undefined,
@@ -27,6 +28,15 @@ export class Vector2<T> implements Collection<T> {
 
     static of<T>(...data: T[]): Vector2<T> {
         return Vector2.ofArray(data);
+    }
+
+    /**
+     * Build a vector from any iterable, which means also
+     * an array for instance.
+     * @type T the item type
+     */
+    static ofIterable<T>(elts: Iterable<T>): Vector2<T> {
+        return Vector2.ofArray(Array.from(elts));
     }
 
     static ofArray<T>(data: T[]): Vector2<T> {
@@ -60,6 +70,30 @@ export class Vector2<T> implements Collection<T> {
 
     isEmpty(): boolean {
         return this._length === 0;
+    }
+
+    /**
+     * Dual to the foldRight function. Build a collection from a seed.
+     * Takes a starting element and a function.
+     * It applies the function on the starting element; if the
+     * function returns None, it stops building the list, if it
+     * returns Some of a pair, it adds the first element to the result
+     * and takes the second element as a seed to keep going.
+     *
+     *     unfoldRight(
+     *          10, x=>Option.of(x)
+     *              .filter(x => x!==0)
+     *              .map<[number,number]>(x => [x,x-1]))
+     *     => [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+     */
+    static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Vector2<U> {
+        let nextVal = fn(seed);
+        let r = Vector2.empty<U>();
+        while (nextVal.isSome()) {
+            r = r.append(nextVal.getOrThrow()[0]);
+            nextVal = fn(nextVal.getOrThrow()[1]);
+        }
+        return r;
     }
 
     private cloneVec(): Vector2<T> {
@@ -227,31 +261,25 @@ export class Vector2<T> implements Collection<T> {
     }
 
     /**
-     * Returns a new collection with the first
-     * n elements discarded.
-     * If the collection has less than n elements,
-     * returns the empty collection.
-     */
-    // drop(n:number): Vector2<T> {
-    //     let r: Vector2<T> = this;
-    //     for (let i=0;i<n;i++) {
-    //         r = r.tail();
-    //     }
-    //     return r;
-    // }
-
-    /**
      * Returns a new collection, discarding the first elements
      * until one element fails the predicate. All elements
      * after that point are retained.
      */
-    // dropWhile(predicate:(x:T)=>boolean): Vector2<T> {
-    //     let r: Vector2<T> = this;
-    //     while (r._length > 0 && predicate(<T>r.internalGet(0))) {
-    //         r = r.tail();
-    //     }
-    //     return r;
-    // }
+    dropWhile(predicate:(x:T)=>boolean): Vector2<T> {
+        // TODO must be optimized!!!
+        let r = Vector2.empty<T>();
+        let skip = true;
+        for (let i=0;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            if (skip && !predicate(val)) {
+                skip = false;
+            }
+            if (!skip) {
+                r = r.append(val);
+            }
+        }
+        return r;
+    }
 
     /**
      * Search for an item matching the predicate you pass,
@@ -331,9 +359,9 @@ export class Vector2<T> implements Collection<T> {
      *
      * also see [[Vector2.groupBy]]
      */
-    // arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
-    //     return SeqHelpers.arrangeBy<T,K>(this, getKey);
-    // }
+    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
+        return SeqHelpers.arrangeBy<T,K>(this, getKey);
+    }
 
     distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Vector2<T> {
         return <Vector2<T>>SeqHelpers.distinctBy(this, keyExtractor);
@@ -553,10 +581,10 @@ export class Vector2<T> implements Collection<T> {
      * in memory.
      */
     equals(other:Vector2<T&WithEquality>): boolean {
-        if (!other || !other._maxShift) {
+        if (!other || (other._maxShift === undefined)) {
             return false;
         }
-        if (this.length !== other.length) return false;
+        if (this._length !== other._length) return false;
         for (let i = 0; i < this._length; i++) {
             const myVal: T & WithEquality|null|undefined = <T&WithEquality>this.internalGet(i);
             const hisVal: T & WithEquality|null|undefined = other.internalGet(i);
@@ -645,9 +673,9 @@ export class Vector2<T> implements Collection<T> {
      *
      * also see [[Vector2.sortBy]]
      */
-    // sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Vector2<T> {
-    //     return <Vector2<T>>SeqHelpers.sortOn<T>(this, getKey);
-    // }
+    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Vector2<T> {
+        return <Vector2<T>>SeqHelpers.sortOn<T>(this, getKey);
+    }
 
     /**
      * Convert this collection to a map. You give a function which
@@ -690,7 +718,7 @@ export class Vector2<T> implements Collection<T> {
         let otherCurItem = otherIterator.next();
 
         while (!thisCurItem.done && !otherCurItem.done) {
-            r.append([thisCurItem.value, otherCurItem.value]);
+            r = r.append([thisCurItem.value, otherCurItem.value]);
             thisCurItem = thisIterator.next();
             otherCurItem = otherIterator.next();
         }
@@ -705,7 +733,7 @@ export class Vector2<T> implements Collection<T> {
     reverse(): Vector2<T> {
         let r = Vector2.empty<T>();
         for (let i=this._length-1;i>=0;i--) {
-            r.append(<T>this.internalGet(i));
+            r = r.append(<T>this.internalGet(i));
         }
         return r;
     }
@@ -717,15 +745,148 @@ export class Vector2<T> implements Collection<T> {
      *
      *     Vector2.of("a","b").zipWithIndex().map([v,idx] => ...)
      */
-    // zipWithIndex(): Vector2<[T,number]> {
-    //     return <Vector2<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
-    // }
+    zipWithIndex(): Vector2<[T,number]> {
+        return <Vector2<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
+    }
 
-    // dropRight
-    // prepend
-    // prependAll
-    // removeFirst
-    // span
-    // splitAt
-    // takeWhile
+    // TODO must be optimized!!!
+    takeWhile(predicate:(x:T)=>boolean): Vector2<T> {
+        let r = Vector2.empty<T>();
+        for (let i=0;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            if (!predicate(val)) {
+                break;
+            }
+            r = r.append(val);
+        }
+        return r;
+    }
+
+    /**
+     * Split the collection at a specific index.
+     *
+     *     List.of(1,2,3,4,5).splitAt(3)
+     *     => [List.of(1,2,3), List.of(4,5)]
+     */
+    splitAt(index:number): [Vector2<T>,Vector2<T>] {
+        // TODO must be optimized!!!
+        let r: [Vector2<T>,Vector2<T>] = [Vector2.empty<T>(), Vector2.empty<T>()];
+        for (let i=0;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            if (i<index) {
+                r[0] = r[0].append(val);
+            } else {
+                r[1] = r[1].append(val);
+            }
+        }
+        return r;
+    }
+
+    /**
+     * Takes a predicate; returns a pair of collections.
+     * The first one is the longest prefix of this collection
+     * which satisfies the predicate, and the second collection
+     * is the remainder of the collection.
+     *
+     *    Vector.of(1,2,3,4,5,6).span(x => x <3)
+     *    => [Vector.of(1,2), Vector.of(3,4,5,6)]
+     */
+    span(predicate:(x:T)=>boolean): [Vector2<T>,Vector2<T>] {
+        // TODO must be optimized!!!
+        const first = this.takeWhile(predicate);
+        return [first, this.drop(first.length())];
+    }
+
+    /**
+     * Returns a new collection with the first
+     * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
+     */
+    drop(n:number): Vector2<T> {
+        // TODO must be optimized!!!
+        let r = Vector2.empty<T>();
+        if (n>=this._length) {
+            return r;
+        }
+        for (let i=n;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            r = r.append(val);
+        }
+        return r;
+    }
+
+    take(n:number): Vector2<T> {
+        // TODO must be optimized!!!
+        let r = Vector2.empty<T>();
+        if (n<0) {
+            return r;
+        }
+        for (let i=0;i<Math.min(n, this._length);i++) {
+            const val = <T>this.internalGet(i);
+            r = r.append(val);
+        }
+        return r;
+    }
+
+    /**
+     * Prepend an element at the beginning of the collection.
+     */
+    prepend(elt: T): Vector2<T> {
+        // TODO must be optimized!!
+        return this.prependAll([elt]);
+    }
+
+    /**
+     * Prepend multiple elements at the beginning of the collection.
+     *
+     * This method requires Array.from()
+     * You may need to polyfill it =>
+     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
+     */
+    prependAll(elts: Iterable<T>): Vector2<T> {
+        // TODO must be optimized!!
+        return Vector2.ofArray(Array.from(elts)).appendAll(this);
+    }
+
+    /**
+     * Removes the first element matching the predicate
+     * (use [[Seq.filter]] to remove all elements matching a predicate)
+     */
+    removeFirst(predicate: (v:T)=>boolean): Vector2<T> {
+        // TODO must be optimized!!
+        let r = Vector2.empty<T>();
+        let i=0;
+        for (;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            if (predicate(val)) {
+                break;
+            }
+            r = r.append(val);
+        }
+        return r.appendAll(this.drop(i+1));
+    }
+
+    /**
+     * Returns a new collection with the last
+     * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
+     */
+    dropRight(n:number): Vector2<T> {
+        // TODO must be optimized!!
+        if (n>=this._length) {
+            return Vector2.empty<T>();
+        }
+        return this.take(this._length-n);
+    }
+
+    /**
+     * Get all the elements in the collection but the first one.
+     * If the collection is empty, return None.
+     */
+    tail(): Option<Vector2<T>> {
+        // TODO must be optimized!!
+        return this._length > 0 ? Option.of(this.drop(1)) : Option.none<Vector2<T>>();
+    }
 }
