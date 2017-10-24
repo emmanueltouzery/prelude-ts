@@ -803,16 +803,19 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      *     => [List.of(1,2,3), List.of(4,5)]
      */
     splitAt(index:number): [Vector2<T>,Vector2<T>] {
-        // TODO must be optimized!!!
         let r: [Vector2<T>,Vector2<T>] = [Vector2.empty<T>(), Vector2.empty<T>()];
-        for (let i=0;i<this._length;i++) {
-            const val = <T>this.internalGet(i);
-            if (i<index) {
-                r[0] = r[0].append(val);
-            } else {
-                r[1] = r[1].append(val);
-            }
-        }
+        r[0].mutate(mutVec1 => {
+            r[1].mutate(mutVec2 => {
+                for (let i=0;i<this._length;i++) {
+                    const val = <T>this.internalGet(i);
+                    if (i<index) {
+                        mutVec1.append(val);
+                    } else {
+                        mutVec2.append(val);
+                    }
+                }
+            });
+        });
         return r;
     }
 
