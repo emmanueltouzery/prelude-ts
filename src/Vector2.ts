@@ -11,6 +11,9 @@ const nodeBits = 5;
 const nodeSize = (1<<nodeBits); // 32
 const nodeBitmask = nodeSize - 1;
 
+interface MutableVector2<T> {
+    append:(x:T)=>void; // don't call on an empty vector!!!
+}
 
 // Implementation of a bit-mapped vector trie.
 // Based on https://github.com/graue/immutable-vector from Scott Feeney.
@@ -23,7 +26,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
                           private _maxShift: number) {}
 
     static empty<T>(): Vector2<T> {
-        return Vector2.ofArray([]);
+        return Vector2.ofArray<T>([]);
     }
 
     static of<T>(...data: T[]): Vector2<T> {
@@ -70,6 +73,29 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     isEmpty(): boolean {
         return this._length === 0;
+    }
+
+    private mutate(fn: (x:MutableVector2<T>)=>void): Vector2<T> {
+        fn({
+            append: (val:T) => {
+                const index = this._length;
+                // next line will crash on empty vector
+                let node = <any[]>this._contents;
+                let shift = this._maxShift;
+                while (shift > 0) {
+                    let childIndex = (index >> shift) & nodeBitmask;
+                    if (!node[childIndex]) {
+                        // Need to create new node. Can happen when appending element.
+                        node[childIndex] = new Array(nodeSize);
+                    }
+                    node = node[childIndex];
+                    shift -= nodeBits;
+                }
+                node[index & nodeBitmask] = val;
+                ++this._length;
+            }
+        });
+        return this;
     }
 
     /**
@@ -192,12 +218,16 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         // TODO performance disaster
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
-        let result: Vector2<T> = this;
-        while (!curItem.done) {
-            result = result.append(curItem.value);
-            curItem = iterator.next();
+        if (curItem.done) {
+            return this;
         }
-        return result;
+        return this.append(curItem.value).mutate(mutVec => {
+            curItem = iterator.next();
+            while (!curItem.done) {
+                mutVec.append(curItem.value);
+                curItem = iterator.next();
+            }
+        });
     }
 
     /**

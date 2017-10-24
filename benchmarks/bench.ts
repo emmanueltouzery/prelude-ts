@@ -66,7 +66,8 @@ compare(['Vector.find', () => vec.find(x => x===atThreeQuarters)],
         ['List.find', () => list.find(x => x===atThreeQuarters)]);
 
 compare(['Vector.ofIterable', () => Vector.ofIterable(array)],
-        ['Vector2.ofIterable', () => Vector2.ofArray(array)],
+        ['Vector2.ofArray', () => Vector2.ofArray(array)],
+        ['Vector2.ofIterable', () => Vector2.ofIterable(array)],
         ['rawhamt.build from iterable', () => {
             hamt.empty.mutate(
                 (h:any) => {
@@ -107,10 +108,12 @@ compare(['Vector.get(i)', () => vec.get(length/2)],
         ['immList.get(i)', () => immList.get(length/2)]);
 
 compare(['Vector.flatMap', () => vec.flatMap(x => Vector.of(1,2))],
+        ['Vector2.flatMap', () => vec2.flatMap(x => Vector2.of(1,2))],
         ['List.flatMap', () => list.flatMap(x => List.of(1,2))],
         ['immList.flatMap', () => immList.flatMap(x => imm.List([1,2]))]);
 
 compare(['Vector.reverse', () => vec.reverse()],
+        ['Vector2.reverse', () => vec2.reverse()],
         ['Array.reverse', () => array.reverse()],
         ['immList.reverse', () => immList.reverse()],
         ['List.reverse', () => list.reverse()]);
@@ -121,19 +124,23 @@ compare(['Vector.groupBy', () => vec.groupBy(x => x%2)],
         ['immList.groupBy', () => immList.groupBy(x => x%2)]);
 
 compare(['Vector.appendAll', () => vec.appendAll(vec)],
+        ['Vector2.appendAll', () => vec2.appendAll(vec2)],
         ['Array.appendAll', () => array.concat(array)],
         ['immList.appendAll', () => immList.concat(immList)],
         ['List.appendAll', () => list.appendAll(list)]);
 
 compare(['Vector.prependAll', () => vec.prependAll(vec)],
+        ['Vector2.prependAll', () => vec2.prependAll(vec2)],
         ['Array.prependAll', () => array.concat(array)],
         ['List.prependAll', () => list.prependAll(list)]);
 
 compare(['Vector.foldLeft', () => vec.foldLeft(0, (acc,i)=>acc+i)],
+        ['Vector2.foldLeft', () => vec2.foldLeft(0, (acc,i)=>acc+i)],
         ['Array.foldLeft', () => array.reduce((acc,i)=>acc+i)],
         ['immList.foldLeft', () => immList.reduce((acc,i)=>acc+i,0)],
         ['List.foldLeft', () => vec.foldLeft(0, (acc,i)=>acc+i)]);
 
 compare(['Vector.foldRight', () => vec.foldRight(0, (i,acc)=>acc+i)],
+        ['Vector2.foldRight', () => vec2.foldRight(0, (i,acc)=>acc+i)],
         ['immList.foldRight', () => immList.reduceRight((acc,i)=>acc+i,0)],
         ['List.foldRight', () => vec.foldRight(0, (i,acc)=>acc+i)]);
