@@ -838,29 +838,29 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * returns the empty collection.
      */
     drop(n:number): Vector2<T> {
-        // TODO must be optimized!!!
         let r = Vector2.empty<T>();
         if (n>=this._length) {
             return r;
         }
-        for (let i=n;i<this._length;i++) {
-            const val = <T>this.internalGet(i);
-            r = r.append(val);
-        }
-        return r;
+        return r.mutate(mutVec => {
+            for (let i=n;i<this._length;i++) {
+                const val = <T>this.internalGet(i);
+                mutVec.append(val);
+            }
+        });
     }
 
     take(n:number): Vector2<T> {
-        // TODO must be optimized!!!
         let r = Vector2.empty<T>();
         if (n<0) {
             return r;
         }
-        for (let i=0;i<Math.min(n, this._length);i++) {
-            const val = <T>this.internalGet(i);
-            r = r.append(val);
-        }
-        return r;
+        return r.mutate(mutVec => {
+            for (let i=0;i<Math.min(n, this._length);i++) {
+                const val = <T>this.internalGet(i);
+                mutVec.append(val);
+            }
+        });
     }
 
     /**
@@ -920,7 +920,6 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * If the collection is empty, return None.
      */
     tail(): Option<Vector2<T>> {
-        // TODO must be optimized!!
         return this._length > 0 ? Option.of(this.drop(1)) : Option.none<Vector2<T>>();
     }
 }
