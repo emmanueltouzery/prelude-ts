@@ -516,15 +516,15 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      */
     mapOption<U>(mapper:(v:T)=>Option<U>): Vector2<U> {
         let iter = this[Symbol.iterator]();
-        let out = Vector2.empty<U>();
+        let mutVec = Vector2.empty<U>().asMutable();
         let step;
         while (!(step = iter.next()).done) {
             const v = mapper(step.value);
             if (v.isSome()) {
-                out = out.append(v.getOrThrow());
+                mutVec.append(v.getOrThrow());
             }
         }
-        return out;
+        return mutVec.getVector2();
     }
 
     /**
