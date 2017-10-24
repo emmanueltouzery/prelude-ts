@@ -66,10 +66,9 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Vector<U> {
         return new Vector<U>(hamt.empty.mutate(
             (h:any) => {
-                let idx = 0;
                 let nextVal = fn(seed);
                 while (nextVal.isSome()) {
-                    h.set(idx++, nextVal.getOrThrow()[0]);
+                    h.set(h.size, nextVal.getOrThrow()[0]);
                     nextVal = fn(nextVal.getOrThrow()[1]);
                 }
             }), 0);
@@ -442,14 +441,13 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
     dropWhile(predicate:(x:T)=>boolean): Vector<T> {
         let h = hamt.make();
         let skip = true;
-        let newIdx = 0;
         for (let i=0;i<this.hamt.size;i++) {
             const v = this.hamt.get(i+this.indexShift);
             if (skip && !predicate(v)) {
                 skip = false;
             }
             if (!skip) {
-                h = h.set(newIdx++, v);
+                h = h.set(h.size, v);
             }
         }
         return new Vector<T>(h, 0);
@@ -461,13 +459,12 @@ export class Vector<T> implements Seq<T>, Iterable<T> {
      */
     takeWhile(predicate:(x:T)=>boolean): Vector<T> {
         let h = hamt.make();
-        let newIdx = 0;
         for (let i=0;i<this.hamt.size;i++) {
             const v = this.hamt.get(i+this.indexShift);
             if (!predicate(v)) {
                 break;
             }
-            h = h.set(newIdx++, v);
+            h = h.set(h.size, v);
         }
         return new Vector<T>(h, 0);
     }
