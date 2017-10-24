@@ -13,6 +13,7 @@ const nodeBitmask = nodeSize - 1;
 
 interface MutableVector2<T> {
     append:(x:T)=>void;
+    appendAll:(x:Iterable<T>)=>void;
 }
 
 // Implementation of a bit-mapped vector trie.
@@ -79,22 +80,31 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
     }
 
     private mutate(fn: (x:MutableVector2<T>)=>void): Vector2<T> {
-        fn({
-            append: (val:T) => {
-                const index = this._length;
-                let node = this._contents || (this._contents = new Array(nodeSize));
-                let shift = this._maxShift;
-                while (shift > 0) {
-                    let childIndex = (index >> shift) & nodeBitmask;
-                    if (!node[childIndex]) {
-                        // Need to create new node. Can happen when appending element.
-                        node[childIndex] = new Array(nodeSize);
-                    }
-                    node = node[childIndex];
-                    shift -= nodeBits;
+        const append = (val:T) => {
+            const index = this._length;
+            let node = this._contents || (this._contents = new Array(nodeSize));
+            let shift = this._maxShift;
+            while (shift > 0) {
+                let childIndex = (index >> shift) & nodeBitmask;
+                if (!node[childIndex]) {
+                    // Need to create new node. Can happen when appending element.
+                    node[childIndex] = new Array(nodeSize);
                 }
-                node[index & nodeBitmask] = val;
-                ++this._length;
+                node = node[childIndex];
+                shift -= nodeBits;
+            }
+            node[index & nodeBitmask] = val;
+            ++this._length;
+        };
+        fn({
+            append,
+            appendAll: (elts: Iterable<T>) => {
+                const iterator = elts[Symbol.iterator]();
+                let curItem = iterator.next();
+                while (!curItem.done) {
+                    append(curItem.value);
+                    curItem = iterator.next();
+                }
             }
         });
         return this;
@@ -518,13 +528,12 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      */
     flatMap<U>(mapper:(v:T)=>Vector2<U>): Vector2<U> {
         let iter = this[Symbol.iterator]();
-        let out = Vector2.empty<U>();
-        let step;
-        while (!(step = iter.next()).done) {
-            const v = mapper(step.value);
-            out = out.appendAll(v);
-        }
-        return out;
+        return Vector2.empty<U>().mutate(mutVec => {
+            let step;
+            while (!(step = iter.next()).done) {
+                mutVec.appendAll(mapper(step.value));
+            }
+        });
     }
 
     /**
