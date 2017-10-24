@@ -14,6 +14,8 @@ const nodeBitmask = nodeSize - 1;
 interface MutableVector2<T> {
     append:(x:T)=>void;
     appendAll:(x:Iterable<T>)=>void;
+    getVector2(): Vector2<T>;
+    internalGet(idx:number): T|undefined;
 }
 
 // Implementation of a bit-mapped vector trie.
@@ -79,7 +81,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return this._length === 0;
     }
 
-    private mutate(fn: (x:MutableVector2<T>)=>void): Vector2<T> {
+    private asMutable(): MutableVector2<T> {
         const append = (val:T) => {
             const index = this._length;
             let node = this._contents || (this._contents = new Array(nodeSize));
@@ -96,7 +98,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
             node[index & nodeBitmask] = val;
             ++this._length;
         };
-        fn({
+        return {
             append,
             appendAll: (elts: Iterable<T>) => {
                 const iterator = elts[Symbol.iterator]();
@@ -105,9 +107,10 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
                     append(curItem.value);
                     curItem = iterator.next();
                 }
-            }
-        });
-        return this;
+            },
+            internalGet: (idx:number) => this.internalGet(idx),
+            getVector2: () => this
+        };
     }
 
     /**
@@ -235,13 +238,14 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         // first need to create a new Vector2 through the first append
         // call, and then we can mutate that new Vector2, otherwise
         // we'll mutate the receiver which is a big no-no!!
-        return this.append(curItem.value).mutate(mutVec => {
+        const mutVec = this.append(curItem.value).asMutable();
+
+        curItem = iterator.next();
+        while (!curItem.done) {
+            mutVec.append(curItem.value);
             curItem = iterator.next();
-            while (!curItem.done) {
-                mutVec.append(curItem.value);
-                curItem = iterator.next();
-            }
-        });
+        }
+        return mutVec.getVector2();
     }
 
     /**
@@ -389,12 +393,15 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      */
     groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Vector2<T>> {
         return this.foldLeft(
-            HashMap.empty<C,Vector2<T>>(),
-            (acc: HashMap<C,Vector2<T>>, v:T) =>
+            HashMap.empty<C,MutableVector2<T>>(),
+            (acc: HashMap<C,MutableVector2<T>>, v:T) =>
                 acc.putWithMerge(
-                    classifier(v), Vector2.of(v),
-                    (v1:Vector2<T>,v2:Vector2<T>)=>
-                        v1.append(v2.single().getOrThrow())));
+                    classifier(v), Vector2.of(v).asMutable(),
+                    (v1:MutableVector2<T>,v2:MutableVector2<T>)=> {
+                        v1.append(<T>v2.internalGet(0));
+                        return v1;
+                    }))
+            .mapValues(mutVec => mutVec.getVector2());
     }
 
     /**
@@ -481,24 +488,24 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     map<U>(fun:(x:T)=>U): Vector2<U> {
         let iter = this[Symbol.iterator]();
-        return Vector2.empty<U>().mutate(mutVec => {
-            let step;
-            while (!(step = iter.next()).done) {
-                mutVec.append(fun(step.value));
-            }
-        });
+        const mutVec = Vector2.empty<U>().asMutable();
+        let step;
+        while (!(step = iter.next()).done) {
+            mutVec.append(fun(step.value));
+        }
+        return mutVec.getVector2();
     }
 
     filter(fun:(x:T)=>boolean): Vector2<T> {
         let iter = this[Symbol.iterator]();
-        return Vector2.empty<T>().mutate(mutVec => {
-            let step;
-            while (!(step = iter.next()).done) {
-                if (fun(step.value)) {
-                    mutVec.append(step.value);
-                }
+        const mutVec = Vector2.empty<T>().asMutable();
+        let step;
+        while (!(step = iter.next()).done) {
+            if (fun(step.value)) {
+                mutVec.append(step.value);
             }
-        });
+        }
+        return mutVec.getVector2();
     }
 
     /**
@@ -528,12 +535,12 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      */
     flatMap<U>(mapper:(v:T)=>Vector2<U>): Vector2<U> {
         let iter = this[Symbol.iterator]();
-        return Vector2.empty<U>().mutate(mutVec => {
-            let step;
-            while (!(step = iter.next()).done) {
-                mutVec.appendAll(mapper(step.value));
-            }
-        });
+        const mutVec = Vector2.empty<U>().asMutable();
+        let step;
+        while (!(step = iter.next()).done) {
+            mutVec.appendAll(mapper(step.value));
+        }
+        return mutVec.getVector2();
     }
 
     /**
@@ -553,7 +560,6 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
     foldLeft<U>(zero:U, fn:(soFar:U,cur:T)=>U):U {
         let iter = this[Symbol.iterator]();
         let step;
-        let index = 0;
         let acc = zero;
         while (!(step = iter.next()).done) {
             acc = fn(acc, step.value);
@@ -774,11 +780,11 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      *     [1,2,3] => [3,2,1]
      */
     reverse(): Vector2<T> {
-        return Vector2.empty<T>().mutate(mutVec => {
-            for (let i=this._length-1;i>=0;i--) {
-                mutVec.append(<T>this.internalGet(i));
-            }
-        });
+        const mutVec = Vector2.empty<T>().asMutable();
+        for (let i=this._length-1;i>=0;i--) {
+            mutVec.append(<T>this.internalGet(i));
+        }
+        return mutVec.getVector2();
     }
 
     /**
@@ -812,20 +818,17 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      *     => [List.of(1,2,3), List.of(4,5)]
      */
     splitAt(index:number): [Vector2<T>,Vector2<T>] {
-        let r: [Vector2<T>,Vector2<T>] = [Vector2.empty<T>(), Vector2.empty<T>()];
-        r[0].mutate(mutVec1 => {
-            r[1].mutate(mutVec2 => {
-                for (let i=0;i<this._length;i++) {
-                    const val = <T>this.internalGet(i);
-                    if (i<index) {
-                        mutVec1.append(val);
-                    } else {
-                        mutVec2.append(val);
-                    }
-                }
-            });
-        });
-        return r;
+        const r1 = Vector2.empty<T>().asMutable();
+        const r2 = Vector2.empty<T>().asMutable();
+        for (let i=0;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            if (i<index) {
+                r1.append(val);
+            } else {
+                r2.append(val);
+            }
+        }
+        return [r1.getVector2(),r2.getVector2()];
     }
 
     /**
@@ -854,12 +857,12 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         if (n>=this._length) {
             return r;
         }
-        return r.mutate(mutVec => {
-            for (let i=n;i<this._length;i++) {
-                const val = <T>this.internalGet(i);
-                mutVec.append(val);
-            }
-        });
+        const mutVec = r.asMutable();
+        for (let i=n;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            mutVec.append(val);
+        }
+        return mutVec.getVector2();
     }
 
     take(n:number): Vector2<T> {
@@ -867,12 +870,12 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         if (n<0) {
             return r;
         }
-        return r.mutate(mutVec => {
-            for (let i=0;i<Math.min(n, this._length);i++) {
-                const val = <T>this.internalGet(i);
-                mutVec.append(val);
-            }
-        });
+        const mutVec = r.asMutable();
+        for (let i=0;i<Math.min(n, this._length);i++) {
+            const val = <T>this.internalGet(i);
+            mutVec.append(val);
+        }
+        return mutVec.getVector2();
     }
 
     /**
