@@ -43,12 +43,15 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      */
     static ofIterable<T>(elts: Iterable<T>): Vector2<T> {
         // I measure appendAll to be 2x faster than Array.from on my
-        // machine (node 6.11.3)
+        // machine (node 6.11.3+8.8.0)
         // return Vector2.ofArray(Array.from(elts));
+        if (Array.isArray(elts)) {
+            return Vector2.ofArray(elts);
+        }
         return Vector2.empty<T>().appendAll(elts);
     }
 
-    static ofArray<T>(data: T[]): Vector2<T> {
+    private static ofArray<T>(data: T[]): Vector2<T> {
         let nodes = [];
 
         for (let i = 0; i < data.length; i += nodeSize) {
@@ -936,7 +939,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * (use [[Seq.filter]] to remove all elements matching a predicate)
      */
     removeFirst(predicate: (v:T)=>boolean): Vector2<T> {
-        // TODO must be optimized!!
+        // TODO must be optimized!! use takeWhile
         let r = Vector2.empty<T>();
         let i=0;
         for (;i<this._length;i++) {

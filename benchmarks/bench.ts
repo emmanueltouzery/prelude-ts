@@ -26,7 +26,7 @@ const getArray = (length:number) => Array.from({length}, () => Math.floor(Math.r
 const length = 200;
 const array = getArray(length);
 const vec = Vector.ofIterable(array);
-const vec2 = Vector2.ofArray(array);
+const vec2 = Vector2.ofIterable(array);
 const rawhamt = hamt.empty.mutate(
     (h:any) => {
         const iterator = array[Symbol.iterator]();
@@ -74,7 +74,6 @@ compare(['Vector.find', () => vec.find(x => x===atThreeQuarters)],
         ['List.find', () => list.find(x => x===atThreeQuarters)]);
 
 compare(['Vector.ofIterable', () => Vector.ofIterable(array)],
-        ['Vector2.ofArray', () => Vector2.ofArray(array)],
         ['Vector2.ofIterable', () => Vector2.ofIterable(array)],
         ['rawhamt.build from iterable', () => {
             hamt.empty.mutate(
