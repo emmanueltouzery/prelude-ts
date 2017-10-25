@@ -487,7 +487,11 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * return only the leaf nodes containing the first n items from the vector.
      * (give n=_length to get all the data)
      */
-    private getLeafNodes(n:number): T[][] {
+    private getLeafNodes(_n:number): T[][] {
+        if (_n<0) {
+            return [];
+        }
+        const n = Math.min(_n, this._length);
         let _index = -1;
         let _stack: any[] = [];
         let _node = this._contents;
@@ -862,17 +866,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      *     => [List.of(1,2,3), List.of(4,5)]
      */
     splitAt(index:number): [Vector2<T>,Vector2<T>] {
-        const r1 = Vector2.empty<T>().asMutable();
-        const r2 = Vector2.empty<T>().asMutable();
-        for (let i=0;i<this._length;i++) {
-            const val = <T>this.internalGet(i);
-            if (i<index) {
-                r1.append(val);
-            } else {
-                r2.append(val);
-            }
-        }
-        return [r1.getVector2(),r2.getVector2()];
+        return [this.take(index),this.drop(index)];
     }
 
     /**
@@ -897,6 +891,9 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * returns the empty collection.
      */
     drop(n:number): Vector2<T> {
+        if (n<0) {
+            return this;
+        }
         let r = Vector2.empty<T>();
         if (n>=this._length) {
             return r;
@@ -911,7 +908,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     take(n:number): Vector2<T> {
         const leafNodes = this.getLeafNodes(n);
-        return Vector2.fromLeafNodes(leafNodes, n);
+        return Vector2.fromLeafNodes(leafNodes, Math.min(n,this._length));
     }
 
     /**
@@ -959,7 +956,6 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * returns the empty collection.
      */
     dropRight(n:number): Vector2<T> {
-        // TODO must be optimized!!
         if (n>=this._length) {
             return Vector2.empty<T>();
         }
