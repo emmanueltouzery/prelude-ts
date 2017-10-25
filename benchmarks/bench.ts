@@ -46,6 +46,15 @@ while (!curItem.done) {
 
 const list = List.ofIterable(array);
 const immList = imm.List(array);
+
+const idxThreeQuarters = array.length*3/4;
+const atThreeQuarters = array[idxThreeQuarters];
+
+compare(['Vector2.take', () => vec2.take(idxThreeQuarters)],
+        ['Array.slice', () => array.slice(0,idxThreeQuarters)],
+        ['immList.take', () => immList.take(idxThreeQuarters)],
+        ['List.take', () => list.take(idxThreeQuarters)]);
+
 compare(['Vector.filter', () => vec.filter(x => x%2===0)],
         ['Vector2.filter', () => vec2.filter(x => x%2===0)],
         ['Array.filter', () => array.filter(x => x%2===0)],
@@ -58,7 +67,6 @@ compare(['Vector.map', () => vec.map(x => x*2)],
         ['immList.map', () => immList.map(x => x*2)],
         ['List.map', () => list.map(x => x*2)]);
 
-const atThreeQuarters = array[array.length*3/4];
 compare(['Vector.find', () => vec.find(x => x===atThreeQuarters)],
         ['Vector2.find', () => vec2.find(x => x===atThreeQuarters)],
         ['Array.find', () => array.find(x => x===atThreeQuarters)],

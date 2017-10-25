@@ -50,13 +50,19 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     static ofArray<T>(data: T[]): Vector2<T> {
         let nodes = [];
-        let depth = 1;
 
         for (let i = 0; i < data.length; i += nodeSize) {
             const node = data.slice(i, i + nodeSize);
             nodes.push(node);
         }
+        return Vector2.fromLeafNodes(nodes, data.length);
+    }
 
+    /**
+     * Build a new vector from the leaf nodes containing data.
+     */
+    private static fromLeafNodes<T>(nodes: T[][], length: number): Vector2<T> {
+        let depth = 1;
         while(nodes.length > 1) {
             let lowerNodes:any[] = nodes;
             nodes = [];
@@ -68,7 +74,6 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         }
 
         const _contents = nodes[0];
-        const length = data ? data.length : 0;
         const _maxShift = _contents ? nodeBits * (depth - 1) : 0;
         return new Vector2<T>(_contents, length, _maxShift);
     }
@@ -477,6 +482,45 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         };
     }
 
+    /**
+     * get the leaf nodes, which contain the data, from the vector.
+     * return only the leaf nodes containing the first n items from the vector.
+     * (give n=_length to get all the data)
+     */
+    private getLeafNodes(n:number): T[][] {
+        let _index = -1;
+        let _stack: any[] = [];
+        let _node = this._contents;
+        let result:T[][] = [];
+        if (!_node) {
+            // empty vector
+            return result;
+        }
+
+        while (_index*nodeSize < n) {
+
+            if (_index > 0) {
+                // Using the stack, go back up the tree, stopping when we reach a node
+                // whose children we haven't fully iterated over.
+                let step;
+                while ((step = _stack.pop())[1] === nodeSize - 1) ;
+                step[1]++;
+                _stack.push(step);
+                _node = step[0][step[1]];
+            }
+
+            let shift;
+            for (shift=_stack.length*nodeBits; shift<this._maxShift; shift+=nodeBits) {
+                _stack.push([_node, 0]);
+                _node = (<any[]>_node)[0];
+            }
+
+            _index++;
+            result.push(<any>_node);
+        }
+        return result;
+    }
+
     forEach(fun:(x:T)=>void):Vector2<T> {
         let iter = this[Symbol.iterator]();
         let step;
@@ -866,16 +910,8 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
     }
 
     take(n:number): Vector2<T> {
-        let r = Vector2.empty<T>();
-        if (n<0) {
-            return r;
-        }
-        const mutVec = r.asMutable();
-        for (let i=0;i<Math.min(n, this._length);i++) {
-            const val = <T>this.internalGet(i);
-            mutVec.append(val);
-        }
-        return mutVec.getVector2();
+        const leafNodes = this.getLeafNodes(n);
+        return Vector2.fromLeafNodes(leafNodes, n);
     }
 
     /**
