@@ -776,20 +776,16 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
     }
 
     toArray(): T[] {
-        const nodes = this.getLeafNodes(this._length);
-        return [].concat.apply([], nodes).slice(0,this._length);
-        // the current implementation is not such a slam-dunk.
-        // concat() is creating a new array everytime, and I
-        // must slice in the end.
-        // Still my tests on 8.8.0 point to 2x the speed of the
-        // naive push() approach, in commented form lower.
-        // also see => https://stackoverflow.com/a/6768642/516188
+        let out = new Array(this._length);
+        for (let i = 0; i < this._length; i++) {
+            out[i] = <T>this.internalGet(i);
+        }
+        return out;
+        // alternative implementation, measured slower
+        // (concat is creating a new array everytime) =>
         //
-        // let out = [];
-        // for (let i = 0; i < this._length; i++) {
-        //     out.push(<T>this.internalGet(i));
-        // }
-        // return out;
+        // const nodes = this.getLeafNodes(this._length);
+        // return [].concat.apply([], nodes).slice(0,this._length);
     };
 
     /**
@@ -904,7 +900,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     take(n:number): Vector2<T> {
         const leafNodes = this.getLeafNodes(n);
-        return Vector2.fromLeafNodes(leafNodes, Math.min(n,this._length));
+        return Vector2.fromLeafNodes(leafNodes, Math.max(0, Math.min(n,this._length)));
     }
 
     /**
