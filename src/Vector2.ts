@@ -426,20 +426,6 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return <Vector2<T>>SeqHelpers.distinctBy(this, keyExtractor);
     }
 
-    // let ImmutableVectorSlice = require('./ImmutableVectorSlice');
-
-    // slice(begin: number, end: number): Vector2<T> {
-    //     if (typeof end !== 'number' || end > this.length) end = this.length;
-    //     if (typeof begin !== 'number' || begin < 0) begin = 0;
-    //     if (end < begin) end = begin;
-
-    //     if (begin === 0 && end === this.length) {
-    //         return this;
-    //     }
-
-    //     return new ImmutableVectorSlice(this, begin, end);
-    // }
-
     [Symbol.iterator](): Iterator<T> {
         let _vec = this;
         let _index = -1;
@@ -673,8 +659,6 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return converter(this);
     }
 
-    // // TODO: See if equals and toArray are faster using a traversal.
-
     /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
@@ -792,11 +776,20 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
     }
 
     toArray(): T[] {
-        let out = [];
-        for (let i = 0; i < this._length; i++) {
-            out.push(<T>this.internalGet(i));
-        }
-        return out;
+        const nodes = this.getLeafNodes(this._length);
+        return [].concat.apply([], nodes).slice(0,this._length);
+        // the current implementation is not such a slam-dunk.
+        // concat() is creating a new array everytime, and I
+        // must slice in the end.
+        // Still my tests on 8.8.0 point to 2x the speed of the
+        // naive push() approach, in commented form lower.
+        // also see => https://stackoverflow.com/a/6768642/516188
+        //
+        // let out = [];
+        // for (let i = 0; i < this._length; i++) {
+        //     out.push(<T>this.internalGet(i));
+        // }
+        // return out;
     };
 
     /**

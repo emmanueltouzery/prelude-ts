@@ -50,6 +50,9 @@ const immList = imm.List(array);
 const idxThreeQuarters = array.length*3/4;
 const atThreeQuarters = array[idxThreeQuarters];
 
+compare(['Vector2.toArray', () => vec2.toArray()],
+        ['immList.toArray', () => immList.toArray()]);
+
 compare(['Vector2.take', () => vec2.take(idxThreeQuarters)],
         ['Array.slice', () => array.slice(0,idxThreeQuarters)],
         ['immList.take', () => immList.take(idxThreeQuarters)],
