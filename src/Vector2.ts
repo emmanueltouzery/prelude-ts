@@ -75,7 +75,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      */
     private static fromLeafNodes<T>(nodes: T[][], length: number): Vector2<T> {
         let depth = 1;
-        while(nodes.length > 1) {
+        while (nodes.length > 1) {
             let lowerNodes:any[] = nodes;
             nodes = [];
             for (let i = 0; i < lowerNodes.length; i += nodeSize) {
@@ -504,11 +504,11 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * (give n=_length to get all the data)
      */
     private getLeafNodes(_n:number): T[][] {
-        if (_n<0) {
+        if (_n<=0) {
             return [];
         }
         const n = Math.min(_n, this._length);
-        let _index = -1;
+        let _index = 0;
         let _stack: any[] = [];
         let _node = this._contents;
         let result:T[][] = [];
@@ -518,7 +518,6 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         }
 
         while (_index*nodeSize < n) {
-
             if (_index > 0) {
                 // Using the stack, go back up the tree, stopping when we reach a node
                 // whose children we haven't fully iterated over.
@@ -538,6 +537,21 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
             _index++;
             result.push(<any>_node);
         }
+
+        // in case n is not a multiple of nodeSize,
+        // i copied a little too much, wipe the end
+        // to allow garbage collection
+        if (n !== this._length && n%nodeSize !== 0) {
+            const lastLeaf = result[result.length-1];
+            // overwrite the last leaf
+            const newLastLeaf = new Array(nodeSize);
+            // copy only what's needed
+            for (let i=0;i<n%nodeSize;i++) {
+                newLastLeaf[i] = lastLeaf[i];
+            }
+            result[result.length-1] = newLastLeaf;
+        }
+
         return result;
     }
 
