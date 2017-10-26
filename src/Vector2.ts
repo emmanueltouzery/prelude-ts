@@ -833,18 +833,18 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * of both collections. Extra elements will be discarded.
      */
     zip<U>(other: Iterable<U>): Vector2<[T,U]> {
-        let r = Vector2.empty<[T,U]>();
+        let r = Vector2.emptyMutable<[T,U]>();
         const thisIterator = this[Symbol.iterator]();
         const otherIterator = other[Symbol.iterator]();
         let thisCurItem = thisIterator.next();
         let otherCurItem = otherIterator.next();
 
         while (!thisCurItem.done && !otherCurItem.done) {
-            r = r.append([thisCurItem.value, otherCurItem.value]);
+            r.append([thisCurItem.value, otherCurItem.value]);
             thisCurItem = thisIterator.next();
             otherCurItem = otherIterator.next();
         }
-        return r;
+        return r.getVector2();
     }
 
     /**
