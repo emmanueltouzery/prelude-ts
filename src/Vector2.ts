@@ -30,7 +30,6 @@ interface MutableVector2<T> {
 
 // Implementation of a bit-mapped vector trie.
 // Based on https://github.com/graue/immutable-vector from Scott Feeney.
-// TODO optimize all the methods doing append() in a loop!
 export class Vector2<T> implements Collection<T>, Seq<T> {
 
     // _contents will be undefined only if length===0
@@ -210,10 +209,6 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
     // OK to call with index === vec.length (an append) as long as vector
     // length is not a (nonzero) power of the branching factor (32, 1024, ...).
     // Cannot be called on the empty vector!! It would crash
-    //
-    // TODO the action callback is costing lots of performance on node6.11.3 at least
-    // on a loop calling append() which map() and groupBy() are doing for instance,
-    // as evidenced by the poor benchmarks.
     private internalSet(index: number, val: T|null): Vector2<T> {
         let newVec = this.cloneVec();
         // next line will crash on empty vector
@@ -355,8 +350,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * after that point are retained.
      */
     dropWhile(predicate:(x:T)=>boolean): Vector2<T> {
-        // TODO must be optimized!!!
-        let r = Vector2.empty<T>();
+        let r = Vector2.emptyMutable<T>();
         let skip = true;
         for (let i=0;i<this._length;i++) {
             const val = <T>this.internalGet(i);
@@ -364,10 +358,10 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
                 skip = false;
             }
             if (!skip) {
-                r = r.append(val);
+                r.append(val);
             }
         }
-        return r;
+        return r.getVector2();
     }
 
     /**
