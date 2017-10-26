@@ -169,12 +169,12 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      */
     static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Vector2<U> {
         let nextVal = fn(seed);
-        let r = Vector2.empty<U>();
+        let r = Vector2.emptyMutable<U>();
         while (nextVal.isSome()) {
-            r = r.append(nextVal.getOrThrow()[0]);
+            r.append(nextVal.getOrThrow()[0]);
             nextVal = fn(nextVal.getOrThrow()[1]);
         }
-        return r;
+        return r.getVector2();
     }
 
     private cloneVec(): Vector2<T> {
