@@ -956,17 +956,8 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * (use [[Seq.filter]] to remove all elements matching a predicate)
      */
     removeFirst(predicate: (v:T)=>boolean): Vector2<T> {
-        // TODO must be optimized!! use takeWhile
-        let r = Vector2.empty<T>();
-        let i=0;
-        for (;i<this._length;i++) {
-            const val = <T>this.internalGet(i);
-            if (predicate(val)) {
-                break;
-            }
-            r = r.append(val);
-        }
-        return r.appendAll(this.drop(i+1));
+        const v1 = this.takeWhile(x => !predicate(x));
+        return v1.appendAll(this.drop(v1.length()+1));
     }
 
     /**
