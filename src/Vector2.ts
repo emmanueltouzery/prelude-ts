@@ -51,12 +51,12 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      * @type T the item type
      */
     static ofIterable<T>(elts: Iterable<T>): Vector2<T> {
-        // I measure appendAll to be 2x faster than Array.from on my
-        // machine (node 6.11.3+8.8.0)
-        // return Vector2.ofArray(Array.from(elts));
         if (Array.isArray(elts)) {
             return Vector2.ofArray(elts);
         }
+        // I measure appendAll to be 2x faster than Array.from on my
+        // machine (node 6.11.3+8.8.0)
+        // return Vector2.ofArray(Array.from(elts));
         return Vector2.empty<T>().appendAll(elts);
     }
 
