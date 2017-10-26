@@ -838,17 +838,13 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return <Vector2<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
     }
 
-    // TODO must be optimized!!!
     takeWhile(predicate:(x:T)=>boolean): Vector2<T> {
-        let r = Vector2.empty<T>();
         for (let i=0;i<this._length;i++) {
-            const val = <T>this.internalGet(i);
-            if (!predicate(val)) {
-                break;
+            if (!predicate(<T>this.internalGet(i))) {
+                return this.take(i);
             }
-            r = r.append(val);
         }
-        return r;
+        return this;
     }
 
     /**
