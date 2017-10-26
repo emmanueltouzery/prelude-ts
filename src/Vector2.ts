@@ -511,7 +511,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         let _index = 0;
         let _stack: any[] = [];
         let _node = this._contents;
-        let result:T[][] = [];
+        let result:T[][] = new Array(Math.floor(n/nodeSize)+1);
         if (!_node) {
             // empty vector
             return result;
@@ -534,8 +534,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
                 _node = (<any[]>_node)[0];
             }
 
-            _index++;
-            result.push(<any>_node);
+            result[_index++] = <any>_node;
         }
 
         // in case n is not a multiple of nodeSize,
