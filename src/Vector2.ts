@@ -894,7 +894,6 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      *    => [Vector.of(1,2), Vector.of(3,4,5,6)]
      */
     span(predicate:(x:T)=>boolean): [Vector2<T>,Vector2<T>] {
-        // TODO must be optimized!!!
         const first = this.takeWhile(predicate);
         return [first, this.drop(first.length())];
     }
