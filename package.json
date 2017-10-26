@@ -19,7 +19,7 @@
         "typescript": "2.5.3",
         "browserify": "14.4.0",
         "uglify-js": "3.1.2",
-        "immutable": "4.0.0-rc.7",
+        "immutable": "4.0.0-rc.9",
         "hamt": "2.2.2"
     },
     "keywords": [
