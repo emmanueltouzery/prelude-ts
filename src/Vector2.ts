@@ -934,14 +934,9 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     /**
      * Prepend multiple elements at the beginning of the collection.
-     *
-     * This method requires Array.from()
-     * You may need to polyfill it =>
-     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
      */
     prependAll(elts: Iterable<T>): Vector2<T> {
-        // TODO must be optimized!!
-        return Vector2.ofArray(Array.from(elts)).appendAll(this);
+        return Vector2.ofIterable(elts).appendAll(this);
     }
 
     /**
