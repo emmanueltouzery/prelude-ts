@@ -11,6 +11,16 @@ const nodeBits = 5;
 const nodeSize = (1<<nodeBits); // 32
 const nodeBitmask = nodeSize - 1;
 
+/**
+ * We can get a mutable vector besides the immutable one,
+ * to enable faster performance in some scenarios (for instance
+ * append in a loop). However this is not exported to users
+ * of the library but purely for internal use.
+ *
+ * Note that since we can never modify nodes of an immutable vector,
+ * we must consider long and hard before adding more operations besides
+ * append to this interface.
+ */
 interface MutableVector2<T> {
     append:(x:T)=>void;
     appendAll:(x:Iterable<T>)=>void;
@@ -89,11 +99,34 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return this._length === 0;
     }
 
-    private asMutable(): MutableVector2<T> {
+    /**
+     * Get an empty mutable vector. Append is much more efficient, and you can
+     * get a normal vector from it.
+     */
+    private static emptyMutable<T>(): MutableVector2<T> {
+        return Vector2.appendToMutable(Vector2.empty<T>(), <any>undefined);
+    }
+
+    /**
+     * Get a mutable vector from an immutable one, however you must add a
+     * a value to the immutable vector at least once, so that the last
+     * node is modified to a temporary vector, because we can't modify
+     * the nodes from the original immutable vector.
+     * Note that is only safe because the only modifying operation on
+     * mutable vector is append at the end (so we know other tiles besides
+     * the last one won't be modified).
+     */
+    private static appendToMutable<T>(vec: Vector2<T>, toAppend:T): MutableVector2<T> {
+        // i don't want to offer even a private API to get a mutable vector from
+        // an immutable one without adding a value to protect the last node, but
+        // I need it for emptyMutable(), so I have this trick with undefined and any.
+        if (typeof toAppend !== "undefined") {
+            vec = vec.append(toAppend);
+        }
         const append = (val:T) => {
-            const index = this._length;
-            let node = this._contents || (this._contents = new Array(nodeSize));
-            let shift = this._maxShift;
+            const index = vec._length;
+            let node = vec._contents || (vec._contents = new Array(nodeSize));
+            let shift = vec._maxShift;
             while (shift > 0) {
                 let childIndex = (index >> shift) & nodeBitmask;
                 if (!node[childIndex]) {
@@ -104,7 +137,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
                 shift -= nodeBits;
             }
             node[index & nodeBitmask] = val;
-            ++this._length;
+            ++vec._length;
         };
         return {
             append,
@@ -116,8 +149,8 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
                     curItem = iterator.next();
                 }
             },
-            internalGet: (idx:number) => this.internalGet(idx),
-            getVector2: () => this
+            internalGet: (idx:number) => vec.internalGet(idx),
+            getVector2: () => vec
         };
     }
 
@@ -246,7 +279,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         // first need to create a new Vector2 through the first append
         // call, and then we can mutate that new Vector2, otherwise
         // we'll mutate the receiver which is a big no-no!!
-        const mutVec = this.append(curItem.value).asMutable();
+        const mutVec = Vector2.appendToMutable(this, curItem.value);
 
         curItem = iterator.next();
         while (!curItem.done) {
@@ -404,7 +437,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
             HashMap.empty<C,MutableVector2<T>>(),
             (acc: HashMap<C,MutableVector2<T>>, v:T) =>
                 acc.putWithMerge(
-                    classifier(v), Vector2.of(v).asMutable(),
+                    classifier(v), Vector2.appendToMutable(Vector2.empty<T>(), v),
                     (v1:MutableVector2<T>,v2:MutableVector2<T>)=> {
                         v1.append(<T>v2.internalGet(0));
                         return v1;
@@ -525,7 +558,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     map<U>(fun:(x:T)=>U): Vector2<U> {
         let iter = this[Symbol.iterator]();
-        const mutVec = Vector2.empty<U>().asMutable();
+        const mutVec = Vector2.emptyMutable<U>();
         let step;
         while (!(step = iter.next()).done) {
             mutVec.append(fun(step.value));
@@ -535,7 +568,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
 
     filter(fun:(x:T)=>boolean): Vector2<T> {
         let iter = this[Symbol.iterator]();
-        const mutVec = Vector2.empty<T>().asMutable();
+        const mutVec = Vector2.emptyMutable<T>();
         let step;
         while (!(step = iter.next()).done) {
             if (fun(step.value)) {
@@ -553,7 +586,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      */
     mapOption<U>(mapper:(v:T)=>Option<U>): Vector2<U> {
         let iter = this[Symbol.iterator]();
-        let mutVec = Vector2.empty<U>().asMutable();
+        let mutVec = Vector2.emptyMutable<U>();
         let step;
         while (!(step = iter.next()).done) {
             const v = mapper(step.value);
@@ -572,7 +605,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      */
     flatMap<U>(mapper:(v:T)=>Vector2<U>): Vector2<U> {
         let iter = this[Symbol.iterator]();
-        const mutVec = Vector2.empty<U>().asMutable();
+        const mutVec = Vector2.emptyMutable<U>();
         let step;
         while (!(step = iter.next()).done) {
             mutVec.appendAll(mapper(step.value));
@@ -820,7 +853,7 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
      *     [1,2,3] => [3,2,1]
      */
     reverse(): Vector2<T> {
-        const mutVec = Vector2.empty<T>().asMutable();
+        const mutVec = Vector2.emptyMutable<T>();
         for (let i=this._length-1;i>=0;i--) {
             mutVec.append(<T>this.internalGet(i));
         }
@@ -882,11 +915,10 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         if (n<0) {
             return this;
         }
-        let r = Vector2.empty<T>();
         if (n>=this._length) {
-            return r;
+            return Vector2.empty<T>();
         }
-        const mutVec = r.asMutable();
+        const mutVec = Vector2.emptyMutable<T>();
         for (let i=n;i<this._length;i++) {
             const val = <T>this.internalGet(i);
             mutVec.append(val);
