@@ -1,4 +1,5 @@
 import { Vector2 } from "../src/Vector2";
+import { Stream } from "../src/Stream";
 import { MyClass } from "./SampleData";
 import * as SeqTest from "./Seq";
 import * as assert from 'assert'
@@ -51,4 +52,7 @@ describe("take() implementation", () => {
     it("handles simple cases correctly", () => assert.deepEqual(
         arraySetUndefineds((<any>Vector2.of(1,2,3))._contents),
         (<any>Vector2.of(1,2,3,4,5,6).take(3))._contents));
+    it("handles root killing correctly", () => assert.deepEqual(
+        arraySetUndefineds((<any>Vector2.of(1,2,3))._contents),
+        (<any>Vector2.ofIterable(Stream.iterate(1,i=>i+1).take(40)).take(3))._contents));
 });
