@@ -498,61 +498,61 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         };
     }
 
-    /**
-     * get the leaf nodes, which contain the data, from the vector.
-     * return only the leaf nodes containing the first n items from the vector.
-     * (give n=_length to get all the data)
-     */
-    private getLeafNodes(_n:number): T[][] {
-        if (_n<=0) {
-            return [];
-        }
-        const n = Math.min(_n, this._length);
-        let _index = 0;
-        let _stack: any[] = [];
-        let _node = this._contents;
-        let result:T[][] = new Array(Math.floor(n/nodeSize)+1);
-        if (!_node) {
-            // empty vector
-            return result;
-        }
+    // /**
+    //  * get the leaf nodes, which contain the data, from the vector.
+    //  * return only the leaf nodes containing the first n items from the vector.
+    //  * (give n=_length to get all the data)
+    //  */
+    // private getLeafNodes(_n:number): T[][] {
+    //     if (_n<=0) {
+    //         return [];
+    //     }
+    //     const n = Math.min(_n, this._length);
+    //     let _index = 0;
+    //     let _stack: any[] = [];
+    //     let _node = this._contents;
+    //     let result:T[][] = new Array(Math.floor(n/nodeSize)+1);
+    //     if (!_node) {
+    //         // empty vector
+    //         return result;
+    //     }
 
-        while (_index*nodeSize < n) {
-            if (_index > 0) {
-                // Using the stack, go back up the tree, stopping when we reach a node
-                // whose children we haven't fully iterated over.
-                let step;
-                while ((step = _stack.pop())[1] === nodeSize - 1) ;
-                step[1]++;
-                _stack.push(step);
-                _node = step[0][step[1]];
-            }
+    //     while (_index*nodeSize < n) {
+    //         if (_index > 0) {
+    //             // Using the stack, go back up the tree, stopping when we reach a node
+    //             // whose children we haven't fully iterated over.
+    //             let step;
+    //             while ((step = _stack.pop())[1] === nodeSize - 1) ;
+    //             step[1]++;
+    //             _stack.push(step);
+    //             _node = step[0][step[1]];
+    //         }
 
-            let shift;
-            for (shift=_stack.length*nodeBits; shift<this._maxShift; shift+=nodeBits) {
-                _stack.push([_node, 0]);
-                _node = (<any[]>_node)[0];
-            }
+    //         let shift;
+    //         for (shift=_stack.length*nodeBits; shift<this._maxShift; shift+=nodeBits) {
+    //             _stack.push([_node, 0]);
+    //             _node = (<any[]>_node)[0];
+    //         }
 
-            result[_index++] = <any>_node;
-        }
+    //         result[_index++] = <any>_node;
+    //     }
 
-        // in case n is not a multiple of nodeSize,
-        // i copied a little too much, wipe the end
-        // to allow garbage collection
-        if (n !== this._length && n%nodeSize !== 0) {
-            const lastLeaf = result[result.length-1];
-            // overwrite the last leaf
-            const newLastLeaf = new Array(nodeSize);
-            // copy only what's needed
-            for (let i=0;i<n%nodeSize;i++) {
-                newLastLeaf[i] = lastLeaf[i];
-            }
-            result[result.length-1] = newLastLeaf;
-        }
+    //     // in case n is not a multiple of nodeSize,
+    //     // i copied a little too much, wipe the end
+    //     // to allow garbage collection
+    //     if (n !== this._length && n%nodeSize !== 0) {
+    //         const lastLeaf = result[result.length-1];
+    //         // overwrite the last leaf
+    //         const newLastLeaf = new Array(nodeSize);
+    //         // copy only what's needed
+    //         for (let i=0;i<n%nodeSize;i++) {
+    //             newLastLeaf[i] = lastLeaf[i];
+    //         }
+    //         result[result.length-1] = newLastLeaf;
+    //     }
 
-        return result;
-    }
+    //     return result;
+    // }
 
     forEach(fun:(x:T)=>void):Vector2<T> {
         let iter = this[Symbol.iterator]();
@@ -932,9 +932,38 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return mutVec.getVector2();
     }
 
-    take(n:number): Vector2<T> {
-        const leafNodes = this.getLeafNodes(n);
-        return Vector2.fromLeafNodes(leafNodes, Math.max(0, Math.min(n,this._length)));
+    take(_n:number): Vector2<T> {
+        if (_n<=0 || this._length === 0) {
+            return Vector2.empty<T>();
+        }
+        const n = Math.min(_n, this._length);
+        const index = this._length-1;
+
+        let newVec = this.cloneVec();
+        newVec._length = n;
+        // next line will crash on empty vector
+        let node = newVec._contents = (<any[]>this._contents).slice();
+        let shift = this._maxShift;
+        while (shift > 0) {
+            let childIndex = (index >> shift) & nodeBitmask;
+            if (node[childIndex]) {
+                for (let i=childIndex+1;i<nodeSize;i++) {
+                    // remove pointers if present, to enable GC
+                    node[i] = null;
+                }
+                node[childIndex] = node[childIndex].slice();
+            } else {
+                // Need to create new node. Can happen when appending element.
+                node[childIndex] = new Array(nodeSize);
+            }
+            node = node[childIndex];
+            shift -= nodeBits;
+        }
+        for (let i=(index & nodeBitmask)+1;i<nodeSize;i++) {
+            // remove pointers if present, to enable GC
+            node[i] = null;
+        }
+        return newVec;
     }
 
     /**
