@@ -77,10 +77,21 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
     private static ofArray<T>(data: T[]): Vector2<T> {
         let nodes = [];
 
-        for (let i = 0; i < data.length; i += nodeSize) {
+        let i=0;
+        for (; i < data.length-(data.length%nodeSize); i += nodeSize) {
             const node = data.slice(i, i + nodeSize);
             nodes.push(node);
         }
+
+        // potentially one non-full node to add.
+        if (data.length-i>0) {
+            const extraNode = new Array(nodeSize);
+            for (let idx=0;i+idx<data.length;idx++) {
+                extraNode[idx] = data[i+idx];
+            }
+            nodes.push(extraNode);
+        }
+
         return Vector2.fromLeafNodes(nodes, data.length);
     }
 
@@ -145,20 +156,25 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
             vec = vec.append(toAppend);
         }
         const append = (val:T) => {
-            const index = vec._length;
-            let node = vec._contents || (vec._contents = new Array(nodeSize));
-            let shift = vec._maxShift;
-            while (shift > 0) {
-                let childIndex = (index >> shift) & nodeBitmask;
-                if (!node[childIndex]) {
-                    // Need to create new node. Can happen when appending element.
-                    node[childIndex] = new Array(nodeSize);
+            if (vec._length < (nodeSize << vec._maxShift)) {
+                const index = vec._length;
+                let node = vec._contents || (vec._contents = new Array(nodeSize));
+                let shift = vec._maxShift;
+                while (shift > 0) {
+                    let childIndex = (index >> shift) & nodeBitmask;
+                    if (!node[childIndex]) {
+                        // Need to create new node. Can happen when appending element.
+                        node[childIndex] = new Array(nodeSize);
+                    }
+                    node = node[childIndex];
+                    shift -= nodeBits;
                 }
-                node = node[childIndex];
-                shift -= nodeBits;
+                node[index & nodeBitmask] = val;
+                ++vec._length;
+            } else {
+                // We'll need a new root node.
+                vec = Vector2.setupNewRootNode(vec, val);
             }
-            node[index & nodeBitmask] = val;
-            ++vec._length;
         };
         return {
             append,
@@ -279,20 +295,24 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
             return newVec;
         } else {
             // We'll need a new root node.
-            const newVec = this.cloneVec();
-            newVec._length++;
-            newVec._maxShift += nodeBits;
-            let node:any[] = [];
-            newVec._contents = [this._contents, node];
-            let depth = newVec._maxShift / nodeBits + 1;
-            for (let i = 2; i < depth; i++) {
-                const newNode: any[] = [];
-                node.push(newNode);
-                node = newNode;
-            }
-            node[0] = val;
-            return newVec;
+            return Vector2.setupNewRootNode(this,val);
         }
+    }
+
+    private static setupNewRootNode<T>(vec: Vector2<T>, val:T): Vector2<T> {
+        const newVec = vec.cloneVec();
+        newVec._length++;
+        newVec._maxShift += nodeBits;
+        let node:any[] = [];
+        newVec._contents = [vec._contents, node];
+        let depth = newVec._maxShift / nodeBits + 1;
+        for (let i = 2; i < depth; i++) {
+            const newNode: any[] = [];
+            node.push(newNode);
+            node = newNode;
+        }
+        node[0] = val;
+        return newVec;
     }
 
     /**
@@ -1014,31 +1034,35 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
             return Vector2.empty<T>();
         }
         const n = Math.min(_n, this._length);
-        const index = this._length-1;
+        const index = n;
 
         let newVec = this.cloneVec();
         newVec._length = n;
         // next line will crash on empty vector
         let node = newVec._contents = (<any[]>this._contents).slice();
         let shift = this._maxShift;
+        let underRoot = true;
         while (shift > 0) {
-            let childIndex = (index >> shift) & nodeBitmask;
-            if (node[childIndex]) {
+            const childIndex = (index >> shift) & nodeBitmask;
+            if (underRoot && childIndex === 0) {
+                // root killing, skip this node, we don't want
+                // root nodes with only 1 child
+                newVec._contents = node[childIndex];
+                newVec._maxShift -= nodeBits;
+            } else {
+                underRoot = underRoot && childIndex === 0;
                 for (let i=childIndex+1;i<nodeSize;i++) {
                     // remove pointers if present, to enable GC
-                    node[i] = null;
+                    node[i] = undefined;
                 }
                 node[childIndex] = node[childIndex].slice();
-            } else {
-                // Need to create new node. Can happen when appending element.
-                node[childIndex] = new Array(nodeSize);
             }
             node = node[childIndex];
             shift -= nodeBits;
         }
-        for (let i=(index & nodeBitmask)+1;i<nodeSize;i++) {
+        for (let i=(index & nodeBitmask);i<nodeSize;i++) {
             // remove pointers if present, to enable GC
-            node[i] = null;
+            node[i] = undefined;
         }
         return newVec;
     }

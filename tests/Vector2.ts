@@ -27,3 +27,28 @@ describe("Vector2 extra methods", () => {
     it("handles init correctly on a single-element vector2", () => assert.deepEqual(
         [], Vector2.of(1).init().toArray()));
 });
+
+// that's needed due to node's assert.deepEqual
+// saying that new Array(2) is NOT the same as
+// [undefined, undefined].
+// (empty vs undefined)
+// => forcing undefined
+function arraySetUndefineds(ar:any[]) {
+    for (let i=0;i<ar.length;i++) {
+        if (Array.isArray(ar[i])) {
+            arraySetUndefineds(ar[i]);
+        }
+        if (typeof ar[i] === "undefined") {
+            ar[i] = undefined;
+        }
+    }
+    return ar;
+}
+
+// check that the internal structure of the vector trie
+// is correct after take, that means also root killing and so on.
+describe("take() implementation", () => {
+    it("handles simple cases correctly", () => assert.deepEqual(
+        arraySetUndefineds((<any>Vector2.of(1,2,3))._contents),
+        (<any>Vector2.of(1,2,3,4,5,6).take(3))._contents));
+});
