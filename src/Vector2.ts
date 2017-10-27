@@ -1047,17 +1047,18 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
             if (underRoot && childIndex === 0) {
                 // root killing, skip this node, we don't want
                 // root nodes with only 1 child
-                newVec._contents = node[childIndex];
+                newVec._contents = node[childIndex].slice();
                 newVec._maxShift -= nodeBits;
+                node = <any[]>newVec._contents;
             } else {
-                underRoot = underRoot && childIndex === 0;
+                underRoot = false;
                 for (let i=childIndex+1;i<nodeSize;i++) {
                     // remove pointers if present, to enable GC
                     node[i] = undefined;
                 }
                 node[childIndex] = node[childIndex].slice();
+                node = node[childIndex];
             }
-            node = node[childIndex];
             shift -= nodeBits;
         }
         for (let i=(index & nodeBitmask);i<nodeSize;i++) {
