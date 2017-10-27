@@ -28,19 +28,33 @@ interface MutableVector2<T> {
     internalGet(idx:number): T|undefined;
 }
 
-// Implementation of a bit-mapped vector trie.
-// Based on https://github.com/graue/immutable-vector from Scott Feeney.
+
+/**
+ * A general-purpose list class with all-around good performance.
+ * O(1) access, append, prepend.
+ * It's backed by a bit-mapped vector trie.
+ * @type T the item type
+ */
 export class Vector2<T> implements Collection<T>, Seq<T> {
+    // Based on https://github.com/graue/immutable-vector from Scott Feeney.
 
     // _contents will be undefined only if length===0
     protected constructor(private _contents: any[]|undefined,
                           private _length: number,
                           private _maxShift: number) {}
 
+    /**
+     * The empty vector.
+     * @type T the item type
+     */
     static empty<T>(): Vector2<T> {
         return Vector2.ofArray<T>([]);
     }
 
+    /**
+     * Build a vector from a series of items (any number, as parameters)
+     * @type T the item type
+     */
     static of<T>(...data: T[]): Vector2<T> {
         return Vector2.ofArray(data);
     }
@@ -90,10 +104,18 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return new Vector2<T>(_contents, length, _maxShift);
     }
 
+    /**
+     * Get the length of the collection.
+     */
     length(): number {
         return this._length;
     }
 
+    // ############################ ADD HASTRUEEQUALITY #############################
+
+    /**
+     * true if the collection is empty, false otherwise.
+     */
     isEmpty(): boolean {
         return this._length === 0;
     }
@@ -196,10 +218,19 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return undefined;
     }
 
+    /**
+     * Retrieve the element at index idx.
+     * Returns an option because the collection may
+     * contain less elements than the index.
+     */
     get(index: number): Option<T> {
         return Option.of(this.internalGet(index));
     }
 
+    /**
+     * If the collection contains a single element,
+     * return Some of its value, otherwise return None.
+     */
     single(): Option<T> {
         return this._length === 1 ?
             this.head() :
@@ -236,6 +267,9 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return this.internalSet(index, val);
     }
 
+    /**
+     * Append an element at the end of the collection.
+     */
     append(val:T): Vector2<T> {
         if (this._length === 0) {
             return Vector2.ofArray<T>([val]);
@@ -449,10 +483,20 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return SeqHelpers.arrangeBy<T,K>(this, getKey);
     }
 
+    /**
+     * Remove duplicate items; elements are mapped to keys, those
+     * get compared.
+     *
+     *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
+     *     => [1,2,3]
+     */
     distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Vector2<T> {
         return <Vector2<T>>SeqHelpers.distinctBy(this, keyExtractor);
     }
 
+    /**
+     * Implementation of the Iterator interface.
+     */
     [Symbol.iterator](): Iterator<T> {
         let _vec = this;
         let _index = -1;
@@ -554,6 +598,9 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
     //     return result;
     // }
 
+    /**
+     * Call a function for element in the collection.
+     */
     forEach(fun:(x:T)=>void):Vector2<T> {
         let iter = this[Symbol.iterator]();
         let step;
@@ -563,6 +610,10 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return this;
     }
 
+    /**
+     * Return a new collection where each element was transformed
+     * by the mapper function you give.
+     */
     map<U>(fun:(x:T)=>U): Vector2<U> {
         let iter = this[Symbol.iterator]();
         const mutVec = Vector2.emptyMutable<U>();
@@ -573,6 +624,11 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return mutVec.getVector2();
     }
 
+    /**
+     * Call a predicate for each element in the collection,
+     * build a new collection holding only the elements
+     * for which the predicate returned true.
+     */
     filter(fun:(x:T)=>boolean): Vector2<T> {
         let iter = this[Symbol.iterator]();
         const mutVec = Vector2.emptyMutable<T>();
@@ -634,6 +690,20 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return this.foldLeft(zero, fn);
     }
 
+    /**
+     * Reduces the collection to a single value.
+     * Left-associative.
+     *
+     * Example:
+     *
+     *     Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs))
+     *     => "cba!"
+     *
+     * @param zero The initial value
+     * @param fn A function taking the previous value and
+     *           the current collection item, and returning
+     *           an updated value.
+     */
     foldLeft<U>(zero:U, fn:(soFar:U,cur:T)=>U):U {
         let iter = this[Symbol.iterator]();
         let step;
@@ -815,6 +885,9 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         });
     }
 
+    /**
+     * Convert to array.
+     */
     toArray(): T[] {
         let out = new Array(this._length);
         for (let i = 0; i < this._length; i++) {
@@ -878,6 +951,10 @@ export class Vector2<T> implements Collection<T>, Seq<T> {
         return <Vector2<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
     }
 
+    /**
+     * Returns a new collection, discarding the elements
+     * after the first element which fails the predicate.
+     */
     takeWhile(predicate:(x:T)=>boolean): Vector2<T> {
         for (let i=0;i<this._length;i++) {
             if (!predicate(<T>this.internalGet(i))) {
