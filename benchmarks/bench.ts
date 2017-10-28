@@ -98,6 +98,7 @@ compare(
     }]);
 
 compare(['Vector.toArray', (p:Prerequisites) => p.vec.toArray()],
+        ['List.toArray', (p:Prerequisites) => p.list.toArray()],
         ['immList.toArray', (p:Prerequisites) => p.immList.toArray()]);
 
 compare(['Vector.take', (p:Prerequisites) => p.vec.take(p.idxThreeQuarters)],

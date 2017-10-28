@@ -998,8 +998,12 @@ class ConsList<T> extends List<T> implements Iterable<T> {
     }
 
     toArray(): T[] {
-        const r = this._tail.toArray();
-        r.unshift(this.value);
+        let r:T[] = [];
+        let curItem: List<T> = this;
+        while (!curItem.isEmpty()) {
+            r.push((<ConsList<T>>curItem).value);
+            curItem = (<ConsList<T>>curItem)._tail;
+        }
         return r;
     }
 
