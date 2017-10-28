@@ -26,6 +26,11 @@ export function runTests(seqName: string,
             [1, null, 2], of(1, null, 2).toArray()));
         it("supports ofIterable", () => assert.deepEqual(
             [1,2,3], ofIterable([1,2,3]).toArray()));
+        // need to test ofIterable with a real iterable as well
+        // as an array -- vector for instance has an optimized codepath
+        // for arrays so we need to give a real iterable too for full coverage.
+        it("supports ofIterable from real iterable", () => assert.deepEqual(
+            [1,2,3], ofIterable(Stream.of(1,2,3)).toArray()));
         it("supports of", () => assert.deepEqual(
             [1,2,3], of(1,2,3).toArray()));
         it("supports unfoldRight", () => assert.deepEqual(
