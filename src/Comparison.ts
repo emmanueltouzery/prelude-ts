@@ -158,21 +158,6 @@ export function hasTrueEquality(val: any): Option<boolean> {
 }
 
 /**
- * Utility function to help converting a value to string
- * util.inspect seems to depend on node.
- * @hidden
- */
-export function toStringHelper(obj: any|null): string {
-    if (Array.isArray(obj)) {
-        return "[" + obj.map(toStringHelper) + "]"
-    }
-    if (typeof obj === "string") {
-        return "'" + obj + "'";
-    }
-    return obj+"";
-}
-
-/**
  * Enumeration used to express ordering relationships.
  * it's a const enum, is replaced by integers in the source.
  */

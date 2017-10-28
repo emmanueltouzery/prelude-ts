@@ -3,7 +3,7 @@ import { HashMap } from "./HashMap";
 import { IMap } from "./IMap";
 import { Seq } from "./Seq";
 import { WithEquality, areEqual, getHashCode,
-         toStringHelper, Ordering } from "./Comparison";
+         Ordering } from "./Comparison";
 import { Collection } from "./Collection";
 import * as SeqHelpers from "./SeqHelpers";
 
@@ -793,7 +793,7 @@ export class Vector<T> implements Seq<T> {
             if (i>0) {
                 r += ", ";
             }
-            r += toStringHelper(this.internalGet(i));
+            r += SeqHelpers.toStringHelper(this.internalGet(i));
         }
         return r + ")";
     }

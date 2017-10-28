@@ -1,7 +1,7 @@
 import { Value } from "./Value";
 import { Option } from "./Option";
-import { WithEquality, areEqual,
-         getHashCode, toStringHelper } from "./Comparison";
+import { WithEquality, areEqual, getHashCode } from "./Comparison";
+import { toStringHelper } from "./SeqHelpers";
 import { contractTrueEquality } from "./Contract";
 
 /**

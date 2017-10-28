@@ -3,7 +3,8 @@ import { Seq } from "./Seq";
 import { Vector } from "./Vector";
 import { Either } from "./Either";
 import { WithEquality, areEqual, hasTrueEquality,
-         getHashCode, toStringHelper } from "./Comparison";
+         getHashCode, } from "./Comparison";
+import { toStringHelper } from "./SeqHelpers";
 import { contractTrueEquality} from "./Contract";
 
 /**

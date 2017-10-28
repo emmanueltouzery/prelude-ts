@@ -1,7 +1,7 @@
 import { Option } from "./Option";
 import { Vector } from "./Vector";
-import { WithEquality, toStringHelper,
-         getHashCode, areEqual, Ordering } from "./Comparison";
+import { WithEquality, getHashCode,
+         areEqual, Ordering } from "./Comparison";
 import { contractTrueEquality } from "./Contract";
 import { Value } from "./Value";
 import { IMap } from "./IMap";
@@ -1093,7 +1093,7 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
         let result = "Stream(";
 
         while (!curItem.isEmpty()) {
-            result += toStringHelper((<ConsStream<T>>curItem).value);
+            result += SeqHelpers.toStringHelper((<ConsStream<T>>curItem).value);
             const tail = (<ConsStream<T>>curItem)._tail;
             if (!tail.isEvaluated()) {
                 result += ", ?";

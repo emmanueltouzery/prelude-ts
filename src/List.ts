@@ -1,7 +1,7 @@
 import { Option } from "./Option";
 import { Vector } from "./Vector";
-import { WithEquality, toStringHelper,
-         getHashCode, areEqual, Ordering } from "./Comparison";
+import { WithEquality, getHashCode,
+         areEqual, Ordering } from "./Comparison";
 import { contractTrueEquality } from "./Contract";
 import { Value } from "./Value";
 import { IMap } from "./IMap";
@@ -1067,7 +1067,7 @@ class ConsList<T> extends List<T> implements Iterable<T> {
         let result = "List(";
 
         while (!curItem.isEmpty()) {
-            result += toStringHelper((<ConsList<T>>curItem).value);
+            result += SeqHelpers.toStringHelper((<ConsList<T>>curItem).value);
             const tail = (<ConsList<T>>curItem)._tail;
             curItem = tail;
             if (!curItem.isEmpty()) {

@@ -80,3 +80,18 @@ export function distinctBy<T,U>(seq: Collection<T>, keyExtractor: (x:T)=>U&WithE
         return !r;
     });
 }
+
+/**
+ * Utility function to help converting a value to string
+ * util.inspect seems to depend on node.
+ * @hidden
+ */
+export function toStringHelper(obj: any|null): string {
+    if (Array.isArray(obj)) {
+        return "[" + obj.map(toStringHelper) + "]"
+    }
+    if (typeof obj === "string") {
+        return "'" + obj + "'";
+    }
+    return obj+"";
+}

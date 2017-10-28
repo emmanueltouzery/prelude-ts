@@ -3,7 +3,8 @@ import { Vector } from "./Vector";
 import { List } from "./List";
 import { Option } from "./Option";
 import { WithEquality, hasEquals, HasEquals, 
-         getHashCode, areEqual, toStringHelper } from "./Comparison";
+         getHashCode, areEqual } from "./Comparison";
+import { toStringHelper } from "./SeqHelpers";
 import { contractTrueEquality } from "./Contract";
 const hamt: any = require("hamt_plus");
 
