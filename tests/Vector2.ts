@@ -64,6 +64,9 @@ describe("Vector2.take() implementation", () => {
     it("handles root killing correctly", () => checkTake(
         Vector2.ofIterable(Stream.iterate(1,i=>i+1).take(40)),
         3, Vector2.of(1,2,3)));
+    it("handles double root killing correctly", () => checkTake(
+        Vector2.ofIterable(Stream.iterate(1,i=>i+1).take(1100)),
+        3, Vector2.of(1,2,3)));
 });
 
 function checkAppend<T>(base: Vector2<T>, toAppend: Iterable<T>, combined: Vector2<T>) {
