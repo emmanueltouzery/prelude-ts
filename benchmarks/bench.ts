@@ -74,6 +74,38 @@ function compare(...items: Array<[string, (x:Prerequisites)=>any]>) {
     }
 }
 
+compare(
+    ['Vector.append', (p:Prerequisites) => {
+        let v = Vector.empty<number>();
+        for (let item of p.array) {
+            v = v.append(item);
+        }
+    }],
+    ['Vector2.append', (p:Prerequisites) => {
+        let v = Vector2.empty<number>();
+        for (let item of p.array) {
+            v = v.append(item);
+        }
+    }],
+    ['Array.push', (p:Prerequisites) => {
+        let v = [];
+        for (let item of p.array) {
+            v.push(item);
+        }
+    }],
+    ['immList.push', (p:Prerequisites) => {
+        let v = imm.List<number>();
+        for (let item of p.array) {
+            v = v.push(item);
+        }
+    }],
+    ['List.append', (p:Prerequisites) => {
+        let v = List.empty<number>();
+        for (let item of p.array) {
+            v = v.append(item);
+        }
+    }]);
+
 compare(['Vector2.toArray', (p:Prerequisites) => p.vec2.toArray()],
         ['immList.toArray', (p:Prerequisites) => p.immList.toArray()]);
 
