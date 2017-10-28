@@ -1,6 +1,4 @@
 import { Vector } from "../src/Vector";
-import { HashMap } from "../src/HashMap";
-import { Option } from "../src/Option";
 import { Stream } from "../src/Stream";
 import { MyClass } from "./SampleData";
 import * as SeqTest from "./Seq";
@@ -12,11 +10,80 @@ SeqTest.runTests("Vector",
                  Vector.empty,
                  Vector.unfoldRight);
 
+
 describe("Vector toString", () => {
-        it("serializes to string correctly", () => assert.equal(
-            "Vector(1, 2, 3)", Vector.of(1,2,3).toString()));
-        it("serializes to string correctly - arrays & strings", () => assert.equal(
-            "Vector([1,'a'])", Vector.of([1,'a']).toString()));
-        it("serializes to string correctly - custom toString", () => assert.equal(
-            "Vector({field1: hi, field2: 99})", Vector.of(new MyClass("hi", 99)).toString()));
+    it("serializes to string correctly", () => assert.equal(
+        "Vector(1, 2, 3)", Vector.of(1,2,3).toString()));
+    it("serializes to string correctly - arrays & strings", () => assert.equal(
+        "Vector([1,'a'])", Vector.of([1,'a']).toString()));
+    it("serializes to string correctly - custom toString", () => assert.equal(
+        "Vector({field1: hi, field2: 99})", Vector.of(new MyClass("hi", 99)).toString()));
+});
+
+describe("Vector extra methods", () => {
+    it("handles init correctly on a non-empty vector", () => assert.deepEqual(
+        [1,2,3], Vector.of(1,2,3,4).init().toArray()));
+    it("handles init correctly on an empty vector", () => assert.deepEqual(
+        [], Vector.empty<number>().init().toArray()));
+    it("handles init correctly on a single-element vector", () => assert.deepEqual(
+        [], Vector.of(1).init().toArray()));
+});
+
+// that's needed due to node's assert.deepEqual
+// saying that new Array(2) is NOT the same as
+// [undefined, undefined].
+// (empty vs undefined)
+// => forcing undefined
+function arraySetUndefineds(ar:any[]) {
+    if (!ar) {return ar;}
+    for (let i=0;i<ar.length;i++) {
+        if (Array.isArray(ar[i])) {
+            arraySetUndefineds(ar[i]);
+        }
+        if (typeof ar[i] === "undefined") {
+            ar[i] = undefined;
+        }
+    }
+    return ar;
+}
+
+function checkTake<T>(longer: Vector<T>, n: number, shorter: Vector<T>) {
+    const arrayBefore = longer.toArray();
+    assert.deepEqual(
+        arraySetUndefineds((<any>shorter)._contents),
+        (<any>longer.take(3))._contents);
+    // taking should not have modified the original vector
+    assert.deepEqual(arrayBefore, longer.toArray());
+}
+
+// check that the internal structure of the vector trie
+// is correct after take, that means also root killing and so on.
+describe("Vector.take() implementation", () => {
+    it("handles simple cases correctly", () =>
+       checkTake(Vector.of(1,2,3,4,5,6), 3, Vector.of(1,2,3)));
+    it("handles root killing correctly", () => checkTake(
+        Vector.ofIterable(Stream.iterate(1,i=>i+1).take(40)),
+        3, Vector.of(1,2,3)));
+    it("handles double root killing correctly", () => checkTake(
+        Vector.ofIterable(Stream.iterate(1,i=>i+1).take(1100)),
+        3, Vector.of(1,2,3)));
+});
+
+function checkAppend<T>(base: Vector<T>, toAppend: Iterable<T>, combined: Vector<T>) {
+    const arrayBefore = base.toArray();
+    assert.deepEqual(
+        arraySetUndefineds((<any>combined)._content),
+        (<any>base.appendAll(toAppend))._content);
+    // appending should not have modified the original vector
+    assert.deepEqual(arrayBefore, base.toArray());
+}
+
+describe("Vector.appendAll() implementation", () => {
+    it("handles simple cases correctly", () => {
+        checkAppend(Vector.of(1,2,3), [4,5,6,7,8], Vector.of(1,2,3,4,5,6,7,8));
+    });
+    it("handles adding nodes correctly", () => {
+        checkAppend(Vector.of(1,2,3), Stream.iterate(4,i=>i+1).take(30),
+                    Vector.ofIterable(Stream.iterate(0,i=>i+1).take(34)));
+    });
 });

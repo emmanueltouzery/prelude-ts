@@ -7,7 +7,6 @@ export * from "./Option";
 export * from "./Either";
 export * from "./Lazy";
 export * from "./Vector";
-export * from "./Vector2";
 export * from "./List";
 export * from "./HashMap";
 export * from "./HashSet";

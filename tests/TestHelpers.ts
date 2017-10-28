@@ -33,7 +33,6 @@ export function assertFailCompile(contents: string, expectedMsg: string): void {
             " import { HashMap } from './dist/src/HashMap';" +
             " import { Option } from './dist/src/Option';" +
             " import { Either } from './dist/src/Either';" +
-            " import { Vector2 } from './dist/src/Vector2';" +
             " import { Vector } from './dist/src/Vector';" + contents);
     const tsProgram = ts.createProgram([TMP_FILENAME], {target:ts.ScriptTarget.ES2016});
     const emitResult = tsProgram.emit();

@@ -1,35 +1,62 @@
-import { Seq } from "./Seq";
-import { WithEquality, Ordering,
-         getHashCode, areEqual, toStringHelper } from "./Comparison";
-import { contractTrueEquality } from "./Contract";
-import { HashMap} from "./HashMap";
-import { IMap } from "./IMap";
 import { Option } from "./Option";
-import { HashSet } from "./HashSet";
-import { List } from "./List";
+import { HashMap } from "./HashMap";
+import { IMap } from "./IMap";
+import { Seq } from "./Seq";
+import { WithEquality, areEqual, getHashCode,
+         toStringHelper, Ordering } from "./Comparison";
+import { Collection } from "./Collection";
 import * as SeqHelpers from "./SeqHelpers";
-const hamt: any = require("hamt_plus");
+
+const nodeBits = 5;
+const nodeSize = (1<<nodeBits); // 32
+const nodeBitmask = nodeSize - 1;
+
+/**
+ * We can get a mutable vector besides the immutable one,
+ * to enable faster performance in some scenarios (for instance
+ * append in a loop). However this is not exported to users
+ * of the library but purely for internal use.
+ *
+ * Note that since we can never modify nodes of an immutable vector,
+ * we must consider long and hard before adding more operations besides
+ * append to this interface.
+ */
+interface MutableVector<T> {
+    append:(x:T)=>void;
+    appendAll:(x:Iterable<T>)=>void;
+    getVector(): Vector<T>;
+    internalGet(idx:number): T|undefined;
+}
+
 
 /**
  * A general-purpose list class with all-around good performance.
  * O(1) access, append, prepend.
+ * It's backed by a bit-mapped vector trie.
  * @type T the item type
  */
 export class Vector<T> implements Seq<T> {
+    // Based on https://github.com/graue/immutable-vector from Scott Feeney.
 
-    /**
-     * @hidden
-     */
-    protected constructor(private hamt: any, private indexShift: number) {}
-
-    private static readonly emptyVector = new Vector(hamt.make(), 0);
+    // _contents will be undefined only if length===0
+    protected constructor(private _contents: any[]|undefined,
+                          private _length: number,
+                          private _maxShift: number) {}
 
     /**
      * The empty vector.
      * @type T the item type
      */
     static empty<T>(): Vector<T> {
-        return <Vector<T>>Vector.emptyVector;
+        return Vector.ofArray<T>([]);
+    }
+
+    /**
+     * Build a vector from a series of items (any number, as parameters)
+     * @type T the item type
+     */
+    static of<T>(...data: T[]): Vector<T> {
+        return Vector.ofArray(data);
     }
 
     /**
@@ -38,15 +65,130 @@ export class Vector<T> implements Seq<T> {
      * @type T the item type
      */
     static ofIterable<T>(elts: Iterable<T>): Vector<T> {
-        return (<Vector<T>>Vector.emptyVector).appendAll(elts);
+        if (Array.isArray(elts)) {
+            return Vector.ofArray(elts);
+        }
+        // I measure appendAll to be 2x faster than Array.from on my
+        // machine (node 6.11.3+8.8.0)
+        // return Vector.ofArray(Array.from(elts));
+        return Vector.empty<T>().appendAll(elts);
+    }
+
+    private static ofArray<T>(data: T[]): Vector<T> {
+        let nodes = [];
+
+        let i=0;
+        for (; i < data.length-(data.length%nodeSize); i += nodeSize) {
+            const node = data.slice(i, i + nodeSize);
+            nodes.push(node);
+        }
+
+        // potentially one non-full node to add.
+        if (data.length-i>0) {
+            const extraNode = new Array(nodeSize);
+            for (let idx=0;i+idx<data.length;idx++) {
+                extraNode[idx] = data[i+idx];
+            }
+            nodes.push(extraNode);
+        }
+
+        return Vector.fromLeafNodes(nodes, data.length);
     }
 
     /**
-     * Build a vector from a series of items (any number, as parameters)
-     * @type T the item type
+     * Build a new vector from the leaf nodes containing data.
      */
-    static of<T>(...arr: Array<T>): Vector<T> {
-        return Vector.ofIterable<T>(arr);
+    private static fromLeafNodes<T>(nodes: T[][], length: number): Vector<T> {
+        let depth = 1;
+        while (nodes.length > 1) {
+            let lowerNodes:any[] = nodes;
+            nodes = [];
+            for (let i = 0; i < lowerNodes.length; i += nodeSize) {
+                const node = lowerNodes.slice(i, i + nodeSize);
+                nodes.push(node);
+            }
+            depth++;
+        }
+
+        const _contents = nodes[0];
+        const _maxShift = _contents ? nodeBits * (depth - 1) : 0;
+        return new Vector<T>(_contents, length, _maxShift);
+    }
+
+    /**
+     * Get the length of the collection.
+     */
+    length(): number {
+        return this._length;
+    }
+
+    // ############################ ADD HASTRUEEQUALITY #############################
+
+    /**
+     * true if the collection is empty, false otherwise.
+     */
+    isEmpty(): boolean {
+        return this._length === 0;
+    }
+
+    /**
+     * Get an empty mutable vector. Append is much more efficient, and you can
+     * get a normal vector from it.
+     */
+    private static emptyMutable<T>(): MutableVector<T> {
+        return Vector.appendToMutable(Vector.empty<T>(), <any>undefined);
+    }
+
+    /**
+     * Get a mutable vector from an immutable one, however you must add a
+     * a value to the immutable vector at least once, so that the last
+     * node is modified to a temporary vector, because we can't modify
+     * the nodes from the original immutable vector.
+     * Note that is only safe because the only modifying operation on
+     * mutable vector is append at the end (so we know other tiles besides
+     * the last one won't be modified).
+     */
+    private static appendToMutable<T>(vec: Vector<T>, toAppend:T): MutableVector<T> {
+        // i don't want to offer even a private API to get a mutable vector from
+        // an immutable one without adding a value to protect the last node, but
+        // I need it for emptyMutable(), so I have this trick with undefined and any.
+        if (typeof toAppend !== "undefined") {
+            vec = vec.append(toAppend);
+        }
+        const append = (val:T) => {
+            if (vec._length < (nodeSize << vec._maxShift)) {
+                const index = vec._length;
+                let node = vec._contents || (vec._contents = new Array(nodeSize));
+                let shift = vec._maxShift;
+                while (shift > 0) {
+                    let childIndex = (index >> shift) & nodeBitmask;
+                    if (!node[childIndex]) {
+                        // Need to create new node. Can happen when appending element.
+                        node[childIndex] = new Array(nodeSize);
+                    }
+                    node = node[childIndex];
+                    shift -= nodeBits;
+                }
+                node[index & nodeBitmask] = val;
+                ++vec._length;
+            } else {
+                // We'll need a new root node.
+                vec = Vector.setupNewRootNode(vec, val);
+            }
+        };
+        return {
+            append,
+            appendAll: (elts: Iterable<T>) => {
+                const iterator = elts[Symbol.iterator]();
+                let curItem = iterator.next();
+                while (!curItem.done) {
+                    append(curItem.value);
+                    curItem = iterator.next();
+                }
+            },
+            internalGet: (idx:number) => vec.internalGet(idx),
+            getVector: () => vec
+        };
     }
 
     /**
@@ -64,58 +206,41 @@ export class Vector<T> implements Seq<T> {
      *     => [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
      */
     static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Vector<U> {
-        return new Vector<U>(hamt.empty.mutate(
-            (h:any) => {
-                let nextVal = fn(seed);
-                while (nextVal.isSome()) {
-                    h.set(h.size, nextVal.getOrThrow()[0]);
-                    nextVal = fn(nextVal.getOrThrow()[1]);
-                }
-            }), 0);
-    }
-
-    /**
-     * Implementation of the Iterator interface.
-     */
-    [Symbol.iterator](): Iterator<T> {
-        let curIdx = 0;
-        const hamt = this.hamt;
-        return {
-            next(): IteratorResult<T> {
-                if (curIdx < hamt.size) {
-                    return {
-                        done: false,
-                        value: hamt.get(curIdx++)
-                    };
-                }
-                return { done: true, value: <any>undefined };
-            }
-        };
-    }
-
-    /**
-     * Convert to array.
-     */
-    toArray(): Array<T> {
-        let r = [];
-        for (let i=0;i<this.hamt.size;i++) {
-            r.push(this.hamt.get(i+this.indexShift));
+        let nextVal = fn(seed);
+        let r = Vector.emptyMutable<U>();
+        while (nextVal.isSome()) {
+            r.append(nextVal.getOrThrow()[0]);
+            nextVal = fn(nextVal.getOrThrow()[1]);
         }
-        return r;
+        return r.getVector();
+    }
+
+    private cloneVec(): Vector<T> {
+        return new Vector<T>(this._contents, this._length, this._maxShift);
+    }
+
+    private internalGet(index: number): T|undefined {
+        if (index >= 0 && index < this._length) {
+            let shift = this._maxShift;
+            let node = this._contents;
+            while (shift > 0 && node) {
+                node = node[(index >> shift) & nodeBitmask];
+                shift -= nodeBits;
+            }
+            // cast should be OK as we check bounds
+            // at the beginning of the method
+            return (<any>node)[index & nodeBitmask];
+        }
+        return undefined;
     }
 
     /**
-     * @hidden
+     * Retrieve the element at index idx.
+     * Returns an option because the collection may
+     * contain less elements than the index.
      */
-    hasTrueEquality(): boolean {
-        return SeqHelpers.seqHasTrueEquality<T>(this);
-    }
-
-    /**
-     * Get the length of the collection.
-     */
-    length(): number {
-        return this.hamt.size;
+    get(index: number): Option<T> {
+        return Option.of(this.internalGet(index));
     }
 
     /**
@@ -123,16 +248,94 @@ export class Vector<T> implements Seq<T> {
      * return Some of its value, otherwise return None.
      */
     single(): Option<T> {
-        return this.hamt.size === 1
-            ? Option.of(this.hamt.get(this.indexShift))
-            : Option.none();
+        return this._length === 1 ?
+            this.head() :
+            Option.none<T>();
+    }
+
+    // OK to call with index === vec.length (an append) as long as vector
+    // length is not a (nonzero) power of the branching factor (32, 1024, ...).
+    // Cannot be called on the empty vector!! It would crash
+    private internalSet(index: number, val: T|null): Vector<T> {
+        let newVec = this.cloneVec();
+        // next line will crash on empty vector
+        let node = newVec._contents = (<any[]>this._contents).slice();
+        let shift = this._maxShift;
+        while (shift > 0) {
+            let childIndex = (index >> shift) & nodeBitmask;
+            if (node[childIndex]) {
+                node[childIndex] = node[childIndex].slice();
+            } else {
+                // Need to create new node. Can happen when appending element.
+                node[childIndex] = new Array(nodeSize);
+            }
+            node = node[childIndex];
+            shift -= nodeBits;
+        }
+        node[index & nodeBitmask] = val;
+        return newVec;
+    }
+
+    set(index: number, val: T): Vector<T> {
+        if (index >= this._length || index < 0) {
+            throw new Error('setting past end of vector is not implemented');
+        }
+        return this.internalSet(index, val);
     }
 
     /**
-     * true if the collection is empty, false otherwise.
+     * Append an element at the end of the collection.
      */
-    isEmpty(): boolean {
-        return this.hamt.size === 0;
+    append(val:T): Vector<T> {
+        if (this._length === 0) {
+            return Vector.ofArray<T>([val]);
+        } else if (this._length < (nodeSize << this._maxShift)) {
+            const newVec = this.internalSet(this._length, val);
+            newVec._length++;
+            return newVec;
+        } else {
+            // We'll need a new root node.
+            return Vector.setupNewRootNode(this,val);
+        }
+    }
+
+    private static setupNewRootNode<T>(vec: Vector<T>, val:T): Vector<T> {
+        const newVec = vec.cloneVec();
+        newVec._length++;
+        newVec._maxShift += nodeBits;
+        let node:any[] = [];
+        newVec._contents = [vec._contents, node];
+        let depth = newVec._maxShift / nodeBits + 1;
+        for (let i = 2; i < depth; i++) {
+            const newNode: any[] = [];
+            node.push(newNode);
+            node = newNode;
+        }
+        node[0] = val;
+        return newVec;
+    }
+
+    /**
+     * Append multiple elements at the end of the collection.
+     * Note that arrays are also iterables.
+     */
+    appendAll(elts: Iterable<T>): Vector<T> {
+        const iterator = elts[Symbol.iterator]();
+        let curItem = iterator.next();
+        if (curItem.done) {
+            return this;
+        }
+        // first need to create a new Vector through the first append
+        // call, and then we can mutate that new Vector, otherwise
+        // we'll mutate the receiver which is a big no-no!!
+        const mutVec = Vector.appendToMutable(this, curItem.value);
+
+        curItem = iterator.next();
+        while (!curItem.done) {
+            mutVec.append(curItem.value);
+            curItem = iterator.next();
+        }
+        return mutVec.getVector();
     }
 
     /**
@@ -141,7 +344,7 @@ export class Vector<T> implements Seq<T> {
      * Option.None if it's empty.
      */
     head(): Option<T> {
-        return Option.of(this.hamt.get(this.indexShift));
+        return this.get(0);
     }
 
     /**
@@ -150,113 +353,312 @@ export class Vector<T> implements Seq<T> {
      * Option.None if it's empty.
      */
     last(): Option<T> {
-        return Option.of(this.hamt.get(this.hamt.size+this.indexShift-1));
+        return Option.of(this.internalGet(this._length-1));
     }
 
-    /**
-     * Get all the elements in the collection but the first one.
-     * If the collection is empty, return None.
-     */
-    tail(): Option<Vector<T>> {
-        return this.isEmpty() ?
-            Option.none<Vector<T>>() :
-            Option.of(new Vector<T>(
-                this.hamt.remove(this.indexShift), this.indexShift+1));
-    }
+    init(): Vector<T> {
+        let popped;
 
-    /**
-     * Append an element at the end of the collection.
-     */
-    append(elt: T): Vector<T> {
-        return new Vector<T>(this.hamt.set(this.hamt.size+this.indexShift, elt), this.indexShift);
-    }
-
-    /**
-     * Prepend an element at the beginning of the collection.
-     */
-    prepend(elt: T): Vector<T> {
-        const newIndexShift = this.indexShift - 1;
-        return new Vector<T>(this.hamt.set(newIndexShift, elt), newIndexShift);
-    }
-
-    /**
-     * Prepend multiple elements at the beginning of the collection.
-     *
-     * This method requires Array.from()
-     * You may need to polyfill it =>
-     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
-     */
-    prependAll(elts: Iterable<T>): Vector<T> {
-        // could optimize if i'm 100% the other one is a Vector...
-        // (no need for in-order get, i can take all the keys in any order)
-        //
-        // need to transform to an array, because
-        // I need the size immediately for the indexShift.
-        const eltsAr = Array.from(elts);
-        const newIndexShift = this.indexShift - eltsAr.length;
-        let hamt = this.hamt;
-        for (let i=0;i<eltsAr.length;i++) {
-            hamt = hamt.set(newIndexShift+i, eltsAr[i]);
+        if (this._length === 0) {
+            return this;
         }
-        return new Vector<T>(hamt, newIndexShift);
+        if (this._length === 1) {
+            return Vector.empty<T>();
+        }
+
+        if ((this._length & nodeBitmask) !== 1) {
+            popped = this.internalSet(this._length - 1, null);
+        }
+        // If the length is a power of the branching factor plus one,
+        // reduce the tree's depth and install the root's first child as
+        // the new root.
+        else if (this._length - 1 === nodeSize << (this._maxShift - nodeBits)) {
+            popped = this.cloneVec();
+            popped._contents = (<any[]>this._contents)[0]; // length>0 => _contents!==undefined
+            popped._maxShift = this._maxShift - nodeBits;
+        }
+        // Otherwise, the root stays the same but we remove a leaf node.
+        else {
+            popped = this.cloneVec();
+
+            // we know the vector is not empty, there is a if at the top
+            // of the function => ok to cast to any[]
+            let node = popped._contents = (<any[]>popped._contents).slice();
+            let shift = this._maxShift;
+            let removedIndex = this._length - 1;
+
+            while (shift > nodeBits) { // i.e., Until we get to lowest non-leaf node.
+                let localIndex = (removedIndex >> shift) & nodeBitmask;
+                node = node[localIndex] = node[localIndex].slice();
+                shift -= nodeBits;
+            }
+            node[(removedIndex >> shift) & nodeBitmask] = null;
+        }
+        popped._length--;
+        return popped;
     }
+
+    /**
+     * Returns a new collection, discarding the first elements
+     * until one element fails the predicate. All elements
+     * after that point are retained.
+     */
+    dropWhile(predicate:(x:T)=>boolean): Vector<T> {
+        let r = Vector.emptyMutable<T>();
+        let skip = true;
+        for (let i=0;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            if (skip && !predicate(val)) {
+                skip = false;
+            }
+            if (!skip) {
+                r.append(val);
+            }
+        }
+        return r.getVector();
+    }
+
+    /**
+     * Search for an item matching the predicate you pass,
+     * return Option.Some of that element if found,
+     * Option.None otherwise.
+     */
+    find(predicate:(v:T)=>boolean): Option<T> {
+        for (let i=0;i<this._length;i++) {
+            const item = <T>this.internalGet(i);
+            if (predicate(item)) {
+                return Option.of(item);
+            }
+        }
+        return Option.none<T>();
+    }
+
+    /**
+     * Returns true if the predicate returns true for all the
+     * elements in the collection.
+     */
+    allMatch(predicate:(v:T)=>boolean): boolean {
+        return this.find(x => !predicate(x)).isNone();
+    }
+
+    /**
+     * Returns true if there the predicate returns true for any
+     * element in the collection.
+     */
+    anyMatch(predicate:(v:T)=>boolean): boolean {
+        return this.find(predicate).isSome();
+    }
+
+    /**
+     * Returns a pair of two collections; the first one
+     * will only contain the items from this collection for
+     * which the predicate you give returns true, the second
+     * will only contain the items from this collection where
+     * the predicate returns false.
+     *
+     *     Vector.of(1,2,3,4).partition(x => x%2===0)
+     *     => [[2,4],[1,3]]
+     */
+    partition(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>] {
+        // TODO goes twice over the list, can be optimized...
+        return [this.filter(predicate), this.filter(x => !predicate(x))];
+    }
+
+    /**
+     * Returns true if the item is in the collection,
+     * false otherwise.
+     */
+    contains(v:T&WithEquality): boolean {
+        return this.find(x => areEqual(x,v)).isSome();
+    }
+
+    /**
+     * Group elements in the collection using a classifier function.
+     * Elements are then organized in a map. The key is the value of
+     * the classifier, and in value we get the list of elements
+     * matching that value.
+     *
+     * also see [[Vector.arrangeBy]]
+     */
+    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Vector<T>> {
+        return this.foldLeft(
+            HashMap.empty<C,MutableVector<T>>(),
+            (acc: HashMap<C,MutableVector<T>>, v:T) =>
+                acc.putWithMerge(
+                    classifier(v), Vector.appendToMutable(Vector.empty<T>(), v),
+                    (v1:MutableVector<T>,v2:MutableVector<T>)=> {
+                        v1.append(<T>v2.internalGet(0));
+                        return v1;
+                    }))
+            .mapValues(mutVec => mutVec.getVector());
+    }
+
+    /**
+     * Matches each element with a unique key that you extract from it.
+     * If the same key is present twice, the function will return None.
+     *
+     * also see [[Vector.groupBy]]
+     */
+    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
+        return SeqHelpers.arrangeBy<T,K>(this, getKey);
+    }
+
+    /**
+     * Remove duplicate items; elements are mapped to keys, those
+     * get compared.
+     *
+     *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
+     *     => [1,2,3]
+     */
+    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Vector<T> {
+        return <Vector<T>>SeqHelpers.distinctBy(this, keyExtractor);
+    }
+
+    /**
+     * Implementation of the Iterator interface.
+     */
+    [Symbol.iterator](): Iterator<T> {
+        let _vec = this;
+        let _index = -1;
+        let _stack: any[] = [];
+        let _node = this._contents;
+        return {
+            next: () => {
+                // Iterator state:
+                //  _vec: Vector we're iterating over.
+                //  _node: "Current" leaf node, meaning the one we returned a value from
+                //         on the previous call.
+                //  _index: Index (within entire vector, not node) of value returned last
+                //          time.
+                //  _stack: Path we traveled to current node, as [node, local index]
+                //          pairs, starting from root node, not including leaf.
+
+                let vec = _vec;
+                let shift;
+
+                if (_index === vec._length - 1) {
+                    return {done: true, value: <any>undefined};
+                }
+
+                if (_index > 0 && (_index & nodeBitmask) === nodeSize - 1) {
+                    // Using the stack, go back up the tree, stopping when we reach a node
+                    // whose children we haven't fully iterated over.
+                    let step;
+                    while ((step = _stack.pop())[1] === nodeSize - 1) ;
+                    step[1]++;
+                    _stack.push(step);
+                    _node = step[0][step[1]];
+                }
+
+                for (shift = _stack.length * nodeBits; shift < _vec._maxShift;
+                     shift += nodeBits) {
+                    _stack.push([_node, 0]);
+                    _node = (<any[]>_node)[0];
+                }
+
+                _index++;
+                return {value: (<any[]>_node)[_index & nodeBitmask], done: false};
+            }
+        };
+    }
+
+    // /**
+    //  * get the leaf nodes, which contain the data, from the vector.
+    //  * return only the leaf nodes containing the first n items from the vector.
+    //  * (give n=_length to get all the data)
+    //  */
+    // private getLeafNodes(_n:number): T[][] {
+    //     if (_n<=0) {
+    //         return [];
+    //     }
+    //     const n = Math.min(_n, this._length);
+    //     let _index = 0;
+    //     let _stack: any[] = [];
+    //     let _node = this._contents;
+    //     let result:T[][] = new Array(Math.floor(n/nodeSize)+1);
+    //     if (!_node) {
+    //         // empty vector
+    //         return result;
+    //     }
+
+    //     while (_index*nodeSize < n) {
+    //         if (_index > 0) {
+    //             // Using the stack, go back up the tree, stopping when we reach a node
+    //             // whose children we haven't fully iterated over.
+    //             let step;
+    //             while ((step = _stack.pop())[1] === nodeSize - 1) ;
+    //             step[1]++;
+    //             _stack.push(step);
+    //             _node = step[0][step[1]];
+    //         }
+
+    //         let shift;
+    //         for (shift=_stack.length*nodeBits; shift<this._maxShift; shift+=nodeBits) {
+    //             _stack.push([_node, 0]);
+    //             _node = (<any[]>_node)[0];
+    //         }
+
+    //         result[_index++] = <any>_node;
+    //     }
+
+    //     // in case n is not a multiple of nodeSize,
+    //     // i copied a little too much, wipe the end
+    //     // to allow garbage collection
+    //     if (n !== this._length && n%nodeSize !== 0) {
+    //         const lastLeaf = result[result.length-1];
+    //         // overwrite the last leaf
+    //         const newLastLeaf = new Array(nodeSize);
+    //         // copy only what's needed
+    //         for (let i=0;i<n%nodeSize;i++) {
+    //             newLastLeaf[i] = lastLeaf[i];
+    //         }
+    //         result[result.length-1] = newLastLeaf;
+    //     }
+
+    //     return result;
+    // }
 
     /**
      * Call a function for element in the collection.
      */
-    forEach(fn: (v:T)=>void): Vector<T> {
-        for (let i=0;i<this.hamt.size;i++) {
-            fn(this.hamt.get(i+this.indexShift));
+    forEach(fun:(x:T)=>void):Vector<T> {
+        let iter = this[Symbol.iterator]();
+        let step;
+        while (!(step = iter.next()).done) {
+            fun(step.value);
         }
         return this;
-    }
-
-    /**
-     * Append multiple elements at the end of the collection.
-     * Note that arrays are also iterables.
-     */
-    appendAll(elts: Iterable<T>): Vector<T> {
-        return new Vector<T>(this.hamt.mutate(
-            (h:any) => {
-                const iterator = elts[Symbol.iterator]();
-                let curItem = iterator.next();
-                while (!curItem.done) {
-                    h.set(h.size+this.indexShift, curItem.value);
-                    curItem = iterator.next();
-                }
-            }), this.indexShift);
-    }
-
-    /**
-     * Removes the first element matching the predicate
-     * (use [[Seq.filter]] to remove all elements matching a predicate)
-     */
-    removeFirst(predicate: (v:T)=>boolean): Vector<T> {
-        return new Vector<T>(hamt.empty.mutate(
-            (h:any) => {
-                let found = false;
-                for (let i=0;i<this.hamt.size;i++) {
-                    const item = this.hamt.get(i+this.indexShift);
-                    if (predicate(item) && !found) {
-                        found = true;
-                    } else {
-                        h.set(h.size, item);
-                    }
-                }
-            }), 0);
     }
 
     /**
      * Return a new collection where each element was transformed
      * by the mapper function you give.
      */
-    map<U>(mapper:(v:T)=>U): Vector<U> {
-        return new Vector<U>(hamt.empty.mutate(
-            (h_:any) => {
-                this.hamt.fold(
-                    (acc: any, v:T & WithEquality, k:number) => acc.set(k-this.indexShift, mapper(v)),
-                    h_)
-            }), 0);
+    map<U>(fun:(x:T)=>U): Vector<U> {
+        let iter = this[Symbol.iterator]();
+        const mutVec = Vector.emptyMutable<U>();
+        let step;
+        while (!(step = iter.next()).done) {
+            mutVec.append(fun(step.value));
+        }
+        return mutVec.getVector();
+    }
+
+    /**
+     * Call a predicate for each element in the collection,
+     * build a new collection holding only the elements
+     * for which the predicate returned true.
+     */
+    filter(fun:(x:T)=>boolean): Vector<T> {
+        let iter = this[Symbol.iterator]();
+        const mutVec = Vector.emptyMutable<T>();
+        let step;
+        while (!(step = iter.next()).done) {
+            if (fun(step.value)) {
+                mutVec.append(step.value);
+            }
+        }
+        return mutVec.getVector();
     }
 
     /**
@@ -266,56 +668,16 @@ export class Vector<T> implements Seq<T> {
      * a None, the value is discarded.
      */
     mapOption<U>(mapper:(v:T)=>Option<U>): Vector<U> {
-        return new Vector<U>(hamt.empty.mutate(
-            (h:any) => {
-                for (let i=0;i<this.hamt.size;i++) {
-                    const item = this.hamt.get(i+this.indexShift);
-                    const val = mapper(item);
-                    if (val.isSome()) {
-                        h.set(h.size, val.getOrThrow());
-                    }
-                }
-            }), 0);
-    }
-
-    /**
-     * Call a predicate for each element in the collection,
-     * build a new collection holding only the elements
-     * for which the predicate returned true.
-     */
-    filter(predicate:(v:T)=>boolean): Vector<T> {
-        return new Vector<T>(hamt.empty.mutate(
-            (h:any) => {
-                for (let i=0;i<this.hamt.size;i++) {
-                    const item = this.hamt.get(i+this.indexShift);
-                    if (predicate(item)) {
-                        h.set(h.size, item);
-                    }
-                }
-            }), 0);
-    }
-
-    /**
-     * Search for an item matching the predicate you pass,
-     * return Option.Some of that element if found,
-     * Option.None otherwise.
-     */
-    find(predicate:(v:T)=>boolean): Option<T> {
-        for (let i=0;i<this.hamt.size;i++) {
-            const item: T = this.hamt.get(i+this.indexShift);
-            if (predicate(item)) {
-                return Option.of(item);
+        let iter = this[Symbol.iterator]();
+        let mutVec = Vector.emptyMutable<U>();
+        let step;
+        while (!(step = iter.next()).done) {
+            const v = mapper(step.value);
+            if (v.isSome()) {
+                mutVec.append(v.getOrThrow());
             }
         }
-        return Option.none<T>();
-    }
-
-    /**
-     * Returns true if the item is in the collection,
-     * false otherwise.
-     */
-    contains(v:T&WithEquality): boolean {
-        return this.anyMatch(curVal => areEqual(curVal, v));
+        return mutVec.getVector();
     }
 
     /**
@@ -325,11 +687,13 @@ export class Vector<T> implements Seq<T> {
      * This is the monadic bind.
      */
     flatMap<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
-        var r:Array<U> = [];
-        for (let i=0;i<this.hamt.size;i++) {
-            r = r.concat(mapper(this.hamt.get(i+this.indexShift)).toArray());
+        let iter = this[Symbol.iterator]();
+        const mutVec = Vector.emptyMutable<U>();
+        let step;
+        while (!(step = iter.next()).done) {
+            mutVec.appendAll(mapper(step.value));
         }
-        return Vector.ofIterable<U>(r);
+        return mutVec.getVector();
     }
 
     /**
@@ -360,12 +724,14 @@ export class Vector<T> implements Seq<T> {
      *           the current collection item, and returning
      *           an updated value.
      */
-    foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
-        let r = zero;
-        for (let i=0;i<this.hamt.size;i++) {
-            r = fn(r, this.hamt.get(i+this.indexShift));
+    foldLeft<U>(zero:U, fn:(soFar:U,cur:T)=>U):U {
+        let iter = this[Symbol.iterator]();
+        let step;
+        let acc = zero;
+        while (!(step = iter.next()).done) {
+            acc = fn(acc, step.value);
         }
-        return r;
+        return acc;
     }
 
     /**
@@ -384,366 +750,35 @@ export class Vector<T> implements Seq<T> {
      */
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U {
         let r = zero;
-        for (let i=this.hamt.size-1;i>=0;i--) {
-            r = fn(this.hamt.get(i+this.indexShift), r);
+        for (let i=this._length-1;i>=0;i--) {
+            r = fn(<T>this.internalGet(i), r);
         }
         return r;
     }
 
-    /**
-     * Joins elements of the collection by a separator.
-     * Example:
-     *
-     *     Vector.of(1,2,3).mkString(", ")
-     *     => "1, 2, 3"
-     */
-    mkString(separator: string): string {
-        let r = "";
-        for (let i=0;i<this.hamt.size;i++) {
-            if (i>0) {
-                r += separator;
-            }
-            r += this.hamt.get(i+this.indexShift).toString();
-        }
-        return r;
-    }
-
-    /**
-     * Retrieve the element at index idx.
-     * Returns an option because the collection may
-     * contain less elements than the index.
-     */
-    get(idx: number): Option<T> {
-        return Option.of(this.hamt.get(idx+this.indexShift));
-    }
-
-    /**
-     * Returns a new collection with the first
-     * n elements discarded.
-     * If the collection has less than n elements,
-     * returns the empty collection.
-     */
-    drop(n:number): Vector<T> {
-        if (n>=this.hamt.size) {
-            return <Vector<T>>Vector.emptyVector;
-        }
-        return new Vector<T>(this.hamt.fold(
-            (h:any,v:T,k:number) => (k-this.indexShift>=n) ?
-                h.set(k-this.indexShift-n, v) : h,
-            hamt.make()), 0);
-    }
-
-    /**
-     * Returns a new collection, discarding the first elements
-     * until one element fails the predicate. All elements
-     * after that point are retained.
-     */
-    dropWhile(predicate:(x:T)=>boolean): Vector<T> {
-        let h = hamt.make();
-        let skip = true;
-        for (let i=0;i<this.hamt.size;i++) {
-            const v = this.hamt.get(i+this.indexShift);
-            if (skip && !predicate(v)) {
-                skip = false;
-            }
-            if (!skip) {
-                h = h.set(h.size, v);
-            }
-        }
-        return new Vector<T>(h, 0);
-    }
-
-    /**
-     * Returns a new collection, discarding the elements
-     * after the first element which fails the predicate.
-     */
-    takeWhile(predicate:(x:T)=>boolean): Vector<T> {
-        let h = hamt.make();
-        for (let i=0;i<this.hamt.size;i++) {
-            const v = this.hamt.get(i+this.indexShift);
-            if (!predicate(v)) {
-                break;
-            }
-            h = h.set(h.size, v);
-        }
-        return new Vector<T>(h, 0);
-    }
-
-    /**
-     * Returns a new collection with the last
-     * n elements discarded.
-     * If the collection has less than n elements,
-     * returns the empty collection.
-     */
-    dropRight(n:number): Vector<T> {
-        const sz = this.hamt.size;
-        if (n>=sz) {
-            return <Vector<T>>Vector.emptyVector;
-        }
-        return new Vector<T>(this.hamt.fold(
-            (h:any,v:T,k:number) => (sz-k+this.indexShift>n) ?
-                h.set(k-this.indexShift, v) : h,
-            hamt.make()), 0);
-    }
-
-    /**
-     * Returns true if the predicate returns true for all the
-     * elements in the collection.
-     */
-    allMatch(predicate:(v:T)=>boolean): boolean {
-        // faster than using .find() because we
-        // don't have to traverse elements in order
-        const iterator: Iterator<T> = this.hamt.values();
-        let curItem = iterator.next();
-        while (!curItem.done) {
-            if (!predicate(curItem.value)) {
-                return false;
-            }
-            curItem = iterator.next();
-        }
-        return true;
-    }
-
-    /**
-     * Returns true if there the predicate returns true for any
-     * element in the collection.
-     */
-    anyMatch(predicate:(v:T)=>boolean): boolean {
-        // faster than using .find() because we
-        // don't have to traverse elements in order
-        const iterator: Iterator<T> = this.hamt.values();
-        let curItem = iterator.next();
-        while (!curItem.done) {
-            if (predicate(curItem.value)) {
-                return true;
-            }
-            curItem = iterator.next();
-        }
-        return false;
-    }
-
-    /**
-     * Returns a new collection with elements
-     * sorted according to the comparator you give.
-     *
-     * also see [[Vector.sortOn]]
-     */
-    sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
-        return Vector.ofIterable<T>(this.toArray().sort(compare));
-    }
-
-    /**
-     * Give a function associating a number or a string with
-     * elements from the collection, and the elements
-     * are sorted according to that value.
-     *
-     * also see [[Vector.sortBy]]
-     */
-    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Vector<T> {
-        return <Vector<T>>SeqHelpers.sortOn<T>(this, getKey);
-    }
-
-    /**
-     * Group elements in the collection using a classifier function.
-     * Elements are then organized in a map. The key is the value of
-     * the classifier, and in value we get the list of elements
-     * matching that value.
-     *
-     * also see [[Vector.arrangeBy]]
-     */
-    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Vector<T>> {
-        return this.hamt.fold(
-            (acc: HashMap<C,any>, v:T, k:number) =>
-                acc.putWithMerge(
-                    classifier(v), hamt.beginMutation(hamt.make()).set(0,v),
-                    (v1:any,v2:any)=>
-                        v1.set(v1.size, v2.get(0))), HashMap.empty())
-            .mapValues((h:any) => new Vector<T>(h.endMutation(), 0));
-    }
-
-    /**
-     * Matches each element with a unique key that you extract from it.
-     * If the same key is present twice, the function will return None.
-     *
-     * also see [[Vector.groupBy]]
-     */
-    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
-        return SeqHelpers.arrangeBy<T,K>(this, getKey);
-    }
+    // indexOf(element:T, fromIndex:number): number {
+    //     if (fromIndex === undefined) {
+    //         fromIndex = 0;
+    //     } else {
+    //         fromIndex >>>= 0;
+    //     }
+    //     let isImmutableCollection = ImmutableVector.isImmutableVector(element);
+    //     for (let index = fromIndex; index < this.length; index++) {
+    //         let val = this.get(index);
+    //         if (isImmutableCollection) {
+    //             if (element.equals(this.get(index))) return index;
+    //         } else {
+    //             if (element === this.internalGet(index)) return index;
+    //         }
+    //     }
+    //     return -1;
+    // }
 
     /**
      * Randomly reorder the elements of the collection.
      */
     shuffle(): Vector<T> {
-        return Vector.ofIterable(SeqHelpers.shuffle(this.toArray()));
-    }
-
-    /**
-     * Convert this collection to a map. You give a function which
-     * for each element in the collection returns a pair. The
-     * key of the pair will be used as a key in the map, the value,
-     * as a value in the map. If several values get the same key,
-     * entries will be lost.
-     */
-    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
-        return this.hamt.fold(
-            (acc: HashMap<K,V>, value:T, k:number) => {
-                const converted = converter(value);
-                return acc.put(converted[0], converted[1]);
-            }, HashMap.empty());
-    }
-
-    /**
-     * Convert this collection to a list.
-     */
-    toList(): List<T> {
-        return List.ofIterable(this);
-    }
-
-    /**
-     * Combine this collection with the collection you give in
-     * parameter to produce a new collection which combines both,
-     * in pairs. For instance:
-     *
-     *     Vector.of(1,2,3).zip(["a","b","c"])
-     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
-     *
-     * The result collection will have the length of the shorter
-     * of both collections. Extra elements will be discarded.
-     */
-    zip<U>(other: Iterable<U>): Vector<[T,U]> {
-        return new Vector<[T,U]>(hamt.empty.mutate(
-            (h:any) => {
-                let i = 0;
-                const thisIterator = this[Symbol.iterator]();
-                const otherIterator = other[Symbol.iterator]();
-                let thisCurItem = thisIterator.next();
-                let otherCurItem = otherIterator.next();
-
-                while (!thisCurItem.done && !otherCurItem.done) {
-                    h.set(i++, [thisCurItem.value, otherCurItem.value]);
-                    thisCurItem = thisIterator.next();
-                    otherCurItem = otherIterator.next();
-                }
-            }), 0);
-    }
-
-    /**
-     * Combine this collection with the index of the elements
-     * in it. Handy if you need the index when you map on
-     * the collection for instance:
-     *
-     *     Vector.of("a","b").zipWithIndex().map([v,idx] => ...)
-     */
-    zipWithIndex(): Vector<[T,number]> {
-        return <Vector<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
-    }
-
-    /**
-     * Reverse the collection. For instance:
-     *
-     *     [1,2,3] => [3,2,1]
-     */
-    reverse(): Vector<T> {
-        const sz = this.hamt.size;
-        const basis = sz-1+this.indexShift;
-        return new Vector<T>(hamt.empty.mutate((hamt2:any) =>
-            this.hamt.fold(
-                (h:any,v:T,k:number) => h.set(basis-k, v),
-                hamt2)), 0);
-    }
-
-    /**
-     * Takes a predicate; returns a pair of collections.
-     * The first one is the longest prefix of this collection
-     * which satisfies the predicate, and the second collection
-     * is the remainder of the collection.
-     *
-     *    Vector.of(1,2,3,4,5,6).span(x => x <3)
-     *    => [Vector.of(1,2), Vector.of(3,4,5,6)]
-     */
-    span(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>] {
-        const first = this.takeWhile(predicate);
-        return [first, this.drop(first.length())];
-    }
-
-    /**
-     * Split the collection at a specific index.
-     *
-     *     Vector.of(1,2,3,4,5).splitAt(3)
-     *     => [Vector.of(1,2,3), Vector.of(4,5)]
-     */
-    splitAt(index:number): [Vector<T>,Vector<T>] {
-        let r: any = [null,null];
-        hamt.empty.mutate(
-            (hamt1:any) =>
-                hamt.empty.mutate((hamt2:any) => {
-                    for (let i=0;i<this.hamt.size;i++) {
-                        const val = this.hamt.get(i+this.indexShift);
-                        if (i<index) {
-                            hamt1.set(hamt1.size, val);
-                        } else {
-                            hamt2.set(hamt2.size, val);
-                        }
-                    }
-
-                    r[0] = new Vector<T>(hamt1,0);
-                    r[1] = new Vector<T>(hamt2,0);
-                }));
-        return r;
-    }
-
-    /**
-     * Returns a pair of two collections; the first one
-     * will only contain the items from this collection for
-     * which the predicate you give returns true, the second
-     * will only contain the items from this collection where
-     * the predicate returns false.
-     *
-     *     Vector.of(1,2,3,4).partition(x => x%2===0)
-     *     => [[2,4],[1,3]]
-     */
-    partition(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>] {
-        let r: any = [null,null];
-        hamt.empty.mutate(
-            (hamt1:any) =>
-                hamt.empty.mutate((hamt2:any) => {
-                    for (let i=0;i<this.hamt.size;i++) {
-                        const val = this.hamt.get(i+this.indexShift);
-                        if (predicate(val)) {
-                            hamt1.set(hamt1.size, val);
-                        } else {
-                            hamt2.set(hamt2.size, val);
-                        }
-                    }
-
-                    r[0] = new Vector<T>(hamt1,0);
-                    r[1] = new Vector<T>(hamt2,0);
-                }));
-        return r;
-    }
-
-    /**
-     * Remove duplicate items; elements are mapped to keys, those
-     * get compared.
-     *
-     *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
-     *     => [1,2,3]
-     */
-    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Vector<T> {
-        let keySet = HashSet.empty<U>();
-        return new Vector<T>(hamt.empty.mutate(
-            (h:any) => {
-                let targetIdx = 0;
-                for (let i=0;i<this.hamt.size;i++) {
-                    const val = this.hamt.get(i+this.indexShift);
-                    const transformedVal = keyExtractor(val);
-                    if (!keySet.contains(transformedVal)) {
-                        h.set(targetIdx++, val);
-                        keySet = keySet.add(transformedVal);
-                    }
-                }
-            }), 0);
+        return Vector.ofArray(SeqHelpers.shuffle(this.toArray()));
     }
 
     /**
@@ -759,18 +794,14 @@ export class Vector<T> implements Seq<T> {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    equals(other: Vector<T&WithEquality>): boolean {
-        if (!other || !other.hamt) {
+    equals(other:Vector<T&WithEquality>): boolean {
+        if (!other || (other._maxShift === undefined)) {
             return false;
         }
-        const sz = this.hamt.size;
-        if (sz !== other.hamt.size) {
-            return false;
-        }
-        contractTrueEquality("Vector.equals", this, other);
-        for (let i=0;i<this.hamt.size;i++) {
-            const myVal: T & WithEquality|null|undefined = this.hamt.get(i+this.indexShift);
-            const hisVal: T & WithEquality|null|undefined = other.hamt.get(i+other.indexShift);
+        if (this._length !== other._length) return false;
+        for (let i = 0; i < this._length; i++) {
+            const myVal: T & WithEquality|null|undefined = <T&WithEquality>this.internalGet(i);
+            const hisVal: T & WithEquality|null|undefined = other.internalGet(i);
             if ((myVal === undefined) !== (hisVal === undefined)) {
                 return false;
             }
@@ -793,8 +824,8 @@ export class Vector<T> implements Seq<T> {
      */
     hashCode(): number {
         let hash = 1;
-        for (let i=0;i<this.hamt.size;i++) {
-            hash = 31 * hash + getHashCode(this.hamt.get(i+this.indexShift));
+        for (let i=0;i<this._length;i++) {
+            hash = 31 * hash + getHashCode(this.internalGet(i));
         }
         return hash;
     }
@@ -804,11 +835,11 @@ export class Vector<T> implements Seq<T> {
      */
     toString(): string {
         let r = "Vector(";
-        for (let i=0;i<this.hamt.size;i++) {
+        for (let i=0;i<this._length;i++) {
             if (i>0) {
                 r += ", ";
             }
-            r += toStringHelper(this.hamt.get(i+this.indexShift));
+            r += toStringHelper(this.internalGet(i));
         }
         return r + ")";
     }
@@ -819,5 +850,274 @@ export class Vector<T> implements Seq<T> {
      */
     inspect(): string {
         return this.toString();
+    }
+
+    /**
+     * Joins elements of the collection by a separator.
+     * Example:
+     *
+     *     Vector.of(1,2,3).mkString(", ")
+     *     => "1, 2, 3"
+     */
+    mkString(separator: string): string {
+        let r = "";
+        for (let i=0;i<this._length;i++) {
+            if (i>0) {
+                r += separator;
+            }
+            r += (<T>this.internalGet(i)).toString();
+        }
+        return r;
+    }
+
+    /**
+     * Returns a new collection with elements
+     * sorted according to the comparator you give.
+     *
+     * also see [[Vector.sortOn]]
+     */
+    sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
+        return Vector.ofArray<T>(this.toArray().sort(compare));
+    }
+
+    /**
+     * Give a function associating a number or a string with
+     * elements from the collection, and the elements
+     * are sorted according to that value.
+     *
+     * also see [[Vector.sortBy]]
+     */
+    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Vector<T> {
+        return <Vector<T>>SeqHelpers.sortOn<T>(this, getKey);
+    }
+
+    /**
+     * Convert this collection to a map. You give a function which
+     * for each element in the collection returns a pair. The
+     * key of the pair will be used as a key in the map, the value,
+     * as a value in the map. If several values get the same key,
+     * entries will be lost.
+     */
+    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
+        return this.foldLeft(HashMap.empty<K,V>(), (acc,cur) => {
+            const converted = converter(cur);
+            return acc.put(converted[0], converted[1]);
+        });
+    }
+
+    /**
+     * Convert to array.
+     */
+    toArray(): T[] {
+        let out = new Array(this._length);
+        for (let i = 0; i < this._length; i++) {
+            out[i] = <T>this.internalGet(i);
+        }
+        return out;
+        // alternative implementation, measured slower
+        // (concat is creating a new array everytime) =>
+        //
+        // const nodes = this.getLeafNodes(this._length);
+        // return [].concat.apply([], nodes).slice(0,this._length);
+    };
+
+
+    /**
+     * @hidden
+     */
+    hasTrueEquality(): boolean {
+        return SeqHelpers.seqHasTrueEquality<T>(this);
+    }
+
+    /**
+     * Combine this collection with the collection you give in
+     * parameter to produce a new collection which combines both,
+     * in pairs. For instance:
+     *
+     *     Vector.of(1,2,3).zip(["a","b","c"])
+     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
+     *
+     * The result collection will have the length of the shorter
+     * of both collections. Extra elements will be discarded.
+     */
+    zip<U>(other: Iterable<U>): Vector<[T,U]> {
+        let r = Vector.emptyMutable<[T,U]>();
+        const thisIterator = this[Symbol.iterator]();
+        const otherIterator = other[Symbol.iterator]();
+        let thisCurItem = thisIterator.next();
+        let otherCurItem = otherIterator.next();
+
+        while (!thisCurItem.done && !otherCurItem.done) {
+            r.append([thisCurItem.value, otherCurItem.value]);
+            thisCurItem = thisIterator.next();
+            otherCurItem = otherIterator.next();
+        }
+        return r.getVector();
+    }
+
+    /**
+     * Reverse the collection. For instance:
+     *
+     *     [1,2,3] => [3,2,1]
+     */
+    reverse(): Vector<T> {
+        const mutVec = Vector.emptyMutable<T>();
+        for (let i=this._length-1;i>=0;i--) {
+            mutVec.append(<T>this.internalGet(i));
+        }
+        return mutVec.getVector();
+    }
+
+    /**
+     * Combine this collection with the index of the elements
+     * in it. Handy if you need the index when you map on
+     * the collection for instance:
+     *
+     *     Vector.of("a","b").zipWithIndex().map([v,idx] => ...)
+     */
+    zipWithIndex(): Vector<[T,number]> {
+        return <Vector<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
+    }
+
+    /**
+     * Returns a new collection, discarding the elements
+     * after the first element which fails the predicate.
+     */
+    takeWhile(predicate:(x:T)=>boolean): Vector<T> {
+        for (let i=0;i<this._length;i++) {
+            if (!predicate(<T>this.internalGet(i))) {
+                return this.take(i);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Split the collection at a specific index.
+     *
+     *     List.of(1,2,3,4,5).splitAt(3)
+     *     => [List.of(1,2,3), List.of(4,5)]
+     */
+    splitAt(index:number): [Vector<T>,Vector<T>] {
+        return [this.take(index),this.drop(index)];
+    }
+
+    /**
+     * Takes a predicate; returns a pair of collections.
+     * The first one is the longest prefix of this collection
+     * which satisfies the predicate, and the second collection
+     * is the remainder of the collection.
+     *
+     *    Vector.of(1,2,3,4,5,6).span(x => x <3)
+     *    => [Vector.of(1,2), Vector.of(3,4,5,6)]
+     */
+    span(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>] {
+        const first = this.takeWhile(predicate);
+        return [first, this.drop(first.length())];
+    }
+
+    /**
+     * Returns a new collection with the first
+     * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
+     */
+    drop(n:number): Vector<T> {
+        if (n<0) {
+            return this;
+        }
+        if (n>=this._length) {
+            return Vector.empty<T>();
+        }
+        const mutVec = Vector.emptyMutable<T>();
+        for (let i=n;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            mutVec.append(val);
+        }
+        return mutVec.getVector();
+    }
+
+    take(_n:number): Vector<T> {
+        if (_n<=0 || this._length === 0) {
+            return Vector.empty<T>();
+        }
+        const n = Math.min(_n, this._length);
+        const index = n;
+
+        let newVec = this.cloneVec();
+        newVec._length = n;
+        // next line will crash on empty vector
+        let node = newVec._contents = (<any[]>this._contents).slice();
+        let shift = this._maxShift;
+        let underRoot = true;
+        while (shift > 0) {
+            const childIndex = (index >> shift) & nodeBitmask;
+            if (underRoot && childIndex === 0) {
+                // root killing, skip this node, we don't want
+                // root nodes with only 1 child
+                newVec._contents = node[childIndex].slice();
+                newVec._maxShift -= nodeBits;
+                node = <any[]>newVec._contents;
+            } else {
+                underRoot = false;
+                for (let i=childIndex+1;i<nodeSize;i++) {
+                    // remove pointers if present, to enable GC
+                    node[i] = undefined;
+                }
+                node[childIndex] = node[childIndex].slice();
+                node = node[childIndex];
+            }
+            shift -= nodeBits;
+        }
+        for (let i=(index & nodeBitmask);i<nodeSize;i++) {
+            // remove pointers if present, to enable GC
+            node[i] = undefined;
+        }
+        return newVec;
+    }
+
+    /**
+     * Prepend an element at the beginning of the collection.
+     */
+    prepend(elt: T): Vector<T> {
+        // TODO must be optimized!!
+        return this.prependAll([elt]);
+    }
+
+    /**
+     * Prepend multiple elements at the beginning of the collection.
+     */
+    prependAll(elts: Iterable<T>): Vector<T> {
+        return Vector.ofIterable(elts).appendAll(this);
+    }
+
+    /**
+     * Removes the first element matching the predicate
+     * (use [[Seq.filter]] to remove all elements matching a predicate)
+     */
+    removeFirst(predicate: (v:T)=>boolean): Vector<T> {
+        const v1 = this.takeWhile(x => !predicate(x));
+        return v1.appendAll(this.drop(v1.length()+1));
+    }
+
+    /**
+     * Returns a new collection with the last
+     * n elements discarded.
+     * If the collection has less than n elements,
+     * returns the empty collection.
+     */
+    dropRight(n:number): Vector<T> {
+        if (n>=this._length) {
+            return Vector.empty<T>();
+        }
+        return this.take(this._length-n);
+    }
+
+    /**
+     * Get all the elements in the collection but the first one.
+     * If the collection is empty, return None.
+     */
+    tail(): Option<Vector<T>> {
+        return this._length > 0 ? Option.of(this.drop(1)) : Option.none<Vector<T>>();
     }
 }
