@@ -27,6 +27,12 @@ describe("Vector extra methods", () => {
         [], Vector.empty<number>().init().toArray()));
     it("handles init correctly on a single-element vector", () => assert.deepEqual(
         [], Vector.of(1).init().toArray()));
+    it("handles replace correctly on a simple example", () => assert.deepEqual(
+        [1,4,3], Vector.of(1,2,3).replace(1,4).toArray()));
+    it("should throw on replace on negative index", () => assert.throws(
+        () => Vector.of(1,2,3).replace(-1,0)));
+    it("should throw on replace on out of bounds index", () => assert.throws(
+        () => Vector.of(1,2,3).replace(5,0)));
 });
 
 // that's needed due to node's assert.deepEqual

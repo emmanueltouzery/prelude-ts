@@ -200,6 +200,15 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
     takeWhile(predicate:(x:T)=>boolean): Seq<T>;
 
     /**
+     * Return a new collection containing the first n
+     * elements from this collection
+     *
+     *     Vector.of(1,2,3,4).take(2)
+     *     => Vector.of(1,2)
+     */
+    take(n:number): Seq<T>;
+
+    /**
      * Remove duplicate items; elements are mapped to keys, those
      * get compared.
      *

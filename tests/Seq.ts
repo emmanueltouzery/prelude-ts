@@ -212,6 +212,12 @@ export function runTests(seqName: string,
             [1,2,3,4], of(1,2,3).append(4).toArray()));
         it("supports appendAll", () => assert.deepEqual(
             [1,2,3,4,5], of(1,2,3).appendAll([4,5]).toArray()));
+        it("supports take", () => assert.deepEqual(
+            [1,2,3], of(1,2,3,4,5,6).take(3).toArray()));
+        it("supports take with an index higher than the length", () =>
+           assert.deepEqual([1,2,3], of(1,2,3).take(6).toArray()));
+        it("supports take with a negative index", () =>
+           assert.deepEqual([], of(1,2,3).take(-1).toArray()));
     });
     describe(seqName + " filtering", () => {
         it("filter works", () => assert.ok(
