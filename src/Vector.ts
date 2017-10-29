@@ -31,7 +31,7 @@ interface MutableVector<T> {
 
 /**
  * A general-purpose list class with all-around good performance.
- * O(1) access, append, prepend.
+ * quasi-O(1) (actually O(log32(n))) access, append, prepend.
  * It's backed by a bit-mapped vector trie.
  * @type T the item type
  */
