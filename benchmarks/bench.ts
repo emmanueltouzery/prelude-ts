@@ -71,32 +71,6 @@ function compare(...items: Array<[string, (x:Prerequisites)=>any]>) {
     }
 }
 
-compare(
-    ['Vector.append', (p:Prerequisites) => {
-        let v = Vector.empty<number>();
-        for (let item of p.array) {
-            v = v.append(item);
-        }
-    }],
-    ['Array.push', (p:Prerequisites) => {
-        let v = [];
-        for (let item of p.array) {
-            v.push(item);
-        }
-    }],
-    ['immList.push', (p:Prerequisites) => {
-        let v = imm.List<number>();
-        for (let item of p.array) {
-            v = v.push(item);
-        }
-    }],
-    ['LinkedList.append', (p:Prerequisites) => {
-        let v =LinkedList.empty<number>();
-        for (let item of p.array) {
-            v = v.append(item);
-        }
-    }]);
-
 compare(['Vector.toArray', (p:Prerequisites) => p.vec.toArray()],
         ['LinkedList.toArray', (p:Prerequisites) => p.list.toArray()],
         ['immList.toArray', (p:Prerequisites) => p.immList.toArray()]);
@@ -172,6 +146,32 @@ compare(['Vector.reverse', (p:Prerequisites) => p.vec.reverse()],
 compare(['Vector.groupBy', (p:Prerequisites) => p.vec.groupBy(x => x%2)],
         ['LinkedList.groupBy', (p:Prerequisites) => p.list.groupBy(x => x%2)],
         ['immList.groupBy', (p:Prerequisites) => p.immList.groupBy(x => x%2)]);
+
+compare(
+    ['Vector.append', (p:Prerequisites) => {
+        let v = Vector.empty<number>();
+        for (let item of p.array) {
+            v = v.append(item);
+        }
+    }],
+    ['Array.push', (p:Prerequisites) => {
+        let v = [];
+        for (let item of p.array) {
+            v.push(item);
+        }
+    }],
+    ['immList.push', (p:Prerequisites) => {
+        let v = imm.List<number>();
+        for (let item of p.array) {
+            v = v.push(item);
+        }
+    }],
+    ['LinkedList.append', (p:Prerequisites) => {
+        let v =LinkedList.empty<number>();
+        for (let item of p.array) {
+            v = v.append(item);
+        }
+    }]);
 
 compare(['Vector.appendAll', (p:Prerequisites) => p.vec.appendAll(p.vec)],
         ['Array.appendAll', (p:Prerequisites) => p.array.concat(p.array)],
