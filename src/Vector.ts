@@ -38,6 +38,9 @@ interface MutableVector<T> {
 export class Vector<T> implements Seq<T> {
     // Based on https://github.com/graue/immutable-vector from Scott Feeney.
 
+    /**
+     * @hidden
+     */
     // _contents will be undefined only if length===0
     protected constructor(private _contents: any[]|undefined,
                           private _length: number,
