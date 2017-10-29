@@ -34,7 +34,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      * @type T the item type
      */
     static ofIterable<T>(elts: Iterable<T & WithEquality>): HashSet<T> {
-        return new HashSet<T>(hamt.empty).addAll(elts);
+        return new EmptyHashSet<T>().addAll(elts);
     }
 
     /**
@@ -453,7 +453,12 @@ class EmptyHashSet<T> extends HashSet<T> {
      * Add multiple elements to this set.
      */
     addAll(elts: Iterable<T & WithEquality>): HashSet<T> {
-        return HashSet.ofIterable(elts);
+        const it = elts[Symbol.iterator]();
+        let curItem = it.next();
+        if (curItem.done) {
+            return <EmptyHashSet<T>>emptyHashSet;
+        }
+        return this.add(curItem.value).addAll({[Symbol.iterator]: () => it});
     }
 
     contains(elt: T & WithEquality): boolean {
