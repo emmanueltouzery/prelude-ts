@@ -5,7 +5,8 @@
 ## Intro
 
 Prelude.ts is a typescript library which aims to make functional programming
-concepts accessible and productive in typescript.
+concepts accessible and productive in typescript. Note that even though it's
+written in typescript, it's perfectly usable from javascript (including ES5)!
 
 It provides [persistent](https://en.wikipedia.org/wiki/Persistent_data_structure)
 immutable collections (Vector, Set, Map, Stream), and constructs such as Option,
@@ -41,12 +42,15 @@ You can check the tests for examples of use, and browse the
 Note that the constructors are private, and you should use static methods to build
 items, for instance `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
 
-At this time most of the collections are implemented using the
+`HashSet` and `HashMap` are implemented using the
 [HAMT algorithm](http://en.wikipedia.org/wiki/Hash_array_mapped_trie),
 and concretely the [hamt_plus library](https://www.npmjs.com/package/hamt_plus).
 Besides this dependency, I'll try to limit the number of dependencies.
+`Vector` is implemented through a
+[bit-mapped vector trie](http://hypirion.com/musings/understanding-persistent-vector-pt-1).
 In addition the library is written in idiomatic javascript style, with loops
-instead of recursion, so the performance should be reasonable.
+instead of recursion, so the performance should be reasonable
+([see benchmarks here](https://github.com/emmanueltouzery/prelude.ts/wiki/Benchmarks)).
 
 ## Set, Map and equality
 
