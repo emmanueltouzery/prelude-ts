@@ -21,6 +21,14 @@ describe("hashmap construction basic sanity tests", () => {
                 HashMap.empty<MyClass,string>()
                     .put(new MyClass("a", 1), "test1")
                     .put(new MyClass("a", 2), "test1"))));
+
+    it("should overwrite values with the same key with custom types when created with of()", () => assert.ok(
+        HashMap.empty<MyClass,string>()
+            .put(new MyClass("a", 1), "test")
+            .put(new MyClass("a", 1), "test1")
+            .put(new MyClass("a", 2), "test1").equals(
+                HashMap.of<MyClass,string>([new MyClass("a", 1), "test1"])
+                    .put(new MyClass("a", 2), "test1"))));
     
     it("should support map as a key itself", () => assert.ok(
         HashMap.empty<HashMap<string,number>, number>()
@@ -183,6 +191,14 @@ describe("hashmap transformation", () => {
             .put(1,"a").put(2,"b").put(3,"c").put(4,"d").filter((k,v) => k%2!=0).toArray()));
     it("should filter empty properly", () => assert.deepEqual(
         [], HashMap.empty().toArray()));
+    it("keeps the custom equality even after filter", () => assert.ok(
+        HashMap.empty<MyClass,string>()
+            .put(new MyClass("a", 1), "test")
+            .put(new MyClass("a", 2), "test1").equals(
+                HashMap.of<MyClass,string>([new MyClass("a", 1), "test1"])
+                    .filter(x => true)
+                    .put(new MyClass("a", 1), "test")
+                    .put(new MyClass("a", 2), "test1"))));
     it("should support allMatch, positive case", () => assert.ok(
         HashMap.empty<number,string>().put(1,"a").put(2,"b").allMatch((k,v) => k > 0)));
     it("should support allMatch, negative case", () => assert.ok(

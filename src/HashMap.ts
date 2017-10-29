@@ -259,10 +259,17 @@ export class HashMap<K,V> implements IMap<K,V> {
      * for which the predicate returned true.
      */
     filter(predicate:(k:K,v:V)=>boolean): HashMap<K,V> {
-        return this.hamt.fold(
-            (acc: HashMap<K,V>, value: V, key: K&WithEquality) =>
-                predicate(key,value) ? acc.put(key,value) : acc,
-            HashMap.empty());
+        return new HashMap<K,V>(
+            hamt.make({hash:this.hamt._config.hash, keyEq:this.hamt._config.keyEq}).mutate((h:any) => {
+                const iterator: Iterator<[K,V]> = this.hamt.entries();
+                let curItem = iterator.next();
+                while (!curItem.done) {
+                    if (predicate(curItem.value[0], curItem.value[1])) {
+                        h.set(curItem.value[0], curItem.value[1]);
+                    }
+                    curItem = iterator.next();
+                }
+            }));
     }
 
     /**
