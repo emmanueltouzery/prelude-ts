@@ -164,6 +164,11 @@ export function runTests(seqName: string,
             [1,2,3,4], of(1,2,3,4,5,6).dropRight(2).toArray()));
         it("returns an empty seq when dropping right too much", () => assert.deepEqual(
             [], of(1,2).dropRight(3).toArray()));
+        it("doesn't modify the receiver upon drop", () => {
+            const x = of(1,2,3);
+            x.drop(2);
+            assert.deepEqual([1,2,3], x.toArray())
+        });
         it("sortBy sorting works", () => assert.ok(
             of(4,3,2,1)
                 .equals(of(1,2,3,4).sortBy((x,y) => y-x))));
@@ -215,14 +220,29 @@ export function runTests(seqName: string,
                 x => x%2==0 ? Option.of(x+1):Option.none()).toArray()));
         it("supports append", () => assert.deepEqual(
             [1,2,3,4], of(1,2,3).append(4).toArray()));
+        it("doesn't modify the receiver upon append", () => {
+            const x = of(1,2,3);
+            x.append(4);
+            assert.deepEqual([1,2,3], x.toArray())
+        });
         it("supports appendAll", () => assert.deepEqual(
             [1,2,3,4,5], of(1,2,3).appendAll([4,5]).toArray()));
+        it("doesn't modify the receiver upon appendAll", () => {
+            const x = of(1,2,3);
+            x.appendAll([4,5]);
+            assert.deepEqual([1,2,3], x.toArray())
+        });
         it("supports take", () => assert.deepEqual(
             [1,2,3], of(1,2,3,4,5,6).take(3).toArray()));
         it("supports take with an index higher than the length", () =>
            assert.deepEqual([1,2,3], of(1,2,3).take(6).toArray()));
         it("supports take with a negative index", () =>
            assert.deepEqual([], of(1,2,3).take(-1).toArray()));
+        it("doesn't modify the receiver upon take", () => {
+            const x = of(1,2,3);
+            x.take(2);
+            assert.deepEqual([1,2,3], x.toArray())
+        });
     });
     describe(seqName + " filtering", () => {
         it("filter works", () => assert.ok(
