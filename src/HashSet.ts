@@ -59,15 +59,31 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
         return new HashSet<T>(this.hamt.set(elt,elt));
     }
 
+    private addAllArray(elts: Array<T&WithEquality>): HashSet<T> {
+        return new HashSet<T>(this.hamt.mutate((h:any) => {
+            if (elts.length > 0) {
+                contractTrueEquality("Error building a HashSet", elts[0]);
+            }
+            for (const val of elts) {
+                h.set(val, val);
+            }
+        }));
+    }
+
     /**
      * Add multiple elements to this set.
      */
     addAll(elts: Iterable<T & WithEquality>): HashSet<T> {
+        if (Array.isArray(elts)) {
+            return this.addAllArray(elts);
+        }
         return new HashSet<T>(this.hamt.mutate((h:any) => {
+            let checkedEq = false;
             const iterator = elts[Symbol.iterator]();
             let curItem = iterator.next();
-            if (!curItem.done) {
+            if (!curItem.done && !checkedEq) {
                 contractTrueEquality("Error building a HashSet", curItem.value);
+                checkedEq = true;
             }
             while (!curItem.done) {
                 h.set(curItem.value, curItem.value);

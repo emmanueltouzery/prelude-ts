@@ -2,7 +2,8 @@ const Benchmark: any = require('benchmark');
 
 import { execSync } from "child_process";
 import { Vector } from "../src/Vector";
-import {LinkedList } from "../src/LinkedList";
+import { HashSet } from "../src/HashSet";
+import { LinkedList } from "../src/LinkedList";
 import * as imm from 'immutable';
 const hamt: any = require("hamt_plus");
 const hamtBase: any = require("hamt");
@@ -37,7 +38,11 @@ function getPrerequisites(length:number): Prerequisites {
     const idxThreeQuarters = array.length*3/4;
     const atThreeQuarters = array[idxThreeQuarters];
 
-    return {vec,immList,array,list,idxThreeQuarters,rawhamt,rawhamtBase,length};
+    const hashset = HashSet.ofIterable(array);
+    const immSet = imm.Set(array);
+
+    return {vec,immList,array,list,idxThreeQuarters,
+            rawhamt,rawhamtBase,hashset,immSet,length};
 }
 
 interface Prerequisites {
@@ -48,6 +53,8 @@ interface Prerequisites {
     idxThreeQuarters: number;
     rawhamt: any;
     rawhamtBase: any;
+    hashset: HashSet<number>;
+    immSet: imm.Set<number>;
     length:number;
 }
 
@@ -72,7 +79,7 @@ function compare(...items: Array<[string, (x:Prerequisites)=>any]>) {
     }
 }
 
-console.log("immList is the immutablejs list https://facebook.github.io/immutable-js/");
+console.log("immList, immSet are the immutablejs list,set... https://facebook.github.io/immutable-js/");
 
 process.stdout.write("node version: ");
 execSync("node --version", {stdio:[0,1,2]});
@@ -197,3 +204,15 @@ compare(['Vector.foldLeft', (p:Prerequisites) => p.vec.foldLeft(0, (acc,i)=>acc+
 compare(['Vector.foldRight', (p:Prerequisites) => p.vec.foldRight(0, (i,acc)=>acc+i)],
         ['immList.foldRight', (p:Prerequisites) => p.immList.reduceRight((acc,i)=>acc+i,0)],
         ['LinkedList.foldRight', (p:Prerequisites) => p.vec.foldRight(0, (i,acc)=>acc+i)]);
+
+compare(['HashSet.ofIterable', (p:Prerequisites) => HashSet.ofIterable(p.array)],
+        ['immSet', (p:Prerequisites) => imm.Set(p.array)]);
+
+compare(['HashSet.ofIterable (from vector)', (p:Prerequisites) => HashSet.ofIterable(p.vec)],
+        ['immSet (from vector)', (p:Prerequisites) => imm.Set(p.vec)]);
+
+compare(['HashSet.contains', (p:Prerequisites) => p.hashset.contains(p.array[Math.floor(Math.random()*p.array.length)])],
+        ['immSet.contains', (p:Prerequisites) => p.immSet.contains(p.array[Math.floor(Math.random()*p.array.length)])]);
+
+compare(['HashSet.filter', (p:Prerequisites) => p.hashset.filter(x => x<p.length/2)],
+        ['immSet.filter', (p:Prerequisites) => p.immSet.filter(x => x<p.length/2)]);
