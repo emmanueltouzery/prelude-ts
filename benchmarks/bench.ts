@@ -3,6 +3,7 @@ const Benchmark: any = require('benchmark');
 import { execSync } from "child_process";
 import { Vector } from "../src/Vector";
 import { HashSet } from "../src/HashSet";
+import { HashMap } from "../src/HashMap";
 import { LinkedList } from "../src/LinkedList";
 import * as imm from 'immutable';
 const hamt: any = require("hamt_plus");
@@ -41,8 +42,11 @@ function getPrerequisites(length:number): Prerequisites {
     const hashset = HashSet.ofIterable(array);
     const immSet = imm.Set(array);
 
+    const hashmap = HashMap.ofIterable<string,number>(array.map<[string,number]>(x => [x+"",x]));
+    const immMap = imm.Map(array.map<[string,number]>(x => [x+"",x]));
+
     return {vec,immList,array,list,idxThreeQuarters,
-            rawhamt,rawhamtBase,hashset,immSet,length};
+            rawhamt,rawhamtBase,hashset,immSet,length,hashmap,immMap};
 }
 
 interface Prerequisites {
@@ -55,6 +59,8 @@ interface Prerequisites {
     rawhamtBase: any;
     hashset: HashSet<number>;
     immSet: imm.Set<number>;
+    hashmap: HashMap<string,number>;
+    immMap: imm.Map<string,number>;
     length:number;
 }
 
@@ -216,3 +222,18 @@ compare(['HashSet.contains', (p:Prerequisites) => p.hashset.contains(p.array[Mat
 
 compare(['HashSet.filter', (p:Prerequisites) => p.hashset.filter(x => x<p.length/2)],
         ['immSet.filter', (p:Prerequisites) => p.immSet.filter(x => x<p.length/2)]);
+
+compare(['HashMap.ofIterable', (p:Prerequisites) =>
+         HashMap.ofIterable<string,number>(p.array.map<[string,number]>(x => [x+"",x]))],
+        ['immMap', (p:Prerequisites) => imm.Map(p.array.map<[string,number]>(x => [x+"",x]))]);
+
+compare(['HashMap.ofIterable (from vector)', (p:Prerequisites) =>
+         HashMap.ofIterable(p.vec.map<[string,number]>(x => [x+"",x]))],
+        ['immMap (from vector)', (p:Prerequisites) =>
+         imm.Map(p.vec.map<[string,number]>(x => [x+"",x]))]);
+
+compare(['HashMap.get', (p:Prerequisites) => p.hashmap.get(p.array[Math.floor(Math.random()*p.array.length)]+"")],
+        ['immMap.get', (p:Prerequisites) => p.immMap.get(p.array[Math.floor(Math.random()*p.array.length)]+"")]);
+
+compare(['HashMap.filter', (p:Prerequisites) => p.hashmap.filter((k,v) => parseInt(k)<p.length/2)],
+        ['immMap.filter', (p:Prerequisites) => p.immMap.filter((v,k) => parseInt(k)<p.length/2)]);
