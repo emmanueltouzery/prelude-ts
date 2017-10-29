@@ -144,10 +144,9 @@ then you can get
 
 ## Wishlist/upcoming features
 
-* Function helpers (compose/andThen, curry)
 * Validation
 * Future, wrapping promises?
-* Non-empty vector probably
+* Non-empty vector?
 * More functions on existing classes
 
 ## Out of scope for prelude.ts
