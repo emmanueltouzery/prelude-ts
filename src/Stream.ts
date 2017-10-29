@@ -1028,8 +1028,12 @@ class ConsStream<T> extends Stream<T> implements Iterable<T> {
     }
 
     toArray(): T[] {
-        const r = this._tail.get().toArray();
-        r.unshift(this.value);
+        let r:T[] = [];
+        let curItem: Stream<T> = this;
+        while (!curItem.isEmpty()) {
+            r.push((<ConsStream<T>>curItem).value);
+            curItem = (<ConsStream<T>>curItem)._tail.get();
+        }
         return r;
     }
 
