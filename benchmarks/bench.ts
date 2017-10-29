@@ -1,7 +1,8 @@
 const Benchmark: any = require('benchmark');
 
-import { Vector } from "../src/Vector"
-import {LinkedList } from "../src/LinkedList"
+import { execSync } from "child_process";
+import { Vector } from "../src/Vector";
+import {LinkedList } from "../src/LinkedList";
 import * as imm from 'immutable';
 const hamt: any = require("hamt_plus");
 const hamtBase: any = require("hamt");
@@ -70,6 +71,12 @@ function compare(...items: Array<[string, (x:Prerequisites)=>any]>) {
         _compare(preReqs[i], items);
     }
 }
+
+console.log("immList is the immutablejs list https://facebook.github.io/immutable-js/");
+
+process.stdout.write("node version: ");
+execSync("node --version", {stdio:[0,1,2]});
+console.log();
 
 compare(['Vector.toArray', (p:Prerequisites) => p.vec.toArray()],
         ['LinkedList.toArray', (p:Prerequisites) => p.list.toArray()],
