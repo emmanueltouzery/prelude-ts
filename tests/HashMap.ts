@@ -29,6 +29,15 @@ describe("hashmap construction basic sanity tests", () => {
             .put(new MyClass("a", 2), "test1").equals(
                 HashMap.of<MyClass,string>([new MyClass("a", 1), "test1"])
                     .put(new MyClass("a", 2), "test1"))));
+
+    it("should overwrite values with the same key with custom types when created with ofIterable()", () => assert.ok(
+        HashMap.ofIterable<MyClass,string>(<[MyClass,string][]>[
+            [new MyClass("a", 1), "test"],
+            [new MyClass("a", 2), "test1"]])
+            .put(new MyClass("a", 1), "test1")
+            .equals(
+                HashMap.of<MyClass,string>([new MyClass("a", 1), "test1"])
+                    .put(new MyClass("a", 2), "test1"))));
     
     it("should support map as a key itself", () => assert.ok(
         HashMap.empty<HashMap<string,number>, number>()

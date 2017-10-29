@@ -45,14 +45,20 @@ export class HashMap<K,V> implements IMap<K,V> {
      */
     static ofIterable<K,V>(entries: Iterable<[K&WithEquality, V]>): HashMap<K,V> {
         // remember we must set up the hamt with the custom equality
-        let r = HashMap.empty<K,V>();
         const iterator = entries[Symbol.iterator]();
         let curItem = iterator.next();
-        while (!curItem.done) {
-            r = r.put(curItem.value[0], curItem.value[1]);
-            curItem = iterator.next();
+        if (curItem.done) {
+            return new EmptyHashMap<K,V>();
         }
-        return r;
+        // emptyhashmap.put sets up the custom equality+hashcode
+        let startH = (new EmptyHashMap<K,V>()).put(curItem.value[0], curItem.value[1]).hamt;
+        curItem = iterator.next();
+        return new HashMap<K,V>(startH.mutate((h:any) => {
+            while (!curItem.done) {
+                h.set(curItem.value[0], curItem.value[1]);
+                curItem = iterator.next();
+            }
+        }));
     }
 
     /**
