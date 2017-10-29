@@ -49,6 +49,6 @@ export function assertFailCompile(contents: string, expectedMsg: string): void {
     } else {
         assert.equal(allErrorsTxt, expectedMsg);
     }
-    fs.unlink(TMP_FILENAME);
-    fs.unlink(TMP_FILENAME.replace(/.ts$/, ".js"));
+    fs.unlinkSync(TMP_FILENAME);
+    fs.unlinkSync(TMP_FILENAME.replace(/.ts$/, ".js"));
 }
