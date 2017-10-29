@@ -1,5 +1,5 @@
 import { WithEquality, areEqual } from "./Comparison";
-import { List } from "./List";
+import { Vector } from "./Vector";
 
 /**
  * A predicate is a function taking one parameter and returning a boolean.
@@ -75,27 +75,27 @@ export class Predicates {
      * list of values you give as parameter.
      */
     static isIn<T>(others: Iterable<T&WithEquality>): Predicate<T&WithEquality> {
-        return Predicates.lift<T&WithEquality>(x => List.ofIterable(others).contains(x));
+        return Predicates.lift<T&WithEquality>(x => Vector.ofIterable(others).contains(x));
     }
 
     /**
      * Return a [[Predicate]] checking whether all of the predicate functions given hold
      */
     static allOf<T>(...predicates: Array<(x:T)=>boolean>): Predicate<T> {
-        return Predicates.lift<T>(x => List.ofIterable(predicates).allMatch(p=>p(x)));
+        return Predicates.lift<T>(x => Vector.ofIterable(predicates).allMatch(p=>p(x)));
     }
 
     /**
      * Return a [[Predicate]] checking whether any of the predicate functions given hold
      */
     static anyOf<T>(...predicates: Array<(x:T)=>boolean>): Predicate<T> {
-        return Predicates.lift<T>(x => List.ofIterable(predicates).anyMatch(p=>p(x)));
+        return Predicates.lift<T>(x => Vector.ofIterable(predicates).anyMatch(p=>p(x)));
     }
 
     /**
      * Return a [[Predicate]] checking whether none of the predicate functions given hold
      */
     static noneOf<T>(...predicates: Array<(x:T)=>boolean>): Predicate<T> {
-        return Predicates.lift<T>(x => !List.ofIterable(predicates).anyMatch(p=>p(x)));
+        return Predicates.lift<T>(x => !Vector.ofIterable(predicates).anyMatch(p=>p(x)));
     }
 }

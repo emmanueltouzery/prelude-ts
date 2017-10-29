@@ -1,6 +1,6 @@
 import { ISet } from "./ISet";
 import { Vector } from "./Vector";
-import { List } from "./List";
+import { LinkedList } from "./LinkedList";
 import { Option } from "./Option";
 import { WithEquality, hasEquals, HasEquals, 
          getHashCode, areEqual } from "./Comparison";
@@ -203,8 +203,8 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     /**
      * Converts this set to an list
      */
-    toList(): List<T & WithEquality> {
-        return List.ofIterable<T&WithEquality>(this.hamt.keys());
+    toLinkedList(): LinkedList<T & WithEquality> {
+        return LinkedList.ofIterable<T&WithEquality>(this.hamt.keys());
     }
 
     /**
@@ -468,8 +468,8 @@ class EmptyHashSet<T> extends HashSet<T> {
         return Vector.empty<T&WithEquality>();
     }
 
-    toList(): List<T & WithEquality> {
-        return List.empty<T&WithEquality>();
+    toLinkedList(): LinkedList<T & WithEquality> {
+        return LinkedList.empty<T&WithEquality>();
     }
 
     [Symbol.iterator](): Iterator<T> {

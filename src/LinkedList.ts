@@ -21,20 +21,20 @@ import * as SeqHelpers from "./SeqHelpers";
  * Avoid appending at the end of the list in a loop, prefer prepending and
  * then reversing the list.
  */
-export abstract class List<T> implements Iterable<T>, Seq<T> {
+export abstract class LinkedList<T> implements Seq<T> {
 
     /**
      * The empty stream
      */
-    static empty<T>(): List<T> {
-        return <EmptyList<T>>emptyList;
+    static empty<T>(): LinkedList<T> {
+        return <EmptyLinkedList<T>>emptyLinkedList;
     }
 
     /**
-     * Create a List with the elements you give.
+     * Create a LinkedList with the elements you give.
      */
-    static of<T>(...elts:T[]): List<T> {
-        return List.ofIterable(elts);
+    static of<T>(...elts:T[]): LinkedList<T> {
+        return LinkedList.ofIterable(elts);
     }
 
     /**
@@ -42,12 +42,12 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * an array for instance.
      * @type T the item type
      */
-    static ofIterable<T>(elts: Iterable<T>): List<T> {
+    static ofIterable<T>(elts: Iterable<T>): LinkedList<T> {
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
-        let result: List<T> = <EmptyList<T>>emptyList;
+        let result: LinkedList<T> = <EmptyLinkedList<T>>emptyLinkedList;
         while (!curItem.done) {
-            result = new ConsList(curItem.value, result);
+            result = new ConsLinkedList(curItem.value, result);
             curItem = iterator.next();
         }
         return result.reverse();
@@ -67,11 +67,11 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      *              .map<[number,number]>(x => [x,x-1]))
      *     => [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
      */
-    static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): List<U> {
+    static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): LinkedList<U> {
         let nextVal = fn(seed);
-        let result = <EmptyList<U>>emptyList;
+        let result = <EmptyLinkedList<U>>emptyLinkedList;
         while (!nextVal.isNone()) {
-            result = new ConsList(
+            result = new ConsLinkedList(
                 nextVal.getOrThrow()[0],
                 result);
             nextVal = fn(nextVal.getOrThrow()[1]);
@@ -118,7 +118,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * Get all the elements in the collection but the first one.
      * If the collection is empty, return None.
      */
-    abstract tail(): Option<List<T>>;
+    abstract tail(): Option<LinkedList<T>>;
 
     /**
      * Get the last value of the collection, if any.
@@ -133,7 +133,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * contain less elements than the index.
      *
      * Careful this is going to have poor performance
-     * on List, which is not a good data structure
+     * on LinkedList, which is not a good data structure
      * for random access!
      */
     abstract get(idx: number): Option<T>;
@@ -155,13 +155,13 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * Return a new stream keeping only the first n elements
      * from this stream.
      */
-    abstract take(n: number): List<T>;
+    abstract take(n: number): LinkedList<T>;
 
     /**
      * Returns a new collection, discarding the elements
      * after the first element which fails the predicate.
      */
-    abstract takeWhile(predicate: (x:T)=>boolean): List<T>;
+    abstract takeWhile(predicate: (x:T)=>boolean): LinkedList<T>;
 
     /**
      * Returns a new collection with the first
@@ -169,14 +169,14 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * If the collection has less than n elements,
      * returns the empty collection.
      */
-    abstract drop(n:number): List<T>;
+    abstract drop(n:number): LinkedList<T>;
 
     /**
      * Returns a new collection, discarding the first elements
      * until one element fails the predicate. All elements
      * after that point are retained.
      */
-    abstract dropWhile(predicate:(x:T)=>boolean): List<T>;
+    abstract dropWhile(predicate:(x:T)=>boolean): LinkedList<T>;
 
     /**
      * Returns a new collection with the last
@@ -184,7 +184,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * If the collection has less than n elements,
      * returns the empty collection.
      */
-    abstract dropRight(n:number): List<T>;
+    abstract dropRight(n:number): LinkedList<T>;
 
     /**
      * Reduces the collection to a single value using the
@@ -193,7 +193,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      *
      * Example:
      *
-     *     List.of(1,2,3).fold(0, (a,b) => a + b);
+     *     LinkedList.of(1,2,3).fold(0, (a,b) => a + b);
      *     => 6
      */
     fold(zero:T, fn:(v1:T,v2:T)=>T): T {
@@ -243,17 +243,17 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
      */
-    abstract zip<U>(other: Iterable<U>): List<[T,U]>;
+    abstract zip<U>(other: Iterable<U>): LinkedList<[T,U]>;
 
     /**
      * Combine this collection with the index of the elements
      * in it. Handy if you need the index when you map on
      * the collection for instance:
      *
-     *     List.of("a","b").zipWithIndex().map([v,idx] => ...)
+     *     LinkedList.of("a","b").zipWithIndex().map([v,idx] => ...)
      */
-    zipWithIndex(): List<[T,number]> {
-        return <List<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
+    zipWithIndex(): LinkedList<[T,number]> {
+        return <LinkedList<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
     }
 
     /**
@@ -261,7 +261,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      *
      *     [1,2,3] => [3,2,1]
      */
-    abstract reverse(): List<T>;
+    abstract reverse(): LinkedList<T>;
 
     /**
      * Takes a predicate; returns a pair of collections.
@@ -269,18 +269,18 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * which satisfies the predicate, and the second collection
      * is the remainder of the collection.
      *
-     *    List.of(1,2,3,4,5,6).span(x => x <3)
-     *    => [List.of(1,2), List.of(3,4,5,6)]
+     *    LinkedList.of(1,2,3,4,5,6).span(x => x <3)
+     *    => [LinkedList.of(1,2), LinkedList.of(3,4,5,6)]
      */
-    abstract span(predicate:(x:T)=>boolean): [List<T>,List<T>];
+    abstract span(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>];
 
     /**
      * Split the collection at a specific index.
      *
-     *     List.of(1,2,3,4,5).splitAt(3)
-     *     => [List.of(1,2,3), List.of(4,5)]
+     *     LinkedList.of(1,2,3,4,5).splitAt(3)
+     *     => [LinkedList.of(1,2,3), LinkedList.of(4,5)]
      */
-    abstract splitAt(index:number): [List<T>,List<T>];
+    abstract splitAt(index:number): [LinkedList<T>,LinkedList<T>];
 
     /**
      * Returns a pair of two collections; the first one
@@ -292,7 +292,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      *     Vector.of(1,2,3,4).partition(x => x%2===0)
      *     => [[2,4],[1,3]]
      */
-    abstract partition(predicate:(x:T)=>boolean): [List<T>,List<T>];
+    abstract partition(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>];
 
     /**
      * Group elements in the collection using a classifier function.
@@ -300,15 +300,15 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * the classifier, and in value we get the list of elements
      * matching that value.
      *
-     * also see [[List.arrangeBy]]
+     * also see [[LinkedList.arrangeBy]]
      */
-    abstract groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,List<T>>;
+    abstract groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,LinkedList<T>>;
 
     /**
      * Matches each element with a unique key that you extract from it.
      * If the same key is present twice, the function will return None.
      *
-     * also see [[List.groupBy]]
+     * also see [[LinkedList.groupBy]]
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
         return SeqHelpers.arrangeBy<T,K>(this, getKey);
@@ -317,41 +317,41 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
     /**
      * Randomly reorder the elements of the collection.
      */
-    shuffle(): List<T> {
-        return List.ofIterable<T>(SeqHelpers.shuffle(this.toArray()));
+    shuffle(): LinkedList<T> {
+        return LinkedList.ofIterable<T>(SeqHelpers.shuffle(this.toArray()));
     }
 
     /**
-     * Append an element at the end of this List.
+     * Append an element at the end of this LinkedList.
      */
-    abstract append(v:T): List<T>;
+    abstract append(v:T): LinkedList<T>;
 
     /*
-     * Append multiple elements at the end of this List.
+     * Append multiple elements at the end of this LinkedList.
      */
-    abstract appendAll(elts:Iterable<T>): List<T>;
+    abstract appendAll(elts:Iterable<T>): LinkedList<T>;
 
     /**
      * Removes the first element matching the predicate
      * (use [[Seq.filter]] to remove all elements matching a predicate)
      */
-    abstract removeFirst(predicate: (v:T)=>boolean): List<T>;
+    abstract removeFirst(predicate: (v:T)=>boolean): LinkedList<T>;
 
     /**
      * Prepend an element at the beginning of the collection.
      */
-    abstract prepend(elt: T): List<T>;
+    abstract prepend(elt: T): LinkedList<T>;
 
     /**
      * Prepend multiple elements at the beginning of the collection.
      */
-    abstract prependAll(elts: Iterable<T>): List<T>;
+    abstract prependAll(elts: Iterable<T>): LinkedList<T>;
 
     /**
      * Return a new collection where each element was transformed
      * by the mapper function you give.
      */
-    abstract map<U>(mapper:(v:T)=>U): List<U>;
+    abstract map<U>(mapper:(v:T)=>U): LinkedList<U>;
 
     /**
      * Apply the mapper function on every element of this collection.
@@ -359,7 +359,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * the value it contains is added to the result Collection, if it's
      * a None, the value is discarded.
      */
-    abstract mapOption<U>(mapper:(v:T)=>Option<U>): List<U>;
+    abstract mapOption<U>(mapper:(v:T)=>Option<U>): LinkedList<U>;
 
     /**
      * Calls the function you give for each item in the collection,
@@ -367,7 +367,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * concatenated.
      * This is the monadic bind.
      */
-    abstract flatMap<U>(mapper:(v:T)=>List<U>): List<U>;
+    abstract flatMap<U>(mapper:(v:T)=>LinkedList<U>): LinkedList<U>;
 
     /**
      * Returns true if the predicate returns true for all the
@@ -386,25 +386,25 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * build a new collection holding only the elements
      * for which the predicate returned true.
      */
-    abstract filter(predicate:(v:T)=>boolean): List<T>;
+    abstract filter(predicate:(v:T)=>boolean): LinkedList<T>;
 
     /**
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
-     * also see [[List.sortOn]]
+     * also see [[LinkedList.sortOn]]
      */
-    abstract sortBy(compare: (v1:T,v2:T)=>Ordering): List<T>;
+    abstract sortBy(compare: (v1:T,v2:T)=>Ordering): LinkedList<T>;
 
     /**
      * Give a function associating a number or a string with
      * elements from the collection, and the elements
      * are sorted according to that value.
      *
-     * also see [[List.sortBy]]
+     * also see [[LinkedList.sortBy]]
      */
-    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): List<T> {
-        return <List<T>>SeqHelpers.sortOn<T>(this, getKey);
+    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): LinkedList<T> {
+        return <LinkedList<T>>SeqHelpers.sortOn<T>(this, getKey);
     }
 
     /**
@@ -414,12 +414,12 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
      *     => [1,2,3]
      */
-    abstract distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): List<T>;
+    abstract distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): LinkedList<T>;
 
     /**
      * Call a function for element in the collection.
      */
-    abstract forEach(fn: (v:T)=>void): List<T>;
+    abstract forEach(fn: (v:T)=>void): LinkedList<T>;
 
     /**
      * Joins elements of the collection by a separator.
@@ -455,7 +455,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * Transform this value to another value type.
      * Enables fluent-style programming by chaining calls.
      */
-    transform<U>(converter:(x:List<T>)=>U): U {
+    transform<U>(converter:(x:LinkedList<T>)=>U): U {
         return converter(this);
     }
 
@@ -464,7 +464,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
      * regardless of whether they are the same object physically
      * in memory.
      */
-    abstract equals(other: List<T&WithEquality>): boolean;
+    abstract equals(other: LinkedList<T&WithEquality>): boolean;
 
     /**
      * Get a human-friendly string representation of that value.
@@ -483,7 +483,7 @@ export abstract class List<T> implements Iterable<T>, Seq<T> {
     }
 }
 
-class EmptyList<T> extends List<T> implements Iterable<T> {
+class EmptyLinkedList<T> extends LinkedList<T> implements Iterable<T> {
 
     [Symbol.iterator](): Iterator<T> {
         return {
@@ -512,8 +512,8 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
         return Option.none<T>();
     }
 
-    tail(): Option<List<T>> {
-        return Option.none<List<T>>();
+    tail(): Option<LinkedList<T>> {
+        return Option.none<LinkedList<T>>();
     }
 
     last(): Option<T> {
@@ -532,23 +532,23 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
         return false;
     }
 
-    take(n: number): List<T> {
+    take(n: number): LinkedList<T> {
         return this;
     }
 
-    takeWhile(predicate: (x:T)=>boolean): List<T> {
+    takeWhile(predicate: (x:T)=>boolean): LinkedList<T> {
         return this;
     }
 
-    drop(n:number): List<T> {
+    drop(n:number): LinkedList<T> {
         return this;
     }
 
-    dropWhile(predicate:(x:T)=>boolean): List<T> {
+    dropWhile(predicate:(x:T)=>boolean): LinkedList<T> {
         return this;
     }
 
-    dropRight(n:number): List<T> {
+    dropRight(n:number): LinkedList<T> {
         return this;
     }
 
@@ -560,60 +560,60 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
         return zero;
     }
 
-    zip<U>(other: Iterable<U>): List<[T,U]> {
-        return <EmptyList<[T,U]>>emptyList;
+    zip<U>(other: Iterable<U>): LinkedList<[T,U]> {
+        return <EmptyLinkedList<[T,U]>>emptyLinkedList;
     }
 
-    reverse(): List<T> {
+    reverse(): LinkedList<T> {
         return this;
     }
 
-    span(predicate:(x:T)=>boolean): [List<T>,List<T>] {
+    span(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>] {
         return [this, this];
     }
 
-    splitAt(index:number): [List<T>,List<T>] {
+    splitAt(index:number): [LinkedList<T>,LinkedList<T>] {
         return [this, this];
     }
 
-    partition(predicate:(x:T)=>boolean): [List<T>,List<T>] {
-        return [List.empty<T>(), List.empty<T>()];
+    partition(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>] {
+        return [LinkedList.empty<T>(), LinkedList.empty<T>()];
     }
 
-    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,List<T>> {
-        return HashMap.empty<C,List<T>>();
+    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,LinkedList<T>> {
+        return HashMap.empty<C,LinkedList<T>>();
     }
 
-    append(v:T): List<T> {
-        return List.of(v);
+    append(v:T): LinkedList<T> {
+        return LinkedList.of(v);
     }
 
-    appendAll(elts:Iterable<T>): List<T> {
-        return List.ofIterable(elts);
+    appendAll(elts:Iterable<T>): LinkedList<T> {
+        return LinkedList.ofIterable(elts);
     }
 
-    removeFirst(predicate: (x:T)=>boolean): List<T> {
+    removeFirst(predicate: (x:T)=>boolean): LinkedList<T> {
         return this;
     }
 
-    prepend(elt: T): List<T> {
-        return new ConsList(elt, this);
+    prepend(elt: T): LinkedList<T> {
+        return new ConsLinkedList(elt, this);
     }
 
-    prependAll(elt: Iterable<T>): List<T> {
-        return List.ofIterable(elt);
+    prependAll(elt: Iterable<T>): LinkedList<T> {
+        return LinkedList.ofIterable(elt);
     }
 
-    map<U>(mapper:(v:T)=>U): List<U> {
-        return <EmptyList<U>>emptyList;
+    map<U>(mapper:(v:T)=>U): LinkedList<U> {
+        return <EmptyLinkedList<U>>emptyLinkedList;
     }
 
-    mapOption<U>(mapper:(v:T)=>Option<U>): List<U> {
-        return <EmptyList<U>>emptyList;
+    mapOption<U>(mapper:(v:T)=>Option<U>): LinkedList<U> {
+        return <EmptyLinkedList<U>>emptyLinkedList;
     }
 
-    flatMap<U>(mapper:(v:T)=>List<U>): List<U> {
-        return <EmptyList<U>>emptyList;
+    flatMap<U>(mapper:(v:T)=>LinkedList<U>): LinkedList<U> {
+        return <EmptyLinkedList<U>>emptyLinkedList;
     }
 
     allMatch(predicate:(v:T)=>boolean): boolean {
@@ -624,19 +624,19 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
         return false;
     }
 
-    filter(predicate:(v:T)=>boolean): List<T> {
+    filter(predicate:(v:T)=>boolean): LinkedList<T> {
         return this;
     }
 
-    sortBy(compare: (v1:T,v2:T)=>Ordering): List<T> {
+    sortBy(compare: (v1:T,v2:T)=>Ordering): LinkedList<T> {
         return this;
     }
 
-    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): List<T> {
+    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): LinkedList<T> {
         return this;
     }
 
-    forEach(fn: (v:T)=>void): List<T> {
+    forEach(fn: (v:T)=>void): LinkedList<T> {
         return this;
     }
 
@@ -656,7 +656,7 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
         return HashMap.empty<K,V>();
     }
 
-    equals(other: List<T&WithEquality>): boolean {
+    equals(other: LinkedList<T&WithEquality>): boolean {
         if (!other) {
             return false;
         }
@@ -672,17 +672,17 @@ class EmptyList<T> extends List<T> implements Iterable<T> {
     }
 }
 
-class ConsList<T> extends List<T> implements Iterable<T> {
+class ConsLinkedList<T> extends LinkedList<T> implements Iterable<T> {
 
     /**
      * @hidden
      */
-    public constructor(protected value: T, protected _tail: List<T>) {
+    public constructor(protected value: T, protected _tail: LinkedList<T>) {
         super();
     }
 
     [Symbol.iterator](): Iterator<T> {
-        let item: List<T> = this;
+        let item: LinkedList<T> = this;
         return {
             next(): IteratorResult<T> {
                 if (item.isEmpty()) {
@@ -713,15 +713,15 @@ class ConsList<T> extends List<T> implements Iterable<T> {
         return Option.of(this.value);
     }
 
-    tail(): Option<List<T>> {
+    tail(): Option<LinkedList<T>> {
         return Option.of(this._tail);
     }
 
     last(): Option<T> {
-        let curItem: List<T> = this;
+        let curItem: LinkedList<T> = this;
         while (true) {
-            const item = (<ConsList<T>>curItem).value;
-            curItem = (<ConsList<T>>curItem)._tail;
+            const item = (<ConsLinkedList<T>>curItem).value;
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
             if (curItem.isEmpty()) {
                 return Option.of(item);
             }
@@ -729,27 +729,27 @@ class ConsList<T> extends List<T> implements Iterable<T> {
     }
 
     get(idx: number): Option<T> {
-        let curItem: List<T> = this;
+        let curItem: LinkedList<T> = this;
         let i=0;
         while (!curItem.isEmpty()) {
             if (i === idx) {
-                const item = (<ConsList<T>>curItem).value;
+                const item = (<ConsLinkedList<T>>curItem).value;
                 return Option.of(item);
             }
-            curItem = (<ConsList<T>>curItem)._tail;
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
             ++i;
         }
         return Option.none<T>();
     }
 
     find(predicate:(v:T)=>boolean): Option<T> {
-        let curItem: List<T> = this;
+        let curItem: LinkedList<T> = this;
         while (!curItem.isEmpty()) {
-            const item = (<ConsList<T>>curItem).value;
+            const item = (<ConsLinkedList<T>>curItem).value;
             if (predicate(item)) {
                 return Option.of(item);
             }
-            curItem = (<ConsList<T>>curItem)._tail;
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return Option.none<T>();
     }
@@ -758,45 +758,45 @@ class ConsList<T> extends List<T> implements Iterable<T> {
         return this.find(x => areEqual(x,v)).isSome();
     }
 
-    take(n: number): List<T> {
-        let result = <EmptyList<T>>emptyList;
-        let curItem: List<T> = this;
+    take(n: number): LinkedList<T> {
+        let result = <EmptyLinkedList<T>>emptyLinkedList;
+        let curItem: LinkedList<T> = this;
         let i = 0;
         while (i++ < n && (!curItem.isEmpty())) {
-            result = new ConsList((<ConsList<T>>curItem).value, result);
-            curItem = (<ConsList<T>>curItem)._tail;
+            result = new ConsLinkedList((<ConsLinkedList<T>>curItem).value, result);
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return result.reverse();
     }
 
-    takeWhile(predicate: (x:T)=>boolean): List<T> {
-        let result = <EmptyList<T>>emptyList;
-        let curItem: List<T> = this;
-        while ((!curItem.isEmpty()) && predicate((<ConsList<T>>curItem).value)) {
-            result = new ConsList((<ConsList<T>>curItem).value, result);
-            curItem = (<ConsList<T>>curItem)._tail;
+    takeWhile(predicate: (x:T)=>boolean): LinkedList<T> {
+        let result = <EmptyLinkedList<T>>emptyLinkedList;
+        let curItem: LinkedList<T> = this;
+        while ((!curItem.isEmpty()) && predicate((<ConsLinkedList<T>>curItem).value)) {
+            result = new ConsLinkedList((<ConsLinkedList<T>>curItem).value, result);
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return result.reverse();
     }
 
-    drop(n:number): List<T> {
+    drop(n:number): LinkedList<T> {
         let i = n;
-        let curItem: List<T> = this;
+        let curItem: LinkedList<T> = this;
         while (i-- > 0 && !curItem.isEmpty()) {
-            curItem = (<ConsList<T>>curItem)._tail;
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return curItem;
     }
 
-    dropWhile(predicate:(x:T)=>boolean): List<T> {
-        let curItem: List<T> = this;
-        while (!curItem.isEmpty() && predicate((<ConsList<T>>curItem).value)) {
-            curItem = (<ConsList<T>>curItem)._tail;
+    dropWhile(predicate:(x:T)=>boolean): LinkedList<T> {
+        let curItem: LinkedList<T> = this;
+        while (!curItem.isEmpty() && predicate((<ConsLinkedList<T>>curItem).value)) {
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return curItem;
     }
 
-    dropRight(n:number): List<T> {
+    dropRight(n:number): LinkedList<T> {
         // going twice through the list...
         const length = this.length();
         return this.take(length-n);
@@ -804,10 +804,10 @@ class ConsList<T> extends List<T> implements Iterable<T> {
 
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {
         let r = zero;
-        let curItem: List<T> = this;
+        let curItem: LinkedList<T> = this;
         while (!curItem.isEmpty()) {
-            r = fn(r, (<ConsList<T>>curItem).value);
-            curItem = (<ConsList<T>>curItem)._tail;
+            r = fn(r, (<ConsLinkedList<T>>curItem).value);
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return r;
     }
@@ -816,131 +816,131 @@ class ConsList<T> extends List<T> implements Iterable<T> {
         return this.reverse().foldLeft(zero, (xs,x)=>fn(x,xs));
     }
 
-    zip<U>(other: Iterable<U>): List<[T,U]> {
+    zip<U>(other: Iterable<U>): LinkedList<[T,U]> {
         const otherIterator = other[Symbol.iterator]();
         let otherCurItem = otherIterator.next();
 
-        let curItem: List<T> = this;
-        let result = <EmptyList<[T,U]>>emptyList;
+        let curItem: LinkedList<T> = this;
+        let result = <EmptyLinkedList<[T,U]>>emptyLinkedList;
 
         while ((!curItem.isEmpty()) && (!otherCurItem.done)) {
-            result = new ConsList(
-                [(<ConsList<T>>curItem).value, otherCurItem.value] as [T,U], result);
-            curItem = (<ConsList<T>>curItem)._tail;
+            result = new ConsLinkedList(
+                [(<ConsLinkedList<T>>curItem).value, otherCurItem.value] as [T,U], result);
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
             otherCurItem = otherIterator.next();
         }
         return result.reverse();
     }
 
-    reverse(): List<T> {
-        return this.foldLeft(<List<T>><EmptyList<T>>emptyList, (xs,x) => xs.prepend(x));
+    reverse(): LinkedList<T> {
+        return this.foldLeft(<LinkedList<T>><EmptyLinkedList<T>>emptyLinkedList, (xs,x) => xs.prepend(x));
     }
 
-    span(predicate:(x:T)=>boolean): [List<T>,List<T>] {
-        let first = <EmptyList<T>>emptyList;
-        let curItem: List<T> = this;
-        while ((!curItem.isEmpty()) && predicate((<ConsList<T>>curItem).value)) {
-            first = new ConsList((<ConsList<T>>curItem).value, first);
-            curItem = (<ConsList<T>>curItem)._tail;
+    span(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>] {
+        let first = <EmptyLinkedList<T>>emptyLinkedList;
+        let curItem: LinkedList<T> = this;
+        while ((!curItem.isEmpty()) && predicate((<ConsLinkedList<T>>curItem).value)) {
+            first = new ConsLinkedList((<ConsLinkedList<T>>curItem).value, first);
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return [first.reverse(), curItem];
     }
 
-    splitAt(index:number): [List<T>,List<T>] {
-        let first = <EmptyList<T>>emptyList;
-        let curItem: List<T> = this;
+    splitAt(index:number): [LinkedList<T>,LinkedList<T>] {
+        let first = <EmptyLinkedList<T>>emptyLinkedList;
+        let curItem: LinkedList<T> = this;
         let i = 0;
         while (i++ < index && (!curItem.isEmpty())) {
-            first = new ConsList((<ConsList<T>>curItem).value, first);
-            curItem = (<ConsList<T>>curItem)._tail;
+            first = new ConsLinkedList((<ConsLinkedList<T>>curItem).value, first);
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return [first.reverse(), curItem];
     }
 
-    partition(predicate:(x:T)=>boolean): [List<T>,List<T>] {
+    partition(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>] {
         // TODO goes twice over the list, can be optimized...
         return [this.filter(predicate), this.filter(x => !predicate(x))];
     }
 
-    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,List<T>> {
+    groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,LinkedList<T>> {
         return this.foldLeft(
-            HashMap.empty<C,List<T>>(),
-            (acc: HashMap<C,List<T>>, v:T) =>
+            HashMap.empty<C,LinkedList<T>>(),
+            (acc: HashMap<C,LinkedList<T>>, v:T) =>
                 acc.putWithMerge(
-                    classifier(v), List.of(v),
-                    (v1:List<T>,v2:List<T>)=>
+                    classifier(v), LinkedList.of(v),
+                    (v1:LinkedList<T>,v2:LinkedList<T>)=>
                         v1.prepend(v2.single().getOrThrow())))
             .mapValues(l => l.reverse());
     }
 
-    append(v:T): List<T> {
-        return new ConsList(
+    append(v:T): LinkedList<T> {
+        return new ConsLinkedList(
             this.value,
             this._tail.append(v));
     }
 
-    appendAll(elts:Iterable<T>): List<T> {
-        return List.ofIterable(elts).prependAll(<List<T>>this);
+    appendAll(elts:Iterable<T>): LinkedList<T> {
+        return LinkedList.ofIterable(elts).prependAll(<LinkedList<T>>this);
     }
 
-    removeFirst(predicate: (x:T)=>boolean): List<T> {
-        let curItem: List<T> = this;
-        let result = <EmptyList<T>>emptyList;
+    removeFirst(predicate: (x:T)=>boolean): LinkedList<T> {
+        let curItem: LinkedList<T> = this;
+        let result = <EmptyLinkedList<T>>emptyLinkedList;
         let removed = false;
         while (!curItem.isEmpty()) {
-            if (predicate((<ConsList<T>>curItem).value) && !removed) {
+            if (predicate((<ConsLinkedList<T>>curItem).value) && !removed) {
                 removed = true;
             } else {
-                result = new ConsList((<ConsList<T>>curItem).value, result);
+                result = new ConsLinkedList((<ConsLinkedList<T>>curItem).value, result);
             }
-            curItem = (<ConsList<T>>curItem)._tail;
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return result.reverse();
     }
 
-    prepend(elt: T): List<T> {
-        return new ConsList(elt, this);
+    prepend(elt: T): LinkedList<T> {
+        return new ConsLinkedList(elt, this);
     }
 
-    prependAll(elts: Iterable<T>): List<T> {
-        let leftToAdd = List.ofIterable(elts).reverse();
-        let result: List<T> = this;
+    prependAll(elts: Iterable<T>): LinkedList<T> {
+        let leftToAdd = LinkedList.ofIterable(elts).reverse();
+        let result: LinkedList<T> = this;
         while (!leftToAdd.isEmpty()) {
-            result = new ConsList((<ConsList<T>>leftToAdd).value, result);
-            leftToAdd = (<ConsList<T>>leftToAdd)._tail;
+            result = new ConsLinkedList((<ConsLinkedList<T>>leftToAdd).value, result);
+            leftToAdd = (<ConsLinkedList<T>>leftToAdd)._tail;
         }
         return result;
     }
 
-    map<U>(mapper:(v:T)=>U): List<U> {
-        let curItem: List<T> = this;
-        let result = <EmptyList<U>>emptyList;
+    map<U>(mapper:(v:T)=>U): LinkedList<U> {
+        let curItem: LinkedList<T> = this;
+        let result = <EmptyLinkedList<U>>emptyLinkedList;
         while (!curItem.isEmpty()) {
-            result = new ConsList(mapper((<ConsList<T>>curItem).value), result);
-            curItem = (<ConsList<T>>curItem)._tail;
+            result = new ConsLinkedList(mapper((<ConsLinkedList<T>>curItem).value), result);
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return result.reverse();
     }
 
-    mapOption<U>(mapper:(v:T)=>Option<U>): List<U> {
-        let curItem: List<T> = this;
-        let result = <EmptyList<U>>emptyList;
+    mapOption<U>(mapper:(v:T)=>Option<U>): LinkedList<U> {
+        let curItem: LinkedList<T> = this;
+        let result = <EmptyLinkedList<U>>emptyLinkedList;
         while (!curItem.isEmpty()) {
-            const mapped = mapper((<ConsList<T>>curItem).value);
+            const mapped = mapper((<ConsLinkedList<T>>curItem).value);
             if (mapped.isSome()) {
-                result = new ConsList(mapped.getOrThrow(), result);
+                result = new ConsLinkedList(mapped.getOrThrow(), result);
             }
-            curItem = (<ConsList<T>>curItem)._tail;
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return result.reverse();
     }
 
-    flatMap<U>(mapper:(v:T)=>List<U>): List<U> {
-        let curItem: List<T> = this;
-        let result = <EmptyList<U>>emptyList;
+    flatMap<U>(mapper:(v:T)=>LinkedList<U>): LinkedList<U> {
+        let curItem: LinkedList<T> = this;
+        let result = <EmptyLinkedList<U>>emptyLinkedList;
         while (!curItem.isEmpty()) {
-            result = result.prependAll(mapper((<ConsList<T>>curItem).value).reverse());
-            curItem = (<ConsList<T>>curItem)._tail;
+            result = result.prependAll(mapper((<ConsLinkedList<T>>curItem).value).reverse());
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return result.reverse();
     }
@@ -953,45 +953,45 @@ class ConsList<T> extends List<T> implements Iterable<T> {
         return this.find(predicate).isSome();
     }
 
-    filter(predicate:(v:T)=>boolean): List<T> {
-        let curItem: List<T> = this;
-        let result = <EmptyList<T>>emptyList;
+    filter(predicate:(v:T)=>boolean): LinkedList<T> {
+        let curItem: LinkedList<T> = this;
+        let result = <EmptyLinkedList<T>>emptyLinkedList;
         while (!curItem.isEmpty()) {
-            if (predicate((<ConsList<T>>curItem).value)) {
-                result = new ConsList((<ConsList<T>>curItem).value, result);
+            if (predicate((<ConsLinkedList<T>>curItem).value)) {
+                result = new ConsLinkedList((<ConsLinkedList<T>>curItem).value, result);
             }
-            curItem = (<ConsList<T>>curItem)._tail;
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return result.reverse();
     }
 
-    sortBy(compare: (v1:T,v2:T)=>Ordering): List<T> {
-        return List.ofIterable<T>(this.toArray().sort(compare));
+    sortBy(compare: (v1:T,v2:T)=>Ordering): LinkedList<T> {
+        return LinkedList.ofIterable<T>(this.toArray().sort(compare));
     }
 
-    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): List<T> {
-        return <List<T>>SeqHelpers.distinctBy(this, keyExtractor);
+    distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): LinkedList<T> {
+        return <LinkedList<T>>SeqHelpers.distinctBy(this, keyExtractor);
     }
 
-    forEach(fn: (v:T)=>void): List<T> {
-        let curItem: List<T> = this;
+    forEach(fn: (v:T)=>void): LinkedList<T> {
+        let curItem: LinkedList<T> = this;
         while (!curItem.isEmpty()) {
-            fn((<ConsList<T>>curItem).value);
-            curItem = (<ConsList<T>>curItem)._tail;
+            fn((<ConsLinkedList<T>>curItem).value);
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return this;
     }
 
     mkString(separator: string): string {
         let r = "";
-        let curItem: List<T> = this;
+        let curItem: LinkedList<T> = this;
         let isNotFirst = false;
         while (!curItem.isEmpty()) {
             if (isNotFirst) {
                 r += separator;
             }
-            r += (<ConsList<T>>curItem).value.toString();
-            curItem = (<ConsList<T>>curItem)._tail;
+            r += (<ConsLinkedList<T>>curItem).value.toString();
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
             isNotFirst = true;
         }
         return r;
@@ -999,10 +999,10 @@ class ConsList<T> extends List<T> implements Iterable<T> {
 
     toArray(): T[] {
         let r:T[] = [];
-        let curItem: List<T> = this;
+        let curItem: LinkedList<T> = this;
         while (!curItem.isEmpty()) {
-            r.push((<ConsList<T>>curItem).value);
-            curItem = (<ConsList<T>>curItem)._tail;
+            r.push((<ConsLinkedList<T>>curItem).value);
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return r;
     }
@@ -1018,12 +1018,12 @@ class ConsList<T> extends List<T> implements Iterable<T> {
         });
     }
 
-    equals(other: List<T&WithEquality>): boolean {
+    equals(other: LinkedList<T&WithEquality>): boolean {
         if (!other || !other.tail) {
             return false;
         }
-        contractTrueEquality("List.equals", this, other);
-        let myVal: List<T> = this;
+        contractTrueEquality("LinkedList.equals", this, other);
+        let myVal: LinkedList<T> = this;
         let hisVal = other;
         while (true) {
             if (myVal.isEmpty() !== hisVal.isEmpty()) {
@@ -1033,8 +1033,8 @@ class ConsList<T> extends List<T> implements Iterable<T> {
                 // they are both empty, end of the stream
                 return true;
             }
-            const myHead = (<ConsList<T&WithEquality>>myVal).value;
-            const hisHead = (<ConsList<T&WithEquality>>hisVal).value;
+            const myHead = (<ConsLinkedList<T&WithEquality>>myVal).value;
+            const hisHead = (<ConsLinkedList<T&WithEquality>>hisVal).value;
 
             if ((myHead === undefined) !== (hisHead === undefined)) {
                 return false;
@@ -1047,28 +1047,28 @@ class ConsList<T> extends List<T> implements Iterable<T> {
             if (!areEqual(myHead, hisHead)) {
                 return false;
             }
-            myVal = (<ConsList<T&WithEquality>>myVal)._tail;
-            hisVal = (<ConsList<T&WithEquality>>hisVal)._tail;
+            myVal = (<ConsLinkedList<T&WithEquality>>myVal)._tail;
+            hisVal = (<ConsLinkedList<T&WithEquality>>hisVal)._tail;
         }
     }
 
     hashCode(): number {
         let hash = 1;
-        let curItem: List<T> = this;
+        let curItem: LinkedList<T> = this;
         while (!curItem.isEmpty()) {
-            hash = 31 * hash + getHashCode((<ConsList<T>>curItem).value);
-            curItem = (<ConsList<T>>curItem)._tail;
+            hash = 31 * hash + getHashCode((<ConsLinkedList<T>>curItem).value);
+            curItem = (<ConsLinkedList<T>>curItem)._tail;
         }
         return hash;
     }
 
     toString(): string {
-        let curItem: List<T> = this;
-        let result = "List(";
+        let curItem: LinkedList<T> = this;
+        let result = "LinkedList(";
 
         while (!curItem.isEmpty()) {
-            result += SeqHelpers.toStringHelper((<ConsList<T>>curItem).value);
-            const tail = (<ConsList<T>>curItem)._tail;
+            result += SeqHelpers.toStringHelper((<ConsLinkedList<T>>curItem).value);
+            const tail = (<ConsLinkedList<T>>curItem)._tail;
             curItem = tail;
             if (!curItem.isEmpty()) {
                 result += ", ";
@@ -1079,4 +1079,4 @@ class ConsList<T> extends List<T> implements Iterable<T> {
     }
 }
 
-const emptyList = new EmptyList();
+const emptyLinkedList = new EmptyLinkedList();

@@ -7,7 +7,7 @@ import { Option, none, None } from "./Option";
 import { HashSet } from "./HashSet";
 import { ISet } from "./ISet";
 import { Vector } from "./Vector";
-import { List } from "./List";
+import { LinkedList } from "./LinkedList";
 const hamt: any = require("hamt_plus");
 
 /**
@@ -345,8 +345,8 @@ export class HashMap<K,V> implements IMap<K,V> {
      * Convert this map to a list of key,value pairs.
      * Note that Map is already an iterable of key,value pairs!
      */
-    toList(): List<[K,V]> {
-        return List.ofIterable(this);
+    toLinkedList(): LinkedList<[K,V]> {
+        return LinkedList.ofIterable(this);
     }
 
     /**
@@ -532,8 +532,8 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return Vector.empty<[K,V]>();
     }
 
-    toList(): List<[K,V]> {
-        return List.empty<[K,V]>();
+    toLinkedList(): LinkedList<[K,V]> {
+        return LinkedList.empty<[K,V]>();
     }
 
     equals(other: IMap<K&WithEquality,V&WithEquality>): boolean {

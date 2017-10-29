@@ -3,7 +3,7 @@
         <script src="../dist/src/prelude_ts.min.js"></script>
         <script src="../dist/src/chrome_dev_tools_formatters.js"></script>
         <script>
-         const v = prelude_ts.List.of(
+         const v = prelude_ts.LinkedList.of(
              {x:1,y:[1,2,3]},
              prelude_ts.Tuple2.of(prelude_ts.Option.none(), prelude_ts.Option.of({x:2,y:1})),
              prelude_ts.Stream.iterate(1,x=>x+1).take(5),3);

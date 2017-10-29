@@ -10,7 +10,7 @@ import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
 import { Seq } from "./Seq";
 import { Lazy } from "./Lazy";
-import { List } from "./List";
+import { LinkedList } from "./LinkedList";
 import * as SeqHelpers from "./SeqHelpers";
 
 /**
@@ -504,8 +504,8 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
     /**
      * Convert this collection to a list.
      */
-    toList(): List<T> {
-        return List.ofIterable(this);
+    toLinkedList(): LinkedList<T> {
+        return LinkedList.ofIterable(this);
     }
 
     /**

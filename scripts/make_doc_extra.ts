@@ -1,4 +1,4 @@
-import { List } from "../src/List";
+import { LinkedList } from "../src/LinkedList";
 import { HashMap } from "../src/HashMap";
 import { HashSet } from "../src/HashSet";
 import { Stream } from "../src/Stream";
@@ -18,13 +18,13 @@ import { readFileSync, writeFileSync } from "fs";
 // at least do some grouping in the apidocs.
 
 // group classes & interfaces by category.
-const CATEGORIES = List.of<[string,HashSet<string>]>(
+const CATEGORIES = LinkedList.of<[string,HashSet<string>]>(
     ["Control", HashSet.of<string>(
         "Either", "Lazy", "Option", "Function",
         "Function1", "Function2", "Function3", "Function4", "Function5",
         "Predicate", "Predicates")],
     ["Collection", HashSet.of<string>(
-        "HashMap", "HashSet", "List", "Stream", "Tuple2",
+        "HashMap", "HashSet", "LinkedList", "Stream", "Tuple2",
         "Vector", "Collection", "Foldable", "IMap",
         "ISet", "Seq")],
     ["Core", HashSet.of<string>(
@@ -32,7 +32,7 @@ const CATEGORIES = List.of<[string,HashSet<string>]>(
 
 // we'll modify the 'globals' typedoc file.
 const contents = readFileSync("apidoc/globals.html").toString();
-const lines = List.ofIterable(contents.split("\n"))
+const lines = LinkedList.ofIterable(contents.split("\n"))
     .map(l => ({indent: l.length-l.trim().length, contents: l}));
 
 // i'm interested in the part within 'tsd-index-content'
@@ -90,7 +90,7 @@ if (!missingElements.isEmpty()) {
 
 CATEGORIES.forEach(([name,elements]) => {
     newIndexContent += getSectionHeader(name);
-    const elts = elements.toList();
+    const elts = elements.toLinkedList();
     const rows = elts.sortOn(x=>x).map(elt => liRows.get(elt).getOrThrow());
     newIndexContent += rows.mkString("\n");
     newIndexContent += getSectionFooter();

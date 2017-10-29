@@ -1,6 +1,6 @@
 import { Value } from "./Value";
 import { Option } from "./Option";
-import { List } from "./List";
+import { LinkedList } from "./LinkedList";
 import { Vector } from "./Vector";
 import { WithEquality, areEqual,
          hasTrueEquality, getHashCode } from "./Comparison";
@@ -162,7 +162,7 @@ export abstract class Either<L,R> implements Value {
      * list, if it's a right, it's a one-element list with
      * the contents of the either.
      */
-    abstract toList(): List<R>;
+    abstract toLinkedList(): LinkedList<R>;
 
     /**
      * Transform this value to another value type.
@@ -274,8 +274,8 @@ class Left<L,R> extends Either<L,R> {
         return Vector.empty<R>();
     }
 
-    toList(): List<R> {
-        return List.empty<R>();
+    toLinkedList(): LinkedList<R> {
+        return LinkedList.empty<R>();
     }
 
     hasTrueEquality(): boolean {
@@ -372,8 +372,8 @@ class Right<L,R> extends Either<L,R> {
         return Vector.of(this.value);
     }
 
-    toList(): List<R> {
-        return List.of(this.value);
+    toLinkedList(): LinkedList<R> {
+        return LinkedList.of(this.value);
     }
 
     hasTrueEquality(): boolean {
