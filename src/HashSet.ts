@@ -142,10 +142,17 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      * for which the predicate returned true.
      */
     filter(predicate:(v:T)=>boolean): HashSet<T> {
-        return this.hamt.fold(
-            (acc: HashSet<T>, value: T&WithEquality, key: T&WithEquality) =>
-                predicate(value) ? acc.add(value) : acc
-            , HashSet.empty());
+        return new HashSet<T>(
+            hamt.make({hash:this.hamt._config.hash, keyEq:this.hamt._config.keyEq}).mutate((h:any) => {
+                const iterator: Iterator<T> = this.hamt.values();
+                let curItem = iterator.next();
+                while (!curItem.done) {
+                    if (predicate(curItem.value)) {
+                        h.set(curItem.value, curItem.value);
+                    }
+                    curItem = iterator.next();
+                }
+            }));
     }
 
     /**
