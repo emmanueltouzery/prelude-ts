@@ -47,7 +47,7 @@ export interface Function2<T1,T2,R> {
     /**
      * Returns a curried version of this function, for example:
      *
-     *     const plus5 = Function2.of((x,y)=>x+y).curried()(5);
+     *     const plus5 = Function.lift2((x,y)=>x+y).curried()(5);
      *     assert.equal(6, plus5(1));
      */
     curried(): Function1<T1,Function1<T2,R>>;
