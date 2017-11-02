@@ -37,7 +37,7 @@ you can use the `for .. of` construct on them. If you're not familiar with
 immutable collections, `list.append(newItem)` keeps `list` unchanged; `append()`
 returns a new list. Immutability helps reasonning about code.
 
-You can check the tests for examples of use, and browse the
+You can check the **[User Guide](https://github.com/emmanueltouzery/prelude.ts/wiki/Prelude.ts-user-guide)**, and browse the
 **[API documentation](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html)**.
 Note that the constructors are private, and you should use static methods to build
 items, for instance `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
@@ -101,7 +101,8 @@ could be to add:
 ### Using in nodejs
 
 Just add the dependency in your `package.json` and start using it (like
-`import { Vector } from "prelude.ts";`).
+`import { Vector } from "prelude.ts";`, or `const { Vector } = require("prelude.ts");`
+if you use commonjs).
 Everything should work, including type-checking. Prelude.ts also provides
 pretty-printing in the node REPL.
 
