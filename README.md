@@ -103,7 +103,7 @@ could be to add:
 Just add the dependency in your `package.json` and start using it (like
 `import { Vector } from "prelude.ts";`, or `const { Vector } = require("prelude.ts");`
 if you use commonjs).
-Everything should work, including type-checking. Prelude.ts also provides
+Everything should work, including type-checking if you use typescript. Prelude.ts also provides
 pretty-printing in the node REPL.
 
 ### Using in the browser
