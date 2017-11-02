@@ -89,7 +89,7 @@ prelude.ts will reject the code at runtime; for instance if you call
 ## Installation
 
 Typescript must know about `Iterable`, an ES6 feature (but present in most browsers)
-to compile prelude.ts. If you target ES5, a minimum change to your tsconfig.json
+to compile prelude.ts. If you use typescript and target ES5, a minimum change to your tsconfig.json
 could be to add:
 
 ```json
