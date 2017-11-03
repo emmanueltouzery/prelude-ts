@@ -10,7 +10,6 @@ SeqTest.runTests("Vector",
                  Vector.empty,
                  Vector.unfoldRight);
 
-
 describe("Vector toString", () => {
     it("serializes to string correctly", () => assert.equal(
         "Vector(1, 2, 3)", Vector.of(1,2,3).toString()));

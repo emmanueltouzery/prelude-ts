@@ -6,7 +6,11 @@ import { Tuple2 } from "../src/Tuple2";
 import { HashMap } from "../src/HashMap";
 import { MyClass} from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
+import * as CollectionTest from './Collection';
 import * as assert from 'assert'
+
+CollectionTest.runTests(
+    "HashSet", HashSet.of, HashSet.empty);
 
 describe("hashset construction basic sanity tests", () => {
     it("should overwrite identical values", () => assert.ok(

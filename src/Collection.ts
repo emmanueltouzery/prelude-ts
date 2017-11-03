@@ -1,9 +1,10 @@
 import { WithEquality, Ordering } from "./Comparison";
 import { Value } from "./Value";
 import { Option } from "./Option";
+import { HashMap } from "./HashMap";
 
 export interface Collection<T> extends Value, Iterable<T> {
-    
+
     /**
      * Get the length of the collection.
      */
@@ -61,4 +62,22 @@ export interface Collection<T> extends Value, Iterable<T> {
      * return Some of its value, otherwise return None.
      */
     single(): Option<T>;
+
+    /**
+     * Group elements in the collection using a classifier function.
+     * Elements are then organized in a map. The key is the value of
+     * the classifier, and in value we get the list of elements
+     * matching that value.
+     *
+     * also see [[Collection.arrangeBy]]
+     */
+    groupBy<C>(classifier: (v:T)=>C&WithEquality): HashMap<C,Collection<T>>;
+
+    /**
+     * Matches each element with a unique key that you extract from it.
+     * If the same key is present twice, the function will return None.
+     *
+     * also see [[Collection.groupBy]]
+     */
+    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<HashMap<K,T>>;
 }

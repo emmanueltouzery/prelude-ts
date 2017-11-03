@@ -1,10 +1,11 @@
 import { ISet } from "./ISet";
 import { Vector } from "./Vector";
+import { HashMap } from "./HashMap";
 import { LinkedList } from "./LinkedList";
 import { Option } from "./Option";
-import { WithEquality, hasEquals, HasEquals, 
+import { WithEquality, hasEquals, HasEquals,
          getHashCode, areEqual } from "./Comparison";
-import { toStringHelper } from "./SeqHelpers";
+import * as SeqHelpers from "./SeqHelpers";
 import { contractTrueEquality } from "./Contract";
 const hamt: any = require("hamt_plus");
 
@@ -332,6 +333,46 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     }
 
     /**
+     * Group elements in the collection using a classifier function.
+     * Elements are then organized in a map. The key is the value of
+     * the classifier, and in value we get the list of elements
+     * matching that value.
+     *
+     * also see [[HashSet.arrangeBy]]
+     */
+    groupBy<C>(classifier: (v:T)=>C&WithEquality): HashMap<C,HashSet<T>> {
+        // make a singleton set with the same equality as this
+        const singletonHamtSet = (v:T) => hamt.make({
+            hash:this.hamt._config.hash, keyEq:this.hamt._config.keyEq
+        }).set(v,v);
+        // merge two mutable hamt sets, but I know the second has only 1 elt
+        const mergeSets = (v1:any,v2:any)=> {
+            const k = v2.keys().next().value;
+            v1.set(k,k);
+            return v1;
+        };
+        return this.hamt.fold(
+            // fold operation: combine a new value from the set with the accumulator
+            (acc: HashMap<C,any>, v:T&WithEquality, k:T&WithEquality) =>
+                acc.putWithMerge(
+                    classifier(v), singletonHamtSet(v).beginMutation(),
+                    mergeSets),
+            // fold accumulator: the empty hashmap
+            HashMap.empty())
+            .mapValues((h:any) => new HashSet<T>(h.endMutation()));
+    }
+
+    /**
+     * Matches each element with a unique key that you extract from it.
+     * If the same key is present twice, the function will return None.
+     *
+     * also see [[HashSet.groupBy]]
+     */
+    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<HashMap<K,T>> {
+        return SeqHelpers.arrangeBy<T,K>(this, getKey);
+    }
+
+    /**
      * Returns a pair of two sets; the first one
      * will only contain the items from this sets for
      * which the predicate you give returns true, the second
@@ -431,7 +472,7 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
     mkString(separator: string): string {
         return this.hamt.fold(
             (acc: string[], value: T, key: T) =>
-                {acc.push(toStringHelper(key)); return acc;}, []).join(separator);
+                {acc.push(SeqHelpers.toStringHelper(key)); return acc;}, []).join(separator);
     }
 }
 
@@ -522,6 +563,10 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     anyMatch(predicate:(v:T)=>boolean): boolean {
         return false;
+    }
+
+    groupBy<C>(classifier: (v:T)=>C&WithEquality): HashMap<C,HashSet<T>> {
+        return HashMap.empty();
     }
 
     allMatch(predicate:(v:T)=>boolean): boolean {

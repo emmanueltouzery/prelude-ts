@@ -512,7 +512,7 @@ export class Vector<T> implements Seq<T> {
      *
      * also see [[Vector.groupBy]]
      */
-    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
+    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<HashMap<K,T>> {
         return SeqHelpers.arrangeBy<T,K>(this, getKey);
     }
 
@@ -855,7 +855,7 @@ export class Vector<T> implements Seq<T> {
      * as a value in the map. If several values get the same key,
      * entries will be lost.
      */
-    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V> {
+    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): HashMap<K,V> {
         return this.foldLeft(HashMap.empty<K,V>(), (acc,cur) => {
             const converted = converter(cur);
             return acc.put(converted[0], converted[1]);

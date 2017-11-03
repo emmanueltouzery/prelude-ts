@@ -1,5 +1,5 @@
 import { WithEquality, Ordering } from "./Comparison";
-import { IMap } from "./IMap";
+import { HashMap } from "./HashMap";
 import { Option } from "./Option";
 import { Collection } from "./Collection";
 import { Foldable } from "./Foldable";
@@ -81,24 +81,6 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
      * This is the monadic bind.
      */
     flatMap<U>(mapper:(v:T)=>Seq<U>): Seq<U>;
-
-    /**
-     * Group elements in the collection using a classifier function.
-     * Elements are then organized in a map. The key is the value of
-     * the classifier, and in value we get the list of elements
-     * matching that value.
-     *
-     * also see [[Seq.arrangeBy]]
-     */
-    groupBy<C>(classifier: (v:T)=>C&WithEquality): IMap<C,Seq<T>>;
-
-    /**
-     * Matches each element with a unique key that you extract from it.
-     * If the same key is present twice, the function will return None.
-     *
-     * also see [[Seq.groupBy]]
-     */
-    arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>>;
 
     /**
      * Randomly reorder the elements of the collection.
@@ -250,7 +232,7 @@ export interface Seq<T> extends Collection<T>, Foldable<T> {
      * as a value in the map. If several values get the same key,
      * entries will be lost.
      */
-    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): IMap<K,V>;
+    toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): HashMap<K,V>;
 
     /**
      * Transform this value to another value type.

@@ -1,6 +1,6 @@
 import { Option } from "./Option";
 import { WithEquality, hasTrueEquality } from "./Comparison";
-import { IMap } from "./IMap";
+import { HashMap } from "./HashMap";
 import { Seq } from "./Seq";
 import { Collection } from "./Collection";
 import { Stream } from "./Stream";
@@ -32,8 +32,8 @@ export function shuffle(array: any[]) {
 /**
  * @hidden
  */
-export function arrangeBy<T,K>(seq: Seq<T>, getKey: (v:T)=>K&WithEquality): Option<IMap<K,T>> {
-    return Option.of(seq.groupBy(getKey).mapValues(v => v.single()))
+export function arrangeBy<T,K>(collection: Collection<T>, getKey: (v:T)=>K&WithEquality): Option<HashMap<K,T>> {
+    return Option.of(collection.groupBy(getKey).mapValues(v => v.single()))
         .filter(map => !map.anyMatch((k,v) => v.isNone()))
         .map(map => map.mapValues(v => v.getOrThrow()));
 }
