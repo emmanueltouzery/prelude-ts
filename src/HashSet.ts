@@ -383,19 +383,23 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
      *     => [HashSet.of(2,4), HashSet.of(1,3)]
      */
     partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>] {
-        let r1 = HashSet.empty<T>();
-        let r2 = HashSet.empty<T>();
+        let r1 = hamt.make({
+            hash:this.hamt._config.hash, keyEq:this.hamt._config.keyEq
+        }).beginMutation();
+        let r2 = hamt.make({
+            hash:this.hamt._config.hash, keyEq:this.hamt._config.keyEq
+        }).beginMutation();
         const iterator: Iterator<T&WithEquality> = this.hamt.values();
         let curItem = iterator.next();
         while (!curItem.done) {
             if (predicate(curItem.value)) {
-                r1 = r1.add(curItem.value);
+                r1.set(curItem.value, curItem.value);
             } else {
-                r2 = r2.add(curItem.value);
+                r2.set(curItem.value, curItem.value);
             }
             curItem = iterator.next();
         }
-        return [r1,r2];
+        return [new HashSet<T>(r1), new HashSet<T>(r2)];
     }
 
     /**
