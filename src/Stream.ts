@@ -482,6 +482,48 @@ export abstract class Stream<T> implements Seq<T> {
     }
 
     /**
+     * Compare values in the collection and return the smallest element.
+     * Returns Option.none if the collection is empty.
+     *
+     * also see [[Stream.minOn]]
+     */
+    minBy(compare: (v1:T,v2:T)=>Ordering): Option<T> {
+        return SeqHelpers.minBy(this, compare);
+    }
+
+    /**
+     * Call the function you give for each value in the collection
+     * and return the element for which the result was the smallest.
+     * Returns Option.none if the collection is empty.
+     *
+     * also see [[Stream.minBy]]
+     */
+    minOn(getNumber: (v:T)=>number): Option<T> {
+        return SeqHelpers.minOn(this, getNumber);
+    }
+
+    /**
+     * Compare values in the collection and return the largest element.
+     * Returns Option.none if the collection is empty.
+     *
+     * also see [[Stream.maxOn]]
+     */
+    maxBy(compare: (v1:T,v2:T)=>Ordering): Option<T> {
+        return SeqHelpers.maxBy(this, compare);
+    }
+
+    /**
+     * Call the function you give for each value in the collection
+     * and return the element for which the result was the largest.
+     * Returns Option.none if the collection is empty.
+     *
+     * also see [[Stream.maxBy]]
+     */
+    maxOn(getNumber: (v:T)=>number): Option<T> {
+        return SeqHelpers.maxOn(this, getNumber);
+    }
+
+    /**
      * Joins elements of the collection by a separator.
      * Example:
      *

@@ -26,5 +26,21 @@ export function runTests(seqName: string,
             6, of(1,2,3).reduce((a,b)=>a+b).getOrThrow()));
         it("reduce works on an empty collection", () => assert.ok(
             Option.none<number>().equals(empty<number>().reduce((a,b)=>a+b))));
+        it("minOn works", () => assert.equal(
+            2, of(2,3,4).minOn(x=>x).getOrThrow()));
+        it("minOn works on the empty collection", () => assert.ok(
+            empty<number>().minOn(x=>x).isNone()));
+        it("minBy works", () => assert.equal(
+            4, of(2,3,4).minBy((x,y)=>x-y).getOrThrow()));
+        it("minBy works on the empty collection", () => assert.ok(
+            empty<number>().minBy((x,y)=>x-y).isNone()));
+        it("maxOn works", () => assert.equal(
+            4, of(2,3,4).maxOn(x=>x).getOrThrow()));
+        it("maxOn works on the empty collection", () => assert.ok(
+            empty<number>().maxOn(x=>x).isNone()));
+        it("maxBy works", () => assert.equal(
+            2, of(2,3,4).maxBy((x,y)=>x-y).getOrThrow()));
+        it("maxBy works on the empty collection", () => assert.ok(
+            empty<number>().maxBy((x,y)=>x-y).isNone()));
     });
 }

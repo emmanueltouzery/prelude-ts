@@ -1,5 +1,5 @@
 import { Option } from "./Option";
-import { WithEquality, hasTrueEquality } from "./Comparison";
+import { WithEquality, hasTrueEquality, Ordering } from "./Comparison";
 import { HashMap } from "./HashMap";
 import { Seq } from "./Seq";
 import { Collection } from "./Collection";
@@ -94,6 +94,62 @@ export function toStringHelper(obj: any|null): string {
         return "'" + obj + "'";
     }
     return obj+"";
+}
+
+/**
+ * @hidden
+ */
+export function minBy<T>(coll: Collection<T>, compare: (v1:T,v2:T)=>Ordering): Option<T> {
+    return coll.reduce((v1,v2)=>compare(v1,v2)<0 ? v2 : v1);
+}
+
+/**
+ * @hidden
+ */
+export function minOn<T>(coll: Collection<T>, getNumber: (v:T)=>number): Option<T> {
+    if (coll.isEmpty()) {
+        return Option.none<T>();
+    }
+    let iter = coll[Symbol.iterator]();
+    let step = iter.next();
+    let val = getNumber(step.value);
+    let result = step.value;
+    while (!(step = iter.next()).done) {
+        const curVal = getNumber(step.value);
+        if (curVal < val) {
+            val = curVal;
+            result = step.value;
+        }
+    }
+    return Option.of(result);
+}
+
+/**
+ * @hidden
+ */
+export function maxBy<T>(coll: Collection<T>, compare: (v1:T,v2:T)=>Ordering): Option<T> {
+    return coll.reduce((v1,v2)=>compare(v1,v2)>0 ? v2 : v1);
+}
+
+/**
+ * @hidden
+ */
+export function maxOn<T>(coll: Collection<T>, getNumber: (v:T)=>number): Option<T> {
+    if (coll.isEmpty()) {
+        return Option.none<T>();
+    }
+    let iter = coll[Symbol.iterator]();
+    let step = iter.next();
+    let val = getNumber(step.value);
+    let result = step.value;
+    while (!(step = iter.next()).done) {
+        const curVal = getNumber(step.value);
+        if (curVal > val) {
+            val = curVal;
+            result = step.value;
+        }
+    }
+    return Option.of(result);
 }
 
 /**

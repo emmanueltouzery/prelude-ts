@@ -81,4 +81,38 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      * also see [[Collection.groupBy]]
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<HashMap<K,T>>;
+
+    /**
+     * Compare values in the collection and return the smallest element.
+     * Returns Option.none if the collection is empty.
+     *
+     * also see [[Collection.minOn]]
+     */
+    minBy(compare: (v1:T,v2:T)=>Ordering): Option<T>;
+
+    /**
+     * Call the function you give for each value in the collection
+     * and return the element for which the result was the smallest.
+     * Returns Option.none if the collection is empty.
+     *
+     * also see [[Collection.minBy]]
+     */
+    minOn(getNumber: (v:T)=>number): Option<T>;
+
+    /**
+     * Compare values in the collection and return the largest element.
+     * Returns Option.none if the collection is empty.
+     *
+     * also see [[Collection.maxOn]]
+     */
+    maxBy(compare: (v1:T,v2:T)=>Ordering): Option<T>;
+
+    /**
+     * Call the function you give for each value in the collection
+     * and return the element for which the result was the largest.
+     * Returns Option.none if the collection is empty.
+     *
+     * also see [[Collection.maxBy]]
+     */
+    maxOn(getNumber: (v:T)=>number): Option<T>;
 }
