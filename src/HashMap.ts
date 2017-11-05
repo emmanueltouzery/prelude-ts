@@ -11,6 +11,14 @@ import { LinkedList } from "./LinkedList";
 import * as SeqHelpers from "./SeqHelpers";
 const hamt: any = require("hamt_plus");
 
+// HashMap could extend Collection, conceptually. But I'm
+// not super happy of having the callbacks get a pair, for instance
+// 'HashMap.filter' takes two parameters in the current HashMap;
+// if HashMap did implement Collection, it would have to take a k,v
+// pair. There's also another trick with 'contains'. The Collection signature
+// says T&WithEquality, but here we get [K&WithEquality,V&WithEquality],
+// but arrays don't have equality so that doesn't type-check :-(
+
 /**
  * A dictionary, mapping keys to values.
  * @type K the key type
