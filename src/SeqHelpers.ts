@@ -155,6 +155,13 @@ export function maxOn<T>(coll: Collection<T>, getNumber: (v:T)=>number): Option<
 /**
  * @hidden
  */
+export function sumOn<T>(coll: Collection<T>, getNumber: (v:T)=>number): number {
+    return coll.foldLeft(0, (soFar,cur)=>soFar+getNumber(cur));
+}
+
+/**
+ * @hidden
+ */
 export function reduce<T>(coll: Collection<T>, combine: (v1:T,v2:T)=>T): Option<T> {
     if (coll.isEmpty()) {
         return Option.none<T>();

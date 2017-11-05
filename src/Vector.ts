@@ -1135,4 +1135,13 @@ export class Vector<T> implements Seq<T> {
     maxOn(getNumber: (v:T)=>number): Option<T> {
         return SeqHelpers.maxOn(this, getNumber);
     }
+
+    /**
+     * Call the function you give for each element in the collection
+     * and sum all the numbers, return that sum.
+     * Will return 0 if the collection is empty.
+     */
+    sumOn(getNumber: (v:T)=>number): number {
+        return SeqHelpers.sumOn(this, getNumber);
+    }
 }

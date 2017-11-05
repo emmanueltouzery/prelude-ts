@@ -115,4 +115,11 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      * also see [[Collection.maxBy]]
      */
     maxOn(getNumber: (v:T)=>number): Option<T>;
+
+    /**
+     * Call the function you give for each element in the collection
+     * and sum all the numbers, return that sum.
+     * Will return 0 if the collection is empty.
+     */
+    sumOn(getNumber: (v:T)=>number): number;
 }

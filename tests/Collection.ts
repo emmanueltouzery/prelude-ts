@@ -42,5 +42,9 @@ export function runTests(seqName: string,
             2, of(2,3,4).maxBy((x,y)=>x-y).getOrThrow()));
         it("maxBy works on the empty collection", () => assert.ok(
             empty<number>().maxBy((x,y)=>x-y).isNone()));
+        it("sumOn works", () => assert.equal(
+            6, of(1,2,3).sumOn(x=>x)));
+        it("sumOn works on the empty collection", () => assert.equal(
+            0, empty<number>().sumOn(x=>x)));
     });
 }

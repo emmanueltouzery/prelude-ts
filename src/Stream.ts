@@ -524,6 +524,15 @@ export abstract class Stream<T> implements Seq<T> {
     }
 
     /**
+     * Call the function you give for each element in the collection
+     * and sum all the numbers, return that sum.
+     * Will return 0 if the collection is empty.
+     */
+    sumOn(getNumber: (v:T)=>number): number {
+        return SeqHelpers.sumOn(this, getNumber);
+    }
+
+    /**
      * Joins elements of the collection by a separator.
      * Example:
      *
