@@ -1083,4 +1083,15 @@ export class Vector<T> implements Seq<T> {
     tail(): Option<Vector<T>> {
         return this._length > 0 ? Option.of(this.drop(1)) : Option.none<Vector<T>>();
     }
+
+    /**
+     * Reduces the collection to a single value by repeatedly
+     * calling the combine function.
+     * No starting value. The order in which the elements are
+     * passed to the combining function is undetermined.
+     */
+    reduce(combine: (v1:T,v2:T)=>T): Option<T> {
+        return SeqHelpers.reduce(this, combine);
+    }
+
 }

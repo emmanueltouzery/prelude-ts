@@ -2,13 +2,12 @@ import { WithEquality, Ordering } from "./Comparison";
 import { HashMap } from "./HashMap";
 import { Option } from "./Option";
 import { Collection } from "./Collection";
-import { Foldable } from "./Foldable";
 
 /**
  * A generic interface for list-like implementations.
  * @type T the item type
  */
-export interface Seq<T> extends Collection<T>, Foldable<T> {
+export interface Seq<T> extends Collection<T> {
 
     /**
      * Append an element at the end of the collection.

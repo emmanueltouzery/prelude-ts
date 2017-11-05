@@ -1,12 +1,14 @@
 import { Collection } from "../src/Collection";
 import { HashMap } from "../src/HashMap";
+import { WithEquality } from "../src/Comparison";
+import { Option } from "../src/Option";
 import * as assert from 'assert'
 
 /**
  * @hidden
  */
 export function runTests(seqName: string,
-                         of: <T>(...i:Array<T>)=>Collection<T>,
+                         of: <T>(...i:Array<T&WithEquality>)=>Collection<T>,
                          empty: <T>()=>Collection<T>) {
     describe(seqName + " manipulation", () => {
         it("arrangeBy works, positive case", () => assert.ok(
@@ -20,5 +22,9 @@ export function runTests(seqName: string,
         it("groupBy works", () => assert.ok(
             HashMap.empty().put(0, of(2,4)).put(1, of(1,3))
                 .equals(of(1,2,3,4).groupBy(x => x%2))));
+        it("reduce works", () => assert.equal(
+            6, of(1,2,3).reduce((a,b)=>a+b).getOrThrow()));
+        it("reduce works on an empty collection", () => assert.ok(
+            Option.none<number>().equals(empty<number>().reduce((a,b)=>a+b))));
     });
 }

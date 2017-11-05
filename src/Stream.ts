@@ -18,7 +18,7 @@ import * as SeqHelpers from "./SeqHelpers";
  *
  * Use take() for instance to reduce an infinite stream to a finite one.
  */
-export abstract class Stream<T> implements Iterable<T>, Seq<T> {
+export abstract class Stream<T> implements Seq<T> {
 
     /**
      * The empty stream
@@ -470,6 +470,16 @@ export abstract class Stream<T> implements Iterable<T>, Seq<T> {
      * Call a function for element in the collection.
      */
     abstract forEach(fn: (v:T)=>void): Stream<T>;
+
+    /**
+     * Reduces the collection to a single value by repeatedly
+     * calling the combine function.
+     * No starting value. The order in which the elements are
+     * passed to the combining function is undetermined.
+     */
+    reduce(combine: (v1:T,v2:T)=>T): Option<T> {
+        return SeqHelpers.reduce(this, combine);
+    }
 
     /**
      * Joins elements of the collection by a separator.

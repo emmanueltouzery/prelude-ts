@@ -422,6 +422,16 @@ export abstract class LinkedList<T> implements Seq<T> {
     abstract forEach(fn: (v:T)=>void): LinkedList<T>;
 
     /**
+     * Reduces the collection to a single value by repeatedly
+     * calling the combine function.
+     * No starting value. The order in which the elements are
+     * passed to the combining function is undetermined.
+     */
+    reduce(combine: (v1:T,v2:T)=>T): Option<T> {
+        return SeqHelpers.reduce(this, combine);
+    }
+
+    /**
      * Joins elements of the collection by a separator.
      * Example:
      *

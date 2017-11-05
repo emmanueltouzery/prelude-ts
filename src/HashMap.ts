@@ -8,6 +8,7 @@ import { HashSet } from "./HashSet";
 import { ISet } from "./ISet";
 import { Vector } from "./Vector";
 import { LinkedList } from "./LinkedList";
+import * as SeqHelpers from "./SeqHelpers";
 const hamt: any = require("hamt_plus");
 
 /**
@@ -40,7 +41,7 @@ export class HashMap<K,V> implements IMap<K,V> {
 
     /**
      * Build a HashMap from an iterable containing key-value pairs.
-     * 
+     *
      *    HashMap.ofIterable(Vector.of<[number,string]>([1,"a"],[2,"b"]));
      */
     static ofIterable<K,V>(entries: Iterable<[K&WithEquality, V]>): HashMap<K,V> {
@@ -333,6 +334,17 @@ export class HashMap<K,V> implements IMap<K,V> {
      */
     foldRight<U>(zero: U, fn:(cur:[K,V], soFar:U)=>U): U {
         return this.foldLeft(zero, (cur, soFar) => fn(soFar, cur));
+    }
+
+    /**
+     * Reduces the collection to a single value by repeatedly
+     * calling the combine function.
+     * No starting value. The order in which the elements are
+     * passed to the combining function is undetermined.
+     */
+    reduce(combine: (v1:[K,V],v2:[K,V])=>[K,V]): Option<[K,V]> {
+        // not really glorious with any...
+        return <Option<[K,V]>>SeqHelpers.reduce<any>(<any>this, combine);
     }
 
     /**

@@ -1,3 +1,5 @@
+import { Option } from "./Option";
+
 export interface Foldable<T> {
 
     /**
@@ -43,4 +45,12 @@ export interface Foldable<T> {
      *           an updated value.
      */
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U;
+
+    /**
+     * Reduces the collection to a single value by repeatedly
+     * calling the combine function.
+     * No starting value. The order in which the elements are
+     * passed to the combining function is undetermined.
+     */
+    reduce(combine: (v1:T,v2:T)=>T): Option<T>;
 }

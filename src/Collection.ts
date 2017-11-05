@@ -2,8 +2,9 @@ import { WithEquality, Ordering } from "./Comparison";
 import { Value } from "./Value";
 import { Option } from "./Option";
 import { HashMap } from "./HashMap";
+import { Foldable } from "./Foldable";
 
-export interface Collection<T> extends Value, Iterable<T> {
+export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
 
     /**
      * Get the length of the collection.

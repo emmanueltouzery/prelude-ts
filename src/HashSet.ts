@@ -14,7 +14,7 @@ const hamt: any = require("hamt_plus");
  * may be equal. A value can only be present once.
  * @type T the item type
  */
-export class HashSet<T> implements ISet<T>, Iterable<T> {
+export class HashSet<T> implements ISet<T> {
 
     /**
      * @hidden
@@ -400,6 +400,16 @@ export class HashSet<T> implements ISet<T>, Iterable<T> {
             curItem = iterator.next();
         }
         return [new HashSet<T>(r1), new HashSet<T>(r2)];
+    }
+
+    /**
+     * Reduces the collection to a single value by repeatedly
+     * calling the combine function.
+     * No starting value. The order in which the elements are
+     * passed to the combining function is undetermined.
+     */
+    reduce(combine: (v1:T,v2:T)=>T): Option<T> {
+        return SeqHelpers.reduce(this, combine);
     }
 
     /**

@@ -95,3 +95,19 @@ export function toStringHelper(obj: any|null): string {
     }
     return obj+"";
 }
+
+/**
+ * @hidden
+ */
+export function reduce<T>(coll: Collection<T>, combine: (v1:T,v2:T)=>T): Option<T> {
+    if (coll.isEmpty()) {
+        return Option.none<T>();
+    }
+    let iter = coll[Symbol.iterator]();
+    let step = iter.next();
+    let result = step.value;
+    while (!(step = iter.next()).done) {
+        result = combine(result, step.value);
+    }
+    return Option.of(result);
+}

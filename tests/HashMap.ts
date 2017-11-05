@@ -38,7 +38,7 @@ describe("hashmap construction basic sanity tests", () => {
             .equals(
                 HashMap.of<MyClass,string>([new MyClass("a", 1), "test1"])
                     .put(new MyClass("a", 2), "test1"))));
-    
+
     it("should support map as a key itself", () => assert.ok(
         HashMap.empty<HashMap<string,number>, number>()
             .put(HashMap.empty<string,number>().put("hello", 1), 6)
@@ -238,4 +238,9 @@ describe("hashmap transformation", () => {
     it("should convert to linked list correctly", () => assert.ok(
         LinkedList.of(Tuple2.of("a",5),Tuple2.of("b",6)).equals(
             HashMap.of<string,number>(["a",5],["b",6]).toLinkedList().map(Tuple2.ofArray))));
+    it("reduce works", () => assert.deepEqual(
+        [3,"c"], HashMap.of<number,string>([1,"a"],[2,"b"],[3,"c"])
+            .reduce((kv1,kv2)=>kv1[0]>kv2[0]?kv1:kv2).getOrThrow()));
+    it("reduce works on an empty collection", () => assert.ok(
+        HashMap.empty<number,string>().reduce((kv1,kv2)=>kv1[0]>kv2[0]?kv1:kv2).isNone()));
 });

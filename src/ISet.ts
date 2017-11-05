@@ -1,7 +1,6 @@
 import { WithEquality } from "./Comparison";
 import { Value} from "./Value";
 import { Collection } from "./Collection";
-import { Foldable } from "./Foldable";
 import { Vector } from "./Vector";
 import { LinkedList } from "./LinkedList";
 import { Option } from "./Option";
@@ -10,7 +9,7 @@ import { Option } from "./Option";
  * A generic interface for set-like implementations.
  * @type T the item type
  */
-export interface ISet<T> extends Value, Collection<T>, Foldable<T> {
+export interface ISet<T> extends Collection<T> {
 
     /**
      * Returns the number of elements in the set.
