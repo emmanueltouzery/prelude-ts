@@ -9,6 +9,8 @@ import { MyClass} from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
 
+type MyEnum = "a" | "b" | "c";
+
 describe("hashmap construction basic sanity tests", () => {
     it("should overwrite values with the same key", () => assert.ok(
         HashMap.empty<number,string>().put(5, "test").put(5, "test1")
@@ -72,6 +74,25 @@ describe("hashmap construction basic sanity tests", () => {
     it("should allow to remove from the empty map", () => assert.ok(
         HashMap.empty<number,string>().equals(
             HashMap.of<number,string>().remove(1))));
+    it("should build from a string object dictionary", () => assert.ok(
+        HashMap.of<string,number>(["a",1],["b",2]).equals(
+            HashMap.ofObjectDictionary<number>({a:1,b:2}))));
+    it("should build from an int object dictionary", () => assert.ok(
+        HashMap.of<string,string>(["1","a"],["2","b"]).equals(
+            HashMap.ofObjectDictionary<string>({1:"a",2:"b"}))));
+    it("should strip dictionary values with undefined", () => assert.ok(
+        HashMap.of<string,string>(["1","a"]).equals(
+            HashMap.ofObjectDictionary<string>({1:"a",2:undefined}))));
+    it("should build from an enum object dictionary", () => {
+        const s: {[TKey in MyEnum]:number} = {"a":1,"b":2,"c":3};
+        const got = HashMap.ofObjectDictionary<number>(s);
+        assert.ok(HashMap.of<string,number>(["a",1],["b",2],["c",3]).equals(got));
+    });
+    it("should build from a partial enum object dictionary", () => {
+        const s: {[TKey in MyEnum]?:number} = {"a":1};
+        const got = HashMap.ofObjectDictionary<number>(s);
+        assert.ok(HashMap.of<string,number>(["a",1]).equals(got));
+    });
 });
 
 describe("hashmap equality", () => {

@@ -71,6 +71,34 @@ export class HashMap<K,V> implements IMap<K,V> {
     }
 
     /**
+     * Build a HashMap from a javascript object literal representing
+     * a dictionary. Note that the key type must always be string,
+     * as that's the way it works in javascript.
+     * Also note that entries with undefined values will be stripped
+     * from the map.
+     *
+     *     HashMap.ofObjectDictionary<number>({a:1,b:2})
+     *     => HashMap.of(["a",1],["b",2])
+     */
+    static ofObjectDictionary<V>(object: {[index:string]: V|undefined}): HashMap<string,V> {
+        // no need to bother with the proper equals & hashcode
+        // as I know the key type supports ===
+        const h: any = hamt.make().beginMutation();
+        for (let property in object) {
+            // the reason we strip entries with undefined values on
+            // import from object dictionaries are: sanity, and also
+            // partial object definitions like {[TKey in MyEnum]?:number}
+            // where typescript sees the value type as 'number|undefined'
+            // (there is a test covering that)
+            if (object.hasOwnProperty(property) &&
+                (typeof object[property] !== "undefined")) {
+                h.set(property, object[property]);
+            }
+        }
+        return new HashMap<string,V>(h.endMutation());
+    }
+
+    /**
      * Get the value for the key you give, if the key is present.
      */
     get(k: K & WithEquality): Option<V> {
