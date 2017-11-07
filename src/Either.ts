@@ -117,6 +117,18 @@ export abstract class Either<L,R> implements Value {
     abstract ifLeft(fn: (x:L)=>void): Either<L,R>;
 
     /**
+     * Handle both branches of the either and return a value
+     * (can also be used for side-effects).
+     * This is the catamorphism for either.
+     *
+     *     myEither.match({
+     *         Left:  x => "left " + x,
+     *         Right: x => "right " + y
+     *     });
+     */
+    abstract match<U>(cases: {Left: (v:L)=>U, Right: (v:R)=>U}): U;
+
+    /**
      * If this either is a right, return its value, else throw
      * an exception.
      * You can optionally pass a message that'll be used as the
@@ -250,6 +262,10 @@ class Left<L,R> extends Either<L,R> {
         return this;
     }
 
+    match<U>(cases: {Left: (v:L)=>U, Right: (v:R)=>U}): U {
+        return cases.Left(this.value);
+    }
+
     getOrThrow(message?: string): R {
         throw message || "Left.getOrThrow called!";
     }
@@ -346,6 +362,10 @@ class Right<L,R> extends Either<L,R> {
 
     ifLeft(fn: (x:L)=>void): Either<L,R> {
         return this;
+    }
+
+    match<U>(cases: {Left: (v:L)=>U, Right: (v:R)=>U}): U {
+        return cases.Right(this.value);
     }
 
     getOrThrow(message?: string): R {

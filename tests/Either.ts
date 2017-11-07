@@ -6,15 +6,15 @@ import * as assert from 'assert'
 
 describe("either comparison", () => {
     it("should mark equal eithers as equal", () =>
-       assert.ok(Either.right(5).equals(Either.right(5))))
+       assert.ok(Either.right(5).equals(Either.right<number,number>(5))))
     it("should mark different eithers as not equal", () =>
-       assert.ok(!Either.right(5).equals(Either.right(6))))
+       assert.ok(!Either.right(5).equals(Either.right<number,number>(6))))
     it("should mark left as equals to left", () =>
        assert.ok(Either.left("x").equals(Either.left<string,string>("x"))));
     it("should mark left and right as not equal", () =>
        assert.ok(!Either.right(5).equals(Either.left<number,number>(5))));
     it("should mark left and right as not equal", () =>
-       assert.ok(!Either.left(5).equals(Either.right(5))));
+       assert.ok(!Either.left(5).equals(Either.right<number,number>(5))));
     it("should return true on contains", () =>
        assert.ok(Either.right(5).contains(5)));
     it("should return false on contains on left", () =>
@@ -30,7 +30,8 @@ describe("either comparison", () => {
     it("empty doesn't throw when given null on equals", () => assert.equal(
         false, Either.left(1).equals(<any>null)));
     it("should throw when comparing eithers without true equality", () => assert.throws(
-        () => Either.right(Vector.of([1])).equals(Either.right(Vector.of([1])))));
+        () => Either.right(Vector.of([1])).equals(
+            Either.right<string,Vector<number[]>>(Vector.of([1])))));
     it("should fail compilation on an obviously bad equality test", () =>
        assertFailCompile(
            "Either.right([1]).equals(Either.right([1]))", "is not assignable to parameter"));
@@ -45,14 +46,16 @@ describe("either transformation", () => {
         assert.ok(Either.right(5).equals(Either.right<number,number>(4).map(x=>x+1)));
     });
     it("should handle null as Right", () =>
-       assert.ok(Either.right(5).map<number|null>(x => null).equals(Either.right(null))));
+       assert.ok(Either.right(5).map<number|null>(x => null).equals(
+           Either.right<string,number|null>(null))));
     it("should transform a Right to string properly", () =>
        assert.equal("Right(5)", Either.right(5).toString()));
     it("should transform a Left to string properly", () =>
        assert.equal("Left(5)", Either.left(5).toString()));
     it("should transform with flatMap x->y", () => {
         assert.ok(Either.right(5).equals(
-            Either.right<number,number>(4).flatMap(x=>Either.right(x+1))));
+            Either.right<number,number>(4)
+                .flatMap(x=>Either.right<number,number>(x+1))));
     });
     it("should transform with flatMap x->left", () => {
         assert.ok(Either.left<number,number>(5).equals(
@@ -68,6 +71,16 @@ describe("either transformation", () => {
     it("should apply bimap on the right value", () =>
        assert.ok(Either.right(2).equals(
            Either.right<number,number>(3).bimap(x=>x+1,x=>x-1))));
+    it("should apply match to a right", () =>
+       assert.equal(5, Either.right(4).match({
+           Right: x=>x+1,
+           Left:  x=>-1
+       })));
+    it("should apply match to a left", () =>
+       assert.equal(4, Either.left(5).match({
+           Right: x=>1,
+           Left:  x=>x-1
+       })));
 });
 
 describe("Either helpers", () => {
