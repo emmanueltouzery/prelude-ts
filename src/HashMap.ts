@@ -411,6 +411,22 @@ export class HashMap<K,V> implements IMap<K,V> {
     }
 
     /**
+     * Convert to a javascript object dictionary
+     * You must provide a function to convert the
+     * key to a string.
+     *
+     *     HashMap.of<string,number>(["a",1],["b",2])
+     *         .toObjectDictionary();
+     *     => {a:1,b:2}
+     */
+    toObjectDictionary(keyConvert:(k:K)=>string): {[index:string]:V} {
+        return this.foldLeft<{[index:string]:V}>({}, (soFar,cur)=> {
+            soFar[keyConvert(cur[0])] = cur[1];
+            return soFar;
+        });
+    }
+
+    /**
      * Transform this value to another value type.
      * Enables fluent-style programming by chaining calls.
      */

@@ -216,6 +216,12 @@ describe("hashmap transformation", () => {
     it("should transform empty to array", () => assert.deepEqual(
         [],
         HashMap.empty<string,number>().toArray()));
+    it("should transform non-empty to ObjectDictionary", () => assert.deepEqual(
+        {"a":1, "b":2},
+        HashMap.empty<string,number>().put("a",1).put("b",2).toObjectDictionary(x=>x)));
+    it("should transform empty to ObjectDictionary", () => assert.deepEqual(
+        {},
+        HashMap.empty<string,number>().toObjectDictionary(x=>x)));
     it("should filter properly", () => assert.deepEqual(
         [[1,"a"],[3,"c"]], HashMap.empty<number,string>()
             .put(1,"a").put(2,"b").put(3,"c").put(4,"d").filter((k,v) => k%2!=0).toArray()));

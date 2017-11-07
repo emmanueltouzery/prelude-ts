@@ -95,6 +95,17 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
     toArray(): Array<[K,V]>;
 
     /**
+     * Convert to a javascript object dictionary
+     * You must provide a function to convert the
+     * key to a string.
+     *
+     *     HashMap.of<string,number>(["a",1],["b",2])
+     *         .toObjectDictionary();
+     *     => {a:1,b:2}
+     */
+    toObjectDictionary(keyConvert:(k:K)=>string): {[index:string]:V};
+
+    /**
      * number of items in the map
      */
     length(): number;
