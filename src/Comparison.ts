@@ -4,6 +4,9 @@ import { Option } from "./Option";
  * List of types which provide equality semantics:
  * some builtin JS types, for which === provides
  * proper semantics, and then types providing HasEquals.
+ * The reason I use all over the place T&WithEquality
+ * instead of saying <T extends WithEquality> earlier
+ * in the declaration is: https://stackoverflow.com/a/45903143/516188
  */
 export type WithEquality
     = string
