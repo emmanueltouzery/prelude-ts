@@ -46,13 +46,19 @@ export abstract class Stream<T> implements Seq<T> {
         // but it.next() modifies the iterator (mutability),
         // and you would end up with getting two different tails
         // for the same stream if you call .tail() twice in a row
+        if (Array.isArray(elts)) {
+            return Stream.ofArray(elts);
+        }
         return Stream.ofArray(Array.from(elts));
     }
 
     /**
      * Build a stream from an array (slightly faster
      * than building from an iterable)
+     * **Deprecated** please use [[Stream.ofIterable]].
+     * Will be removed for the next major release.
      * @type T the item type
+     * @deprecated
      */
     static ofArray<T>(elts: Array<T>): Stream<T> {
         if (elts.length === 0) {
