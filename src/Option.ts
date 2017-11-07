@@ -150,6 +150,18 @@ export abstract class Option<T> implements Value {
     abstract ifPresent(fn:(v:T)=>void): Option<T>;
 
     /**
+     * Handle both branches of the option and return a value
+     * (can also be used for side-effects).
+     * This is the catamorphism for option.
+     *
+     *     myOption.match({
+     *         Some: x  => "got " + x,
+     *         None: () => "got nothing!"
+     *     });
+     */
+    abstract match<U>(cases: {Some: (v:T)=>U, None: ()=>U}): U;
+
+    /**
      * Convert to a vector. If it's a None, it's the empty
      * vector, if it's a Some, it's a one-element vector with
      * the contents of the option.
@@ -208,56 +220,76 @@ export class Some<T> extends Option<T> {
     isSome(): boolean {
         return true;
     }
+
     isNone(): boolean {
         return false;
     }
+    
     orElse(other: Option<T>): Option<T> {
         return this;
     }
+
     getOrThrow(message?: string): T {
         return this.value;
     }
+
     contains(v: T&WithEquality): boolean {
         return v === this.value;
     }
+
     getOrUndefined(): T | undefined {
         return this.value;
     }
+
     getOrElse(alt: T): T {
         return this.value;
     }
+
     map<U>(fn: (v:T)=>U): Option<U> {
         return Option.of(fn(this.value));
     }
+
     flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return mapper(this.value);
     }
+
     filter(fn: (v:T)=>boolean): Option<T> {
         return fn(this.value) ? this : Option.none<T>();
     }
+
     ifPresent(fn:(v:T)=>void): Option<T> {
         fn(this.value);
         return this;
     }
+
+    match<U>(cases: {Some: (v:T)=>U, None: ()=>U}): U {
+        return cases.Some(this.value);
+    }
+
     toVector(): Vector<T> {
         return Vector.of(this.value);
     }
+
     toEither<L>(left: L): Either<L,T> {
-        return Either.right(this.value);
+        return Either.right<L,T>(this.value);
     }
+
     equals(other: Option<T&WithEquality>): boolean {
         // the .isSome doesn't test if it's a Some, but
         // if the object has a field called isSome.
         if (other === <None<T>>none || !other || !(<any>other).isSome) {
             return false;
         }
+
         const someOther = <Some<T&WithEquality>>other;
         contractTrueEquality("Option.equals", this, someOther);
         return areEqual(this.value, someOther.value);
     }
+
     hashCode(): number {
         return getHashCode(this.value);
     }
+
     toString(): string {
         return "Some(" + toStringHelper(this.value) + ")";
     }
@@ -270,48 +302,67 @@ export class None<T> extends Option<T> {
     isSome(): boolean {
         return false;
     }
+
     isNone(): boolean {
         return true;
     }
+
     orElse(other: Option<T>): Option<T> {
         return other;
     }
+
     getOrThrow(message?: string): T & WithEquality {
         throw message || "getOrThrow called on none!";
     }
+
     contains(v: T&WithEquality): boolean {
         return false;
     }
+
     getOrUndefined(): T|undefined {
         return undefined;
     }
+
     getOrElse(alt: T & WithEquality): T & WithEquality {
         return alt;
     }
+
     map<U>(fn: (v:T)=>U): Option<U> {
         return <None<U>>none;
     }
+
     flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return <None<U>>none;
     }
+
     filter(fn: (v:T)=>boolean): Option<T> {
         return <None<T>>none;
     }
+
     ifPresent(fn:(v:T)=>void): Option<T> {
         return this;
     }
+
+    match<U>(cases: {Some: (v:T)=>U, None: ()=>U}): U {
+        return cases.None();
+    }
+
     toVector(): Vector<T> {
         return Vector.empty<T>();
     }
+
     toEither<L>(left: L): Either<L,T> {
         return Either.left<L,T>(left);
     }
+
     equals(other: Option<T&WithEquality>): boolean {
         return other === <None<T>>none;
     }
+
     hashCode(): number {
         return 1;
     }
+
     toString(): string {
         return "None()";
     }

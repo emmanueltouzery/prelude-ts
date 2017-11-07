@@ -66,6 +66,16 @@ describe("option transformation", () => {
        assert.ok(Option.of(5).filter(x => x<2).isNone()));
     it("should filter none->none", () =>
        assert.ok(Option.none<number>().filter(x => x<2).isNone()));
+    it("should apply match to a some", () =>
+       assert.equal(5, Option.of(4).match({
+           Some: x=>x+1,
+           None: ()=>-1
+       })));
+    it("should apply match to a nome", () =>
+       assert.equal(-1, Option.none<number>().match({
+           Some: x=>x+1,
+           None: ()=>-1
+       })));
 });
 
 describe("Option helpers", () => {
