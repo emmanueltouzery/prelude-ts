@@ -87,6 +87,9 @@ describe("Vector.take() implementation", () => {
     it("handles taking all on length multiple of node size correctly", () => checkTake(
         Stream.iterate(1,i=>i+1).take(128).toVector(),
         128, Stream.iterate(1,i=>i+1).take(128).toVector()));
+    it("handles taking more than the whole length on length multiple of node size correctly", () => checkTake(
+        Stream.iterate(1,i=>i+1).take(128).toVector(),
+        129, Stream.iterate(1,i=>i+1).take(128).toVector()));
 });
 
 function checkAppend<T>(base: Vector<T>, toAppend: Iterable<T>, combined: Vector<T>) {

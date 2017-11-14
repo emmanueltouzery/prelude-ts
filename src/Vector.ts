@@ -1005,7 +1005,7 @@ export class Vector<T> implements Seq<T> {
         if (n<=0 || this._length === 0) {
             return Vector.empty<T>();
         }
-        if (n === this._length) {
+        if (n >= this._length) {
             // not only an optimization. we want to wipe from
             // the first item after the current one, but in case
             // the length is a multiple of nodeSize, and we want
