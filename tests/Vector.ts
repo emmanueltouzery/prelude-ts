@@ -68,7 +68,7 @@ function checkTake<T>(longer: Vector<T>, n: number, shorter: Vector<T>) {
     const arrayBefore = longer.toArray();
     assert.deepEqual(
         arraySetUndefineds((<any>shorter)._contents),
-        (<any>longer.take(3))._contents);
+        (<any>longer.take(n))._contents);
     // taking should not have modified the original vector
     assert.deepEqual(arrayBefore, longer.toArray());
 }
@@ -84,6 +84,9 @@ describe("Vector.take() implementation", () => {
     it("handles double root killing correctly", () => checkTake(
         Vector.ofIterable(Stream.iterate(1,i=>i+1).take(1100)),
         3, Vector.of(1,2,3)));
+    it("handles taking all on length multiple of node size correctly", () => checkTake(
+        Stream.iterate(1,i=>i+1).take(128).toVector(),
+        128, Stream.iterate(1,i=>i+1).take(128).toVector()));
 });
 
 function checkAppend<T>(base: Vector<T>, toAppend: Iterable<T>, combined: Vector<T>) {

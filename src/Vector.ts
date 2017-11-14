@@ -1005,6 +1005,19 @@ export class Vector<T> implements Seq<T> {
         if (n<=0 || this._length === 0) {
             return Vector.empty<T>();
         }
+        if (n === this._length) {
+            // not only an optimization. we want to wipe from
+            // the first item after the current one, but in case
+            // the length is a multiple of nodeSize, and we want
+            // to take the full array length, that next item is
+            // on a node which doesn't exist currently. Trying to
+            // go there to wipe that item would fail, so that's also
+            // a fix for  that.
+            return this;
+        }
+        // note that index actually points to the
+        // first item we want to wipe (item after
+        // the last item we want to keep)
         const index = Math.min(n, this._length);
 
         let newVec = this.cloneVec();
