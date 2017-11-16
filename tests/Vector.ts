@@ -17,6 +17,8 @@ describe("Vector toString", () => {
         "Vector([1,'a'])", Vector.of([1,'a']).toString()));
     it("serializes to string correctly - custom toString", () => assert.equal(
         "Vector({field1: hi, field2: 99})", Vector.of(new MyClass("hi", 99)).toString()));
+    it("serializes to string correctly - plain map", () => assert.equal(
+        "Vector({\"name\":\"hi\",\"age\":99})", Vector.of({name:"hi", age:99}).toString()));
 });
 
 describe("Vector extra methods", () => {

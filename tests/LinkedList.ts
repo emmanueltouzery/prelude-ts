@@ -13,10 +13,12 @@ SeqTest.runTests("LinkedList",
                  LinkedList.unfoldRight);
 
 describe("LinkedList toString", () => {
-        it("serializes to string correctly", () => assert.equal(
-            "LinkedList(1, 2, 3)", LinkedList.of(1,2,3).toString()));
-        it("serializes to string correctly - arrays & strings", () => assert.equal(
-            "LinkedList([1,'a'])", LinkedList.of([1,'a']).toString()));
-        it("serializes to string correctly - custom toString", () => assert.equal(
-            "LinkedList({field1: hi, field2: 99})", LinkedList.of(new MyClass("hi", 99)).toString()));
+    it("serializes to string correctly", () => assert.equal(
+        "LinkedList(1, 2, 3)", LinkedList.of(1,2,3).toString()));
+    it("serializes to string correctly - arrays & strings", () => assert.equal(
+        "LinkedList([1,'a'])", LinkedList.of([1,'a']).toString()));
+    it("serializes to string correctly - custom toString", () => assert.equal(
+        "LinkedList({field1: hi, field2: 99})", LinkedList.of(new MyClass("hi", 99)).toString()));
+    it("serializes to string correctly - plain map", () => assert.equal(
+        "LinkedList({\"name\":\"hi\",\"age\":99})", LinkedList.of({name:"hi", age:99}).toString()));
 });

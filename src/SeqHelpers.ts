@@ -93,7 +93,10 @@ export function toStringHelper(obj: any|null): string {
     if (typeof obj === "string") {
         return "'" + obj + "'";
     }
-    return obj+"";
+    if (obj.toString !== Object.prototype.toString) {
+        return obj.toString();
+    }
+    return JSON.stringify(obj);
 }
 
 /**

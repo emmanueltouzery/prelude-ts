@@ -53,4 +53,6 @@ describe("Stream toString", () => {
         "Stream([1,'a'], ?)", Stream.of([1,'a']).toString()));
     it("serializes to string correctly - custom toString", () => assert.equal(
         "Stream({field1: hi, field2: 99}, ?)", Stream.of(new MyClass("hi", 99)).toString()));
+    it("serializes to string correctly - plain map", () => assert.equal(
+        "Stream({\"name\":\"hi\",\"age\":99}, ?)", Stream.of({name:"hi", age:99}).toString()));
 });
