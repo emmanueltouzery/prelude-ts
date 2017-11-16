@@ -26,7 +26,7 @@ makeModule "Comparison" src/Comparison.ts
 makeModule "Contract" src/Contract.ts
 
 # generate with typedoc
-./node_modules/typedoc/bin/typedoc --mode file --out apidoc --excludePrivate --excludeExternals --excludeNotExported --ignoreCompilerErrors src/index.ts
+./node_modules/typedoc/bin/typedoc --exclude "**/make_doc_extra/*.ts" --mode file --out apidoc --excludePrivate --excludeExternals --excludeNotExported --ignoreCompilerErrors src/index.ts
 
 # modify the output to say 'File' instead of 'Module'
 find apidoc -name "*.html" -exec sed -i 's/Module/File/g' \{\} \;
@@ -35,7 +35,7 @@ find apidoc -name "*.html" -exec sed -i 's/Module/File/g' \{\} \;
 mv apidoc/modules apidoc/files
 find apidoc -name "*.html" -exec sed -i 's/modules/files/g' \{\} \;
 
-node dist/scripts/make_doc_extra.js
+node dist/scripts/make_doc_extra/make_doc_extra.js
 
 # we're happy with the output now, revert the changes I made
 # to the files to make typedoc think they're external modules
