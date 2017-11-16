@@ -53,10 +53,10 @@ function putStaticMethodsOnTop(parentTag: string, parentMarker: string, childTag
 
 function classPutStaticMethodsOnTop(classfilename: string): void {
     const lines = helpers.fileGetLinesByIndent(classesFolder + classfilename);
-    const fnStatic = Function.lift4(putStaticMethodsOnTop).curried();
-    const transform = fnStatic("ul")("tsd-index-list")("li")
-        .andThen(fnStatic("li")("current tsd-kind-class")("li"))
-        .andThen(fnStatic("section")("tsd-panel-group tsd-member-group")("section"));
+    const fnStatic = Function.lift4(putStaticMethodsOnTop);
+    const transform = fnStatic.apply3("ul", "tsd-index-list", "li")
+        .andThen(fnStatic.apply3("li", "current tsd-kind-class", "li"))
+        .andThen(fnStatic.apply3("section", "tsd-panel-group tsd-member-group", "section"));
 
     writeFileSync(classesFolder + classfilename, helpers.linesByIndentStr(transform(lines)));
 }

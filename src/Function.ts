@@ -64,6 +64,14 @@ export interface Function2<T1,T2,R> {
      * in the reverse order.
      */
     flipped(): Function2<T2,T1,R>;
+
+    /**
+     * Applies this function partially to one argument.
+     *
+     *     const plus5 = Function.lift2((x,y)=>x+y).apply1(5);
+     *     assert.equal(6, plus5(1));
+     */
+    apply1(param1:T1): Function1<T2,R>;
 }
 
 /**
@@ -103,6 +111,22 @@ export interface Function3<T1,T2,T3,R> {
      * in the reverse order.
      */
     flipped(): Function3<T3,T2,T1,R>;
+
+    /**
+     * Applies this function partially to one argument.
+     *
+     *     const plus5 = Function.lift3((x,y,z)=>x+y+z).apply1(5);
+     *     assert.equal(8, plus5(1,2));
+     */
+    apply1(param1:T1): Function2<T2,T3,R>;
+
+    /**
+     * Applies this function partially to two arguments.
+     *
+     *     const plus54 = Function.lift3((x,y,z)=>x+y+z).apply2(5,4);
+     *     assert.equal(12, plus54(3));
+     */
+    apply2(param1:T1, param2: T2): Function1<T3,R>;
 }
 
 /**
@@ -142,6 +166,30 @@ export interface Function4<T1,T2,T3,T4,R> {
      * in the reverse order.
      */
     flipped(): Function4<T4,T3,T2,T1,R>;
+
+    /**
+     * Applies this function partially to one argument.
+     *
+     *     const plus5 = Function.lift4((x,y,z,a)=>x+y+z+a).apply1(5);
+     *     assert.equal(11, plus5(1,2,3));
+     */
+    apply1(param1:T1): Function3<T2,T3,T4,R>;
+
+    /**
+     * Applies this function partially to two arguments.
+     *
+     *     const plus51 = Function.lift4((x,y,z,a)=>x+y+z+a).apply2(5,1);
+     *     assert.equal(11, plus51(2,3));
+     */
+    apply2(param1:T1, param2: T2): Function2<T3,T4,R>;
+
+    /**
+     * Applies this function partially to three arguments.
+     *
+     *     const plus512 = Function.lift4((x,y,z,a)=>x+y+z+a).apply3(5,1,2);
+     *     assert.equal(11, plus512(3));
+     */
+    apply3(param1:T1, param2: T2, param3: T3): Function1<T4,R>;
 }
 
 /**
@@ -181,6 +229,38 @@ export interface Function5<T1,T2,T3,T4,T5,R> {
      * in the reverse order.
      */
     flipped(): Function5<T5,T4,T3,T2,T1,R>;
+
+    /**
+     * Applies this function partially to one argument.
+     *
+     *     const plus5 = Function.lift5((x,y,z,a,b)=>x+y+z+a+b).apply1(5);
+     *     assert.equal(15, plus5(1,2,3,4));
+     */
+    apply1(param1:T1): Function4<T2,T3,T4,T5,R>;
+
+    /**
+     * Applies this function partially to two arguments.
+     *
+     *     const plus51 = Function.lift5((x,y,z,a,b)=>x+y+z+a+b).apply2(5,1);
+     *     assert.equal(15, plus5(2,3,4));
+     */
+    apply2(param1:T1, param2: T2): Function3<T3,T4,T5,R>;
+
+    /**
+     * Applies this function partially to three arguments.
+     *
+     *     const plus512 = Function.lift5((x,y,z,a,b)=>x+y+z+a+b).apply3(5,1,2);
+     *     assert.equal(15, plus5(3,4));
+     */
+    apply3(param1:T1, param2: T2, param3: T3): Function2<T4,T5,R>;
+
+    /**
+     * Applies this function partially to four arguments.
+     *
+     *     const plus5123 = Function.lift5((x,y,z,a,b)=>x+y+z+a+b).apply4(5,1,2,3);
+     *     assert.equal(15, plus5(4));
+     */
+    apply4(param1:T1, param2: T2, param3: T3, param4: T4): Function1<T5,R>;
 }
 
 /**
@@ -238,6 +318,7 @@ export class Function {
         r.curried = () => Function.lift1((x:T1) => Function.lift1((y:T2) => r(x,y)));
         r.tupled = () => Function.lift1((pair:[T1,T2]) => r(pair[0],pair[1]));
         r.flipped = () => Function.lift2((x:T2,y:T1) => r(y,x));
+        r.apply1 = (x:T1) => Function.lift1((y:T2) => r(x,y));
         return r;
     }
 
@@ -260,6 +341,8 @@ export class Function {
         r.curried = () => Function.lift1((x:T1) => Function.lift1((y:T2) => Function.lift1((z:T3) => r(x,y,z))));
         r.tupled = () => Function.lift1((tuple:[T1,T2,T3]) => r(tuple[0],tuple[1],tuple[2]));
         r.flipped = () => Function.lift3((x:T3,y:T2,z:T1) => r(z,y,x));
+        r.apply1 = (x:T1) => Function.lift2((y:T2,z:T3) => r(x,y,z));
+        r.apply2 = (x:T1,y:T2) => Function.lift1((z:T3) => r(x,y,z));
         return r;
     }
 
@@ -283,6 +366,9 @@ export class Function {
             (y:T2) => Function.lift1((z:T3) => Function.lift1((a:T4)=>r(x,y,z,a)))));
         r.tupled = () => Function.lift1((tuple:[T1,T2,T3,T4]) => r(tuple[0],tuple[1],tuple[2],tuple[3]));
         r.flipped = () => Function.lift4((x:T4,y:T3,z:T2,a:T1) => r(a,z,y,x));
+        r.apply1 = (x:T1) => Function.lift3((y:T2,z:T3,a:T4) => r(x,y,z,a));
+        r.apply2 = (x:T1,y:T2) => Function.lift2((z:T3,a:T4) => r(x,y,z,a));
+        r.apply3 = (x:T1,y:T2,z:T3) => Function.lift1((a:T4) => r(x,y,z,a));
         return r;
     }
 
@@ -306,6 +392,10 @@ export class Function {
             (y:T2) => Function.lift1((z:T3) => Function.lift1((a:T4)=>Function.lift1((b:T5) => r(x,y,z,a,b))))));
         r.tupled = () => Function.lift1((tuple:[T1,T2,T3,T4,T5]) => r(tuple[0],tuple[1],tuple[2],tuple[3],tuple[4]));
         r.flipped = () => Function.lift5((x:T5,y:T4,z:T3,a:T2,b:T1) => r(b,a,z,y,x));
+        r.apply1 = (x:T1) => Function.lift4((y:T2,z:T3,a:T4,b:T5) => r(x,y,z,a,b));
+        r.apply2 = (x:T1,y:T2) => Function.lift3((z:T3,a:T4,b:T5) => r(x,y,z,a,b));
+        r.apply3 = (x:T1,y:T2,z:T3) => Function.lift2((a:T4,b:T5) => r(x,y,z,a,b));
+        r.apply4 = (x:T1,y:T2,z:T3,a:T4) => Function.lift1((b:T5) => r(x,y,z,a,b));
         return r;
     }
 }
