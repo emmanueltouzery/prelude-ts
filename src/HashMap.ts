@@ -26,6 +26,9 @@ const hamt: any = require("hamt_plus");
  */
 export class HashMap<K,V> implements IMap<K,V> {
 
+    /**
+     * @hidden
+     */
     protected constructor(private hamt: any) {}
 
     /**
