@@ -220,19 +220,16 @@ export class Vector<T> implements Seq<T> {
         return new Vector<T>(this._contents, this._length, this._maxShift);
     }
 
-    private internalGet(index: number): T|undefined {
-        if (index >= 0 && index < this._length) {
-            let shift = this._maxShift;
-            let node = this._contents;
-            while (shift > 0 && node) {
-                node = node[(index >> shift) & nodeBitmask];
-                shift -= nodeBits;
-            }
-            // cast should be OK as we check bounds
-            // at the beginning of the method
-            return (<any>node)[index & nodeBitmask];
+    // WILL blow up if you give out of bounds index!
+    // it's the caller's responsability to check bounds.
+    private internalGet(index: number): T {
+        let shift = this._maxShift;
+        let node = this._contents;
+        while (shift > 0) {
+            node = (<any>node)[(index >> shift) & nodeBitmask];
+            shift -= nodeBits;
         }
-        return undefined;
+        return (<any>node)[index & nodeBitmask];
     }
 
     /**
@@ -241,6 +238,9 @@ export class Vector<T> implements Seq<T> {
      * contain less elements than the index.
      */
     get(index: number): Option<T> {
+        if (index < 0 || index >= this._length) {
+            return Option.none();
+        }
         return Option.of(this.internalGet(index));
     }
 
@@ -358,6 +358,9 @@ export class Vector<T> implements Seq<T> {
      * Option.None if it's empty.
      */
     last(): Option<T> {
+        if (this._length === 0) {
+            return Option.none();
+        }
         return Option.of(this.internalGet(this._length-1));
     }
 
