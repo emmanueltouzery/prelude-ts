@@ -530,18 +530,14 @@ export class Vector<T> implements Seq<T> {
         return <Vector<T>>SeqHelpers.distinctBy(this, keyExtractor);
     }
 
-    /**
-     * Implementation of the Iterator interface.
-     */
     [Symbol.iterator](): Iterator<T> {
-        let _vec = this;
         let _index = -1;
         let _stack: any[] = [];
         let _node = this._contents;
+        const sz = nodeSize - 1;
         return {
             next: () => {
                 // Iterator state:
-                //  _vec: Vector we're iterating over.
                 //  _node: "Current" leaf node, meaning the one we returned a value from
                 //         on the previous call.
                 //  _index: Index (within entire vector, not node) of value returned last
@@ -549,30 +545,27 @@ export class Vector<T> implements Seq<T> {
                 //  _stack: Path we traveled to current node, as [node, local index]
                 //          pairs, starting from root node, not including leaf.
 
-                let vec = _vec;
-                let shift;
-
-                if (_index === vec._length - 1) {
+                if (_index === this._length - 1) {
                     return {done: true, value: <any>undefined};
                 }
 
-                if (_index > 0 && (_index & nodeBitmask) === nodeSize - 1) {
+                if (_index > 0 && (_index & nodeBitmask) === sz) {
                     // Using the stack, go back up the tree, stopping when we reach a node
                     // whose children we haven't fully iterated over.
                     let step;
-                    while ((step = _stack.pop())[1] === nodeSize - 1) ;
+                    while ((step = _stack.pop())[1] === sz) ;
                     step[1]++;
                     _stack.push(step);
                     _node = step[0][step[1]];
                 }
 
-                for (shift = _stack.length * nodeBits; shift < _vec._maxShift;
+                for (let shift = _stack.length * nodeBits; shift < this._maxShift;
                      shift += nodeBits) {
                     _stack.push([_node, 0]);
                     _node = (<any[]>_node)[0];
                 }
 
-                _index++;
+                ++_index;
                 return {value: (<any[]>_node)[_index & nodeBitmask], done: false};
             }
         };

@@ -21,6 +21,18 @@ describe("Vector toString", () => {
         "Vector({\"name\":\"hi\",\"age\":99})", Vector.of({name:"hi", age:99}).toString()));
 });
 
+// tests with over 32 elements
+describe("Vector over one node", () => {
+    it("maps also on longer lists", () => assert.deepEqual(
+        [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,
+         25,26,27,28,29,30,31,32,33,34,35,36,37,38,39],
+        Stream.iterate(1,x=>x+1).take(40).toVector().map(x=>x-1).toArray()));
+    it("iterator is correct also on longer lists", () => assert.deepEqual(
+        [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,
+         25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
+        Array.from(Stream.iterate(1,x=>x+1).take(40).toVector())));
+})
+
 describe("Vector extra methods", () => {
     it("handles init correctly on a non-empty vector", () => assert.deepEqual(
         [1,2,3], Vector.of(1,2,3,4).init().toArray()));
