@@ -575,10 +575,8 @@ export class Vector<T> implements Seq<T> {
      * Call a function for element in the collection.
      */
     forEach(fun:(x:T)=>void):Vector<T> {
-        let iter = this[Symbol.iterator]();
-        let step;
-        while (!(step = iter.next()).done) {
-            fun(step.value);
+        for (let i = 0; i < this._length; i++) {
+            fun(this.internalGet(i));
         }
         return this;
     }
@@ -588,11 +586,9 @@ export class Vector<T> implements Seq<T> {
      * by the mapper function you give.
      */
     map<U>(fun:(x:T)=>U): Vector<U> {
-        let iter = this[Symbol.iterator]();
         const mutVec = Vector.emptyMutable<U>();
-        let step;
-        while (!(step = iter.next()).done) {
-            mutVec.append(fun(step.value));
+        for (let i = 0; i < this._length; i++) {
+            mutVec.append(fun(this.internalGet(i)));
         }
         return mutVec.getVector();
     }
@@ -603,12 +599,11 @@ export class Vector<T> implements Seq<T> {
      * for which the predicate returned true.
      */
     filter(fun:(x:T)=>boolean): Vector<T> {
-        let iter = this[Symbol.iterator]();
         const mutVec = Vector.emptyMutable<T>();
-        let step;
-        while (!(step = iter.next()).done) {
-            if (fun(step.value)) {
-                mutVec.append(step.value);
+        for (let i = 0; i < this._length; i++) {
+            const value = this.internalGet(i);
+            if (fun(value)) {
+                mutVec.append(value);
             }
         }
         return mutVec.getVector();
@@ -621,11 +616,9 @@ export class Vector<T> implements Seq<T> {
      * a None, the value is discarded.
      */
     mapOption<U>(mapper:(v:T)=>Option<U>): Vector<U> {
-        let iter = this[Symbol.iterator]();
         let mutVec = Vector.emptyMutable<U>();
-        let step;
-        while (!(step = iter.next()).done) {
-            const v = mapper(step.value);
+        for (let i = 0; i < this._length; i++) {
+            const v = mapper(this.internalGet(i));
             if (v.isSome()) {
                 mutVec.append(v.getOrThrow());
             }
@@ -640,11 +633,9 @@ export class Vector<T> implements Seq<T> {
      * This is the monadic bind.
      */
     flatMap<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
-        let iter = this[Symbol.iterator]();
         const mutVec = Vector.emptyMutable<U>();
-        let step;
-        while (!(step = iter.next()).done) {
-            mutVec.appendAll(mapper(step.value));
+        for (let i = 0; i < this._length; i++) {
+            mutVec.appendAll(mapper(this.internalGet(i)));
         }
         return mutVec.getVector();
     }
@@ -678,11 +669,9 @@ export class Vector<T> implements Seq<T> {
      *           an updated value.
      */
     foldLeft<U>(zero:U, fn:(soFar:U,cur:T)=>U):U {
-        let iter = this[Symbol.iterator]();
-        let step;
         let acc = zero;
-        while (!(step = iter.next()).done) {
-            acc = fn(acc, step.value);
+        for (let i = 0; i < this._length; i++) {
+            acc = fn(acc, this.internalGet(i));
         }
         return acc;
     }
