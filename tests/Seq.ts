@@ -6,6 +6,8 @@ import { Predicates } from "../src/Predicate";
 import { MyClass } from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as CollectionTest from './Collection';
+require("mocha-testcheck").install();
+const { gen, check} = require("mocha-testcheck");
 import * as assert from 'assert'
 
 /**
@@ -233,6 +235,15 @@ export function runTests(seqName: string,
             const x = of(1,2,3);
             x.take(2);
             assert.deepEqual([1,2,3], x.toArray())
+        });
+        check.it("applying reverse twice is the identity", gen.array(gen.string), (ar:string[]) => {
+            assert.deepEqual(ofIterable(ar).reverse().reverse().toArray(),
+                             ofIterable(ar).toArray());
+        });
+        check.it("calling take() on the seq is the same as on the array",
+                 gen.array(gen.string), gen.int.suchThat((n:number) => !Number.isNaN(n)), (ar:number[],n:number) => {
+            assert.deepEqual(ofIterable(ar).take(n).toArray(),
+                             ar.slice(0,Math.max(0,n)));
         });
     });
     describe(seqName + " filtering", () => {

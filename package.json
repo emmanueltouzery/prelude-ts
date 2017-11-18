@@ -20,7 +20,8 @@
         "browserify": "14.4.0",
         "uglify-js": "3.1.2",
         "immutable": "4.0.0-rc.9",
-        "hamt": "2.2.2"
+        "hamt": "2.2.2",
+        "mocha-testcheck": "1.0.0-rc.0"
     },
     "keywords": [
         "typescript",
