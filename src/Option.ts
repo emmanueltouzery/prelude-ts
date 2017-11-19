@@ -275,6 +275,9 @@ export class Some<T> extends Option<T> {
     }
 
     equals(other: Option<T&WithEquality>): boolean {
+        if (<any>other === this) {
+            return true;
+        }
         // the .isSome doesn't test if it's a Some, but
         // if the object has a field called isSome.
         if (other === <None<T>>none || !other || !(<any>other).isSome) {

@@ -1080,6 +1080,9 @@ class ConsLinkedList<T> extends LinkedList<T> implements Iterable<T> {
     }
 
     equals(other: LinkedList<T&WithEquality>): boolean {
+        if (<any>other === this) {
+            return true;
+        }
         if (!other || !other.tail) {
             return false;
         }

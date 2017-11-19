@@ -443,6 +443,9 @@ export class HashMap<K,V> implements IMap<K,V> {
      * in memory.
      */
     equals(other: IMap<K&WithEquality,V&WithEquality>): boolean {
+        if (<any>other === this) {
+            return true;
+        }
         if (!other || !other.valueIterable) {
             return false;
         }

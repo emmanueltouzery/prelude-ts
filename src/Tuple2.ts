@@ -87,6 +87,9 @@ export class Tuple2<T,U> implements Value {
      * in memory.
      */
     equals(other: Tuple2<T&WithEquality,U&WithEquality>): boolean {
+        if (<any>other === this) {
+            return true;
+        }
         if (!other || !other._fst) {
             return false;
         }

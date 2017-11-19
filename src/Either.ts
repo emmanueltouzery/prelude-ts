@@ -305,6 +305,9 @@ class Left<L,R> extends Either<L,R> {
     }
 
     equals(other: Either<L&WithEquality,R&WithEquality>): boolean {
+        if (<any>other === this) {
+            return true;
+        }
         if ((!other) || (!other.isRight) || other.isRight()) {
             return false;
         }
@@ -407,6 +410,9 @@ class Right<L,R> extends Either<L,R> {
     }
 
     equals(other: Either<L&WithEquality,R&WithEquality>): boolean {
+        if (<any>other === this) {
+            return true;
+        }
         if ((!other) || (!other.isRight) || (!other.isRight())) {
             return false;
         }

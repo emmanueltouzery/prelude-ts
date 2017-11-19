@@ -477,6 +477,9 @@ export class HashSet<T> implements ISet<T> {
      * in memory.
      */
     equals(other: HashSet<T>): boolean {
+        if (<any>other === this) {
+            return true;
+        }
         const sz = this.hamt.size;
         if (other === <EmptyHashSet<T>>emptyHashSet && sz === 0) {
             // we could get that i'm not the empty map

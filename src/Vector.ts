@@ -737,6 +737,9 @@ export class Vector<T> implements Seq<T> {
      * in memory.
      */
     equals(other:Vector<T&WithEquality>): boolean {
+        if (<any>other === this) {
+            return true;
+        }
         if (!other || (other._maxShift === undefined)) {
             return false;
         }
