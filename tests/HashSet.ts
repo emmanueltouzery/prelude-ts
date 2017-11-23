@@ -31,6 +31,8 @@ describe("hashset construction basic sanity tests", () => {
         HashSet.of(1,2,3,4).equals(HashSet.of(1,2).addAll([3,4]))));
     it("should support addAll on an empty set", () => assert.ok(
         HashSet.of(1,2,3,4).equals(HashSet.empty<number>().addAll([1,2,3,4]))));
+    it("should fail at runtime on key without equality", () => assert.throws(() =>
+        HashSet.empty<any>().add({field1:'test', field2:-1})));
 });
 
 describe("hashset conversions", () => {

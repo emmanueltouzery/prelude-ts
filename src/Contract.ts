@@ -1,3 +1,6 @@
+import { hasTrueEquality } from "./Comparison";
+import { toStringHelper } from "./SeqHelpers";
+
 let preludeTsContractViolationCb = (msg:string):void => { throw msg; };
 
 /**
@@ -31,9 +34,17 @@ export function reportContractViolation(msg: string): void {
  */
 export function contractTrueEquality(context: string, ...vals: Array<any>) {
     for (const val of vals) {
-        if (val && val.hasTrueEquality && (!val.hasTrueEquality())) {
-            reportContractViolation(
-                context + ": element doesn't support true equality: " + val);
+        if (val) {
+            if (val.hasTrueEquality && (!val.hasTrueEquality())) {
+                reportContractViolation(
+                    context + ": element doesn't support true equality: " + toStringHelper(val));
+            }
+            if (!hasTrueEquality(val).getOrThrow()) {
+                reportContractViolation(
+                    context + ": element doesn't support equality: " + toStringHelper(val));
+            }
+            // the first element i find is looking good, aborting
+            return;
         }
     }
 }

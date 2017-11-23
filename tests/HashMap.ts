@@ -94,6 +94,8 @@ describe("hashmap construction basic sanity tests", () => {
         const got = HashMap.ofObjectDictionary<number>(s);
         assert.ok(HashMap.of<string,number>(["a",1]).equals(got));
     });
+    it("should fail at runtime on key without equality", () => assert.throws(() =>
+        HashMap.empty<any,string>().put({field1:'test', field2:-1}, "value1")));
 });
 
 describe("hashmap equality", () => {
