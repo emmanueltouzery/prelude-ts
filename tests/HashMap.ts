@@ -5,6 +5,7 @@ import { LinkedList } from "../src/LinkedList";
 import { Option } from "../src/Option";
 import { Stream } from "../src/Stream";
 import { Tuple2 } from "../src/Tuple2";
+import { fieldsHashCode } from "../src/Comparison";
 import { MyClass} from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
@@ -129,11 +130,19 @@ describe("hashmap equality", () => {
 
 describe("hashmap - toString should be nicely formatted", () => {
     it("should format strings and numbers", () => assert.equal(
-        "{key1 => 6, key2 => 7}",
-        ""+HashMap.empty<string,number>().put("key1", 6).put("key2", 7)));
+       "{key1: 6, key2: 7}",
+         ""+HashMap.empty<string,number>().put("key1", 6).put("key2", 7)));
     it("should format custom classes", () => assert.equal(
-        "{key1 => {field1: test, field2: -1}}",
-        ""+HashMap.empty<string,MyClass>().put("key1", new MyClass('test', -1))));
+       "{key1: {field1: test, field2: -1}}",
+         ""+HashMap.empty<string,MyClass>().put("key1", new MyClass('test', -1))));
+   it("should format cust class keys as well", () => assert.equal(
+        "{{\"field1\":\"test\",\"field2\":-1}: 'value1'}",
+        ""+HashMap.empty<any,string>().put({
+            field1:'test',
+            field2:-1,
+            equals(this:any, b:any) { return this.field1===b.field1 && this.field2===b.field2 },
+            hashCode(this:any) { return fieldsHashCode(this.field1, this.field2);}
+        }, "value1")));
 });
 
 describe("hashmap extract values", () => {

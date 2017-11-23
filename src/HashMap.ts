@@ -491,7 +491,10 @@ export class HashMap<K,V> implements IMap<K,V> {
         return "{" +
             this.hamt.fold(
                 (acc: string[], value: V, key: K) =>
-                    {acc.push(key + " => " + toStringHelper(value)); return acc;}, []).join(", ") + "}";
+                    {acc.push(
+                        toStringHelper(key, {quoteStrings:false}) +
+                            ": " + toStringHelper(value)); return acc;}, [])
+            .join(", ") + "}";
     }
 
     inspect(): string {

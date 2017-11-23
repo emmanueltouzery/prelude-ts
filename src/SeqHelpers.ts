@@ -86,12 +86,15 @@ export function distinctBy<T,U>(seq: Collection<T>, keyExtractor: (x:T)=>U&WithE
  * util.inspect seems to depend on node.
  * @hidden
  */
-export function toStringHelper(obj: any|null): string {
+export function toStringHelper(
+    obj: any|null,
+    options: {quoteStrings:boolean} = {quoteStrings: true}): string
+{
     if (Array.isArray(obj)) {
-        return "[" + obj.map(toStringHelper) + "]"
+        return "[" + obj.map(o => toStringHelper(o, options)) + "]"
     }
     if (typeof obj === "string") {
-        return "'" + obj + "'";
+        return options.quoteStrings ? `'${obj}'` : obj;
     }
     if (obj.toString !== Object.prototype.toString) {
         return obj.toString();
