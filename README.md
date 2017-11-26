@@ -145,6 +145,7 @@ then you can get
 
 ## Wishlist/upcoming features
 
+* CharSeq, a string wrapper?
 * Validation
 * Future, wrapping promises?
 * Non-empty vector?
