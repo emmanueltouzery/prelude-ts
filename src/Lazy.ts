@@ -41,4 +41,12 @@ export class Lazy<T> {
     isEvaluated(): boolean {
         return this.thunk === undefined;
     }
+
+    /**
+     * Return a new lazy where the element was transformed
+     * by the mapper function you give.
+     */
+    map<U>(mapper:(v:T)=>U): Lazy<U> {
+        return new Lazy(()=>mapper(this.get()));
+    }
 }
