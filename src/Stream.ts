@@ -53,14 +53,9 @@ export abstract class Stream<T> implements Seq<T> {
     }
 
     /**
-     * Build a stream from an array (slightly faster
-     * than building from an iterable)
-     * **Deprecated** please use [[Stream.ofIterable]].
-     * Will be removed for the next major release.
-     * @type T the item type
-     * @deprecated
+     * @hidden
      */
-    static ofArray<T>(elts: Array<T>): Stream<T> {
+    private static ofArray<T>(elts: Array<T>): Stream<T> {
         if (elts.length === 0) {
             return <EmptyStream<T>>emptyStream;
         }
