@@ -81,6 +81,12 @@ describe("either transformation", () => {
            Right: x=>1,
            Left:  x=>x-1
        })));
+    it("should liftA2", () => assert.ok(Either.right(11).equals(
+        Either.liftA2<number,number,string,number>((x:number,y:number) => x+y)
+        (Either.right<string,number>(5), Either.right<string,number>(6)))));
+    it("should abort liftA2 on none", () => assert.ok(Either.left("bad").equals(
+        Either.liftA2<number,number,string,number>((x:number,y:number) => x+y)(
+            Either.right<string,number>(5), Either.left<string,number>("bad")))));
 });
 
 describe("Either helpers", () => {

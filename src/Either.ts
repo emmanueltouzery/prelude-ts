@@ -57,6 +57,21 @@ export abstract class Either<L,R> implements Value {
     }
 
     /**
+     * Applicative lifting for Either.
+     * Takes a function which operates on basic values, and turns it
+     * in a function that operates on eithers of these values ('lifts'
+     * the function). The 2 is because it works on functions taking two
+     * parameters.
+     * @type R1 the first right type
+     * @type R2 the second right type
+     * @type L the left type
+     * @type V the new right type as returned by the combining function.
+     */
+    static liftA2<R1,R2,L,V>(fn:(v1:R1,v2:R2)=>V) : (p1:Either<L,R1>, p2:Either<L,R2>) => Either<L,V> {
+        return (p1,p2) => p1.flatMap(a1 => p2.map(a2 => fn(a1,a2)));
+    }
+
+    /**
      * Returns true if this is either is a left, false otherwise.
      */
     abstract isLeft(): boolean;
