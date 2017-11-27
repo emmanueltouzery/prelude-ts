@@ -275,7 +275,7 @@ describe("hashmap transformation", () => {
             .foldRight(0, ([item,value],soFar)=>soFar+value.length)));
     it("should convert to linked list correctly", () => assert.ok(
         LinkedList.of(Tuple2.of("a",5),Tuple2.of("b",6)).equals(
-            HashMap.of<string,number>(["a",5],["b",6]).toLinkedList().map(Tuple2.ofArray))));
+            HashMap.of<string,number>(["a",5],["b",6]).toLinkedList().map(Tuple2.ofPair))));
     it("reduce works", () => assert.deepEqual(
         [3,"c"], HashMap.of<number,string>([1,"a"],[2,"b"],[3,"c"])
             .reduce((kv1,kv2)=>kv1[0]>kv2[0]?kv1:kv2).getOrThrow()));

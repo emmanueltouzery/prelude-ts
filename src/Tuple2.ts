@@ -24,9 +24,22 @@ export class Tuple2<T,U> implements Value {
     }
 
     /**
-     * Build a tuple2 from javascript pair.
+     * Build a tuple2 from javascript array. Compared to [[Tuple2.ofPair]],
+     * it checks the length of the array and will return [[Option.none]] in case
+     * the length isn't two. However the types of the elements aren't checked.
      */
-    static ofArray<T,U>(pair: [T, U]): Tuple2<T,U> {
+    static ofArray<T,U>(pair: Array<T|U>): Option<Tuple2<T,U>> {
+        if (pair && pair.length === 2) {
+            return Option.of(new Tuple2<T,U>(<T>pair[0], <U>pair[1]));
+        }
+        return Option.none<Tuple2<T,U>>();
+    }
+
+    /**
+     * Build a tuple2 from javascript pair.
+     * Also see [[Tuple2.ofArray]]
+     */
+    static ofPair<T,U>(pair: [T, U]): Tuple2<T,U> {
         return new Tuple2(pair[0], pair[1]);
     }
 
