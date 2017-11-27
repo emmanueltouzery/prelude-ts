@@ -1,3 +1,5 @@
+import { toStringHelper } from "./SeqHelpers";
+
 /**
  * Represent a lazily evaluated value. You give a function which
  * will return a value; that function is only called when the value
@@ -48,5 +50,22 @@ export class Lazy<T> {
      */
     map<U>(mapper:(v:T)=>U): Lazy<U> {
         return new Lazy(()=>mapper(this.get()));
+    }
+
+    /**
+     * Get a human-friendly string representation of that value.
+     */
+    toString(): string {
+        return this.isEvaluated() ?
+            `Lazy(${toStringHelper(this.get())})` :
+            "Lazy(?)";
+    }
+
+    /**
+     * Used by the node REPL to display values.
+     * Most of the time should be the same as toString()
+     */
+    inspect(): string {
+        return this.toString();
     }
 }

@@ -30,4 +30,11 @@ describe("lazy basics", () => {
         assert.equal(4, l2.get());
         assert.equal(true, evaluated);
     });
+    it("should convert to string properly, value not present", () =>
+       assert.equal("Lazy(?)", Lazy.of(() => 5).toString()));
+    it("should convert to string properly, value present", () => {
+        const l = Lazy.of(() => 5);
+        l.get();
+        assert.equal("Lazy(5)", l.toString())
+    });
 });
