@@ -62,9 +62,54 @@ export abstract class Option<T> implements Value {
      * in a function that operates on options of these values ('lifts'
      * the function). The 2 is because it works on functions taking two
      * parameters.
+     *
+     *     const lifted = Option.liftA2((x:number,y:number) => x+y);
+     *     lifted(Option.of(5), Option.of(6));
+     *     => Option.of(11)
+     *
+     *     const lifted2 = Option.liftA2((x:number,y:number) => x+y);
+     *     lifted2(Option.of(5), Option.none<number>());
+     *     => Option.none()
+     *
+     * @type T the first option type
+     * @type U the second option type
+     * @type V the new type as returned by the combining function.
      */
     static liftA2<T,U,V>(fn:(v1:T,v2:U)=>V): (p1:Option<T>, p2:Option<U>) => Option<V> {
         return (p1,p2) => p1.flatMap(a1 => p2.map(a2 => fn(a1,a2)));
+    }
+
+    /**
+     * Applicative lifting for Option. 'p' stands for 'properties'.
+     *
+     * Takes a function which operates on a simple JS object, and turns it
+     * in a function that operates on the same JS object type except which each field
+     * wrapped in an Option ('lifts' the function).
+     * It's an alternative to [[Option.liftA2]] when the number of parameters
+     * is not two.
+     *
+     *     const lifted = Option.liftAp((x:{a:number,b:number,c:number}) => x.a+x.b+x.c);
+     *     lifted({a:Option.of(5), b:Option.of(6), c:Option.of(3)});
+     *     => Option.of(14)        
+     *
+     *     const lifted = Option.liftAp((x:{a:number,b:number}) => x.a+x.b)
+     *     lifted({a:Option.of(5), b:Option.none<number>()});
+     *     => Option.none()
+     *
+     * @type A the object property type specifying the parameters for your function
+     * @type B the type returned by your function, returned wrapped in an option by liftAp.
+     */
+    static liftAp<A,B>(fn:(x:A)=>B): (x: {[K in keyof A]: Option<A[K]>;}) => Option<B> {
+        return x => {
+            const copy:A = <any>{};
+            for (let p in x) {
+                if (x[p].isNone()) {
+                    return Option.none<B>();
+                }
+                copy[p] = x[p].getOrThrow();
+            }
+            return Option.of(fn(copy));
+        }
     }
 
     /**

@@ -91,6 +91,12 @@ describe("Option helpers", () => {
         Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.of(6)))));
     it("should abort liftA2 on none", () => assert.ok(Option.none().equals(
         Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.none<number>()))));
+    it("should liftAp", () => assert.ok(Option.of(14).equals(
+        Option.liftAp((x:{a:number,b:number,c:number}) => x.a+x.b+x.c)
+        ({a:Option.of(5), b:Option.of(6), c:Option.of(3)}))));
+    it("should abort liftAp on none", () => assert.ok(Option.none().equals(
+        Option.liftAp((x:{a:number,b:number}) => x.a+x.b)
+        ({a:Option.of(5), b:Option.none<number>()}))));
 });
 
 describe("option retrieval", () => {

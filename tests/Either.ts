@@ -81,12 +81,21 @@ describe("either transformation", () => {
            Right: x=>1,
            Left:  x=>x-1
        })));
-    it("should liftA2", () => assert.ok(Either.right(11).equals(
-        Either.liftA2<number,number,string,number>((x:number,y:number) => x+y)
+    it("should liftA2", () => assert.ok(Either.right<string,number>(11).equals(
+        Either.liftA2((x:number,y:number) => x+y, {} as string)
         (Either.right<string,number>(5), Either.right<string,number>(6)))));
-    it("should abort liftA2 on none", () => assert.ok(Either.left("bad").equals(
-        Either.liftA2<number,number,string,number>((x:number,y:number) => x+y)(
+    it("should abort liftA2 on left", () => assert.ok(Either.left("bad").equals(
+        Either.liftA2((x:number,y:number) => x+y, {} as string)(
             Either.right<string,number>(5), Either.left<string,number>("bad")))));
+    it("should liftAp", () => {
+        const fn = (x:{a:number,b:number,c:number}) => x.a+x.b+x.c;
+        const lifted = Either.liftAp(fn, {} as number);
+        assert.ok(Either.right(14).equals(
+            lifted({a:Either.right<number,number>(5), b:Either.right<number,number>(6), c:Either.right<number,number>(3)})));
+    });
+    it("should abort liftAp on left", () => assert.ok(Either.left(2).equals(
+        Either.liftAp<number,{a:number,b:number},number>(x => x.a+x.b)
+        ({a:Either.right<number,number>(5), b:Either.left<number,number>(2)}))));
 });
 
 describe("Either helpers", () => {

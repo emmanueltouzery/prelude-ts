@@ -62,13 +62,56 @@ export abstract class Either<L,R> implements Value {
      * in a function that operates on eithers of these values ('lifts'
      * the function). The 2 is because it works on functions taking two
      * parameters.
+     *
+     *    const lifted = Either.liftA2((x:number,y:number) => x+y, {} as string)
+     *    lifted(Either.right<string,number>(5), Either.right<string,number>(6)))));
+     *    => Either.right(11)
+     *
+     *    const lifted = Either.liftA2((x:number,y:number) => x+y, {} as string);
+     *    lifted(Either.right<string,number>(5), Either.left<string,number>("bad")))));
+     *    => Either.left("bad")
+     *
      * @type R1 the first right type
      * @type R2 the second right type
      * @type L the left type
      * @type V the new right type as returned by the combining function.
      */
-    static liftA2<R1,R2,L,V>(fn:(v1:R1,v2:R2)=>V) : (p1:Either<L,R1>, p2:Either<L,R2>) => Either<L,V> {
+    static liftA2<R1,R2,L,V>(fn:(v1:R1,v2:R2)=>V, leftWitness?: L) : (p1:Either<L,R1>, p2:Either<L,R2>) => Either<L,V> {
         return (p1,p2) => p1.flatMap(a1 => p2.map(a2 => fn(a1,a2)));
+    }
+
+    /**
+     * Applicative lifting for Either. 'p' stands for 'properties'.
+     *
+     * Takes a function which operates on a simple JS object, and turns it
+     * in a function that operates on the same JS object type except which each field
+     * wrapped in an Either ('lifts' the function).
+     * It's an alternative to [[Either.liftA2]] when the number of parameters
+     * is not two.
+     *
+     *     const fn = (x:{a:number,b:number,c:number}) => x.a+x.b+x.c;
+     *     const lifted = Either.liftAp(fn, {} as number);
+     *     lifted({a:Either.right<number,number>(5), b:Either.right<number,number>(6), c:Either.right<number,number>(3)})));
+     *     => Either.right(14)
+     *
+     *     const lifted = Either.liftAp<number,{a:number,b:number},number>(x => x.a+x.b);
+     *     lifted({a:Either.right<number,number>(5), b:Either.left<number,number>(2)});
+     *     => Either.left(2)
+     *
+     * @type A the object property type specifying the parameters for your function
+     * @type B the type returned by your function, returned wrapped in an either by liftAp.
+     */
+    static liftAp<L,A,B>(fn:(x:A)=>B, leftWitness?: L): (x: {[K in keyof A]: Either<L,A[K]>;}) => Either<L,B> {
+        return x => {
+            const copy:A = <any>{};
+            for (let p in x) {
+                if (x[p].isLeft()) {
+                    return <Either<L,B>><any>x[p];
+                }
+                copy[p] = x[p].getOrThrow();
+            }
+            return Either.right<L,B>(fn(copy));
+        }
     }
 
     /**
