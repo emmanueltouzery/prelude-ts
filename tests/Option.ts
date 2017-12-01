@@ -34,7 +34,7 @@ describe("option comparison", () => {
     it("should fail compilation on an obviously bad equality test", () =>
        assertFailCompile(
            "Option.of([1]).equals(Option.of([1]))", "Argument of type \'" +
-               "Option<number[]>\' is not assignable to parameter"));
+               "Some<number[]>\' is not assignable to parameter"));
     it("should fail compilation on an obviously bad contains test", () =>
        assertFailCompile(
            "Option.of([1]).contains([1])",
@@ -86,7 +86,7 @@ describe("Option helpers", () => {
     it("should fail sequence when some are none", () =>
        assert.ok(
            Option.none().equals(
-               Option.sequence(Vector.of(Option.of(1), Option.none(), Option.of(3))))));
+               Option.sequence(Vector.of<Option<number>>(Option.of(1), Option.none(), Option.of(3))))));
     it("should liftA2", () => assert.ok(Option.of(11).equals(
         Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.of(6)))));
     it("should abort liftA2 on none", () => assert.ok(Option.none().equals(
@@ -122,4 +122,10 @@ describe("option retrieval", () => {
             assert.equal(5, opt.get());
         }
     });
+    it("should know whether we got a Some from Option.of", () =>
+       assert.equal(5, Option.of(5).get()));
+    it("should know whether we got a Some from None.orElse", () =>
+       assert.equal(5, Option.none<number>().orElse(Option.of(5)).get()));
+    it("should know whether we got a Some from Some.orElse", () =>
+       assert.equal(5, Option.of(5).orElse(Option.none<number>()).get()));
 });
