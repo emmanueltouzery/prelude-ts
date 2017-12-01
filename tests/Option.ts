@@ -114,4 +114,12 @@ describe("option retrieval", () => {
        assert.throws(() => Option.none().getOrThrow()));
     it("should throw on None.getOrThrow with custom msg", () =>
        assert.throws(() => Option.none().getOrThrow("my custom msg"), /^my custom msg$/));
+    it("should offer get() if i checked for isSome", () => {
+        const opt = <Option<number>>Option.of(5); 
+        if (opt.isSome()) {
+            // what we are checking here is whether this does build
+            // .get() is available only on Some not on None
+            assert.equal(5, opt.get());
+        }
+    });
 });

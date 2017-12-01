@@ -116,13 +116,13 @@ export abstract class Option<T> implements Value {
      * Returns true if the option is a Some (contains a value),
      * false otherwise (it's a None)
      */
-    abstract isSome(): boolean;
+    abstract isSome(): this is Some<T>;
 
     /**
      * Returns true if the option is a None (doesn't contains a value),
      * false otherwise (it's a Some)
      */
-    abstract isNone(): boolean;
+    abstract isNone(): this is None<T>;
 
     /**
      * @hidden
@@ -262,12 +262,16 @@ export class Some<T> extends Option<T> {
         super();
     }
 
-    isSome(): boolean {
+    isSome(): this is Some<T> {
         return true;
     }
 
-    isNone(): boolean {
+    isNone(): this is None<T> {
         return false;
+    }
+
+    get(): T {
+        return this.value;
     }
     
     orElse(other: Option<T>): Option<T> {
@@ -347,11 +351,12 @@ export class Some<T> extends Option<T> {
  * @hidden
  */
 export class None<T> extends Option<T> {
-    isSome(): boolean {
+
+    isSome(): this is Some<T> {
         return false;
     }
 
-    isNone(): boolean {
+    isNone(): this is None<T> {
         return true;
     }
 
