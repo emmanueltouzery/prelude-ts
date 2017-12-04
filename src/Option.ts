@@ -7,6 +7,8 @@ import { WithEquality, areEqual, hasTrueEquality,
 import { toStringHelper } from "./SeqHelpers";
 import { contractTrueEquality} from "./Contract";
 
+// implementation also inspired by https://github.com/bcherny/tsoption
+
 /**
  * Expresses that a value may be present, or not.
  * @type T the item type
@@ -18,14 +20,15 @@ export abstract class Option<T> implements Value {
      * undefined gives a none
      * null gives a some
      */
-    static of<T>(v: T|undefined): Option<T> {
-        return (v === undefined) ? <None<T>>none : new Some(v);
-    }
+    static of: {
+            <T = {}>(value: undefined): None<T>;
+            <T>(value: T): Some<T>;
+    } = <any>(<T>(v:T|undefined) => (v === undefined) ? <None<T>>none : new Some(v));
 
     /**
      * The optional value expressing a missing value.
      */
-    static none<T>(): Option<T> {
+    static none<T>(): None<T> {
         return <None<T>>none;
     }
 
@@ -274,7 +277,7 @@ export class Some<T> extends Option<T> {
         return this.value;
     }
     
-    orElse(other: Option<T>): Option<T> {
+    orElse(other: Option<T>): Some<T> {
         return this;
     }
 
@@ -286,7 +289,7 @@ export class Some<T> extends Option<T> {
         return v === this.value;
     }
 
-    getOrUndefined(): T | undefined {
+    getOrUndefined(): T {
         return this.value;
     }
 
@@ -294,7 +297,7 @@ export class Some<T> extends Option<T> {
         return this.value;
     }
 
-    map<U>(fn: (v:T)=>U): Option<U> {
+    map<U>(fn: (v:T)=>U): Some<U> {
         return Option.of(fn(this.value));
     }
 
@@ -306,7 +309,7 @@ export class Some<T> extends Option<T> {
         return fn(this.value) ? this : Option.none<T>();
     }
 
-    ifPresent(fn:(v:T)=>void): Option<T> {
+    ifPresent(fn:(v:T)=>void): Some<T> {
         fn(this.value);
         return this;
     }
@@ -360,7 +363,7 @@ export class None<T> extends Option<T> {
         return true;
     }
 
-    orElse(other: Option<T>): Option<T> {
+    orElse<U extends Option<T>>(other: U): U {
         return other;
     }
 
@@ -380,7 +383,7 @@ export class None<T> extends Option<T> {
         return alt;
     }
 
-    map<U>(fn: (v:T)=>U): Option<U> {
+    map<U>(fn: (v:T)=>U): None<U> {
         return <None<U>>none;
     }
 
@@ -388,11 +391,11 @@ export class None<T> extends Option<T> {
         return <None<U>>none;
     }
 
-    filter(fn: (v:T)=>boolean): Option<T> {
+    filter(fn: (v:T)=>boolean): None<T> {
         return <None<T>>none;
     }
 
-    ifPresent(fn:(v:T)=>void): Option<T> {
+    ifPresent(fn:(v:T)=>void): None<T> {
         return this;
     }
 
