@@ -254,9 +254,6 @@ export abstract class Option<T> implements Value {
     }
 }
 
-/**
- * @hidden
- */
 export class Some<T> extends Option<T> {
     constructor(private value: T) {
         super();
@@ -347,9 +344,6 @@ export class Some<T> extends Option<T> {
     }
 }
 
-/**
- * @hidden
- */
 export class None<T> extends Option<T> {
 
     isSome(): this is Some<T> {

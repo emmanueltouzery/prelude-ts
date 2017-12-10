@@ -5,17 +5,18 @@ import { writeFileSync } from "fs";
 import * as helpers from "./helpers";
 
 // group classes & interfaces by category.
-const CATEGORIES = Vector.of<[string,HashSet<string>]>(
-    ["Control", HashSet.of<string>(
-        "Either", "Lazy", "Option", "Function",
+const CATEGORIES = Vector.of<[string,Vector<string>]>(
+    ["Control", Vector.of(
+        "Either", "Left", "Right", "Option", "Some", "None", "Lazy", "Function",
         "Function1", "Function2", "Function3", "Function4", "Function5",
         "Predicate", "Predicates")],
-    ["Collection", HashSet.of<string>(
-        "HashMap", "HashSet", "LinkedList", "Stream", "Tuple2",
-        "Vector", "Collection", "Foldable", "IMap",
-        "ISet", "Seq")],
-    ["Core", HashSet.of<string>(
-        "Value", "Comparison", "Contract")]);
+    ["Collection", Vector.of(
+        "Collection", "Foldable", 
+        "IMap","HashMap", "ISet", "HashSet",
+        "Seq", "LinkedList", "Stream", "Vector", 
+        "Tuple2")],
+    ["Core", Vector.of(
+        "Comparison", "Value", "Contract")]);
 
 function getSectionHeader(sectionName:string): string {
     return `${helpers.indent(6)}<section class="tsd-index-section">` +
@@ -62,7 +63,8 @@ export function groupGlobalsByCategory(): void {
 
     const allKnownElements = CATEGORIES
         .map(c=>c[1])
-        .fold(HashSet.empty<string>(), (s1,s2)=>s1.addAll(s2));
+        .flatMap(x=>x)
+        .transform(HashSet.ofIterable);
 
     const missingElements = liRows.keySet().diff(allKnownElements);
     if (!missingElements.isEmpty()) {
@@ -71,8 +73,7 @@ export function groupGlobalsByCategory(): void {
 
     CATEGORIES.forEach(([name,elements]) => {
         newIndexContent += getSectionHeader(name);
-        const elts = elements.toVector();
-        const rows = elts.sortOn(x=>x).map(elt => liRows.get(elt).getOrThrow());
+        const rows = elements.map(elt => liRows.get(elt).getOrThrow());
         newIndexContent += rows.mkString("\n");
         newIndexContent += getSectionFooter();
     });
