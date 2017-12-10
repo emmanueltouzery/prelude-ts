@@ -124,4 +124,20 @@ describe("either retrieval", () => {
        assert.throws(() => Either.left<number,number>(5).getOrThrow()));
     it("should throw on Left.getOrThrow with custom msg", () =>
        assert.throws(() => Either.left<number,number>(5).getOrThrow("my custom msg"), /^my custom msg$/));
+    it("should offer get() if i checked for isRight", () => {
+        const either = <Either<string,number>>Either.right(5); 
+        if (either.isRight()) {
+            // what we are checking here is whether this does build
+            // .get() is available only on Right
+            assert.equal(5, either.get());
+        }
+    });
+    it("should offer getLeft() if i checked for isLeft", () => {
+        const either = <Either<string,number>>Either.left("5"); 
+        if (either.isLeft()) {
+            // what we are checking here is whether this does build
+            // .get() is available only on Left
+            assert.equal("5", either.getLeft());
+        }
+    });
 });

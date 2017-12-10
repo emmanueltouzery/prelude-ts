@@ -117,12 +117,12 @@ export abstract class Either<L,R> implements Value {
     /**
      * Returns true if this is either is a left, false otherwise.
      */
-    abstract isLeft(): boolean;
+    abstract isLeft(): this is Left<L,R>;
 
     /**
      * Returns true if this is either is a right, false otherwise.
      */
-    abstract isRight(): boolean;
+    abstract isRight(): this is Right<L,R>;
 
     /**
      * Returns true if this is either is a right and contains the value you give.
@@ -274,12 +274,12 @@ export abstract class Either<L,R> implements Value {
     }
 }
 
-class Left<L,R> extends Either<L,R> {
+export class Left<L,R> extends Either<L,R> {
     constructor(private value: L) {
         super();
     }
 
-    isLeft(): boolean {
+    isLeft(): this is Left<L,R> {
         return true;
     }
 
@@ -332,6 +332,10 @@ class Left<L,R> extends Either<L,R> {
         return other;
     }
 
+    getLeft(): L {
+        return this.value;
+    }
+
     getLeftOrThrow(message?: string): L {
         return this.value;
     }
@@ -379,7 +383,7 @@ class Left<L,R> extends Either<L,R> {
     }
 }
 
-class Right<L,R> extends Either<L,R> {
+export class Right<L,R> extends Either<L,R> {
     constructor(private value: R) {
         super();
     }
@@ -388,7 +392,7 @@ class Right<L,R> extends Either<L,R> {
         return false;
     }
 
-    isRight(): boolean {
+    isRight(): this is Right<L,R> {
         return true;
     }
 
@@ -427,6 +431,10 @@ class Right<L,R> extends Either<L,R> {
 
     match<U>(cases: {Left: (v:L)=>U, Right: (v:R)=>U}): U {
         return cases.Right(this.value);
+    }
+
+    get(): R {
+        return this.value;
     }
 
     getOrThrow(message?: string): R {
