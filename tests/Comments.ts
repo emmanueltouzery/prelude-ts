@@ -1,11 +1,19 @@
 import { readFileSync, writeFileSync, readdirSync } from "fs";
 import { Vector } from "../src/Vector";
-import { Stream } from "../src/Stream";
-import { HashMap } from "../src/HashMap";
-import { HashSet } from "../src/HashSet";
 import { Option } from "../src/Option";
 import { Function } from "../src/Function";
 import * as ts from 'typescript';
+
+/**
+ * In this little script we extract source code from the apidoc comments
+ * all over the source of prelude.ts, generate for each source file which
+ * has apidoc comments containing source code samples a special apidoc-*.ts
+ * test file.
+ *
+ * The apidoc comments must have the source indented by 4 characters, and
+ * apidoc comments can specify an expected result for an expression using
+ * "=>".
+ */
 
 function getCodeSamples(commentText: string): Vector<string> {
     const closedOpen = Vector
