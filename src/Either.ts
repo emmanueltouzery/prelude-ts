@@ -68,13 +68,19 @@ export abstract class Either<L,R> implements Value {
      * the function). The 2 is because it works on functions taking two
      * parameters.
      *
-     *    const lifted = Either.liftA2((x:number,y:number) => x+y, {} as string);
-     *    lifted(Either.right<string,number>(5), Either.right<string,number>(6));
-     *    => Either.right(11)
+     *     const lifted = Either.liftA2(
+     *         (x:number,y:number) => x+y, {} as string);
+     *     lifted(
+     *         Either.right<string,number>(5),
+     *         Either.right<string,number>(6));
+     *     => Either.right(11)
      *
-     *    const lifted = Either.liftA2((x:number,y:number) => x+y, {} as string);
-     *    lifted(Either.right<string,number>(5), Either.left<string,number>("bad"));
-     *    => Either.left("bad")
+     *     const lifted = Either.liftA2(
+     *         (x:number,y:number) => x+y, {} as string);
+     *     lifted(
+     *         Either.right<string,number>(5),
+     *         Either.left<string,number>("bad"));
+     *     => Either.left("bad")
      *
      * @type R1 the first right type
      * @type R2 the second right type
@@ -103,6 +109,7 @@ export abstract class Either<L,R> implements Value {
      *     lifted({a:Either.right<number,number>(5), b:Either.left<number,number>(2)});
      *     => Either.left(2)
      *
+     * @type L the left type
      * @type A the object property type specifying the parameters for your function
      * @type B the type returned by your function, returned wrapped in an either by liftAp.
      */
