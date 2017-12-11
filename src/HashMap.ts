@@ -326,7 +326,7 @@ export class HashMap<K,V> implements IMap<K,V> {
      * Example:
      *
      *     HashMap.of<number,string>([1,"a"],[2,"b"],[3,"c"])
-            .fold([0,""], ([a,b],[c,d])=>[a+c, b>d?b:d])
+     *      .fold([0,""], ([a,b],[c,d])=>[a+c, b>d?b:d])
      *     => [6,"c"]
      */
     fold(zero:[K,V], fn:(v1:[K,V],v2:[K,V])=>[K,V]): [K,V] {
@@ -341,7 +341,7 @@ export class HashMap<K,V> implements IMap<K,V> {
      * Example:
      *
      *     HashMap.of([1,"a"], [2,"bb"], [3,"ccc"])
-     *     .foldLeft(0, (soFar,[item,val])=>soFar+val.length))
+     *     .foldLeft(0, (soFar,[item,val])=>soFar+val.length);
      *     => 6
      *
      * @param zero The initial value
@@ -363,7 +363,7 @@ export class HashMap<K,V> implements IMap<K,V> {
      * Example:
      *
      *     HashMap.of([1,"a"], [2,"bb"], [3,"ccc"])
-     *     .foldRight(0, ([item,value],soFar)=>soFar+value.length))
+     *     .foldRight(0, ([item,value],soFar)=>soFar+value.length);
      *     => 6
      *
      * @param zero The initial value
@@ -419,7 +419,7 @@ export class HashMap<K,V> implements IMap<K,V> {
      * key to a string.
      *
      *     HashMap.of<string,number>(["a",1],["b",2])
-     *         .toObjectDictionary();
+     *         .toObjectDictionary(x=>x);
      *     => {a:1,b:2}
      */
     toObjectDictionary(keyConvert:(k:K)=>string): {[index:string]:V} {

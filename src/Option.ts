@@ -92,7 +92,7 @@ export abstract class Option<T> implements Value {
      *     lifted({a:Option.of(5), b:Option.of(6), c:Option.of(3)});
      *     => Option.of(14)        
      *
-     *     const lifted = Option.liftAp((x:{a:number,b:number}) => x.a+x.b)
+     *     const lifted = Option.liftAp((x:{a:number,b:number}) => x.a+x.b);
      *     lifted({a:Option.of(5), b:Option.none<number>()});
      *     => Option.none()
      *
@@ -199,10 +199,11 @@ export abstract class Option<T> implements Value {
      * (can also be used for side-effects).
      * This is the catamorphism for option.
      *
-     *     myOption.match({
+     *     Option.of(5).match({
      *         Some: x  => "got " + x,
      *         None: () => "got nothing!"
      *     });
+     *     => "got 5"
      */
     abstract match<U>(cases: {Some: (v:T)=>U, None: ()=>U}): U;
 

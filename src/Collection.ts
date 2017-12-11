@@ -36,7 +36,7 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      * the predicate returns false.
      *
      *     Vector.of(1,2,3,4).partition(x => x%2===0)
-     *     => [[2,4],[1,3]]
+     *     => [Vector.of(2,4), Vector.of(1,3)]
      */
     partition(predicate:(x:T)=>boolean): [Collection<T>,Collection<T>];
 

@@ -66,8 +66,8 @@ export abstract class Stream<T> implements Seq<T> {
     /**
      * Build an infinite stream from a seed and a transformation function.
      *
-     *     Stream.iterate(1, x => x*2)
-     *     => [1,2,4,8,...]
+     *     Stream.iterate(1, x => x*2).take(4);
+     *     => Stream.of(1,2,4,8)
      */
     static iterate<T>(seed:T, fn: (v:T)=>T): Stream<T> {
         return new ConsStream(seed, Lazy.of(()=>Stream.iterate(fn(seed), fn)));
@@ -76,11 +76,11 @@ export abstract class Stream<T> implements Seq<T> {
     /**
      * Build an infinite stream by calling repeatedly a function.
      *
-     *     Stream.continually(() => 1)
-     *     => [1,1,1,1,...]
+     *     Stream.continually(() => 1).take(4);
+     *     => Stream.of(1,1,1,1)
      *
-     *     Stream.continually(Math.random)
-     *     => [0.49884723907769635, 0.3226548779864311, ...]
+     *     Stream.continually(Math.random).take(2);
+     *     => Stream.of(0.49884723907769635, 0.3226548779864311)
      */
     static continually<T>(fn: ()=>T): Stream<T> {
         return new ConsStream(fn(), Lazy.of(() => Stream.continually(fn)));
@@ -94,11 +94,11 @@ export abstract class Stream<T> implements Seq<T> {
      * returns Some of a pair, it adds the first element to the result
      * and takes the second element as a seed to keep going.
      *
-     *     unfoldRight(
+     *     Stream.unfoldRight(
      *          10, x=>Option.of(x)
      *              .filter(x => x!==0)
-     *              .map<[number,number]>(x => [x,x-1]))
-     *     => [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+     *              .map<[number,number]>(x => [x,x-1]));
+     *     => Stream.of(10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
      */
     static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Stream<U> {
         let nextVal = fn(seed);
@@ -237,7 +237,7 @@ export abstract class Stream<T> implements Seq<T> {
      *
      * Example:
      *
-     *     Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs))
+     *     Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs);
      *     => "cba!"
      *
      * @param zero The initial value
@@ -253,7 +253,7 @@ export abstract class Stream<T> implements Seq<T> {
      *
      * Example:
      *
-     *     Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x))
+     *     Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x);
      *     => "!cba"
      *
      * @param zero The initial value
@@ -281,7 +281,8 @@ export abstract class Stream<T> implements Seq<T> {
      * in it. Handy if you need the index when you map on
      * the collection for instance:
      *
-     *     Stream.of("a","b").zipWithIndex().map([v,idx] => ...)
+     *     Stream.of("a","b").zipWithIndex().map(([v,idx]) => v+idx);
+     *     => Stream.of("a0", "b1")
      */
     zipWithIndex(): Stream<[T,number]> {
         return <Stream<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
@@ -290,7 +291,8 @@ export abstract class Stream<T> implements Seq<T> {
     /**
      * Reverse the collection. For instance:
      *
-     *     [1,2,3] => [3,2,1]
+     *     Stream.of(1,2,3).reverse();
+     *     => Stream.of(3,2,1)
      */
     abstract reverse(): Stream<T>;
 
@@ -320,8 +322,8 @@ export abstract class Stream<T> implements Seq<T> {
      * will only contain the items from this collection where
      * the predicate returns false.
      *
-     *     Vector.of(1,2,3,4).partition(x => x%2===0)
-     *     => [[2,4],[1,3]]
+     *     Stream.of(1,2,3,4).partition(x => x%2===0)
+     *     => [Stream.of(2,4),Stream.of(1,3)]
      */
     abstract partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>];
 
@@ -393,8 +395,8 @@ export abstract class Stream<T> implements Seq<T> {
      * Repeat infinitely this Stream.
      * For instance:
      *
-     *     Stream.of(1,2,3).cycle()
-     *     => [1,2,3,1,2,3,1,2...]
+     *     Stream.of(1,2,3).cycle().take(8)
+     *     => Stream.of(1,2,3,1,2,3,1,2)
      */
     abstract cycle(): Stream<T>;
 
@@ -462,8 +464,8 @@ export abstract class Stream<T> implements Seq<T> {
      * Remove duplicate items; elements are mapped to keys, those
      * get compared.
      *
-     *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
-     *     => [1,2,3]
+     *     Stream.of(1,1,2,3,2,3,1).distinctBy(x => x);
+     *     => Stream.of(1,2,3)
      */
     abstract distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Stream<T>;
 

@@ -47,7 +47,7 @@ export interface Function2<T1,T2,R> {
     /**
      * Returns a curried version of this function, for example:
      *
-     *     const plus5 = Function.lift2((x,y)=>x+y).curried()(5);
+     *     const plus5 = Function.lift2((x:number,y:number)=>x+y).curried()(5);
      *     assert.equal(6, plus5(1));
      */
     curried(): Function1<T1,Function1<T2,R>>;
@@ -68,7 +68,7 @@ export interface Function2<T1,T2,R> {
     /**
      * Applies this function partially to one argument.
      *
-     *     const plus5 = Function.lift2((x,y)=>x+y).apply1(5);
+     *     const plus5 = Function.lift2((x:number,y:number)=>x+y).apply1(5);
      *     assert.equal(6, plus5(1));
      */
     apply1(param1:T1): Function1<T2,R>;
@@ -115,7 +115,7 @@ export interface Function3<T1,T2,T3,R> {
     /**
      * Applies this function partially to one argument.
      *
-     *     const plus5 = Function.lift3((x,y,z)=>x+y+z).apply1(5);
+     *     const plus5 = Function.lift3((x:number,y:number,z:number)=>x+y+z).apply1(5);
      *     assert.equal(8, plus5(1,2));
      */
     apply1(param1:T1): Function2<T2,T3,R>;
@@ -123,7 +123,7 @@ export interface Function3<T1,T2,T3,R> {
     /**
      * Applies this function partially to two arguments.
      *
-     *     const plus54 = Function.lift3((x,y,z)=>x+y+z).apply2(5,4);
+     *     const plus54 = Function.lift3((x:number,y:number,z:number)=>x+y+z).apply2(5,4);
      *     assert.equal(12, plus54(3));
      */
     apply2(param1:T1, param2: T2): Function1<T3,R>;
@@ -170,7 +170,7 @@ export interface Function4<T1,T2,T3,T4,R> {
     /**
      * Applies this function partially to one argument.
      *
-     *     const plus5 = Function.lift4((x,y,z,a)=>x+y+z+a).apply1(5);
+     *     const plus5 = Function.lift4((x:number,y:number,z:number,a:number)=>x+y+z+a).apply1(5);
      *     assert.equal(11, plus5(1,2,3));
      */
     apply1(param1:T1): Function3<T2,T3,T4,R>;
@@ -178,7 +178,7 @@ export interface Function4<T1,T2,T3,T4,R> {
     /**
      * Applies this function partially to two arguments.
      *
-     *     const plus51 = Function.lift4((x,y,z,a)=>x+y+z+a).apply2(5,1);
+     *     const plus51 = Function.lift4((x:number,y:number,z:number,a:number)=>x+y+z+a).apply2(5,1);
      *     assert.equal(11, plus51(2,3));
      */
     apply2(param1:T1, param2: T2): Function2<T3,T4,R>;
@@ -186,7 +186,7 @@ export interface Function4<T1,T2,T3,T4,R> {
     /**
      * Applies this function partially to three arguments.
      *
-     *     const plus512 = Function.lift4((x,y,z,a)=>x+y+z+a).apply3(5,1,2);
+     *     const plus512 = Function.lift4((x:number,y:number,z:number,a:number)=>x+y+z+a).apply3(5,1,2);
      *     assert.equal(11, plus512(3));
      */
     apply3(param1:T1, param2: T2, param3: T3): Function1<T4,R>;
@@ -233,7 +233,7 @@ export interface Function5<T1,T2,T3,T4,T5,R> {
     /**
      * Applies this function partially to one argument.
      *
-     *     const plus5 = Function.lift5((x,y,z,a,b)=>x+y+z+a+b).apply1(5);
+     *     const plus5 = Function.lift5((x:number,y:number,z:number,a:number,b:number)=>x+y+z+a+b).apply1(5);
      *     assert.equal(15, plus5(1,2,3,4));
      */
     apply1(param1:T1): Function4<T2,T3,T4,T5,R>;
@@ -241,24 +241,24 @@ export interface Function5<T1,T2,T3,T4,T5,R> {
     /**
      * Applies this function partially to two arguments.
      *
-     *     const plus51 = Function.lift5((x,y,z,a,b)=>x+y+z+a+b).apply2(5,1);
-     *     assert.equal(15, plus5(2,3,4));
+     *     const plus51 = Function.lift5((x:number,y:number,z:number,a:number,b:number)=>x+y+z+a+b).apply2(5,1);
+     *     assert.equal(15, plus51(2,3,4));
      */
     apply2(param1:T1, param2: T2): Function3<T3,T4,T5,R>;
 
     /**
      * Applies this function partially to three arguments.
      *
-     *     const plus512 = Function.lift5((x,y,z,a,b)=>x+y+z+a+b).apply3(5,1,2);
-     *     assert.equal(15, plus5(3,4));
+     *     const plus512 = Function.lift5((x:number,y:number,z:number,a:number,b:number)=>x+y+z+a+b).apply3(5,1,2);
+     *     assert.equal(15, plus512(3,4));
      */
     apply3(param1:T1, param2: T2, param3: T3): Function2<T4,T5,R>;
 
     /**
      * Applies this function partially to four arguments.
      *
-     *     const plus5123 = Function.lift5((x,y,z,a,b)=>x+y+z+a+b).apply4(5,1,2,3);
-     *     assert.equal(15, plus5(4));
+     *     const plus5123 = Function.lift5((x:number,y:number,z:number,a:number,b:number)=>x+y+z+a+b).apply4(5,1,2,3);
+     *     assert.equal(15, plus5123(4));
      */
     apply4(param1:T1, param2: T2, param3: T3, param4: T4): Function1<T5,R>;
 }

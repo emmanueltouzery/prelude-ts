@@ -33,12 +33,17 @@ export abstract class Either<L,R> implements Value {
      * Turns a list of eithers in an either containing a list of items.
      * Useful in many contexts.
      *
-     *     Either.sequence(Vector.of(Either.right(1),Either.right(2)))
+     *     Either.sequence(Vector.of(
+     *         Either.right<number,number>(1),
+     *         Either.right<number,number>(2)));
      *     => Either.right(Vector.of(1,2))
      *
      * But if a single element is None, everything is discarded:
      *
-     *     Either.sequence(Vector.of(Either.right(1), Either.left(2), Either.left(3)))
+     *     Either.sequence(Vector.of(
+     *           Either.right<number,number>(1),
+     *           Either.left<number,number>(2),
+     *           Either.left<number,number>(3)));
      *     => Either.left(2)
      */
     static sequence<L,R>(elts:Iterable<Either<L,R>>): Either<L,Vector<R>> {
@@ -63,12 +68,12 @@ export abstract class Either<L,R> implements Value {
      * the function). The 2 is because it works on functions taking two
      * parameters.
      *
-     *    const lifted = Either.liftA2((x:number,y:number) => x+y, {} as string)
-     *    lifted(Either.right<string,number>(5), Either.right<string,number>(6)))));
+     *    const lifted = Either.liftA2((x:number,y:number) => x+y, {} as string);
+     *    lifted(Either.right<string,number>(5), Either.right<string,number>(6));
      *    => Either.right(11)
      *
      *    const lifted = Either.liftA2((x:number,y:number) => x+y, {} as string);
-     *    lifted(Either.right<string,number>(5), Either.left<string,number>("bad")))));
+     *    lifted(Either.right<string,number>(5), Either.left<string,number>("bad"));
      *    => Either.left("bad")
      *
      * @type R1 the first right type
@@ -91,7 +96,7 @@ export abstract class Either<L,R> implements Value {
      *
      *     const fn = (x:{a:number,b:number,c:number}) => x.a+x.b+x.c;
      *     const lifted = Either.liftAp(fn, {} as number);
-     *     lifted({a:Either.right<number,number>(5), b:Either.right<number,number>(6), c:Either.right<number,number>(3)})));
+     *     lifted({a:Either.right<number,number>(5), b:Either.right<number,number>(6), c:Either.right<number,number>(3)});
      *     => Either.right(14)
      *
      *     const lifted = Either.liftAp<number,{a:number,b:number},number>(x => x.a+x.b);
@@ -179,10 +184,11 @@ export abstract class Either<L,R> implements Value {
      * (can also be used for side-effects).
      * This is the catamorphism for either.
      *
-     *     myEither.match({
+     *     Either.right<string,number>(5).match({
      *         Left:  x => "left " + x,
-     *         Right: x => "right " + y
+     *         Right: x => "right " + x
      *     });
+     *     => "right 5"
      */
     abstract match<U>(cases: {Left: (v:L)=>U, Right: (v:R)=>U}): U;
 

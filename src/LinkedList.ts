@@ -61,11 +61,11 @@ export abstract class LinkedList<T> implements Seq<T> {
      * returns Some of a pair, it adds the first element to the result
      * and takes the second element as a seed to keep going.
      *
-     *     unfoldRight(
+     *     LinkedList.unfoldRight(
      *          10, x=>Option.of(x)
      *              .filter(x => x!==0)
      *              .map<[number,number]>(x => [x,x-1]))
-     *     => [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+     *     => LinkedList.of(10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
      */
     static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): LinkedList<U> {
         let nextVal = fn(seed);
@@ -206,7 +206,7 @@ export abstract class LinkedList<T> implements Seq<T> {
      *
      * Example:
      *
-     *     Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs))
+     *     Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs);
      *     => "cba!"
      *
      * @param zero The initial value
@@ -222,7 +222,7 @@ export abstract class LinkedList<T> implements Seq<T> {
      *
      * Example:
      *
-     *     Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x))
+     *     Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x);
      *     => "!cba"
      *
      * @param zero The initial value
@@ -250,7 +250,8 @@ export abstract class LinkedList<T> implements Seq<T> {
      * in it. Handy if you need the index when you map on
      * the collection for instance:
      *
-     *     LinkedList.of("a","b").zipWithIndex().map([v,idx] => ...)
+     *     LinkedList.of("a","b").zipWithIndex().map(([v,idx]) => v+idx);
+     *     => LinkedList.of("a0", "b1")
      */
     zipWithIndex(): LinkedList<[T,number]> {
         return <LinkedList<[T,number]>>SeqHelpers.zipWithIndex<T>(this);
@@ -259,7 +260,8 @@ export abstract class LinkedList<T> implements Seq<T> {
     /**
      * Reverse the collection. For instance:
      *
-     *     [1,2,3] => [3,2,1]
+     *     LinkedList.of(1,2,3).reverse();
+     *     => LinkedList.of(3,2,1)
      */
     abstract reverse(): LinkedList<T>;
 
@@ -289,8 +291,8 @@ export abstract class LinkedList<T> implements Seq<T> {
      * will only contain the items from this collection where
      * the predicate returns false.
      *
-     *     Vector.of(1,2,3,4).partition(x => x%2===0)
-     *     => [[2,4],[1,3]]
+     *     LinkedList.of(1,2,3,4).partition(x => x%2===0)
+     *     => [LinkedList.of(2,4),LinkedList.of(1,3)]
      */
     abstract partition(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>];
 
@@ -411,8 +413,8 @@ export abstract class LinkedList<T> implements Seq<T> {
      * Remove duplicate items; elements are mapped to keys, those
      * get compared.
      *
-     *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
-     *     => [1,2,3]
+     *     LinkedList.of(1,1,2,3,2,3,1).distinctBy(x => x)
+     *     => LinkedList.of(1,2,3)
      */
     abstract distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): LinkedList<T>;
 

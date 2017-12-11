@@ -100,7 +100,7 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
      * key to a string.
      *
      *     HashMap.of<string,number>(["a",1],["b",2])
-     *         .toObjectDictionary();
+     *         .toObjectDictionary(x=>x);
      *     => {a:1,b:2}
      */
     toObjectDictionary(keyConvert:(k:K)=>string): {[index:string]:V};

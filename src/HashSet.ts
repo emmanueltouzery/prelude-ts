@@ -177,7 +177,7 @@ export class HashSet<T> implements ISet<T> {
      *
      * Example:
      *
-     *     HashSet.of("a", "bb", "ccc").foldLeft(0, (soFar,item) => soFar+item.length))
+     *     HashSet.of("a", "bb", "ccc").foldLeft(0, (soFar,item) => soFar+item.length);
      *     => 6
      *
      * @param zero The initial value
@@ -198,7 +198,7 @@ export class HashSet<T> implements ISet<T> {
      *
      * Example:
      *
-     *     HashSet.of("a", "bb", "ccc").foldRight(0, (item,soFar) => soFar+item.length))
+     *     HashSet.of("a", "bb", "ccc").foldRight(0, (item,soFar) => soFar+item.length);
      *     => 6
      *
      * @param zero The initial value

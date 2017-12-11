@@ -127,7 +127,7 @@ export interface Seq<T> extends Collection<T> {
      * parameter to produce a new collection which combines both,
      * in pairs. For instance:
      *
-     *     Vector.of(1,2,3).zip("a","b","c")
+     *     Vector.of(1,2,3).zip(["a","b","c"])
      *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
      *
      * The result collection will have the length of the shorter
@@ -140,7 +140,8 @@ export interface Seq<T> extends Collection<T> {
      * in it. Handy if you need the index when you map on
      * the collection for instance:
      *
-     *     Vector.of("a","b").zipWithIndex().map([v,idx] => ...)
+     *     Vector.of("a","b").zipWithIndex().map(([v,idx]) => v+idx);
+     *     => Vector.of("a0", "b1")
      */
     zipWithIndex(): Seq<[T,number]>;
 
@@ -193,15 +194,16 @@ export interface Seq<T> extends Collection<T> {
      * Remove duplicate items; elements are mapped to keys, those
      * get compared.
      *
-     *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x)
-     *     => [1,2,3]
+     *     Vector.of(1,1,2,3,2,3,1).distinctBy(x => x);
+     *     => Vector.of(1,2,3)
      */
     distinctBy<U>(keyExtractor: (x:T)=>U&WithEquality): Seq<T>;
 
     /**
      * Reverse the collection. For instance:
      *
-     *     [1,2,3] => [3,2,1]
+     *     Vector.of(1,2,3).reverse();
+     *     => Vector.of(3,2,1)
      */
     reverse(): Seq<T>;
 
@@ -211,16 +213,16 @@ export interface Seq<T> extends Collection<T> {
      * which satisfies the predicate, and the second collection
      * is the remainder of the collection.
      *
-     *    List.of(1,2,3,4,5,6).span(x => x <3)
-     *    => [List.of(1,2), List.of(3,4,5,6)]
+     *    Vector.of(1,2,3,4,5,6).span(x => x <3)
+     *    => [Vector.of(1,2), Vector.of(3,4,5,6)]
      */
     span(predicate:(x:T)=>boolean): [Seq<T>,Seq<T>];
 
     /**
      * Split the collection at a specific index.
      *
-     *     List.of(1,2,3,4,5).splitAt(3)
-     *     => [List.of(1,2,3), List.of(4,5)]
+     *     Vector.of(1,2,3,4,5).splitAt(3)
+     *     => [Vector.of(1,2,3), Vector.of(4,5)]
      */
     splitAt(index:number): [Seq<T>,Seq<T>];
 

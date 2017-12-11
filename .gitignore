@@ -2,3 +2,4 @@ dist/
 node_modules/
 apidoc/
 npm-debug.log
+tests/apidoc-*

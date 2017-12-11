@@ -20,7 +20,7 @@ export interface Foldable<T> {
      *
      * Example:
      *
-     *     Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs))
+     *     Vector.of("a", "b", "c").foldLeft("!", (xs,x) => x+xs);
      *     => "cba!"
      *
      * @param zero The initial value
@@ -36,7 +36,7 @@ export interface Foldable<T> {
      *
      * Example:
      *
-     *     Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x))
+     *     Vector.of("a", "b", "c").foldRight("!", (x,xs) => xs+x)
      *     => "!cba"
      *
      * @param zero The initial value
