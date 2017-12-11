@@ -87,9 +87,29 @@ function storeInVariable(code: string) {
         return "const x = " + code;
     }
     // assuming several lines
+    // we rely on indentation to find out where to insert
+    // the const x = ...
+    //
+    // for instance...
+    //
+    // first LOC
+    // xcx
+    // blabla( <-- insert here: last line with same indentation as first LOC
+    //    ...
+    //    ...);
+    // => 
     const lines = Vector.ofIterable(code.split("\n"));
-    return lines.init()
-        .append(" const x = " + lines.last().getOrThrow())
+    const getIndent = (str:string)=> str.replace(/[^\s].*$/, "").length;
+    const codeIndent = getIndent(lines.head().getOrThrow());
+    const constExprLines = lines
+        .reverse()
+        .takeWhile(l => getIndent(l) > codeIndent)
+        .length()+1
+
+    const [before,after] = lines.splitAt(lines.length()-constExprLines);
+    return before
+        .append(" const x = ")
+        .appendAll(after)
         .mkString("\n");
 }
 
