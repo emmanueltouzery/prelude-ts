@@ -8,8 +8,8 @@ import { Foldable } from "./Foldable";
 
 /**
  * A generic interface for a dictionary, mapping keys to values.
- * @type K the key type
- * @type V the value type
+ * @param K the key type
+ * @param V the value type
  */
 export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
 

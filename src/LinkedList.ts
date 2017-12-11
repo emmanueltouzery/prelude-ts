@@ -40,7 +40,7 @@ export abstract class LinkedList<T> implements Seq<T> {
     /**
      * Build a stream from any iterable, which means also
      * an array for instance.
-     * @type T the item type
+     * @param T the item type
      */
     static ofIterable<T>(elts: Iterable<T>): LinkedList<T> {
         const iterator = elts[Symbol.iterator]();

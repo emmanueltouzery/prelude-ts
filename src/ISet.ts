@@ -7,7 +7,7 @@ import { Option } from "./Option";
 
 /**
  * A generic interface for set-like implementations.
- * @type T the item type
+ * @param T the item type
  */
 export interface ISet<T> extends Collection<T> {
 

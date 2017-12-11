@@ -5,7 +5,7 @@ import { Collection } from "./Collection";
 
 /**
  * A generic interface for list-like implementations.
- * @type T the item type
+ * @param T the item type
  */
 export interface Seq<T> extends Collection<T> {
 

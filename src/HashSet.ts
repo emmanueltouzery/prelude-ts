@@ -12,7 +12,7 @@ const hamt: any = require("hamt_plus");
 /**
  * An unordered collection of values, where no two values
  * may be equal. A value can only be present once.
- * @type T the item type
+ * @param T the item type
  */
 export class HashSet<T> implements ISet<T> {
 
@@ -23,7 +23,7 @@ export class HashSet<T> implements ISet<T> {
 
     /**
      * The empty hashset.
-     * @type T the item type
+     * @param T the item type
      */
     static empty<T>(): HashSet<T> {
         return <EmptyHashSet<T>>emptyHashSet;
@@ -32,7 +32,7 @@ export class HashSet<T> implements ISet<T> {
     /**
      * Build a hashset from any iterable, which means also
      * an array for instance.
-     * @type T the item type
+     * @param T the item type
      */
     static ofIterable<T>(elts: Iterable<T & WithEquality>): HashSet<T> {
         return new EmptyHashSet<T>().addAll(elts);
@@ -40,7 +40,7 @@ export class HashSet<T> implements ISet<T> {
 
     /**
      * Build a hashset from a series of items (any number, as parameters)
-     * @type T the item type
+     * @param T the item type
      */
     static of<T>(...arr: Array<T & WithEquality>): HashSet<T> {
         return HashSet.ofIterable(arr);

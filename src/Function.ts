@@ -4,6 +4,9 @@
  * to combine or transform functions.
  *
  * You can build a Function1 using [[Function]].
+ *
+ * @param T the parameter type
+ * @param U the result type
  */
 export interface Function1<T,U> {
 
@@ -29,7 +32,11 @@ export interface Function1<T,U> {
  * and returning a value. It adds some useful functions
  * to combine or transform functions.
  *
- * You can build a Function2 using [[Function]].
+ * You can build Function2 using [[Function]].
+ *
+ * @param T1 the first parameter type
+ * @param T2 the second parameter type
+ * @param R the result type
  */
 export interface Function2<T1,T2,R> {
 
@@ -84,6 +91,11 @@ export interface Function2<T1,T2,R> {
  * to combine or transform functions.
  *
  * You can build a Function3 using [[Function]].
+ *
+ * @param T1 the first parameter type
+ * @param T2 the second parameter type
+ * @param T3 the third parameter type
+ * @param R the result type
  */
 export interface Function3<T1,T2,T3,R> {
 
@@ -143,6 +155,12 @@ export interface Function3<T1,T2,T3,R> {
  * to combine or transform functions.
  *
  * You can build a Function4 using [[Function]].
+ *
+ * @param T1 the first parameter type
+ * @param T2 the second parameter type
+ * @param T3 the third parameter type
+ * @param T4 the fourth parameter type
+ * @param R the result type
  */
 export interface Function4<T1,T2,T3,T4,R> {
 
@@ -188,7 +206,9 @@ export interface Function4<T1,T2,T3,T4,R> {
     /**
      * Applies this function partially to two arguments.
      *
-     *     const plus51 = Function.lift4((x:number,y:number,z:number,a:number)=>x+y+z+a).apply2(5,1);
+     *     const plus51 = Function.lift4(
+     *         (x:number,y:number,z:number,a:number)=>x+y+z+a)
+     *            .apply2(5,1);
      *     assert.equal(11, plus51(2,3));
      */
     apply2(param1:T1, param2: T2): Function2<T3,T4,R>;
@@ -196,7 +216,9 @@ export interface Function4<T1,T2,T3,T4,R> {
     /**
      * Applies this function partially to three arguments.
      *
-     *     const plus512 = Function.lift4((x:number,y:number,z:number,a:number)=>x+y+z+a).apply3(5,1,2);
+     *     const plus512 = Function.lift4(
+     *         (x:number,y:number,z:number,a:number)=>x+y+z+a)
+     *            .apply3(5,1,2);
      *     assert.equal(11, plus512(3));
      */
     apply3(param1:T1, param2: T2, param3: T3): Function1<T4,R>;
@@ -208,6 +230,13 @@ export interface Function4<T1,T2,T3,T4,R> {
  * to combine or transform functions.
  *
  * You can build a Function5 using [[Function]].
+ *
+ * @param T1 the first parameter type
+ * @param T2 the second parameter type
+ * @param T3 the third parameter type
+ * @param T4 the fourth parameter type
+ * @param T5 the fifth parameter type
+ * @param R the result type
  */
 export interface Function5<T1,T2,T3,T4,T5,R> {
 

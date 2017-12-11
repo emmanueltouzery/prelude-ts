@@ -33,7 +33,7 @@ interface MutableVector<T> {
  * A general-purpose list class with all-around good performance.
  * quasi-O(1) (actually O(log32(n))) access, append, replace.
  * It's backed by a bit-mapped vector trie.
- * @type T the item type
+ * @param T the item type
  */
 export class Vector<T> implements Seq<T> {
     // Based on https://github.com/graue/immutable-vector from Scott Feeney.
@@ -48,7 +48,7 @@ export class Vector<T> implements Seq<T> {
 
     /**
      * The empty vector.
-     * @type T the item type
+     * @param T the item type
      */
     static empty<T>(): Vector<T> {
         return Vector.ofArray<T>([]);
@@ -56,7 +56,7 @@ export class Vector<T> implements Seq<T> {
 
     /**
      * Build a vector from a series of items (any number, as parameters)
-     * @type T the item type
+     * @param T the item type
      */
     static of<T>(...data: T[]): Vector<T> {
         return Vector.ofArray(data);
@@ -65,7 +65,7 @@ export class Vector<T> implements Seq<T> {
     /**
      * Build a vector from any iterable, which means also
      * an array for instance.
-     * @type T the item type
+     * @param T the item type
      */
     static ofIterable<T>(elts: Iterable<T>): Vector<T> {
         if (Array.isArray(elts)) {

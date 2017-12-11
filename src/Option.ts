@@ -9,7 +9,7 @@ import { contractTrueEquality} from "./Contract";
 
 /**
  * Expresses that a value may be present, or not.
- * @type T the item type
+ * @param T the item type
  */
 export abstract class Option<T> implements Value {
     /**
@@ -71,9 +71,9 @@ export abstract class Option<T> implements Value {
      *     lifted2(Option.of(5), Option.none<number>());
      *     => Option.none()
      *
-     * @type T the first option type
-     * @type U the second option type
-     * @type V the new type as returned by the combining function.
+     * @param T the first option type
+     * @param U the second option type
+     * @param V the new type as returned by the combining function.
      */
     static liftA2<T,U,V>(fn:(v1:T,v2:U)=>V): (p1:Option<T>, p2:Option<U>) => Option<V> {
         return (p1,p2) => p1.flatMap(a1 => p2.map(a2 => fn(a1,a2)));
@@ -96,8 +96,8 @@ export abstract class Option<T> implements Value {
      *     lifted({a:Option.of(5), b:Option.none<number>()});
      *     => Option.none()
      *
-     * @type A the object property type specifying the parameters for your function
-     * @type B the type returned by your function, returned wrapped in an option by liftAp.
+     * @param A the object property type specifying the parameters for your function
+     * @param B the type returned by your function, returned wrapped in an option by liftAp.
      */
     static liftAp<A,B>(fn:(x:A)=>B): (x: {[K in keyof A]: Option<A[K]>;}) => Option<B> {
         return x => {

@@ -10,8 +10,8 @@ import { contractTrueEquality} from "./Contract";
  * Represents an alternative between two value types.
  * A "left" value which is also conceptually tied to a failure,
  * or a "right" value which is conceptually tied to success.
- * @type L the "left" item type 'failure'
- * @type R the "right" item type 'success'
+ * @param L the "left" item type 'failure'
+ * @param R the "right" item type 'success'
  */
 export abstract class Either<L,R> implements Value {
     
@@ -82,10 +82,10 @@ export abstract class Either<L,R> implements Value {
      *         Either.left<string,number>("bad"));
      *     => Either.left("bad")
      *
-     * @type R1 the first right type
-     * @type R2 the second right type
-     * @type L the left type
-     * @type V the new right type as returned by the combining function.
+     * @param R1 the first right type
+     * @param R2 the second right type
+     * @param L the left type
+     * @param V the new right type as returned by the combining function.
      */
     static liftA2<R1,R2,L,V>(fn:(v1:R1,v2:R2)=>V, leftWitness?: L) : (p1:Either<L,R1>, p2:Either<L,R2>) => Either<L,V> {
         return (p1,p2) => p1.flatMap(a1 => p2.map(a2 => fn(a1,a2)));
@@ -109,9 +109,9 @@ export abstract class Either<L,R> implements Value {
      *     lifted({a:Either.right<number,number>(5), b:Either.left<number,number>(2)});
      *     => Either.left(2)
      *
-     * @type L the left type
-     * @type A the object property type specifying the parameters for your function
-     * @type B the type returned by your function, returned wrapped in an either by liftAp.
+     * @param L the left type
+     * @param A the object property type specifying the parameters for your function
+     * @param B the type returned by your function, returned wrapped in an either by liftAp.
      */
     static liftAp<L,A,B>(fn:(x:A)=>B, leftWitness?: L): (x: {[K in keyof A]: Either<L,A[K]>;}) => Either<L,B> {
         return x => {

@@ -8,8 +8,8 @@ import { contractTrueEquality } from "./Contract";
  * Contains a pair of two values, which may or may not have the same type.
  * Compared to the builtin typescript [T,U] type, we get equality semantics
  * and helper functions (like mapping and so on).
- * @type T the first item type
- * @type U the second item type
+ * @param T the first item type
+ * @param U the second item type
  */
 export class Tuple2<T,U> implements Value {
     

@@ -21,8 +21,8 @@ const hamt: any = require("hamt_plus");
 
 /**
  * A dictionary, mapping keys to values.
- * @type K the key type
- * @type V the value type
+ * @param K the key type
+ * @param V the value type
  */
 export class HashMap<K,V> implements IMap<K,V> {
 
@@ -33,8 +33,8 @@ export class HashMap<K,V> implements IMap<K,V> {
 
     /**
      * The empty map.
-     * @type K the key type
-     * @type V the value type
+     * @param K the key type
+     * @param V the value type
      */
     static empty<K,V>(): HashMap<K,V> {
         return <EmptyHashMap<K,V>>emptyHashMap;
