@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
+cd scripts/typedoc_plugin_inherit_apidoc
+npm install --no-package-lock
+tsc
+cd ../..
+npm install --no-package-lock
+tsc
+
 # https://github.com/TypeStrong/typedoc/issues/564
 # i would like typedoc to group functions in categories but it's not supported
 # yet. So I hack it with their support for external modules...

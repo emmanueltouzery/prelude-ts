@@ -268,6 +268,11 @@ export class Some<T> extends Option<T> {
         return false;
     }
 
+    /**
+     * Get the value contained in this option.
+     * NOTE: we know it's there, since this method
+     * belongs to Some, not Option.
+     */
     get(): T {
         return this.value;
     }

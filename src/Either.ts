@@ -345,6 +345,11 @@ export class Left<L,R> extends Either<L,R> {
         return other;
     }
 
+    /**
+     * Get the value contained in this left.
+     * NOTE: we know it's there, since this method
+     * belongs to Left, not Either.
+     */
     getLeft(): L {
         return this.value;
     }
@@ -446,6 +451,11 @@ export class Right<L,R> extends Either<L,R> {
         return cases.Right(this.value);
     }
 
+    /**
+     * Get the value contained in this right.
+     * NOTE: we know it's there, since this method
+     * belongs to Right, not Either.
+     */
     get(): R {
         return this.value;
     }
