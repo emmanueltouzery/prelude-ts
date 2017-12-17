@@ -19,21 +19,19 @@ if [[ $(git status --porcelain) ]]; then
     exit 1
 fi
 
-# the output of typedoc when using external modules suits us
-# exactly, but we don't want to use external modules
-# => trick typedoc into thinking we do have external modules
-function makeModule {
-    sed -i "1s/^/export module $1 { /" $2
-    echo "}" >> $2
-}
+# pre-process files
+node dist/scripts/make_doc_extra/make_doc_preprocess.js
 
-# list of files for which to trick typedoc
-# to think they're external modules
-makeModule "Comparison" src/Comparison.ts
-makeModule "Contract" src/Contract.ts
+# trick for the 'Option' constant which typedoc skips as it clashes
+# with the 'Option' type synomym
+sed -i "s/const Option/const optionGlabiboulga/" src/Option.ts
 
 # generate with typedoc
 ./node_modules/typedoc/bin/typedoc --exclude "**/make_doc_extra/*.ts" --mode file --out apidoc --excludePrivate --excludeExternals --excludeNotExported --ignoreCompilerErrors src/index.ts
+
+# revert the 'Option' constant rename
+find apidoc -name "*.html" -exec sed -i 's/optionglabiboulga/Option/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/option<wbr>Glabiboulga/Option/g' \{\} \;
 
 # modify the output to say 'File' instead of 'Module'
 find apidoc -name "*.html" -exec sed -i 's/Module/File/g' \{\} \;

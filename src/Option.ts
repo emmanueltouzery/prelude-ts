@@ -1,3 +1,32 @@
+/**
+ * The Option type expresses that a value may be present or not.
+ * The code is organized through the class [[None]] (value not
+ * present), the class [[Some]] (value present), and the type alias
+ * [[Option]] (Some or None).
+ *
+ * Finally, "static" functions on Option are arranged in the class
+ * [[OptionStatic]] and are accessed through the global constant Option.
+ *
+ * Examples:
+ *
+ *     Option.of(5);
+ *     Option.none<number>();
+ *     Option.of(5).map(x => x*2);
+ *
+ * To get the value out of an option, you can use [[Some.getOrThrow]],
+ * or [[Some.get]]. The latter is available if you've checked that you
+ * indeed have a some, for example:
+ *
+ *     const opt = <Option<number>>Option.of(5);
+ *     if (opt.isSome()) {
+ *         opt.get();
+ *     }
+ *
+ * You also have other options like [[Some.getOrElse]], [[Some.getOrUndefined]]
+ * and so on. [[Some]] and [[None]] have the same methods, except that
+ * Some has the extra [[Some.get]] method that [[None]] doesn't have.
+ */
+
 import { Value } from "./Value";
 import { Seq } from "./Seq";
 import { Vector } from "./Vector";
@@ -8,24 +37,29 @@ import { toStringHelper } from "./SeqHelpers";
 import { contractTrueEquality} from "./Contract";
 
 /**
- * Expresses that a value may be present, or not.
+ * An Option is either [[Some]] or [[None]]
  * @param T the item type
  */
-export abstract class Option<T> implements Value {
+export type Option<T> = Some<T> | None<T>;
+
+/**
+ * Holds the "static methods" for [[Option]]
+ */
+export class OptionStatic {
     /**
      * Builds an optional value.
      * T gives a some
      * undefined gives a none
      * null gives a some
      */
-    static of<T>(v: T|undefined): Option<T> {
+    of<T>(v: T|undefined): Option<T> {
         return (v === undefined) ? <None<T>>none : new Some(v);
     }
 
     /**
      * The optional value expressing a missing value.
      */
-    static none<T>(): Option<T> {
+    none<T>(): Option<T> {
         return <None<T>>none;
     }
 
@@ -41,7 +75,7 @@ export abstract class Option<T> implements Value {
      *     Option.sequence(Vector.of(Option.of(1), Option.none()))
      *     => Option.none()
      */
-    static sequence<T>(elts:Iterable<Option<T>>): Option<Vector<T>> {
+    sequence<T>(elts:Iterable<Option<T>>): Option<Vector<T>> {
         let r = Vector.empty<T>();
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
@@ -50,7 +84,7 @@ export abstract class Option<T> implements Value {
             if (v.isNone()) {
                 return <None<Vector<T>>>none;
             }
-            r = r.append(v.getOrThrow());
+            r = r.append(v.get());
             curItem = iterator.next();
         }
         return Option.of(r);
@@ -75,7 +109,7 @@ export abstract class Option<T> implements Value {
      * @param U the second option type
      * @param V the new type as returned by the combining function.
      */
-    static liftA2<T,U,V>(fn:(v1:T,v2:U)=>V): (p1:Option<T>, p2:Option<U>) => Option<V> {
+    liftA2<T,U,V>(fn:(v1:T,v2:U)=>V): (p1:Option<T>, p2:Option<U>) => Option<V> {
         return (p1,p2) => p1.flatMap(a1 => p2.map(a2 => fn(a1,a2)));
     }
 
@@ -99,7 +133,7 @@ export abstract class Option<T> implements Value {
      * @param A the object property type specifying the parameters for your function
      * @param B the type returned by your function, returned wrapped in an option by liftAp.
      */
-    static liftAp<A,B>(fn:(x:A)=>B): (x: {[K in keyof A]: Option<A[K]>;}) => Option<B> {
+    liftAp<A,B>(fn:(x:A)=>B): (x: {[K in keyof A]: Option<A[K]>;}) => Option<B> {
         return x => {
             const copy:A = <any>{};
             for (let p in x) {
@@ -111,159 +145,40 @@ export abstract class Option<T> implements Value {
             return Option.of(fn(copy));
         }
     }
-
-    /**
-     * Returns true if the option is a Some (contains a value),
-     * false otherwise (it's a None)
-     */
-    abstract isSome(): this is Some<T>;
-
-    /**
-     * Returns true if the option is a None (doesn't contains a value),
-     * false otherwise (it's a Some)
-     */
-    abstract isNone(): this is None<T>;
-
-    /**
-     * @hidden
-     */
-    hasTrueEquality(): boolean {
-        return this.flatMap(
-            x => (x && (<any>x).hasTrueEquality) ?
-                Option.of((<any>x).hasTrueEquality()) :
-                hasTrueEquality(x))
-            .getOrElse(true);
-    }
-
-    /**
-     * Combines two options. If this option is a Some, returns it.
-     * If it's a None, returns the other one.
-     */
-    abstract orElse(other: Option<T>): Option<T>;
-
-    /**
-     * Get the value from this option if it's a Some, otherwise
-     * throw an exception.
-     * You can optionally pass a message that'll be used as the
-     * exception message.
-     */
-    abstract getOrThrow(message?: string): T;
-
-    /**
-     * Get the value from this option; if it's a None (no value
-     * present), then return the default value that you give.
-     */
-    abstract getOrElse(alt: T): T;
-
-    /**
-     * Returns true if the option is a Some and contains the
-     * value you give, false otherwise.
-     */
-    abstract contains(v: T&WithEquality): boolean;
-
-    /**
-     * Get the value contained in the option if it's a Some,
-     * return undefined if it's a None.
-     */
-    abstract getOrUndefined(): T|undefined;
-
-    /**
-     * Return a new option where the element (if present) was transformed
-     * by the mapper function you give. If the option was None it'll stay None.
-     */
-    abstract map<U>(fn: (v:T)=>U): Option<U>;
-
-    /**
-     * If this is a Some, calls the function you give on
-     * the item in the option and return its result.
-     * If the option is a None, return none.
-     * This is the monadic bind.
-     */
-    abstract flatMap<U>(mapper:(v:T)=>Option<U>): Option<U>;
-
-    /**
-     * If this is None, will return None. If it's a Some,
-     * and the contents match your predicate, return the option.
-     * If the contents don't match the predicate, return None.
-     */
-    abstract filter(fn: (v:T)=>boolean): Option<T>;
-
-    /**
-     * Execute a side-effecting function if the option
-     * is a Some; returns the option.
-     */
-    abstract ifPresent(fn:(v:T)=>void): Option<T>;
-
-    /**
-     * Handle both branches of the option and return a value
-     * (can also be used for side-effects).
-     * This is the catamorphism for option.
-     *
-     *     Option.of(5).match({
-     *         Some: x  => "got " + x,
-     *         None: () => "got nothing!"
-     *     });
-     *     => "got 5"
-     */
-    abstract match<U>(cases: {Some: (v:T)=>U, None: ()=>U}): U;
-
-    /**
-     * Convert to a vector. If it's a None, it's the empty
-     * vector, if it's a Some, it's a one-element vector with
-     * the contents of the option.
-     */
-    abstract toVector(): Vector<T>;
-
-    /**
-     * Convert to an either. You must provide a left value
-     * in case this is a None.
-     */
-    abstract toEither<L>(left: L): Either<L,T>;
-
-    /**
-     * Transform this value to another value type.
-     * Enables fluent-style programming by chaining calls.
-     */
-    transform<U>(converter:(x:Option<T>)=>U): U {
-        return converter(this);
-    }
-
-    /**
-     * Two objects are equal if they represent the same value,
-     * regardless of whether they are the same object physically
-     * in memory.
-     */
-    abstract equals(other: Option<T&WithEquality>): boolean;
-
-    /**
-     * Get a number for that object. Two different values
-     * may get the same number, but one value must always get
-     * the same number. The formula can impact performance.
-     */
-    abstract hashCode(): number;
-
-    /**
-     * Get a human-friendly string representation of that value.
-     */
-    abstract toString(): string;
-
-    /**
-     * Used by the node REPL to display values.
-     */
-    inspect(): string {
-        return this.toString();
-    }
 }
 
-export class Some<T> extends Option<T> {
-    constructor(private value: T) {
-        super();
-    }
+/**
+ * The Option constant allows to call the option "static" methods
+ */
+export const Option = new OptionStatic();
 
+function optionHasTrueEquality<T>(opt: Option<T>): boolean {
+    return opt.flatMap(
+        x => (x && (<any>x).hasTrueEquality) ?
+            Option.of((<any>x).hasTrueEquality()) :
+            hasTrueEquality(x))
+        .getOrElse(true);
+}
+
+/**
+ * Some represents an [[Option]] with a value.
+ * @param T the item type
+ */
+export class Some<T> {
+    constructor(private value: T) {}
+
+    readonly className: "Some";  // https://stackoverflow.com/a/47841595/516188
+
+    /**
+     * Returns true since this is a Some (contains a value)
+     */
     isSome(): this is Some<T> {
         return true;
     }
 
+    /**
+     * Returns false since this is a Some (contains a value)
+     */
     isNone(): this is None<T> {
         return false;
     }
@@ -277,55 +192,133 @@ export class Some<T> extends Option<T> {
         return this.value;
     }
     
+    /**
+     * Combines two options. If this option is a Some, returns it.
+     * If it's a None, returns the other one.
+     */
     orElse(other: Option<T>): Option<T> {
         return this;
     }
 
+    /**
+     * Get the value from this option if it's a Some, otherwise
+     * throw an exception.
+     * You can optionally pass a message that'll be used as the
+     * exception message.
+     */
     getOrThrow(message?: string): T {
         return this.value;
     }
 
+    /**
+     * Returns true if the option is a Some and contains the
+     * value you give, false otherwise.
+     */
     contains(v: T&WithEquality): boolean {
         return v === this.value;
     }
 
+    /**
+     * Get the value contained in the option if it's a Some,
+     * return undefined if it's a None.
+     */
     getOrUndefined(): T | undefined {
         return this.value;
     }
 
+    /**
+     * Get the value from this option; if it's a None (no value
+     * present), then return the default value that you give.
+     */
     getOrElse(alt: T): T {
         return this.value;
     }
 
+    /**
+     * Return a new option where the element (if present) was transformed
+     * by the mapper function you give. If the option was None it'll stay None.
+     */
     map<U>(fn: (v:T)=>U): Option<U> {
         return Option.of(fn(this.value));
     }
 
+    /**
+     * If this is a Some, calls the function you give on
+     * the item in the option and return its result.
+     * If the option is a None, return none.
+     * This is the monadic bind.
+     */
     flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return mapper(this.value);
     }
 
+    /**
+     * If this is None, will return None. If it's a Some,
+     * and the contents match your predicate, return the option.
+     * If the contents don't match the predicate, return None.
+     */
     filter(fn: (v:T)=>boolean): Option<T> {
         return fn(this.value) ? this : Option.none<T>();
     }
 
+    /**
+     * Execute a side-effecting function if the option
+     * is a Some; returns the option.
+     */
     ifPresent(fn:(v:T)=>void): Option<T> {
         fn(this.value);
         return this;
     }
 
+    /**
+     * Handle both branches of the option and return a value
+     * (can also be used for side-effects).
+     * This is the catamorphism for option.
+     *
+     *     Option.of(5).match({
+     *         Some: x  => "got " + x,
+     *         None: () => "got nothing!"
+     *     });
+     *     => "got 5"
+     */
     match<U>(cases: {Some: (v:T)=>U, None: ()=>U}): U {
         return cases.Some(this.value);
     }
 
+    /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:Option<T>)=>U): U {
+        return converter(this);
+    }
+
+    /**
+     * Convert to a vector. If it's a None, it's the empty
+     * vector, if it's a Some, it's a one-element vector with
+     * the contents of the option.
+     */
     toVector(): Vector<T> {
         return Vector.of(this.value);
     }
 
+    /**
+     * Convert to an either. You must provide a left value
+     * in case this is a None.
+     */
     toEither<L>(left: L): Either<L,T> {
         return Either.right<L,T>(this.value);
     }
 
+    hasTrueEquality<T>(): boolean {
+        return optionHasTrueEquality(this);
+    }
+
+    /**
+     * Two objects are equal if they represent the same value,
+     * regardless of whether they are the same object physically
+     * in memory.
+     */
     equals(other: Option<T&WithEquality>): boolean {
         if (<any>other === this) {
             return true;
@@ -341,83 +334,203 @@ export class Some<T> extends Option<T> {
         return areEqual(this.value, someOther.value);
     }
 
+    /**
+     * Get a number for that object. Two different values
+     * may get the same number, but one value must always get
+     * the same number. The formula can impact performance.
+     */
     hashCode(): number {
         return getHashCode(this.value);
     }
 
+    /**
+     * Get a human-friendly string representation of that value.
+     */
     toString(): string {
         return "Some(" + toStringHelper(this.value) + ")";
     }
+
+    /**
+     * Used by the node REPL to display values.
+     */
+    inspect(): string {
+        return this.toString();
+    }
 }
 
-export class None<T> extends Option<T> {
+/**
+ * None represents an [[Option]] without value.
+ * @param T the item type
+ */
+export class None<T> {
 
+    readonly className: "None";  // https://stackoverflow.com/a/47841595/516188
+
+    /**
+     * Returns false since this is a None (doesn'tcontains a value)
+     */
     isSome(): this is Some<T> {
         return false;
     }
 
+    /**
+     * Returns true since this is a None (doesn'tcontains a value)
+     */
     isNone(): this is None<T> {
         return true;
     }
 
+    /**
+     * Combines two options. If this option is a Some, returns it.
+     * If it's a None, returns the other one.
+     */
     orElse(other: Option<T>): Option<T> {
         return other;
     }
 
+    /**
+     * Get the value from this option if it's a Some, otherwise
+     * throw an exception.
+     * You can optionally pass a message that'll be used as the
+     * exception message.
+     */
     getOrThrow(message?: string): T & WithEquality {
         throw message || "getOrThrow called on none!";
     }
 
+    /**
+     * Returns true if the option is a Some and contains the
+     * value you give, false otherwise.
+     */
     contains(v: T&WithEquality): boolean {
         return false;
     }
 
+    /**
+     * Get the value contained in the option if it's a Some,
+     * return undefined if it's a None.
+     */
     getOrUndefined(): T|undefined {
         return undefined;
     }
 
-    getOrElse(alt: T & WithEquality): T & WithEquality {
+    /**
+     * Get the value from this option; if it's a None (no value
+     * present), then return the default value that you give.
+     */
+    getOrElse(alt: T): T {
         return alt;
     }
 
+    /**
+     * Return a new option where the element (if present) was transformed
+     * by the mapper function you give. If the option was None it'll stay None.
+     */
     map<U>(fn: (v:T)=>U): Option<U> {
         return <None<U>>none;
     }
 
+    /**
+     * If this is a Some, calls the function you give on
+     * the item in the option and return its result.
+     * If the option is a None, return none.
+     * This is the monadic bind.
+     */
     flatMap<U>(mapper:(v:T)=>Option<U>): Option<U> {
         return <None<U>>none;
     }
 
+    /**
+     * If this is None, will return None. If it's a Some,
+     * and the contents match your predicate, return the option.
+     * If the contents don't match the predicate, return None.
+     */
     filter(fn: (v:T)=>boolean): Option<T> {
         return <None<T>>none;
     }
 
+    /**
+     * Execute a side-effecting function if the option
+     * is a Some; returns the option.
+     */
     ifPresent(fn:(v:T)=>void): Option<T> {
         return this;
     }
 
+    /**
+     * Handle both branches of the option and return a value
+     * (can also be used for side-effects).
+     * This is the catamorphism for option.
+     *
+     *     Option.of(5).match({
+     *         Some: x  => "got " + x,
+     *         None: () => "got nothing!"
+     *     });
+     *     => "got 5"
+     */
     match<U>(cases: {Some: (v:T)=>U, None: ()=>U}): U {
         return cases.None();
     }
 
+    /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:Option<T>)=>U): U {
+        return converter(this);
+    }
+
+    /**
+     * Convert to a vector. If it's a None, it's the empty
+     * vector, if it's a Some, it's a one-element vector with
+     * the contents of the option.
+     */
     toVector(): Vector<T> {
         return Vector.empty<T>();
     }
 
+    /**
+     * Convert to an either. You must provide a left value
+     * in case this is a None.
+     */
     toEither<L>(left: L): Either<L,T> {
         return Either.left<L,T>(left);
     }
 
+    hasTrueEquality<T>(): boolean {
+        return optionHasTrueEquality(this);
+    }
+
+    /**
+     * Two objects are equal if they represent the same value,
+     * regardless of whether they are the same object physically
+     * in memory.
+     */
     equals(other: Option<T&WithEquality>): boolean {
         return other === <None<T>>none;
     }
 
+    /**
+     * Get a number for that object. Two different values
+     * may get the same number, but one value must always get
+     * the same number. The formula can impact performance.
+     */
     hashCode(): number {
         return 1;
     }
 
+    /**
+     * Get a human-friendly string representation of that value.
+     */
     toString(): string {
         return "None()";
+    }
+
+    /**
+     * Used by the node REPL to display values.
+     */
+    inspect(): string {
+        return this.toString();
     }
 }
 

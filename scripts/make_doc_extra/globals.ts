@@ -7,7 +7,7 @@ import * as helpers from "./helpers";
 // group classes & interfaces by category.
 const CATEGORIES = Vector.of<[string,Vector<string>]>(
     ["Control", Vector.of(
-        "Either", "Left", "Right", "Option", "Some", "None", "Lazy", "Function",
+        "Either", "Left", "Right", "Option", "Lazy", "Function",
         "Function1", "Function2", "Function3", "Function4", "Function5",
         "Predicate", "Predicates")],
     ["Collection", Vector.of(
@@ -56,7 +56,7 @@ export function groupGlobalsByCategory(): void {
         .map(l => l.contents)
         .filter(t => t.indexOf("<li") >= 0)
         .arrangeBy(row => helpers.requireNotNull(row.match(/>([\w<>]+)<\//))[1].replace(/<wbr>/g,""))
-        .getOrThrow();
+        .getOrThrow("globals.arrangeBy failed!");
 
     // start preparing the new contents for the indexContent
     let newIndexContent = `${helpers.indent(5)}<div class="tsd-index-content">`;
@@ -73,7 +73,7 @@ export function groupGlobalsByCategory(): void {
 
     CATEGORIES.forEach(([name,elements]) => {
         newIndexContent += getSectionHeader(name);
-        const rows = elements.map(elt => liRows.get(elt).getOrThrow());
+        const rows = elements.map(elt => liRows.get(elt).getOrThrow("can't find row for " + elt));
         newIndexContent += rows.mkString("\n");
         newIndexContent += getSectionFooter();
     });

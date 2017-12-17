@@ -106,7 +106,7 @@ export abstract class Stream<T> implements Seq<T> {
             return <EmptyStream<U>>emptyStream;
         }
         return new ConsStream(
-            nextVal.getOrThrow()[0],
+            nextVal.get()[0],
             Lazy.of(()=>Stream.unfoldRight(nextVal.getOrThrow()[1], fn)));
     }
 

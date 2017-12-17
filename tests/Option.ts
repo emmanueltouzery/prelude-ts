@@ -76,6 +76,10 @@ describe("option transformation", () => {
            Some: x=>x+1,
            None: ()=>-1
        })));
+    it("some supports transform", () =>
+       assert.equal(6, Option.of(3).transform(x => 6)));
+    it("none supports transform", () =>
+       assert.equal(6, Option.none<number>().transform(x => 6)));
 });
 
 describe("Option helpers", () => {
@@ -117,6 +121,14 @@ describe("option retrieval", () => {
     it("should offer get() if i checked for isSome", () => {
         const opt = <Option<number>>Option.of(5); 
         if (opt.isSome()) {
+            // what we are checking here is whether this does build
+            // .get() is available only on Some not on None
+            assert.equal(5, opt.get());
+        }
+    });
+    it("should offer get() if i eliminated isNone", () => {
+        const opt = <Option<number>>Option.of(5); 
+        if (!opt.isNone()) {
             // what we are checking here is whether this does build
             // .get() is available only on Some not on None
             assert.equal(5, opt.get());
