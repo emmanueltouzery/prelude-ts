@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-cd scripts/typedoc_plugin_inherit_apidoc
-npm install --no-package-lock
-tsc
-cd ../..
 npm install --no-package-lock
 tsc
 
