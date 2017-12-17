@@ -1,5 +1,5 @@
 /**
- * The Option type expresses that a value may be present or not.
+ * The [[Option]] type expresses that a value may be present or not.
  * The code is organized through the class [[None]] (value not
  * present), the class [[Some]] (value present), and the type alias
  * [[Option]] (Some or None).
@@ -164,7 +164,7 @@ function optionHasTrueEquality<T>(opt: Option<T>): boolean {
  * Some represents an [[Option]] with a value.
  * @param T the item type
  */
-export class Some<T> {
+export class Some<T> implements Value {
     constructor(private value: T) {}
 
     readonly className: "Some";  // https://stackoverflow.com/a/47841595/516188
@@ -362,7 +362,7 @@ export class Some<T> {
  * None represents an [[Option]] without value.
  * @param T the item type
  */
-export class None<T> {
+export class None<T> implements Value {
 
     readonly className: "None";  // https://stackoverflow.com/a/47841595/516188
 

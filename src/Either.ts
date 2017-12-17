@@ -1,3 +1,24 @@
+/**
+ * The [[Either]] type represents an alternative between two value types.
+ * A "left" value which is also conceptually tied to a failure,
+ * or a "right" value which is conceptually tied to success.
+ *
+ * The code is organized through the class [[Left]], the class [[Right]],
+ * and the type alias [[Either]] (Left or Right).
+ *
+ * Finally, "static" functions on Option are arranged in the class
+ * [[EitherStatic]] and are accessed through the global constant Either.
+ *
+ * Examples:
+ *
+ *     Either.right<number,number>(5);
+ *     Either.left<number,number>(2);
+ *     Either.right<number,number>(5).map(x => x*2);
+ *
+ * Left has the extra [[Left.getLeft]] method that [[Right]] doesn't have.
+ * Right has the extra [[Right.getRight]] method that [[Left]] doesn't have.
+ */
+    
 import { Value } from "./Value";
 import { Option } from "./Option";
 import { LinkedList } from "./LinkedList";
@@ -7,25 +28,20 @@ import { WithEquality, areEqual,
 import { contractTrueEquality} from "./Contract";
 
 /**
- * Represents an alternative between two value types.
- * A "left" value which is also conceptually tied to a failure,
- * or a "right" value which is conceptually tied to success.
- * @param L the "left" item type 'failure'
- * @param R the "right" item type 'success'
+ * Holds the "static methods" for [[Either]]
  */
-export abstract class Either<L,R> implements Value {
-    
+export class EitherStatic {
     /**
      * Constructs an Either containing a left value which you give.
      */
-    static left<L,R>(val: L): Either<L,R> {
+    left<L,R>(val: L): Either<L,R> {
         return new Left<L,R>(val);
     }
 
     /**
      * Constructs an Either containing a right value which you give.
      */
-    static right<L,R>(val: R): Either<L,R> {
+    right<L,R>(val: R): Either<L,R> {
         return new Right<L,R>(val);
     }
 
@@ -46,7 +62,7 @@ export abstract class Either<L,R> implements Value {
      *           Either.left<number,number>(3)));
      *     => Either.left(2)
      */
-    static sequence<L,R>(elts:Iterable<Either<L,R>>): Either<L,Vector<R>> {
+    sequence<L,R>(elts:Iterable<Either<L,R>>): Either<L,Vector<R>> {
         let r = Vector.empty<R>();
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
@@ -87,7 +103,7 @@ export abstract class Either<L,R> implements Value {
      * @param L the left type
      * @param V the new right type as returned by the combining function.
      */
-    static liftA2<R1,R2,L,V>(fn:(v1:R1,v2:R2)=>V, leftWitness?: L) : (p1:Either<L,R1>, p2:Either<L,R2>) => Either<L,V> {
+    liftA2<R1,R2,L,V>(fn:(v1:R1,v2:R2)=>V, leftWitness?: L) : (p1:Either<L,R1>, p2:Either<L,R2>) => Either<L,V> {
         return (p1,p2) => p1.flatMap(a1 => p2.map(a2 => fn(a1,a2)));
     }
 
@@ -113,7 +129,7 @@ export abstract class Either<L,R> implements Value {
      * @param A the object property type specifying the parameters for your function
      * @param B the type returned by your function, returned wrapped in an either by liftAp.
      */
-    static liftAp<L,A,B>(fn:(x:A)=>B, leftWitness?: L): (x: {[K in keyof A]: Either<L,A[K]>;}) => Either<L,B> {
+    liftAp<L,A,B>(fn:(x:A)=>B, leftWitness?: L): (x: {[K in keyof A]: Either<L,A[K]>;}) => Either<L,B> {
         return x => {
             const copy:A = <any>{};
             for (let p in x) {
@@ -125,27 +141,59 @@ export abstract class Either<L,R> implements Value {
             return Either.right<L,B>(fn(copy));
         }
     }
+}
+
+/**
+ * The Either constant allows to call the either "static" methods
+ */
+export const Either = new EitherStatic();
+
+/**
+ * Either represents an alternative between two value types.
+ * A "left" value which is also conceptually tied to a failure,
+ * or a "right" value which is conceptually tied to success.
+ */
+export type Either<L,R> = Left<L,R> | Right<L,R>;
+
+/**
+ * Represents an [[Either]] containing a left value,
+ * conceptually tied to a failure.
+ * @param L the "left" item type 'failure'
+ * @param R the "right" item type 'success'
+ */
+export class Left<L,R> implements Value {
+    constructor(private value: L) {}
+
+    readonly className: "Left";  // https://stackoverflow.com/a/47841595/516188
 
     /**
-     * Returns true if this is either is a left, false otherwise.
+     * Returns true since this is a Left
      */
-    abstract isLeft(): this is Left<L,R>;
+    isLeft(): this is Left<L,R> {
+        return true;
+    }
 
     /**
-     * Returns true if this is either is a right, false otherwise.
+     * Returns false since this is a Left
      */
-    abstract isRight(): this is Right<L,R>;
+    isRight(): this is Right<L,R> {
+        return false;
+    }
 
     /**
      * Returns true if this is either is a right and contains the value you give.
      */
-    abstract contains(val: R&WithEquality): boolean;
+    contains(val: R&WithEquality): boolean {
+        return false;
+    }
 
     /**
      * If this either is a right, applies the function you give
      * to its contents and build a new right either, otherwise return this.
      */
-    abstract map<U>(fn: (x:R)=>U): Either<L,U>;
+    map<U>(fn: (x:R)=>U): Either<L,U> {
+        return <any>this;
+    }
 
     /**
      * If this either is a right, call the function you give with
@@ -153,38 +201,51 @@ export abstract class Either<L,R> implements Value {
      * returns this.
      * This is the monadic bind.
      */
-    abstract flatMap<U>(fn: (x:R)=>Either<L,U>): Either<L,U>;
+    flatMap<U>(fn: (x:R)=>Either<L,U>): Either<L,U> {
+        return <any>this;
+    }
 
     /**
      * If this either is a left, call the function you give with
      * the left value and return a new either left with the result
      * of the function, else return this.
      */
-    abstract mapLeft<U>(fn: (x:L)=>U): Either<U,R>;
+    mapLeft<U>(fn: (x:L)=>U): Either<U,R> {
+        return new Left<U,R>(fn(this.value));
+    }
 
     /**
      * Map the either: you give a function to apply to the value,
      * a function in case it's a left, a function in case it's a right.
      */
-    abstract bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T>;
+    bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T> {
+        return new Left<S,T>(fnL(this.value));
+    }
 
     /**
      * Combines two eithers. If this either is a right, returns it.
      * If it's a left, returns the other one.
      */
-    abstract orElse(other: Either<L,R>): Either<L,R>;
+    orElse(other: Either<L,R>): Either<L,R> {
+        return other;
+    }
 
     /**
      * Execute a side-effecting function if the either
      * is a right; returns the either.
      */
-    abstract ifRight(fn: (x:R)=>void): Either<L,R>;
+    ifRight(fn: (x:R)=>void): Either<L,R> {
+        return this;
+    }
 
     /**
      * Execute a side-effecting function if the either
      * is a left; returns the either.
      */
-    abstract ifLeft(fn: (x:L)=>void): Either<L,R>;
+    ifLeft(fn: (x:L)=>void): Either<L,R> {
+        fn(this.value);
+        return this;
+    }
 
     /**
      * Handle both branches of the either and return a value
@@ -197,7 +258,9 @@ export abstract class Either<L,R> implements Value {
      *     });
      *     => "right 5"
      */
-    abstract match<U>(cases: {Left: (v:L)=>U, Right: (v:R)=>U}): U;
+    match<U>(cases: {Left: (v:L)=>U, Right: (v:R)=>U}): U {
+        return cases.Left(this.value);
+    }
 
     /**
      * If this either is a right, return its value, else throw
@@ -205,142 +268,14 @@ export abstract class Either<L,R> implements Value {
      * You can optionally pass a message that'll be used as the
      * exception message.
      */
-    abstract getOrThrow(message?: string): R;
+    getOrThrow(message?: string): R {
+        throw message || "Left.getOrThrow called!";
+    }
 
     /**
      * If this either is a right, return its value, else return
      * the value you give.
      */
-    abstract getOrElse(other: R): R;
-
-    /**
-     * If this either is a left, return its value, else throw
-     * an exception.
-     * You can optionally pass a message that'll be used as the
-     * exception message.
-     */
-    abstract getLeftOrThrow(message?: string): L;
-
-    /**
-     * If this either is a left, return its value, else return
-     * the value you give.
-     */
-    abstract getLeftOrElse(other: L): L;
-
-    /**
-     * Convert this either to an option, conceptually dropping
-     * the left (failing) value.
-     */
-    abstract toOption(): Option<R>;
-
-    /**
-     * Convert to a vector. If it's a left, it's the empty
-     * vector, if it's a right, it's a one-element vector with
-     * the contents of the either.
-     */
-    abstract toVector(): Vector<R>;
-
-    /**
-     * Convert to a list. If it's a left, it's the empty
-     * list, if it's a right, it's a one-element list with
-     * the contents of the either.
-     */
-    abstract toLinkedList(): LinkedList<R>;
-
-    /**
-     * Transform this value to another value type.
-     * Enables fluent-style programming by chaining calls.
-     */
-    transform<U>(converter:(x:Either<L,R>)=>U): U {
-        return converter(this);
-    }
-
-    /**
-     * @hidden
-     */
-    abstract hasTrueEquality(): boolean;
-
-    /**
-     * Two objects are equal if they represent the same value,
-     * regardless of whether they are the same object physically
-     * in memory.
-     */
-    abstract equals(other: Either<L&WithEquality,R&WithEquality>): boolean;
-
-    /**
-     * Get a number for that object. Two different values
-     * may get the same number, but one value must always get
-     * the same number. The formula can impact performance.
-     */
-    abstract hashCode(): number;
-
-    /**
-     * Get a human-friendly string representation of that value.
-     */
-    abstract toString(): string;
-
-    /**
-     * Used by the node REPL to display values.
-     */
-    inspect(): string {
-        return this.toString();
-    }
-}
-
-export class Left<L,R> extends Either<L,R> {
-    constructor(private value: L) {
-        super();
-    }
-
-    isLeft(): this is Left<L,R> {
-        return true;
-    }
-
-    isRight(): boolean {
-        return false;
-    }
-
-    contains(val: R&WithEquality): boolean {
-        return false;
-    }
-
-    map<U>(fn: (x:R)=>U): Either<L,U> {
-        return <any>this;
-    }
-
-    flatMap<U>(fn: (x:R)=>Either<L,U>): Either<L,U> {
-        return <any>this;
-    }
-
-    mapLeft<U>(fn: (x:L)=>U): Either<U,R> {
-        return new Left<U,R>(fn(this.value));
-    }
-
-    bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T> {
-        return new Left<S,T>(fnL(this.value));
-    }
-
-    orElse(other: Either<L,R>): Either<L,R> {
-        return other;
-    }
-
-    ifRight(fn: (x:R)=>void): Either<L,R> {
-        return this;
-    }
-
-    ifLeft(fn: (x:L)=>void): Either<L,R> {
-        fn(this.value);
-        return this;
-    }
-
-    match<U>(cases: {Left: (v:L)=>U, Right: (v:R)=>U}): U {
-        return cases.Left(this.value);
-    }
-
-    getOrThrow(message?: string): R {
-        throw message || "Left.getOrThrow called!";
-    }
-
     getOrElse(other: R): R {
         return other;
     }
@@ -354,24 +289,56 @@ export class Left<L,R> extends Either<L,R> {
         return this.value;
     }
 
+    /**
+     * If this either is a left, return its value, else throw
+     * an exception.
+     * You can optionally pass a message that'll be used as the
+     * exception message.
+     */
     getLeftOrThrow(message?: string): L {
         return this.value;
     }
 
+    /**
+     * If this either is a left, return its value, else return
+     * the value you give.
+     */
     getLeftOrElse(other: L): L {
         return this.value;
     }
 
+    /**
+     * Convert this either to an option, conceptually dropping
+     * the left (failing) value.
+     */
     toOption(): Option<R> {
         return Option.none<R>();
     }
 
+    /**
+     * Convert to a vector. If it's a left, it's the empty
+     * vector, if it's a right, it's a one-element vector with
+     * the contents of the either.
+     */
     toVector(): Vector<R> {
         return Vector.empty<R>();
     }
 
+    /**
+     * Convert to a list. If it's a left, it's the empty
+     * list, if it's a right, it's a one-element list with
+     * the contents of the either.
+     */
     toLinkedList(): LinkedList<R> {
         return LinkedList.empty<R>();
+    }
+
+    /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:Either<L,R>)=>U): U {
+        return converter(this);
     }
 
     hasTrueEquality(): boolean {
@@ -380,10 +347,20 @@ export class Left<L,R> extends Either<L,R> {
             hasTrueEquality(this.value);
     }
 
+    /**
+     * Get a number for that object. Two different values
+     * may get the same number, but one value must always get
+     * the same number. The formula can impact performance.
+     */
     hashCode(): number {
         return getHashCode(this.value);
     }
 
+    /**
+     * Two objects are equal if they represent the same value,
+     * regardless of whether they are the same object physically
+     * in memory.
+     */
     equals(other: Either<L&WithEquality,R&WithEquality>): boolean {
         if (<any>other === this) {
             return true;
@@ -396,57 +373,124 @@ export class Left<L,R> extends Either<L,R> {
         return areEqual(this.value, leftOther.value);
     }
 
+    /**
+     * Get a human-friendly string representation of that value.
+     */
     toString(): string {
         return "Left(" + this.value + ")";
     }
+
+    /**
+     * Used by the node REPL to display values.
+     */
+    inspect(): string {
+        return this.toString();
+    }
 }
 
-export class Right<L,R> extends Either<L,R> {
-    constructor(private value: R) {
-        super();
-    }
+/**
+ * Represents an [[Either]] containing a success value,
+ * conceptually tied to a success.
+ * @param L the "left" item type 'failure'
+ * @param R the "right" item type 'success'
+ */
+export class Right<L,R> implements Value {
+    constructor(private value: R) {}
 
-    isLeft(): boolean {
+    readonly className: "Right";  // https://stackoverflow.com/a/47841595/516188
+
+    /**
+     * Returns false since this is a Right
+     */
+    isLeft(): this is Left<L,R> {
         return false;
     }
 
+    /**
+     * Returns true since this is a Right
+     */
     isRight(): this is Right<L,R> {
         return true;
     }
 
+    /**
+     * Returns true if this is either is a right and contains the value you give.
+     */
     contains(val: R&WithEquality): boolean {
         return areEqual(this.value, val);
     }
 
+    /**
+     * If this either is a right, applies the function you give
+     * to its contents and build a new right either, otherwise return this.
+     */
     map<U>(fn: (x:R)=>U): Either<L,U> {
         return new Right<L,U>(fn(this.value));
     }
 
+    /**
+     * If this either is a right, call the function you give with
+     * the contents, and return what the function returns, else
+     * returns this.
+     * This is the monadic bind.
+     */
     flatMap<U>(fn: (x:R)=>Either<L,U>): Either<L,U> {
         return fn(this.value);
     }
 
+    /**
+     * If this either is a left, call the function you give with
+     * the left value and return a new either left with the result
+     * of the function, else return this.
+     */
     mapLeft<U>(fn: (x:L)=>U): Either<U,R> {
         return <any>this;
     }
 
+    /**
+     * Map the either: you give a function to apply to the value,
+     * a function in case it's a left, a function in case it's a right.
+     */
     bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T> {
         return new Right<S,T>(fnR(this.value));
     }
 
+    /**
+     * Combines two eithers. If this either is a right, returns it.
+     * If it's a left, returns the other one.
+     */
     orElse(other: Either<L,R>): Either<L,R> {
         return this;
     }
 
+    /**
+     * Execute a side-effecting function if the either
+     * is a right; returns the either.
+     */
     ifRight(fn: (x:R)=>void): Either<L,R> {
         fn(this.value);
         return this;
     }
 
+    /**
+     * Execute a side-effecting function if the either
+     * is a left; returns the either.
+     */
     ifLeft(fn: (x:L)=>void): Either<L,R> {
         return this;
     }
 
+    /**
+     * Handle both branches of the either and return a value
+     * (can also be used for side-effects).
+     * This is the catamorphism for either.
+     *
+     *     Either.right<string,number>(5).match({
+     *         Left:  x => "left " + x,
+     *         Right: x => "right " + x
+     *     });
+     *     => "right 5"
+     */
     match<U>(cases: {Left: (v:L)=>U, Right: (v:R)=>U}): U {
         return cases.Right(this.value);
     }
@@ -460,32 +504,74 @@ export class Right<L,R> extends Either<L,R> {
         return this.value;
     }
 
+    /**
+     * If this either is a right, return its value, else throw
+     * an exception.
+     * You can optionally pass a message that'll be used as the
+     * exception message.
+     */
     getOrThrow(message?: string): R {
         return this.value;
     }
 
+    /**
+     * If this either is a right, return its value, else return
+     * the value you give.
+     */
     getOrElse(other: R): R {
         return this.value;
     }
 
+    /**
+     * If this either is a left, return its value, else throw
+     * an exception.
+     * You can optionally pass a message that'll be used as the
+     * exception message.
+     */
     getLeftOrThrow(message?: string): L {
         throw message || "Left.getOrThrow called!";
     }
 
+    /**
+     * If this either is a left, return its value, else return
+     * the value you give.
+     */
     getLeftOrElse(other: L): L {
         return other;
     }
 
+    /**
+     * Convert this either to an option, conceptually dropping
+     * the left (failing) value.
+     */
     toOption(): Option<R> {
         return Option.of(this.value);
     }
 
+    /**
+     * Convert to a vector. If it's a left, it's the empty
+     * vector, if it's a right, it's a one-element vector with
+     * the contents of the either.
+     */
     toVector(): Vector<R> {
         return Vector.of(this.value);
     }
 
+    /**
+     * Convert to a list. If it's a left, it's the empty
+     * list, if it's a right, it's a one-element list with
+     * the contents of the either.
+     */
     toLinkedList(): LinkedList<R> {
         return LinkedList.of(this.value);
+    }
+
+    /**
+     * Transform this value to another value type.
+     * Enables fluent-style programming by chaining calls.
+     */
+    transform<U>(converter:(x:Either<L,R>)=>U): U {
+        return converter(this);
     }
 
     hasTrueEquality(): boolean {
@@ -494,10 +580,20 @@ export class Right<L,R> extends Either<L,R> {
             hasTrueEquality(this.value);
     }
 
+    /**
+     * Get a number for that object. Two different values
+     * may get the same number, but one value must always get
+     * the same number. The formula can impact performance.
+     */
     hashCode(): number {
         return getHashCode(this.value);
     }
 
+    /**
+     * Two objects are equal if they represent the same value,
+     * regardless of whether they are the same object physically
+     * in memory.
+     */
     equals(other: Either<L&WithEquality,R&WithEquality>): boolean {
         if (<any>other === this) {
             return true;
@@ -510,7 +606,17 @@ export class Right<L,R> extends Either<L,R> {
         return areEqual(this.value, rightOther.value);
     }
 
+    /**
+     * Get a human-friendly string representation of that value.
+     */
     toString(): string {
         return "Right(" + this.value + ")";
+    }
+
+    /**
+     * Used by the node REPL to display values.
+     */
+    inspect(): string {
+        return this.toString();
     }
 }

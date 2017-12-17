@@ -96,6 +96,10 @@ describe("either transformation", () => {
     it("should abort liftAp on left", () => assert.ok(Either.left(2).equals(
         Either.liftAp<number,{a:number,b:number},number>(x => x.a+x.b)
         ({a:Either.right<number,number>(5), b:Either.left<number,number>(2)}))));
+    it("left should provide transform", () => assert.equal(
+        6, Either.left<number,number>(5).transform(x => 6)));
+    it("right should provide transform", () => assert.equal(
+        6, Either.right<number,number>(5).transform(x => 6)));
 });
 
 describe("Either helpers", () => {
@@ -132,9 +136,25 @@ describe("either retrieval", () => {
             assert.equal(5, either.get());
         }
     });
+    it("should offer get() if i checked against isLeft", () => {
+        const either = <Either<string,number>>Either.right(5); 
+        if (!either.isLeft()) {
+            // what we are checking here is whether this does build
+            // .get() is available only on Right
+            assert.equal(5, either.get());
+        }
+    });
     it("should offer getLeft() if i checked for isLeft", () => {
         const either = <Either<string,number>>Either.left("5"); 
         if (either.isLeft()) {
+            // what we are checking here is whether this does build
+            // .get() is available only on Left
+            assert.equal("5", either.getLeft());
+        }
+    });
+    it("should offer getLeft() if i checked against isRight", () => {
+        const either = <Either<string,number>>Either.left("5"); 
+        if (!either.isRight()) {
             // what we are checking here is whether this does build
             // .get() is available only on Left
             assert.equal("5", either.getLeft());

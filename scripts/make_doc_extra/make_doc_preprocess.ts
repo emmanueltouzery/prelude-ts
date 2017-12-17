@@ -25,4 +25,5 @@ function makeModule(moduleName:string, filename:string): void {
 makeModule("Comparison", "src/Comparison.ts");
 makeModule("Contract", "src/Contract.ts");
 makeModule("Option", "src/Option.ts");
+makeModule("Either", "src/Either.ts");
 

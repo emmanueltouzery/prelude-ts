@@ -22,16 +22,19 @@ fi
 # pre-process files
 node dist/scripts/make_doc_extra/make_doc_preprocess.js
 
-# trick for the 'Option' constant which typedoc skips as it clashes
-# with the 'Option' type synomym
+# trick for the 'Option' & 'Either' constants which typedoc skips as it clashes
+# with the 'Option' & 'Either' type synomym
 sed -i "s/const Option/const optionGlabiboulga/" src/Option.ts
+sed -i "s/const Either/const eitherGlabiboulga/" src/Either.ts
 
 # generate with typedoc
 ./node_modules/typedoc/bin/typedoc --exclude "**/make_doc_extra/*.ts" --mode file --out apidoc --excludePrivate --excludeExternals --excludeNotExported --ignoreCompilerErrors src/index.ts
 
-# revert the 'Option' constant rename
+# revert the 'Option' & 'Either' constant rename
 find apidoc -name "*.html" -exec sed -i 's/optionglabiboulga/Option/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/option<wbr>Glabiboulga/Option/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/eitherglabiboulga/Either/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/either<wbr>Glabiboulga/Either/g' \{\} \;
 
 # modify the output to say 'File' instead of 'Module'
 find apidoc -name "*.html" -exec sed -i 's/Module/File/g' \{\} \;
