@@ -26,4 +26,5 @@ makeModule("Comparison", "src/Comparison.ts");
 makeModule("Contract", "src/Contract.ts");
 makeModule("Option", "src/Option.ts");
 makeModule("Either", "src/Either.ts");
+makeModule("LinkedList", "src/LinkedList.ts");
 

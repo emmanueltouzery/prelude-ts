@@ -17,7 +17,9 @@ export function runTests(seqName: string,
                          ofIterable: <T>(i:Iterable<T>)=>Seq<T>,
                          of: <T>(...i:Array<T>)=>Seq<T>,
                          empty: <T>()=>Seq<T>,
-                         unfoldRight: <T,U>(seed: T, fn: (x:T)=>Option<[U,T]>)=>Seq<U>) {
+                         unfoldRight: <T,U>(seed: T, fn: (x:T)=>Option<[U,T]>)=>Seq<U>,
+                         nonEmptySeqName_?:string) {
+    const nonEmptySeqName = nonEmptySeqName_ || seqName;
     CollectionTest.runTests(seqName, of, empty);
     describe(seqName + " creation", () => {
         it("creates from a JS array", () => assert.deepEqual(
@@ -94,7 +96,7 @@ export function runTests(seqName: string,
         it("should fail compilation on an obviously bad equality test", () =>
            assertFailCompile(
                seqName + ".of([1]).equals(" + seqName + ".of([1]))", "Argument of type \'" +
-                   seqName + "<number[]>\' is not assignable to parameter"));
+                   nonEmptySeqName + "<number[]>\' is not assignable to parameter"));
         it("should fail compilation on an obviously bad contains test", () =>
            assertFailCompile(
                seqName + ".of([1]).contains([1])",

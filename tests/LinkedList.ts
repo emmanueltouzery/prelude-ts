@@ -1,4 +1,4 @@
-import { LinkedList } from "../src/LinkedList";
+import { LinkedList, ConsLinkedList } from "../src/LinkedList";
 import { HashMap } from "../src/HashMap";
 import { Option } from "../src/Option";
 import { Stream } from "../src/Stream";
@@ -10,7 +10,8 @@ SeqTest.runTests("LinkedList",
                  LinkedList.ofIterable,
                  LinkedList.of,
                  LinkedList.empty,
-                 LinkedList.unfoldRight);
+                 LinkedList.unfoldRight,
+                 "ConsLinkedList");
 
 describe("LinkedList toString", () => {
     it("serializes to string correctly", () => assert.equal(
@@ -21,4 +22,10 @@ describe("LinkedList toString", () => {
         "LinkedList({field1: hi, field2: 99})", LinkedList.of(new MyClass("hi", 99)).toString()));
     it("serializes to string correctly - plain map", () => assert.equal(
         "LinkedList({\"name\":\"hi\",\"age\":99})", LinkedList.of({name:"hi", age:99}).toString()));
+    it("takes advantage of isEmpty", () => {
+        const list = LinkedList.of(1,2,3);
+        if (!list.isEmpty()) {
+            list.head().get();
+        }
+    });
 });
