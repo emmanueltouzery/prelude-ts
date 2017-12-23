@@ -1,4 +1,4 @@
-import { Option } from "../src/Option";
+import { Option, Some, None } from "../src/Option";
 import { Vector } from "../src/Vector";
 import { Seq } from "../src/Seq";
 import { assertFailCompile } from "./TestHelpers";
@@ -80,6 +80,11 @@ describe("option transformation", () => {
        assert.equal(6, Option.of(3).transform(x => 6)));
     it("none supports transform", () =>
        assert.equal(6, Option.none<number>().transform(x => 6)));
+    it("should support lists combining some & none", () => {
+        const a = <Some<number>>Option.of(5);
+        const b = <None<number>>Option.none<number>();
+        const c = Vector.of<Option<number>>(a, b);
+    });
 });
 
 describe("Option helpers", () => {
@@ -134,4 +139,11 @@ describe("option retrieval", () => {
             assert.equal(5, opt.get());
         }
     });
+    it("should allow some & none in a list", () => {
+        const a = Option.of(5);
+        const b = Option.none<number>();
+        if (a.isSome() && b.isNone()) {
+            Vector.of(a.asOption(),b);
+        }
+    })
 });

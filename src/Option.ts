@@ -184,6 +184,14 @@ export class Some<T> implements Value {
     }
 
     /**
+     * View this Some a as Option. Useful to help typescript type
+     * inference sometimes.
+     */
+    asOption(): Option<T> {
+        return this;
+    }
+
+    /**
      * Get the value contained in this option.
      * NOTE: we know it's there, since this method
      * belongs to Some, not Option.
@@ -378,6 +386,14 @@ export class None<T> implements Value {
      */
     isNone(): this is None<T> {
         return true;
+    }
+
+    /**
+     * View this Some a as Option. Useful to help typescript type
+     * inference sometimes.
+     */
+    asOption(): Option<T> {
+        return this;
     }
 
     /**
