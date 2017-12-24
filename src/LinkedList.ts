@@ -369,6 +369,26 @@ export class EmptyLinkedList<T> implements Seq<T> {
     }
 
     /**
+     * Handle both branches of the list and return a value
+     * (can also be used for side-effects).
+     * This is the catamorphism for list.
+     *
+     *     function myLength<T>(list:LinkedList<T>, val=0):number {
+     *         return list.match({
+     *             Empty: () => val,
+     *             Cons: (v,r)  => myLength(r, ++val)
+     *         });
+     *     }
+     *     myLength(
+     *         LinkedList.of(1,2,3));
+     *     => 3
+     })
+     */
+    match<U>(cases: {Empty: ()=>U, Cons: (v: T, rest:LinkedList<T>)=>U}): U {
+        return cases.Empty();
+    }
+
+    /**
      * Returns a pair of two collections; the first one
      * will only contain the items from this collection for
      * which the predicate you give returns true, the second
@@ -1040,6 +1060,26 @@ export class ConsLinkedList<T> implements Seq<T> {
             curItem = curItem._tail;
         }
         return [first.reverse(), curItem];
+    }
+
+    /**
+     * Handle both branches of the list and return a value
+     * (can also be used for side-effects).
+     * This is the catamorphism for list.
+     *
+     *     function myLength<T>(list:LinkedList<T>, val=0):number {
+     *         return list.match({
+     *             Empty: () => val,
+     *             Cons: (v,r)  => myLength(r, ++val)
+     *         });
+     *     }
+     *     myLength(
+     *         LinkedList.of(1,2,3));
+     *     => 3
+     })
+     */
+    match<U>(cases: {Empty: ()=>U, Cons: (v: T, rest:LinkedList<T>)=>U}): U {
+        return cases.Cons(this.head().get(), this.tail().get());
     }
 
     /**
