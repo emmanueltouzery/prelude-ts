@@ -53,14 +53,14 @@ export class OptionStatic {
      * undefined gives a none
      * null gives a some.
      *
-     * Also see [[Option.some]]
+     * Also see [[OptionStatic.some]]
      */
     of<T>(v: T|undefined): Option<T> {
         return (v === undefined) ? <None<T>>none : new Some(v);
     }
 
     /**
-     * Build a [[Some]], unlike [[Option.of]], which may build a [[Some]]
+     * Build a [[Some]], unlike [[OptionStatic.of]], which may build a [[Some]]
      * or a [[None]].
      * Will throw if given undefined.
      */
