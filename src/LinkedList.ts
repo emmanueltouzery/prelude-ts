@@ -79,9 +79,9 @@ export class LinkedListStatic {
         let result = <LinkedList<U>><EmptyLinkedList<U>>emptyLinkedList;
         while (!nextVal.isNone()) {
             result = new ConsLinkedList(
-                nextVal.getOrThrow()[0],
+                nextVal.get()[0],
                 result);
-            nextVal = fn(nextVal.getOrThrow()[1]);
+            nextVal = fn(nextVal.get()[1]);
         }
         return result.reverse();
     }
@@ -721,8 +721,8 @@ export class ConsLinkedList<T> implements Seq<T> {
                 if (item.isEmpty()) {
                     return { done: true, value: <any>undefined };
                 }
-                const value = item.head().getOrThrow();
-                item = item.tail().getOrThrow();
+                const value = item.head().get();
+                item = item.tail().get();
                 return {done: false, value};
             }
         };
@@ -1176,7 +1176,7 @@ export class ConsLinkedList<T> implements Seq<T> {
         while (!curItem.isEmpty()) {
             const mapped = mapper(curItem.value);
             if (mapped.isSome()) {
-                result = new ConsLinkedList(mapped.getOrThrow(), result);
+                result = new ConsLinkedList(mapped.get(), result);
             }
             curItem = curItem._tail;
         }
