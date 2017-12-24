@@ -156,6 +156,14 @@ export class EmptyStream<T> implements Seq<T> {
     }
 
     /**
+     * View this Some a as Stream. Useful to help typescript type
+     * inference sometimes.
+     */
+    asStream(): Stream<T> {
+        return this;
+    }
+
+    /**
      * @hidden
      */
     hasTrueEquality(): boolean {
@@ -770,6 +778,14 @@ export class ConsStream<T> implements Seq<T> {
     }
 
     /**
+     * View this Some a as Stream. Useful to help typescript type
+     * inference sometimes.
+     */
+    asStream(): Stream<T> {
+        return this;
+    }
+
+    /**
      * @hidden
      */
     hasTrueEquality(): boolean {
@@ -806,7 +822,7 @@ export class ConsStream<T> implements Seq<T> {
      * Option.None if it's empty.
      */
     head(): Some<T> {
-        return <Some<T>>Option.of(this.value);
+        return Option.some(this.value);
     }
 
     /**
@@ -814,7 +830,7 @@ export class ConsStream<T> implements Seq<T> {
      * If the collection is empty, return None.
      */
     tail(): Some<Stream<T>> {
-        return <Some<Stream<T>>>Option.of(this._tail.get());
+        return Option.some(this._tail.get());
     }
 
     /**
@@ -828,7 +844,7 @@ export class ConsStream<T> implements Seq<T> {
             const item = (<ConsStream<T>>curItem).value;
             curItem = (<ConsStream<T>>curItem)._tail.get();
             if (curItem.isEmpty()) {
-                return <Some<T>>Option.of(item);
+                return Option.some(item);
             }
         }
     }

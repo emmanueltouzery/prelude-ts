@@ -17,7 +17,7 @@
  * or [[Some.get]]. The latter is available if you've checked that you
  * indeed have a some, for example:
  *
- *     const opt = <Option<number>>Option.of(5);
+ *     const opt = Option.of(5);
  *     if (opt.isSome()) {
  *         opt.get();
  *     }
@@ -46,14 +46,35 @@ export type Option<T> = Some<T> | None<T>;
  * Holds the "static methods" for [[Option]]
  */
 export class OptionStatic {
+
     /**
      * Builds an optional value.
      * T gives a some
      * undefined gives a none
-     * null gives a some
+     * null gives a some.
+     *
+     * Also see [[Option.some]]
      */
     of<T>(v: T|undefined): Option<T> {
         return (v === undefined) ? <None<T>>none : new Some(v);
+    }
+
+    /**
+     * Build a [[Some]], unlike [[Option.of]], which may build a [[Some]]
+     * or a [[None]].
+     * Will throw if given undefined.
+     */
+    some<T>(v: T): Some<T> {
+        // the reason I decided to add a some in addition to 'of'
+        // instead of making 'of' smarter (which is possible in
+        // typescript, see https://github.com/bcherny/tsoption)
+        // is that sometimes you really want an Option, not a Some.
+        // for instance you can't mix an a Some and an Option in a list
+        // if you put the Some first, without calling asOption().
+        if (typeof v === "undefined") {
+            throw "Option.some got undefined!";
+        }
+        return new Some(v);
     }
 
     /**

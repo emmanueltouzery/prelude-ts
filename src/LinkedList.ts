@@ -757,7 +757,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      * In this case the list is not empty, so returns Option.some
      */
     head(): Some<T> {
-        return <Some<T>>Option.of(this.value);
+        return Option.some(this.value);
     }
 
     /**
@@ -765,7 +765,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      * If the collection is empty, return None.
      */
     tail(): Some<LinkedList<T>> {
-        return <Some<LinkedList<T>>>Option.of(this._tail);
+        return Option.some(this._tail);
     }
 
     /**
@@ -779,7 +779,7 @@ export class ConsLinkedList<T> implements Seq<T> {
             const item = (<ConsLinkedList<T>>curItem).value;
             curItem = (<ConsLinkedList<T>>curItem)._tail;
             if (curItem.isEmpty()) {
-                return <Some<T>>Option.of(item);
+                return Option.some(item);
             }
         }
     }
