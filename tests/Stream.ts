@@ -10,7 +10,8 @@ SeqTest.runTests("Stream",
                  Stream.ofIterable,
                  Stream.of,
                  Stream.empty,
-                 Stream.unfoldRight);
+                 Stream.unfoldRight,
+                "ConsStream");
 
 describe("Stream basics", () => {
     it("creates a continually constant value", () => assert.deepEqual(
@@ -23,6 +24,12 @@ describe("Stream basics", () => {
         [1,2,3,4,5,6], Stream.of(1,2,3).appendStream(Stream.of(4,5,6)).toArray()));
     it("supports cycle", () => assert.deepEqual(
         [1,2,3,1,2,3,1,2], Stream.of(1,2,3).cycle().take(8).toArray()));
+    it("takes advantage of isEmpty", () => {
+        const stream = Stream.of(1,2,3);
+        if (!stream.isEmpty()) {
+            stream.head().get();
+        }
+    });
 });
 
 describe("Stream filtering", () => {

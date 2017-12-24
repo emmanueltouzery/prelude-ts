@@ -23,6 +23,7 @@ node dist/scripts/make_doc_extra/make_doc_preprocess.js
 sed -i "s/const Option/const optionGlabiboulga/" src/Option.ts
 sed -i "s/const Either/const eitherGlabiboulga/" src/Either.ts
 sed -i "s/const LinkedList/const linkedListGlabiboulga/" src/LinkedList.ts
+sed -i "s/const Stream/const streamGlabiboulga/" src/Stream.ts
 
 # generate with typedoc
 ./node_modules/typedoc/bin/typedoc --exclude "**/make_doc_extra/*.ts" --mode file --out apidoc --excludePrivate --excludeExternals --excludeNotExported --ignoreCompilerErrors src/index.ts
@@ -34,6 +35,8 @@ find apidoc -name "*.html" -exec sed -i 's/eitherglabiboulga/Either/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/either<wbr>Glabiboulga/Either/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/linkedlistglabiboulga/LinkedList/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/linked<wbr>List<wbr>Glabiboulga/LinkedList/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/streamglabiboulga/Stream/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/stream<wbr>Glabiboulga/Stream/g' \{\} \;
 
 # modify the output to say 'File' instead of 'Module'
 find apidoc -name "*.html" -exec sed -i 's/Module/File/g' \{\} \;

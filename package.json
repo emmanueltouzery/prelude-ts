@@ -37,7 +37,7 @@
     "homepage": "https://github.com/emmanueltouzery/prelude.ts#readme",
     "scripts": {
         "prepublish": "scripts/prepublish.sh",
-        "test": "tsc && node ./dist/tests/Comments.js && tsc && ./node_modules/mocha/bin/mocha --timeout 15000 ./dist/tests/*.js",
+        "test": "tsc && node ./dist/tests/Comments.js && tsc && ./node_modules/mocha/bin/mocha --timeout 30000 ./dist/tests/*.js",
         "clean": "rm -Rf ./dist",
         "docgen": "./scripts/make_doc.sh",
         "benchmarks": "tsc && node ./dist/benchmarks/bench.js"
