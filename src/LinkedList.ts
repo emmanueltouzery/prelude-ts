@@ -2,6 +2,13 @@
  * A sequence of values, organized in-memory as a strict linked list.
  * Each element has an head (value) and a tail (the rest of the list).
  *
+ * The code is organized through the class [[EmptyLinkedList]] (empty list
+ * or tail), the class [[ConsLinkedList]] (list value and pointer to next),
+ * and the type alias [[LinkedList]] (empty or cons).
+ *
+ * Finally, "static" functions on Option are arranged in the class
+ * [[LinkedListStatic]] and are accessed through the global constant LinkedList.
+ *
  * Random access is expensive, appending is expensive, prepend or getting
  * the tail of the list is very cheap.
  * If you often need random access you should rather use [[Vector]].
@@ -94,6 +101,7 @@ export const LinkedList = new LinkedListStatic();
 
 /**
  * A LinkedList is either [[EmptyLinkedList]] or [[ConsLinkedList]]
+ * "static methods" available through [[LinkedListStatic]]
  * @param T the item type
  */
 export type LinkedList<T> = EmptyLinkedList<T> | ConsLinkedList<T>;
@@ -102,6 +110,8 @@ export type LinkedList<T> = EmptyLinkedList<T> | ConsLinkedList<T>;
  * EmptyLinkedList is the empty linked list; every non-empty
  * linked list also has a pointer to an empty linked list
  * after its last element.
+ * "static methods" available through [[LinkedListStatic]]
+ * @param T the item type
  */
 export class EmptyLinkedList<T> implements Seq<T> {
 
@@ -126,6 +136,9 @@ export class EmptyLinkedList<T> implements Seq<T> {
         }
     }
 
+    /**
+     * @hidden
+     */
     readonly className: "EmptyLinkedList";  // https://stackoverflow.com/a/47841595/516188
 
     /**
@@ -686,9 +699,14 @@ export class EmptyLinkedList<T> implements Seq<T> {
  * which could be [[ConsLinkedList]] or [[EmptyLinkedList]].
  * A ConsLinkedList is basically a non-empty linked list. It will
  * contain at least one element.
+ * "static methods" available through [[LinkedListStatic]]
+ * @param T the item type
  */
 export class ConsLinkedList<T> implements Seq<T> {
 
+    /**
+     * @hidden
+     */
     readonly className: "ConsLinkedList";  // https://stackoverflow.com/a/47841595/516188
 
     /**

@@ -1,6 +1,13 @@
 /**
  * A lazy, potentially infinite, sequence of values.
  *
+ * The code is organized through the class [[EmptyStream]] (empty list
+ * or tail), the class [[ConsStream]] (list value and lazy pointer to next),
+ * and the type alias [[Stream]] (empty or cons).
+ *
+ * Finally, "static" functions on Option are arranged in the class
+ * [[StreamStatic]] and are accessed through the global constant Stream.
+ *
  * Use take() for instance to reduce an infinite stream to a finite one.
  *
  * Examples:
@@ -28,6 +35,7 @@ import * as SeqHelpers from "./SeqHelpers";
 
 /**
  * A Stream is either [[EmptyStream]] or [[ConsStream]]
+ * "static methods" available through [[StreamStatic]]
  * @param T the item type
  */
 export type Stream<T> = EmptyStream<T> | ConsStream<T>;
@@ -136,9 +144,14 @@ export const Stream = new StreamStatic();
  * EmptyStream is the empty stream; every non-empty
  * stream also has a pointer to an empty stream
  * after its last element.
+ * "static methods" available through [[StreamStatic]]
+ * @param T the item type
  */
 export class EmptyStream<T> implements Seq<T> {
 
+    /**
+     * @hidden
+     */
     readonly className: "EmptyStream";  // https://stackoverflow.com/a/47841595/516188
 
     /**
@@ -750,9 +763,14 @@ export class EmptyStream<T> implements Seq<T> {
  * which could be [[ConsStream]] or [[EmptyStream]].
  * A ConsStream is basically a non-empty stream. It will
  * contain at least one element.
+ * "static methods" available through [[StreamStatic]]
+ * @param T the item type
  */
 export class ConsStream<T> implements Seq<T> {
 
+    /**
+     * @hidden
+     */
     readonly className: "ConsStream";  // https://stackoverflow.com/a/47841595/516188
 
     /**

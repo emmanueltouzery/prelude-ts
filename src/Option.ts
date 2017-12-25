@@ -38,6 +38,7 @@ import { contractTrueEquality} from "./Contract";
 
 /**
  * An Option is either [[Some]] or [[None]]
+ * "static methods" available through [[OptionStatic]]
  * @param T the item type
  */
 export type Option<T> = Some<T> | None<T>;
@@ -183,11 +184,18 @@ function optionHasTrueEquality<T>(opt: Option<T>): boolean {
 
 /**
  * Some represents an [[Option]] with a value.
+ * "static methods" available through [[OptionStatic]]
  * @param T the item type
  */
 export class Some<T> implements Value {
+    /**
+     * @hidden
+     */
     constructor(private value: T) {}
 
+    /**
+     * @hidden
+     */
     readonly className: "Some";  // https://stackoverflow.com/a/47841595/516188
 
     /**
@@ -389,10 +397,14 @@ export class Some<T> implements Value {
 
 /**
  * None represents an [[Option]] without value.
+ * "static methods" available through [[OptionStatic]]
  * @param T the item type
  */
 export class None<T> implements Value {
 
+    /**
+     * @hidden
+     */
     readonly className: "None";  // https://stackoverflow.com/a/47841595/516188
 
     /**

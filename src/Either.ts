@@ -16,7 +16,7 @@
  *     Either.right<number,number>(5).map(x => x*2);
  *
  * Left has the extra [[Left.getLeft]] method that [[Right]] doesn't have.
- * Right has the extra [[Right.getRight]] method that [[Left]] doesn't have.
+ * Right has the extra [[Right.get]] method that [[Left]] doesn't have.
  */
     
 import { Value } from "./Value";
@@ -152,18 +152,23 @@ export const Either = new EitherStatic();
  * Either represents an alternative between two value types.
  * A "left" value which is also conceptually tied to a failure,
  * or a "right" value which is conceptually tied to success.
+ * "static methods" available through [[EitherStatic]]
  */
 export type Either<L,R> = Left<L,R> | Right<L,R>;
 
 /**
  * Represents an [[Either]] containing a left value,
  * conceptually tied to a failure.
+ * "static methods" available through [[EitherStatic]]
  * @param L the "left" item type 'failure'
  * @param R the "right" item type 'success'
  */
 export class Left<L,R> implements Value {
     constructor(private value: L) {}
 
+    /**
+     * @hidden
+     */
     readonly className: "Left";  // https://stackoverflow.com/a/47841595/516188
 
     /**
@@ -391,12 +396,16 @@ export class Left<L,R> implements Value {
 /**
  * Represents an [[Either]] containing a success value,
  * conceptually tied to a success.
+ * "static methods" available through [[EitherStatic]]
  * @param L the "left" item type 'failure'
  * @param R the "right" item type 'success'
  */
 export class Right<L,R> implements Value {
     constructor(private value: R) {}
 
+    /**
+     * @hidden
+     */
     readonly className: "Right";  // https://stackoverflow.com/a/47841595/516188
 
     /**
