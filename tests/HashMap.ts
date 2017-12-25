@@ -113,6 +113,12 @@ describe("hashmap equality", () => {
         false, HashMap.empty().equals(<any>[1,2])));
     it("empty doesn't throw when given null on equals", () => assert.equal(
         false, HashMap.empty().equals(<any>null)));
+    it("should refuse keys which don't offer true equality (neither equals nor hashcode)", () => assert.throws(
+        () => HashMap.of([<any>{name:""}, 1])));
+    it("should refuse keys which don't offer true equality (no hashcode)", () => assert.throws(
+        () => HashMap.of([<any>{name:"",equals:(x:any,y:any)=>true},1])));
+    it("should refuse keys which don't offer true equality (no equals)", () => assert.throws(
+        () => HashMap.of([<any>{name:"",hashCode:()=>1},1])));
     it("should refuse keys which don't offer true equality", () => assert.throws(
         () => HashMap.of([Vector.of([1]),"value"])));
     it("should refuse keys which don't offer true equality (vector)", () => assert.throws(

@@ -112,6 +112,12 @@ describe("hashset equality", () => {
         false, HashSet.of(1).equals(<any>null)));
     it("should refuse elements which don't offer true equality", () => assert.throws(
         () => HashSet.of(Vector.of([1]))));
+    it("should refuse elements which don't offer true equality (neither equals nor hashcode)", () => assert.throws(
+        () => HashSet.of(<any>{name:""})));
+    it("should refuse elements which don't offer true equality (no hashcode)", () => assert.throws(
+        () => HashSet.of(<any>{name:"",equals:(x:any,y:any)=>true})));
+    it("should refuse elements which don't offer true equality (no equals)", () => assert.throws(
+        () => HashSet.of(<any>{name:"",hashCode:()=>1})));
     it("should refuse elements which don't offer true equality (vector)", () => assert.throws(
         () => HashSet.empty().add(Vector.of(Vector.of([1])))));
     it("should refuse elements which don't offer true equality (stream)", () => assert.throws(
