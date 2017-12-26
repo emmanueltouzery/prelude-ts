@@ -26,6 +26,12 @@ export type HasEquals = {equals(other: any): boolean; hashCode(): number;};
  * or ===
  */
 export function hasEquals(v: WithEquality): v is HasEquals {
+    // there is a reason why we check only for equals, not for hashCode.
+    // we want to decide which codepath to take: === or equals/hashcode.
+    // if there is a equals function then we don't want ===, regardless of
+    // whether there is a hashCode method or not. If there is a equals
+    // and not hashCode, we want to go on the equals/hashCode codepath,
+    // which will blow a little later at runtime if the hashCode is missing.
     return ((<HasEquals>v).equals !== undefined);
 }
 
