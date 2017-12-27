@@ -38,7 +38,7 @@ immutable collections, `list.append(newItem)` keeps `list` unchanged; `append()`
 returns a new list. Immutability helps reasonning about code.
 
 You can check the **[User Guide](https://github.com/emmanueltouzery/prelude.ts/wiki/Prelude.ts-user-guide)**, and browse the
-**[API documentation](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html)**.
+**[API documentation](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html)**.
 Note that the constructors are private, and you should use static methods to build
 items, for instance `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
 
@@ -84,7 +84,7 @@ prelude.ts will reject the code at runtime; for instance if you call
 
     Error building a HashSet: element doesn't support true equality: Vector([1])
 
-(this behavior is [customizable](http://emmanueltouzery.github.io/prelude.ts/apidoc/globals.html#setcontractviolationaction)).
+(this behavior is [customizable](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html#setcontractviolationaction)).
 
 ## Installation
 
@@ -148,7 +148,7 @@ then you can get
 * CharSeq, a string wrapper?
 * Validation
 * Future, wrapping promises?
-* Non-empty vector?
+* Non-empty vector? (already have [non-empty linkedlist](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/classes/linkedlist.conslinkedlist.html))
 * More functions on existing classes
 
 ## Out of scope for prelude.ts
@@ -167,9 +167,19 @@ such as typescript.
   `Option` collections, implemented in functional-style ES5.
 * [immutables.js](https://facebook.github.io/immutable-js/) -- doesn't have the
   `Option` concept, the types can be clunky.
-* [sanctuary](https://github.com/sanctuary-js/sanctuary) and [ramdajs](http://ramdajs.com/)
-  push global functions like `R.filter(R.where(...))` while prelude.ts prefers a
-  fluent-api style like `list.filter(..).sortBy(...)`
+* [sanctuary](https://github.com/sanctuary-js/sanctuary)
+  offers global functions like `S.filter(S.where(...))` while prelude.ts prefers a
+  fluent-api style like `list.filter(..).sortBy(...)`. Also, sanctuary doesn't
+  offer sets and maps. On the other hand, sanctuary has some JS runtime type system
+  which prelude.ts doesn't have.
+* [ramdajs](http://ramdajs.com/) offers global functions like 
+  `R.filter(R.where(...))` while prelude.ts prefers a
+  fluent-api style like `list.filter(..).sortBy(...)`. Also, ramda doesn't offer
+  sets and maps. Ramda also uses currying a lot out of the box, which may not
+  be intuitive to a number of developers. In prelude, 
+  [currying](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function2.html#curried) 
+  & [partial application](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function2.html#apply1)
+  are opt-in.
 * [lodash](https://lodash.com) also has the global functions, and many functions
   mutate the collections.
 * [vavr](http://www.vavr.io/) -- it's a java library, but it's the main inspiration for prelude.ts.
