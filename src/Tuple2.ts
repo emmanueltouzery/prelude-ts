@@ -1,5 +1,7 @@
 import { Value } from "./Value";
 import { Option } from "./Option";
+import { Vector } from "./Vector";
+import { LinkedList } from "./LinkedList";
 import { WithEquality, areEqual, getHashCode } from "./Comparison";
 import { toStringHelper } from "./SeqHelpers";
 import { contractTrueEquality } from "./Contract";
@@ -119,6 +121,40 @@ export class Tuple2<T,U> implements Value {
     hashCode(): number {
         return getHashCode(this._fst)*53 + getHashCode(this._snd);
     }
+
+    /**
+     * Convert the tuple to a javascript pair.
+     * Compared to [[Tuple2.toArray]], it behaves the
+     * same at runtime, the only difference is the
+     * typescript type definition.
+     */
+    toPair(): [T,U] {
+        return [this._fst, this._snd];
+    }
+
+    /**
+     * Convert the tuple to a javascript array.
+     * Compared to [[Tuple2.toPair]], it behaves the
+     * same at runtime, the only difference is the
+     * typescript type definition.
+     */
+    toArray(): Array<T|U> {
+        return [this._fst, this._snd];
+    }
+
+    /**
+     * Convert the tuple to a vector.
+     */
+    toVector(): Vector<T|U> {
+        return Vector.of<T|U>(this._fst, this._snd);
+    }
+
+    /**
+     * Convert the tuple to a linked list.
+     */
+    toLinkedList(): LinkedList<T|U> {
+        return LinkedList.of<T|U>(this._fst, this._snd);
+    }
     
     /**
      * Get a human-friendly string representation of that value.
@@ -127,6 +163,10 @@ export class Tuple2<T,U> implements Value {
         return `Tuple2(${toStringHelper(this._fst)}, ${toStringHelper(this._snd)})`;
     }
 
+    /**
+     * Used by the node REPL to display values.
+     * Most of the time should be the same as toString()
+     */
     inspect(): string {
         return this.toString();
     }
