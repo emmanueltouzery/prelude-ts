@@ -185,6 +185,9 @@ function optionHasTrueEquality<T>(opt: Option<T>): boolean {
 /**
  * Some represents an [[Option]] with a value.
  * "static methods" available through [[OptionStatic]]
+ *
+ * [[Some]] and [[None]] have the same methods, except that
+ * Some has the extra [[Some.get]] method that [[None]] doesn't have.
  * @param T the item type
  */
 export class Some<T> implements Value {
@@ -398,6 +401,9 @@ export class Some<T> implements Value {
 /**
  * None represents an [[Option]] without value.
  * "static methods" available through [[OptionStatic]]
+ *
+ * [[Some]] and [[None]] have the same methods, except that
+ * Some has the extra [[Some.get]] method that [[None]] doesn't have.
  * @param T the item type
  */
 export class None<T> implements Value {

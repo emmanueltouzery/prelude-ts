@@ -25,7 +25,7 @@ export class Tuple2<T,U> implements Value {
 
     /**
      * Build a tuple2 from javascript array. Compared to [[Tuple2.ofPair]],
-     * it checks the length of the array and will return [[Option.none]] in case
+     * it checks the length of the array and will return [[None]] in case
      * the length isn't two. However the types of the elements aren't checked.
      */
     static ofArray<T,U>(pair: Array<T|U>): Option<Tuple2<T,U>> {
