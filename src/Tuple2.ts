@@ -1,7 +1,7 @@
 import { Value } from "./Value";
 import { Option } from "./Option";
 import { Vector } from "./Vector";
-import { LinkedList } from "./LinkedList";
+import { LinkedList, ConsLinkedList } from "./LinkedList";
 import { WithEquality, areEqual, getHashCode } from "./Comparison";
 import { toStringHelper } from "./SeqHelpers";
 import { contractTrueEquality } from "./Contract";
@@ -14,7 +14,7 @@ import { contractTrueEquality } from "./Contract";
  * @param U the second item type
  */
 export class Tuple2<T,U> implements Value {
-    
+
     private constructor(private _fst: T,
                         private _snd: U) {}
 
@@ -112,7 +112,7 @@ export class Tuple2<T,U> implements Value {
         return areEqual(this._fst, other._fst) &&
             areEqual(this._snd, other._snd);
     }
-    
+
     /**
      * Get a number for that object. Two different values
      * may get the same number, but one value must always get
@@ -152,10 +152,10 @@ export class Tuple2<T,U> implements Value {
     /**
      * Convert the tuple to a linked list.
      */
-    toLinkedList(): LinkedList<T|U> {
+    toLinkedList(): ConsLinkedList<T|U> {
         return LinkedList.of<T|U>(this._fst, this._snd);
     }
-    
+
     /**
      * Get a human-friendly string representation of that value.
      */
