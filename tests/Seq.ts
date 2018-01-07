@@ -247,6 +247,15 @@ export function runTests(seqName: string,
             assert.deepEqual(ofIterable(ar).take(n).toArray(),
                              ar.slice(0,Math.max(0,n)));
         });
+        it("correctly implements sliding on a non-empty seq", () => {
+            assert.deepEqual([[1,2],[3,4],[5,6]], of(1,2,3,4,5,6).sliding(2).map(x => x.toArray()).toArray())
+        });
+        it("correctly implements sliding on a non-empty seq with length non-multiple of count", () => {
+            assert.deepEqual([[1,2,3],[4,5,6],[7]], of(1,2,3,4,5,6,7).sliding(3).map(x => x.toArray()).toArray())
+        });
+        it("correctly implements sliding on an empty seq", () => {
+            assert.deepEqual([], empty().sliding(2).map(x => x.toArray()).toArray())
+        });
     });
     describe(seqName + " filtering", () => {
         it("filter works", () => assert.ok(

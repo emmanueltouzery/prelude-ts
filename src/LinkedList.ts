@@ -31,6 +31,7 @@ import { HashMap } from "./HashMap";
 import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
 import { Seq } from "./Seq";
+import { Stream } from "./Stream";
 import * as SeqHelpers from "./SeqHelpers";
 
 /**
@@ -613,6 +614,17 @@ export class EmptyLinkedList<T> implements Seq<T> {
      */
     sumOn(getNumber: (v:T)=>number): number {
         return SeqHelpers.sumOn(this, getNumber);
+    }
+
+    /**
+     * Slides a window of a specific size over the sequence.
+     * Returns a lazy stream so memory use is not prohibitive.
+     *
+     *     LinkedList.of(1,2,3,4,5,6,7,8).sliding(3)
+     *     => Stream.of(LinkedList.of(1,2,3), LinkedList.of(4,5,6), LinkedList.of(7,8))
+     */
+    sliding(count:number): Stream<LinkedList<T>> {
+        return <Stream<LinkedList<T>>>SeqHelpers.sliding(this, count);
     }
 
     /**
@@ -1353,6 +1365,17 @@ export class ConsLinkedList<T> implements Seq<T> {
      */
     sumOn(getNumber: (v:T)=>number): number {
         return SeqHelpers.sumOn(this, getNumber);
+    }
+
+    /**
+     * Slides a window of a specific size over the sequence.
+     * Returns a lazy stream so memory use is not prohibitive.
+     *
+     *     LinkedList.of(1,2,3,4,5,6,7,8).sliding(3)
+     *     => Stream.of(LinkedList.of(1,2,3), LinkedList.of(4,5,6), LinkedList.of(7,8))
+     */
+    sliding(count:number): Stream<LinkedList<T>> {
+        return <Stream<LinkedList<T>>>SeqHelpers.sliding(this, count);
     }
 
     /**

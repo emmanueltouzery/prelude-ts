@@ -673,6 +673,17 @@ export class EmptyStream<T> implements Seq<T> {
     }
 
     /**
+     * Slides a window of a specific size over the sequence.
+     * Returns a lazy stream so memory use is not prohibitive.
+     *
+     *     Stream.of(1,2,3,4,5,6,7,8).sliding(3)
+     *     => Stream.of(Stream.of(1,2,3), Stream.of(4,5,6), Stream.of(7,8))
+     */
+    sliding(count:number): Stream<Stream<T>> {
+        return <Stream<Stream<T>>>SeqHelpers.sliding(this, count);
+    }
+
+    /**
      * Joins elements of the collection by a separator.
      * Example:
      *
@@ -1303,7 +1314,7 @@ export class ConsStream<T> implements Seq<T> {
     sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T> {
         return Stream.ofIterable<T>(this.toArray().sort(compare));
     }
-    
+
     /**
      * Give a function associating a number or a string with
      * elements from the collection, and the elements
@@ -1397,6 +1408,17 @@ export class ConsStream<T> implements Seq<T> {
      */
     sumOn(getNumber: (v:T)=>number): number {
         return SeqHelpers.sumOn(this, getNumber);
+    }
+
+    /**
+     * Slides a window of a specific size over the sequence.
+     * Returns a lazy stream so memory use is not prohibitive.
+     *
+     *     Stream.of(1,2,3,4,5,6,7,8).sliding(3)
+     *     => Stream.of(Stream.of(1,2,3), Stream.of(4,5,6), Stream.of(7,8))
+     */
+    sliding(count:number): Stream<Stream<T>> {
+        return <Stream<Stream<T>>>SeqHelpers.sliding(this, count);
     }
 
     /**

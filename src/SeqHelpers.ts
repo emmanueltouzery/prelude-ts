@@ -3,7 +3,8 @@ import { WithEquality, hasTrueEquality, Ordering } from "./Comparison";
 import { HashMap } from "./HashMap";
 import { Seq } from "./Seq";
 import { Collection } from "./Collection";
-import { Stream } from "./Stream";
+import { Stream, ConsStream } from "./Stream";
+import { Lazy } from "./Lazy";
 import { HashSet } from "./HashSet";
 
 /**
@@ -179,4 +180,17 @@ export function reduce<T>(coll: Collection<T>, combine: (v1:T,v2:T)=>T): Option<
         result = combine(result, step.value);
     }
     return Option.of(result);
+}
+
+/**
+ * @hidden
+ */
+export function sliding<T>(seq: Seq<T>, count:number): Stream<Seq<T>> {
+    // in a way should get better performance with Seq.splitAt instead
+    // of Seq.take+Seq.drop, but we should be lazy and not hold another
+    // version of the sequence in memory (though for linked list it's free,
+    // it's not the case for Vector)
+    return seq.isEmpty() ?
+        Stream.empty<Seq<T>>() :
+        new ConsStream(seq.take(count), Lazy.of(() => sliding(seq.drop(count), count)));
 }

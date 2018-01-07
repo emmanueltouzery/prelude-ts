@@ -1,6 +1,7 @@
 import { Option } from "./Option";
 import { HashMap } from "./HashMap";
 import { IMap } from "./IMap";
+import { Stream } from "./Stream";
 import { Seq } from "./Seq";
 import { WithEquality, areEqual, getHashCode,
          Ordering } from "./Comparison";
@@ -1146,5 +1147,16 @@ export class Vector<T> implements Seq<T> {
      */
     sumOn(getNumber: (v:T)=>number): number {
         return SeqHelpers.sumOn(this, getNumber);
+    }
+
+    /**
+     * Slides a window of a specific size over the sequence.
+     * Returns a lazy stream so memory use is not prohibitive.
+     *
+     *     Vector.of(1,2,3,4,5,6,7,8).sliding(3)
+     *     => Stream.of(Vector.of(1,2,3), Vector.of(4,5,6), Vector.of(7,8))
+     */
+    sliding(count:number): Stream<Vector<T>> {
+        return <Stream<Vector<T>>>SeqHelpers.sliding(this, count);
     }
 }

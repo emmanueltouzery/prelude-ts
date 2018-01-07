@@ -2,6 +2,7 @@ import { WithEquality, Ordering } from "./Comparison";
 import { HashMap } from "./HashMap";
 import { Option } from "./Option";
 import { Collection } from "./Collection";
+import { Stream } from "./Stream";
 
 /**
  * A generic interface for list-like implementations.
@@ -225,6 +226,15 @@ export interface Seq<T> extends Collection<T> {
      *     => [Vector.of(1,2,3), Vector.of(4,5)]
      */
     splitAt(index:number): [Seq<T>,Seq<T>];
+
+    /**
+     * Slides a window of a specific size over the sequence.
+     * Returns a lazy stream so memory use is not prohibitive.
+     *
+     *     Vector.of(1,2,3,4,5,6,7,8).sliding(3)
+     *     => Stream.of(Vector.of(1,2,3), Vector.of(4,5,6), Vector.of(7,8))
+     */
+    sliding(count:number): Stream<Seq<T>>;
 
     /**
      * Convert this collection to a map. You give a function which
