@@ -623,8 +623,8 @@ export class EmptyLinkedList<T> implements Seq<T> {
      *     LinkedList.of(1,2,3,4,5,6,7,8).sliding(3)
      *     => Stream.of(LinkedList.of(1,2,3), LinkedList.of(4,5,6), LinkedList.of(7,8))
      */
-    sliding(count:number): Stream<LinkedList<T>> {
-        return <Stream<LinkedList<T>>>SeqHelpers.sliding(this, count);
+    sliding(count:number): Stream<ConsLinkedList<T>> {
+        return <Stream<ConsLinkedList<T>>>SeqHelpers.sliding(this, count);
     }
 
     /**
@@ -1374,8 +1374,8 @@ export class ConsLinkedList<T> implements Seq<T> {
      *     LinkedList.of(1,2,3,4,5,6,7,8).sliding(3)
      *     => Stream.of(LinkedList.of(1,2,3), LinkedList.of(4,5,6), LinkedList.of(7,8))
      */
-    sliding(count:number): Stream<LinkedList<T>> {
-        return <Stream<LinkedList<T>>>SeqHelpers.sliding(this, count);
+    sliding(count:number): Stream<ConsLinkedList<T>> {
+        return <Stream<ConsLinkedList<T>>>SeqHelpers.sliding(this, count);
     }
 
     /**
