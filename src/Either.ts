@@ -113,7 +113,7 @@ export class EitherStatic {
      * Takes a function which operates on a simple JS object, and turns it
      * in a function that operates on the same JS object type except which each field
      * wrapped in an Either ('lifts' the function).
-     * It's an alternative to [[Either.liftA2]] when the number of parameters
+     * It's an alternative to [[EitherStatic.liftA2]] when the number of parameters
      * is not two.
      *
      *     const fn = (x:{a:number,b:number,c:number}) => x.a+x.b+x.c;
