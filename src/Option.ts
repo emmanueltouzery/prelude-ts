@@ -50,9 +50,9 @@ export class OptionStatic {
 
     /**
      * Builds an optional value.
-     * T gives a some
-     * undefined gives a none
-     * null gives a some.
+     * * T is wrapped in a [[Some]]
+     * * undefined becomes a [[None]]
+     * * null becomes a [[Some]].
      *
      * Also see [[OptionStatic.some]]
      */
