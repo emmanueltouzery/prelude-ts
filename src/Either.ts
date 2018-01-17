@@ -71,7 +71,7 @@ export class EitherStatic {
             if (v.isLeft()) {
                 return <any>v;
             }
-            r = r.append(v.getOrThrow());
+            r = r.append(v.get());
             curItem = iterator.next();
         }
         return Either.right<L,Vector<R>>(r);

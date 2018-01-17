@@ -211,8 +211,8 @@ export class Vector<T> implements Seq<T> {
         let nextVal = fn(seed);
         let r = Vector.emptyMutable<U>();
         while (nextVal.isSome()) {
-            r.append(nextVal.getOrThrow()[0]);
-            nextVal = fn(nextVal.getOrThrow()[1]);
+            r.append(nextVal.get()[0]);
+            nextVal = fn(nextVal.get()[1]);
         }
         return r.getVector();
     }
@@ -621,7 +621,7 @@ export class Vector<T> implements Seq<T> {
         for (let i = 0; i < this._length; i++) {
             const v = mapper(this.internalGet(i));
             if (v.isSome()) {
-                mutVec.append(v.getOrThrow());
+                mutVec.append(v.get());
             }
         }
         return mutVec.getVector();

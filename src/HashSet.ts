@@ -123,7 +123,7 @@ export class HashSet<T> implements ISet<T> {
         return this.hamt.fold(
             (acc: HashSet<U>, value: T&WithEquality, key: T&WithEquality) => {
                 const val = mapper(value);
-                return val.isSome() ? acc.add(val.getOrThrow()) : acc
+                return val.isSome() ? acc.add(val.get()) : acc
             }, HashSet.empty());
     }
 
