@@ -28,4 +28,6 @@ makeModule("Option", "src/Option.ts");
 makeModule("Either", "src/Either.ts");
 makeModule("LinkedList", "src/LinkedList.ts");
 makeModule("Stream", "src/Stream.ts");
+makeModule("Function", "src/Function.ts");
+makeModule("Predicate", "src/Predicate.ts");
 

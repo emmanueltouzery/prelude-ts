@@ -24,6 +24,12 @@ sed -i "s/const Option/const optionGlabiboulga/" src/Option.ts
 sed -i "s/const Either/const eitherGlabiboulga/" src/Either.ts
 sed -i "s/const LinkedList/const linkedListGlabiboulga/" src/LinkedList.ts
 sed -i "s/const Stream/const streamGlabiboulga/" src/Stream.ts
+sed -i "s/const Function1/const function1Glabiboulga/" src/Function.ts
+sed -i "s/const Function2/const function2Glabiboulga/" src/Function.ts
+sed -i "s/const Function3/const function3Glabiboulga/" src/Function.ts
+sed -i "s/const Function4/const function4Glabiboulga/" src/Function.ts
+sed -i "s/const Function5/const function5Glabiboulga/" src/Function.ts
+sed -i "s/const Predicate/const predicateGlabiboulga/" src/Predicate.ts
 
 # generate with typedoc
 ./node_modules/typedoc/bin/typedoc --exclude "**/make_doc_extra/*.ts" --mode file --out apidoc --excludePrivate --excludeExternals --excludeNotExported --ignoreCompilerErrors src/index.ts
@@ -37,6 +43,18 @@ find apidoc -name "*.html" -exec sed -i 's/linkedlistglabiboulga/LinkedList/g' \
 find apidoc -name "*.html" -exec sed -i 's/linked<wbr>List<wbr>Glabiboulga/LinkedList/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/streamglabiboulga/Stream/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/stream<wbr>Glabiboulga/Stream/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function1glabiboulga/Function1/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function1<wbr>Glabiboulga/Function1/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function2glabiboulga/Function2/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function2<wbr>Glabiboulga/Function2/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function3glabiboulga/Function3/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function3<wbr>Glabiboulga/Function3/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function4glabiboulga/Function4/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function4<wbr>Glabiboulga/Function4/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function5glabiboulga/Function5/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function5<wbr>Glabiboulga/Function5/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/predicateglabiboulga/Predicate/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/predicate<wbr>Glabiboulga/Predicate/g' \{\} \;
 
 # modify the output to say 'File' instead of 'Module'
 find apidoc -name "*.html" -exec sed -i 's/Module/File/g' \{\} \;

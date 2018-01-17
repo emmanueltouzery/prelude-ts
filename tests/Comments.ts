@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, readdirSync } from "fs";
 import { Vector } from "../src/Vector";
 import { Option } from "../src/Option";
-import { Function } from "../src/Function";
+import { Function2 } from "../src/Function";
 import * as ts from 'typescript';
 
 /**
@@ -61,7 +61,7 @@ function getCommentsInlineCode(scanner: ts.Scanner): Vector<SampleInfo> {
         if (!curCodeSample.isEmpty() &&
             token === ts.SyntaxKind.Identifier) {
             codeSamples = codeSamples.appendAll(
-                curCodeSample.map(Function.lift2(getCodeSampleInfo).apply1(scanner.getTokenText())));
+                curCodeSample.map(Function2.lift(getCodeSampleInfo).apply1(scanner.getTokenText())));
             curCodeSample = Vector.empty<string>();
         }
         if ((token === ts.SyntaxKind.SingleLineCommentTrivia) ||
@@ -157,9 +157,9 @@ function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>
         import { HashSet } from "../src/HashSet";
         import { HashMap } from "../src/HashMap";
         import { Stream } from "../src/Stream";
-        import { Function, Function1, Function2,
+        import { Function1, Function2,
                  Function3, Function4, Function5 } from "../src/Function";
-        import { Predicate, Predicates } from "../src/Predicate";
+        import { Predicate } from "../src/Predicate";
         import { Either, Left, Right } from "../src/Either";
         import { Option, Some, None } from "../src/Option";
         import * as assert from 'assert';
@@ -196,7 +196,7 @@ function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>
              Math.random = mockMathRandom;
         }
 
-        ${samplesInfo.map(Function.lift2(generateTestContents).apply1(fname)).mkString("\n")}
+        ${samplesInfo.map(Function2.lift(generateTestContents).apply1(fname)).mkString("\n")}
     `;
 }
 

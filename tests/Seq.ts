@@ -2,7 +2,7 @@ import { Seq } from "../src/Seq";
 import { HashMap } from "../src/HashMap";
 import { Stream } from "../src/Stream";
 import { Option } from "../src/Option";
-import { Predicates } from "../src/Predicate";
+import { Predicate } from "../src/Predicate";
 import { MyClass } from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as CollectionTest from './Collection';
@@ -281,9 +281,9 @@ export function runTests(seqName: string,
         it("returns an empty stream when dropping too much", () => assert.deepEqual(
             [], of(1,2).drop(3).toArray()));
         it("calculates removeFirst well", () => assert.deepEqual(
-            [0,1,3,4], of(0,1,2,3,4).removeFirst(Predicates.isIn([3,2])).toArray()));
+            [0,1,3,4], of(0,1,2,3,4).removeFirst(Predicate.isIn([3,2])).toArray()));
         it("calculates removeFirst well event if item not present", () => assert.deepEqual(
-            [0,1,2,3,4], of(0,1,2,3,4).removeFirst(Predicates.equals(5)).toArray()));
+            [0,1,2,3,4], of(0,1,2,3,4).removeFirst(Predicate.equals(5)).toArray()));
         it("calculates removeFirst from empty well", () => assert.ok(
             empty<number>().equals(empty<number>().removeFirst(x => x === 3))));
         it("handles a simple splitAt", () => assert.deepEqual(
