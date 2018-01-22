@@ -18,6 +18,7 @@
  *     => 6
  */
 import { Option } from "./Option";
+import { Either } from "./Either";
 
 /**
  * Function1 encapsulates a function taking a single parameter
@@ -360,6 +361,20 @@ export class Function1Static {
     /**
      * Take a one-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const add = Function1.liftOption((x:number)=>x+1);
+     *     add(1);
+     *     => Option.of(2)
+     *
+     *     const undef = Function1.liftOption((x:number)=>undefined);
+     *     undef(1);
+     *     => Option.none()
+     *
+     *     const throws = Function1.liftOption((x:number)=>{throw "x"});
+     *     throws(1);
+     *     => Option.none()
+     *
      */
     liftOption<T,U>(fn:(x:T)=>U|undefined): Function1<T,Option<U>> {
         return Function1.lift(x => {
@@ -368,6 +383,39 @@ export class Function1Static {
             } catch {
                 return Option.none<U>();
             }
+        });
+    }
+
+    /**
+     * Take a one-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Either]] instead.
+     * Note that unlike the [[Function1Static.liftOption]] version, if
+     * the function returns undefined, the liftEither version will throw
+     * (the liftOption version returns None()).
+     *
+     *     const add1 = Function1.liftEither((x:number) => x+1, {} as string);
+     *     add1(1);
+     *     => Either.right(2)
+     *
+     *     const undef = Function1.liftEither((x:number) => undefined);
+     *     undef(1);
+     *     => throws
+     *
+     *     const throws = Function1.liftEither((x:number) => {throw "x"});
+     *     throws(1);
+     *     => Either.left("x")
+     */
+    liftEither<T,L,U>(fn:(x:T)=>U, witness?: L): Function1<T,Either<L,U>> {
+        return Function1.lift(x => {
+            try {
+                const r = fn(x);
+                if (r !== undefined) {
+                    return Either.right(r);
+                }
+            } catch (err) {
+                return Either.left(err);
+            }
+            throw "liftEither got undefined!";
         });
     }
 }
@@ -404,6 +452,19 @@ export class Function2Static {
     /**
      * Take a two-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const plus = Function2.liftOption((x:number,y:number)=>x+y);
+     *     plus(1,2);
+     *     => Option.of(3)
+     *
+     *     const undef = Function2.liftOption((x:number,y:number)=>undefined);
+     *     undef(1,2);
+     *     => Option.none()
+     *
+     *     const throws = Function2.liftOption((x:number,y:number)=>{throw "x"});
+     *     throws(1,2);
+     *     => Option.none()
      */
     liftOption<T1,T2,R>(fn:(x:T1,y:T2)=>R|undefined): Function2<T1,T2,Option<R>> {
         return Function2.lift((x,y) => {
@@ -412,6 +473,39 @@ export class Function2Static {
             } catch {
                 return Option.none<R>();
             }
+        });
+    }
+
+    /**
+     * Take a two-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Either]] instead.
+     * Note that unlike the [[Function2Static.liftOption]] version, if
+     * the function returns undefined, the liftEither version will throw
+     * (the liftOption version returns None()).
+     *
+     *     const add = Function2.liftEither((x:number,y:number) => x+y, {} as string);
+     *     add(1,2);
+     *     => Either.right(3)
+     *
+     *     const undef = Function2.liftEither((x:number,y:number) => undefined);
+     *     undef(1,2);
+     *     => throws
+     *
+     *     const throws = Function2.liftEither((x:number,y:number) => {throw "x"});
+     *     throws(1,2);
+     *     => Either.left("x")
+     */
+    liftEither<T1,T2,L,R>(fn:(x:T1,y:T2)=>R, witness?: L): Function2<T1,T2,Either<L,R>> {
+        return Function2.lift((x,y) => {
+            try {
+                const r = fn(x,y);
+                if (r !== undefined) {
+                    return Either.right(r);
+                }
+            } catch (err) {
+                return Either.left(err);
+            }
+            throw "liftEither got undefined!";
         });
     }
 }
@@ -449,6 +543,22 @@ export class Function3Static {
     /**
      * Take a three-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const add3 = Function3.liftOption(
+     *         (x:number,y:number,z:number)=>x+y+z);
+     *     add3(1,2,3);
+     *     => Option.of(6)
+     *
+     *     const undef = Function3.liftOption(
+     *         (x:number,y:number,z:number)=>undefined);
+     *     undef(1,2,3);
+     *     => Option.none()
+     *
+     *     const throws = Function3.liftOption(
+     *         (x:number,y:number,z:number)=>{throw "x"});
+     *     throws(1,2,3);
+     *     => Option.none()
      */
     liftOption<T1,T2,T3,R>(
         fn:(x:T1,y:T2,z:T3)=>R|undefined): Function3<T1,T2,T3,Option<R>> {
@@ -458,6 +568,39 @@ export class Function3Static {
             } catch {
                 return Option.none<R>();
             }
+        });
+    }
+
+    /**
+     * Take a three-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Either]] instead.
+     * Note that unlike the [[Function3Static.liftOption]] version, if
+     * the function returns undefined, the liftEither version will throw
+     * (the liftOption version returns None()).
+     *
+     *     const add3 = Function3.liftEither((x:number,y:number,z:number) => x+y+z, {} as string);
+     *     add3(1,2,3);
+     *     => Either.right(6)
+     *
+     *     const undef = Function3.liftEither((x:number,y:number,z:number) => undefined);
+     *     undef(1,2,3);
+     *     => throws
+     *
+     *     const throws = Function3.liftEither((x:number,y:number,z:number) => {throw "x"});
+     *     throws(1,2,3);
+     *     => Either.left("x")
+     */
+    liftEither<T1,T2,T3,L,R>(fn:(x:T1,y:T2,z:T3)=>R, witness?: L): Function3<T1,T2,T3,Either<L,R>> {
+        return Function3.lift((x,y,z) => {
+            try {
+                const r = fn(x,y,z);
+                if (r !== undefined) {
+                    return Either.right(r);
+                }
+            } catch (err) {
+                return Either.left(err);
+            }
+            throw "liftEither got undefined!";
         });
     }
 }
@@ -498,6 +641,22 @@ export class Function4Static {
     /**
      * Take a four-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const add4 = Function4.liftOption(
+     *         (x:number,y:number,z:number,a:number)=>x+y+z+a);
+     *     add4(1,2,3,4);
+     *     => Option.of(10)
+     *
+     *     const undef = Function4.liftOption(
+     *         (x:number,y:number,z:number,a:number)=>undefined);
+     *     undef(1,2,3,4);
+     *     => Option.none()
+     *
+     *     const throws = Function4.liftOption(
+     *         (x:number,y:number,z:number,a:number)=>{throw "x"});
+     *     throws(1,2,3,4);
+     *     => Option.none()
      */
     liftOption<T1,T2,T3,T4,R>(
         fn:(x:T1,y:T2,z:T3,a:T4)=>R|undefined): Function4<T1,T2,T3,T4,Option<R>> {
@@ -507,6 +666,39 @@ export class Function4Static {
             } catch {
                 return Option.none<R>();
             }
+        });
+    }
+
+    /**
+     * Take a four-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Either]] instead.
+     * Note that unlike the [[Function4Static.liftOption]] version, if
+     * the function returns undefined, the liftEither version will throw
+     * (the liftOption version returns None()).
+     *
+     *     const add4 = Function4.liftEither((x:number,y:number,z:number,a:number) => x+y+z+a, {} as string);
+     *     add4(1,2,3,4);
+     *     => Either.right(10)
+     *
+     *     const undef = Function4.liftEither((x:number,y:number,z:number,a:number) => undefined);
+     *     undef(1,2,3,4);
+     *     => throws
+     *
+     *     const throws = Function4.liftEither((x:number,y:number,z:number,a:number) => {throw "x"});
+     *     throws(1,2,3,4);
+     *     => Either.left("x")
+     */
+    liftEither<T1,T2,T3,T4,L,R>(fn:(x:T1,y:T2,z:T3,a:T4)=>R, witness?: L): Function4<T1,T2,T3,T4,Either<L,R>> {
+        return Function4.lift((x,y,z,a) => {
+            try {
+                const r = fn(x,y,z,a);
+                if (r !== undefined) {
+                    return Either.right(r);
+                }
+            } catch (err) {
+                return Either.left(err);
+            }
+            throw "liftEither got undefined!";
         });
     }
 };
@@ -547,6 +739,22 @@ export class Function5Static {
     /**
      * Take a five-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const add5 = Function5.liftOption(
+     *         (x:number,y:number,z:number,a:number,b:number)=>x+y+z+a+b);
+     *     add5(1,2,3,4,5);
+     *     => Option.of(15)
+     *
+     *     const undef = Function5.liftOption(
+     *         (x:number,y:number,z:number,a:number,b:number)=>undefined);
+     *     undef(1,2,3,4,5);
+     *     => Option.none()
+     *
+     *     const throws = Function5.liftOption(
+     *         (x:number,y:number,z:number,a:number,b:number)=>{throw "x"});
+     *     throws(1,2,3,4,5);
+     *     => Option.none()
      */
     liftOption<T1,T2,T3,T4,T5,R>(
         fn:(x:T1,y:T2,z:T3,a:T4,b:T5)=>R|undefined): Function5<T1,T2,T3,T4,T5,Option<R>> {
@@ -556,6 +764,42 @@ export class Function5Static {
             } catch {
                 return Option.none<R>();
             }
+        });
+    }
+
+    /**
+     * Take a five-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Either]] instead.
+     * Note that unlike the [[Function5Static.liftOption]] version, if
+     * the function returns undefined, the liftEither version will throw
+     * (the liftOption version returns None()).
+     *
+     *     const add5 = Function5.liftEither(
+     *         (x:number,y:number,z:number,a:number,b:number) => x+y+z+a+b, {} as string);
+     *     add5(1,2,3,4,5);
+     *     => Either.right(15)
+     *
+     *     const undef = Function5.liftEither(
+     *         (x:number,y:number,z:number,a:number,b:number) => undefined);
+     *     undef(1,2,3,4,5);
+     *     => throws
+     *
+     *     const throws = Function5.liftEither(
+     *         (x:number,y:number,z:number,a:number,b:number) => {throw "x"});
+     *     throws(1,2,3,4,5);
+     *     => Either.left("x")
+     */
+    liftEither<T1,T2,T3,T4,T5,L,R>(fn:(x:T1,y:T2,z:T3,a:T4,b:T5)=>R, witness?: L): Function5<T1,T2,T3,T4,T5,Either<L,R>> {
+        return Function5.lift((x,y,z,a,b) => {
+            try {
+                const r = fn(x,y,z,a,b);
+                if (r !== undefined) {
+                    return Either.right(r);
+                }
+            } catch (err) {
+                return Either.left(err);
+            }
+            throw "liftEither got undefined!";
         });
     }
 }
