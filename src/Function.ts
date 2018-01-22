@@ -368,7 +368,7 @@ export class Function0Static {
      * enabling you to call [[Function1Static.andThen]] and other such methods on it.
      */
     lift<R>(fn:()=>R): Function0<R> {
-        const r = <Function0<R>>fn;
+        const r = <Function0<R>>(() => fn());
         r.andThen = <V>(fn2:(x:R)=>V) => Function0.lift(() => fn2(r()));
         return r;
     }
@@ -471,7 +471,7 @@ export class Function1Static {
      * enabling you to call [[Function1Static.andThen]] and other such methods on it.
      */
     lift<T,U>(fn:(x:T)=>U): Function1<T,U> {
-        const r = <Function1<T,U>>fn;
+        const r = <Function1<T,U>>(x => fn(x));
         r.andThen = <V>(fn2:(x:U)=>V) => Function1.lift((x:T) => fn2(r(x)));
         r.compose = <S>(fn2:(x:S)=>T) => Function1.lift((x:S) => r(fn2(x)));
         return r;
@@ -567,7 +567,7 @@ export class Function2Static {
      * enabling you to call [[Function2.andThen]] and other such methods on it.
      */
     lift<T1,T2,R>(fn:(x:T1,y:T2)=>R): Function2<T1,T2,R> {
-        const r = <Function2<T1,T2,R>>fn;
+        const r = <Function2<T1,T2,R>>((x,y)=>fn(x,y));
         r.andThen = <V>(fn2:(x:R)=>V) => Function2.lift((x:T1,y:T2) => fn2(r(x,y)));
         r.curried = () => Function1.lift((x:T1) => Function1.lift((y:T2) => r(x,y)));
         r.tupled = () => Function1.lift((pair:[T1,T2]) => r(pair[0],pair[1]));
@@ -665,7 +665,7 @@ export class Function3Static {
      * enabling you to call [[Function3.andThen]] and other such methods on it.
      */
     lift<T1,T2,T3,R>(fn:(x:T1,y:T2,z:T3)=>R): Function3<T1,T2,T3,R> {
-        const r = <Function3<T1,T2,T3,R>>fn;
+        const r = <Function3<T1,T2,T3,R>>((x,y,z)=>fn(x,y,z));
         r.andThen = <V>(fn2:(x:R)=>V) => Function3.lift((x:T1,y:T2,z:T3) => fn2(r(x,y,z)));
         r.curried = () => Function1.lift((x:T1) => Function1.lift((y:T2) => Function1.lift((z:T3) => r(x,y,z))));
         r.tupled = () => Function1.lift((tuple:[T1,T2,T3]) => r(tuple[0],tuple[1],tuple[2]));
@@ -769,7 +769,7 @@ export class Function4Static {
      * enabling you to call [[Function4.andThen]] and other such methods on it.
      */
     lift<T1,T2,T3,T4,R>(fn:(x:T1,y:T2,z:T3,a:T4)=>R): Function4<T1,T2,T3,T4,R> {
-        const r = <Function4<T1,T2,T3,T4,R>>fn;
+        const r = <Function4<T1,T2,T3,T4,R>>((x,y,z,a)=>fn(x,y,z,a));
         r.andThen = <V>(fn2:(x:R)=>V) => Function4.lift((x:T1,y:T2,z:T3,a:T4) => fn2(r(x,y,z,a)));
         r.curried = () => Function1.lift((x:T1) => Function1.lift(
             (y:T2) => Function1.lift((z:T3) => Function1.lift((a:T4)=>r(x,y,z,a)))));
@@ -874,7 +874,7 @@ export class Function5Static {
      * enabling you to call [[Function5.andThen]] and other such methods on it.
      */
     lift<T1,T2,T3,T4,T5,R>(fn:(x:T1,y:T2,z:T3,a:T4,b:T5)=>R): Function5<T1,T2,T3,T4,T5,R> {
-        const r = <Function5<T1,T2,T3,T4,T5,R>>fn;
+        const r = <Function5<T1,T2,T3,T4,T5,R>>((x,y,z,a,b)=>fn(x,y,z,a,b));
         r.andThen = <V>(fn2:(x:R)=>V) => Function5.lift((x:T1,y:T2,z:T3,a:T4,b:T5) => fn2(r(x,y,z,a,b)));
         r.curried = () => Function1.lift((x:T1) => Function1.lift(
             (y:T2) => Function1.lift((z:T3) => Function1.lift((a:T4)=>Function1.lift((b:T5) => r(x,y,z,a,b))))));
