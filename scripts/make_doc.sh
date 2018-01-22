@@ -24,6 +24,7 @@ sed -i "s/const Option/const optionGlabiboulga/" src/Option.ts
 sed -i "s/const Either/const eitherGlabiboulga/" src/Either.ts
 sed -i "s/const LinkedList/const linkedListGlabiboulga/" src/LinkedList.ts
 sed -i "s/const Stream/const streamGlabiboulga/" src/Stream.ts
+sed -i "s/const Function0/const function0Glabiboulga/" src/Function.ts
 sed -i "s/const Function1/const function1Glabiboulga/" src/Function.ts
 sed -i "s/const Function2/const function2Glabiboulga/" src/Function.ts
 sed -i "s/const Function3/const function3Glabiboulga/" src/Function.ts
@@ -43,6 +44,8 @@ find apidoc -name "*.html" -exec sed -i 's/linkedlistglabiboulga/LinkedList/g' \
 find apidoc -name "*.html" -exec sed -i 's/linked<wbr>List<wbr>Glabiboulga/LinkedList/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/streamglabiboulga/Stream/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/stream<wbr>Glabiboulga/Stream/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function0glabiboulga/Function0/g' \{\} \;
+find apidoc -name "*.html" -exec sed -i 's/function0<wbr>Glabiboulga/Function0/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/function1glabiboulga/Function1/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/function1<wbr>Glabiboulga/Function1/g' \{\} \;
 find apidoc -name "*.html" -exec sed -i 's/function2glabiboulga/Function2/g' \{\} \;

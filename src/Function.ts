@@ -7,6 +7,11 @@
  * on [[Function1Static]], [[Function2Static]]... accessible on constants
  * named Function1, Function2,...
  *
+ * It also has for instance [[Function1Static.liftOption]], which allows
+ * to use functions which are not aware of [[Option]] (for instance _.find())
+ * and make them take advantage of Option, or [[Function1Static.liftEither]],
+ * which allow to work with [[Either]] instead of exceptions.
+ *
  * Examples:
  *
  *     const combined = Function1.lift((x:number)=>x+2).andThen(x=>x*3);
@@ -350,7 +355,7 @@ export interface Function5<T1,T2,T3,T4,T5,R> {
  * with [[Function0]] including
  * the ability to build [[Function0]]
  * from functions using [[Function0Static.lift]].
- * It also offers some builtin functions like [[Function0Static.const]].
+ * It also offers some builtin functions like [[Function0Static.constant]].
  */
 export class Function0Static {
 
@@ -446,7 +451,7 @@ export const Function0 = new Function0Static();
  * with [[Function1]] including
  * the ability to build [[Function1]]
  * from functions using [[Function1Static.lift]].
- * It also offers some builtin functions like [[Function1Static.const]].
+ * It also offers some builtin functions like [[Function1Static.constant]].
  */
 export class Function1Static {
 
@@ -550,7 +555,7 @@ export const Function1 = new Function1Static();
  * with [[Function2]] including
  * the ability to build [[Function2]]
  * from functions using [[Function2Static.lift]].
- * It also offers some builtin functions like [[Function2Static.const]].
+ * It also offers some builtin functions like [[Function2Static.constant]].
  */
 export class Function2Static {
     /**
@@ -648,7 +653,7 @@ export const Function2 = new Function2Static();
  * with [[Function3]] including
  * the ability to build [[Function3]]
  * from functions using [[Function3Static.lift]].
- * It also offers some builtin functions like [[Function3Static.const]].
+ * It also offers some builtin functions like [[Function3Static.constant]].
  */
 export class Function3Static {
     /**
@@ -751,7 +756,7 @@ export const Function3 = new Function3Static();
  * with [[Function4]] including
  * the ability to build [[Function4]]
  * from functions using [[Function4Static.lift]].
- * It also offers some builtin functions like [[Function4Static.const]].
+ * It also offers some builtin functions like [[Function4Static.constant]].
  */
 export class Function4Static {
 
@@ -857,7 +862,7 @@ export const Function4 = new Function4Static();
  * with [[Function5]] including
  * the ability to build [[Function5]]
  * from functions using [[Function5Static.lift]].
- * It also offers some builtin functions like [[Function5Static.const]].
+ * It also offers some builtin functions like [[Function5Static.constant]].
  */
 export class Function5Static {
     /**
