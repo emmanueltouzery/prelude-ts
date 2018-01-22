@@ -21,6 +21,28 @@ import { Option } from "./Option";
 import { Either } from "./Either";
 
 /**
+ * Function0 encapsulates a parameterless function
+ * which returns a value. It adds some useful functions
+ * to combine or transform functions.
+ *
+ * @param T the parameter type
+ * @param U the result type
+ */
+export interface Function0<R> {
+
+    /**
+     * Invoke the function
+     */
+    (): R;
+
+    /**
+     * Returns a new composed function which first calls the current
+     * function and then the one you pass as parameter.
+     */
+    andThen<V>(fn:(x:R)=>V): Function0<V>;
+}
+
+/**
  * Function1 encapsulates a function taking a single parameter
  * and returning a value. It adds some useful functions
  * to combine or transform functions.
@@ -323,10 +345,107 @@ export interface Function5<T1,T2,T3,T4,T5,R> {
 }
 
 /**
- * The Function class offers some helper functions to deal
- * with [[Function1Static]], [[Function2]] and so on, including
- * the ability to build [[Function1Static]], [[Function2]], ...
- * from functions using [[Function1Static.lift]], [[Function2Static.lift]], ...
+ * This is the type of the Function0 constant, which
+ * offers some helper functions to deal
+ * with [[Function0]] including
+ * the ability to build [[Function0]]
+ * from functions using [[Function0Static.lift]].
+ * It also offers some builtin functions like [[Function0Static.const]].
+ */
+export class Function0Static {
+
+    /**
+     * The constant function of one parameter:
+     * will always return the value you give, no
+     * matter the parameter it's given.
+     */
+    constant<R>(val:R): Function0<R> {
+        return Function0.lift(()=>val);
+    }
+
+    /**
+     * Take a one-parameter function and lift it to become a [[Function1Static]],
+     * enabling you to call [[Function1Static.andThen]] and other such methods on it.
+     */
+    lift<R>(fn:()=>R): Function0<R> {
+        const r = <Function0<R>>fn;
+        r.andThen = <V>(fn2:(x:R)=>V) => Function0.lift(() => fn2(r()));
+        return r;
+    }
+
+    /**
+     * Take a no-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const randOpt = Function0.liftOption(Math.random);
+     *     randOpt();
+     *     => Option.of(0.49884723907769635)
+     *
+     *     const undef = Function0.liftOption(()=>undefined);
+     *     undef();
+     *     => Option.none()
+     *
+     *     const throws = Function0.liftOption(()=>{throw "x"});
+     *     throws();
+     *     => Option.none()
+     *
+     */
+    liftOption<U>(fn:()=>U|undefined): Function0<Option<U>> {
+        return Function0.lift(() => {
+            try {
+                return Option.of(fn());
+            } catch {
+                return Option.none<U>();
+            }
+        });
+    }
+
+    /**
+     * Take a no-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Either]] instead.
+     * Note that unlike the [[Function1Static.liftOption]] version, if
+     * the function returns undefined, the liftEither version will throw
+     * (the liftOption version returns None()).
+     *
+     *     const eitherRand = Function0.liftEither(Math.random, {} as string);
+     *     eitherRand();
+     *     => Either.right(0.49884723907769635)
+     *
+     *     const undef = Function0.liftEither(() => undefined);
+     *     undef();
+     *     => throws
+     *
+     *     const throws = Function0.liftEither(() => {throw "x"});
+     *     throws();
+     *     => Either.left("x")
+     */
+    liftEither<L,U>(fn:()=>U, witness?: L): Function0<Either<L,U>> {
+        return Function0.lift(() => {
+            try {
+                const r = fn();
+                if (r !== undefined) {
+                    return Either.right(r);
+                }
+            } catch (err) {
+                return Either.left(err);
+            }
+            throw "liftEither got undefined!";
+        });
+    }
+}
+
+/**
+ * The Function1 constant allows to call the [[Function0]] "static" methods.
+ */
+export const Function0 = new Function0Static();
+
+/**
+ * This is the type of the Function1 constant, which
+ * offers some helper functions to deal
+ * with [[Function1]] including
+ * the ability to build [[Function1]]
+ * from functions using [[Function1Static.lift]].
  * It also offers some builtin functions like [[Function1Static.const]].
  */
 export class Function1Static {
@@ -425,6 +544,14 @@ export class Function1Static {
  */
 export const Function1 = new Function1Static();
 
+/**
+ * This is the type of the Function2 constant, which
+ * offers some helper functions to deal
+ * with [[Function2]] including
+ * the ability to build [[Function2]]
+ * from functions using [[Function2Static.lift]].
+ * It also offers some builtin functions like [[Function2Static.const]].
+ */
 export class Function2Static {
     /**
      * The constant function of two parameters:
@@ -515,6 +642,14 @@ export class Function2Static {
  */
 export const Function2 = new Function2Static();
 
+/**
+ * This is the type of the Function3 constant, which
+ * offers some helper functions to deal
+ * with [[Function3]] including
+ * the ability to build [[Function3]]
+ * from functions using [[Function3Static.lift]].
+ * It also offers some builtin functions like [[Function3Static.const]].
+ */
 export class Function3Static {
     /**
      * The constant function of three parameters:
@@ -610,6 +745,14 @@ export class Function3Static {
  */
 export const Function3 = new Function3Static();
 
+/**
+ * This is the type of the Function4 constant, which
+ * offers some helper functions to deal
+ * with [[Function4]] including
+ * the ability to build [[Function4]]
+ * from functions using [[Function4Static.lift]].
+ * It also offers some builtin functions like [[Function4Static.const]].
+ */
 export class Function4Static {
 
     /**
@@ -708,6 +851,14 @@ export class Function4Static {
  */
 export const Function4 = new Function4Static();
 
+/**
+ * This is the type of the Function5 constant, which
+ * offers some helper functions to deal
+ * with [[Function5]] including
+ * the ability to build [[Function5]]
+ * from functions using [[Function5Static.lift]].
+ * It also offers some builtin functions like [[Function5Static.const]].
+ */
 export class Function5Static {
     /**
      * The constant function of five parameters:

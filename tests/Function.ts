@@ -1,8 +1,13 @@
-import { Function1, Function2, Function3, Function4, Function5 } from '../src/Function';
+import { Function0, Function1, Function2, Function3, Function4, Function5 } from '../src/Function';
 import { Option } from "../src/Option";
 import * as assert from 'assert'
 
 describe("function composition", () => {
+    it ("Function0 tests", () => {
+        const two = Function0.lift(()=>2);
+        assert.equal(4, two.andThen((x:number)=>x*2)());
+        assert.equal(5, Function0.constant(5)());
+    });
     it ("Function1 tests", () => {
         const add1 = Function1.lift((x:number)=>x+1);
         assert.equal(9, add1.compose((x:number)=>x*2)(4));

@@ -105,7 +105,7 @@ function storeInVariable(code: string) {
     // blabla( <-- insert here: last line with same indentation as first LOC
     //    ...
     //    ...);
-    // => 
+    // =>
     const lines = Vector.ofIterable(code.split("\n"));
     const getIndent = (str:string)=> str.replace(/[^\s].*$/, "").length;
     const codeIndent = getIndent(lines.head().getOrThrow());
@@ -157,7 +157,7 @@ function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>
         import { HashSet } from "../src/HashSet";
         import { HashMap } from "../src/HashMap";
         import { Stream } from "../src/Stream";
-        import { Function1, Function2,
+        import { Function0, Function1, Function2,
                  Function3, Function4, Function5 } from "../src/Function";
         import { Predicate } from "../src/Predicate";
         import { Either, Left, Right } from "../src/Either";
