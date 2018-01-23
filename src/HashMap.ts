@@ -300,6 +300,20 @@ export class HashMap<K,V> implements IMap<K,V> {
     }
 
     /**
+     * Returns true if there is item with that key in the collection,
+     * false otherwise.
+     *
+     *     HashMap.of<number,string>([1,"a"],[2,"b"]).containsKey(1);
+     *     => true
+     *
+     *     HashMap.of<number,string>([1,"a"],[2,"b"]).containsKey(3);
+     *     => false
+     */
+    containsKey(key: K&WithEquality): boolean {
+        return this.hamt.has(key);
+    }
+
+    /**
      * Call a predicate for each element in the collection,
      * build a new collection holding only the elements
      * for which the predicate returned true.

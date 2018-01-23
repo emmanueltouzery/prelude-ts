@@ -151,6 +151,12 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
     contains(val: [K&WithEquality,V&WithEquality]): boolean;
 
     /**
+     * Returns true if there is item with that key in the collection,
+     * false otherwise.
+     */
+    containsKey(key: K&WithEquality): boolean;
+
+    /**
      * Call a predicate for each element in the collection,
      * build a new collection holding only the elements
      * for which the predicate returned true.
