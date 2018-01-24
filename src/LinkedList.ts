@@ -140,7 +140,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
     /**
      * @hidden
      */
-    readonly className: "EmptyLinkedList";  // https://stackoverflow.com/a/47841595/516188
+    readonly className: "EmptyLinkedList" = <any>undefined;  // https://stackoverflow.com/a/47841595/516188
 
     /**
      * View this Some a as LinkedList. Useful to help typescript type
@@ -719,7 +719,7 @@ export class ConsLinkedList<T> implements Seq<T> {
     /**
      * @hidden
      */
-    readonly className: "ConsLinkedList";  // https://stackoverflow.com/a/47841595/516188
+    readonly className: "ConsLinkedList" = <any>undefined;  // https://stackoverflow.com/a/47841595/516188
 
     /**
      * @hidden

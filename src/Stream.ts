@@ -152,7 +152,7 @@ export class EmptyStream<T> implements Seq<T> {
     /**
      * @hidden
      */
-    readonly className: "EmptyStream";  // https://stackoverflow.com/a/47841595/516188
+    readonly className: "EmptyStream" = <any>undefined;  // https://stackoverflow.com/a/47841595/516188
 
     /**
      * Implementation of the Iterator interface.
@@ -782,7 +782,7 @@ export class ConsStream<T> implements Seq<T> {
     /**
      * @hidden
      */
-    readonly className: "ConsStream";  // https://stackoverflow.com/a/47841595/516188
+    readonly className: "ConsStream" = <any>undefined;  // https://stackoverflow.com/a/47841595/516188
 
     /**
      * @hidden

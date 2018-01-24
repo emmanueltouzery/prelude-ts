@@ -199,7 +199,7 @@ export class Some<T> implements Value {
     /**
      * @hidden
      */
-    readonly className: "Some";  // https://stackoverflow.com/a/47841595/516188
+    readonly className: "Some" = <any>undefined;  // https://stackoverflow.com/a/47841595/516188
 
     /**
      * Returns true since this is a Some (contains a value)
@@ -411,7 +411,7 @@ export class None<T> implements Value {
     /**
      * @hidden
      */
-    readonly className: "None";  // https://stackoverflow.com/a/47841595/516188
+    readonly className: "None" = <any>undefined;  // https://stackoverflow.com/a/47841595/516188
 
     /**
      * Returns false since this is a None (doesn'tcontains a value)

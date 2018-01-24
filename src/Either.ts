@@ -169,7 +169,7 @@ export class Left<L,R> implements Value {
     /**
      * @hidden
      */
-    readonly className: "Left";  // https://stackoverflow.com/a/47841595/516188
+    readonly className: "Left" = <any>undefined;  // https://stackoverflow.com/a/47841595/516188
 
     /**
      * Returns true since this is a Left
@@ -406,7 +406,7 @@ export class Right<L,R> implements Value {
     /**
      * @hidden
      */
-    readonly className: "Right";  // https://stackoverflow.com/a/47841595/516188
+    readonly className: "Right" = <any>undefined;  // https://stackoverflow.com/a/47841595/516188
 
     /**
      * Returns false since this is a Right
