@@ -162,4 +162,18 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
      * for which the predicate returned true.
      */
     filter(predicate:(k:K,v:V)=>boolean): IMap<K,V>;
+
+    /**
+     * Call a predicate for each key in the collection,
+     * build a new collection holding only the elements
+     * for which the predicate returned true.
+     */
+    filterKeys(predicate:(k:K)=>boolean): IMap<K,V>;
+
+    /**
+     * Call a predicate for each value in the collection,
+     * build a new collection holding only the elements
+     * for which the predicate returned true.
+     */
+    filterValues(predicate:(v:V)=>boolean): IMap<K,V>;
 }
