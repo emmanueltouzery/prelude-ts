@@ -4,12 +4,12 @@ import * as assert from 'assert'
 
 describe("function composition", () => {
     it ("Function0 tests", () => {
-        const two = Function0.lift(()=>2);
+        const two = Function0.of(()=>2);
         assert.equal(4, two.andThen((x:number)=>x*2)());
         assert.equal(5, Function0.constant(5)());
     });
     it ("Function1 tests", () => {
-        const add1 = Function1.lift((x:number)=>x+1);
+        const add1 = Function1.of((x:number)=>x+1);
         assert.equal(9, add1.compose((x:number)=>x*2)(4));
         assert.equal(10, add1.andThen((x:number)=>x*2)(4));
         assert.equal(5, Function1.id()(5));
@@ -19,7 +19,7 @@ describe("function composition", () => {
         assert.ok(Function1.liftOption((x:number)=>{throw "x"})(1).isNone());
     });
     it ("Function2 tests", () => {
-        const sumPlus1 = Function2.lift((x:number,y:number)=>x+y+1);
+        const sumPlus1 = Function2.of((x:number,y:number)=>x+y+1);
         assert.equal(16, sumPlus1.andThen((x:number)=>x*2)(4,3));
         assert.equal(8, sumPlus1.curried()(4)(3));
         assert.equal(8, sumPlus1.tupled()([4,3]));
@@ -34,7 +34,7 @@ describe("function composition", () => {
             (x:number,y:number)=>{throw "x"})(1,2).isNone());
     });
     it ("Function3 tests", () => {
-        const sumPlus1 = Function3.lift((x:number,y:number,z:number)=>x+y+z+1);
+        const sumPlus1 = Function3.of((x:number,y:number,z:number)=>x+y+z+1);
         assert.equal(20, sumPlus1.andThen((x:number)=>x*2)(4,3,2));
         assert.equal(10, sumPlus1.curried()(4)(3)(2));
         assert.equal(10, sumPlus1.tupled()([4,3,2]));
@@ -50,7 +50,7 @@ describe("function composition", () => {
             (x:number,y:number,z:number)=>{throw "x"})(1,2,3).isNone());
     });
     it ("Function4 tests", () => {
-        const sumPlus1 = Function4.lift((x:number,y:number,z:number,a:number)=>x+y+z+a+1);
+        const sumPlus1 = Function4.of((x:number,y:number,z:number,a:number)=>x+y+z+a+1);
         assert.equal(22, sumPlus1.andThen((x:number)=>x*2)(4,3,2,1));
         assert.equal(11, sumPlus1.curried()(4)(3)(2)(1));
         assert.equal(11, sumPlus1.tupled()([4,3,2,1]));
@@ -67,7 +67,7 @@ describe("function composition", () => {
             (x:number,y:number,z:number,a:number)=>{throw "x"})(1,2,3,4).isNone());
     });
     it ("Function5 tests", () => {
-        const sumPlus1 = Function5.lift((x:number,y:number,z:number,a:number,b:number)=>x+y+z+a+b+1);
+        const sumPlus1 = Function5.of((x:number,y:number,z:number,a:number,b:number)=>x+y+z+a+b+1);
         assert.equal(22, sumPlus1.andThen((x:number)=>x*2)(4,3,2,1,0));
         assert.equal(11, sumPlus1.curried()(4)(3)(2)(1)(0));
         assert.equal(11, sumPlus1.tupled()([4,3,2,1,0]));

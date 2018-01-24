@@ -61,7 +61,7 @@ function getCommentsInlineCode(scanner: ts.Scanner): Vector<SampleInfo> {
         if (!curCodeSample.isEmpty() &&
             token === ts.SyntaxKind.Identifier) {
             codeSamples = codeSamples.appendAll(
-                curCodeSample.map(Function2.lift(getCodeSampleInfo).apply1(scanner.getTokenText())));
+                curCodeSample.map(Function2.of(getCodeSampleInfo).apply1(scanner.getTokenText())));
             curCodeSample = Vector.empty<string>();
         }
         if ((token === ts.SyntaxKind.SingleLineCommentTrivia) ||
@@ -196,7 +196,7 @@ function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>
              Math.random = mockMathRandom;
         }
 
-        ${samplesInfo.map(Function2.lift(generateTestContents).apply1(fname)).mkString("\n")}
+        ${samplesInfo.map(Function2.of(generateTestContents).apply1(fname)).mkString("\n")}
     `;
 }
 

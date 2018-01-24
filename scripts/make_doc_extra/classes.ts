@@ -17,7 +17,7 @@ function putStaticMethodsOnTop(parentTag: string, parentMarker: string, childTag
     const [beforeIndexContent,indexContent,afterIndexContent] =
         helpers.linesByIndentGetTagContents(linesByIndent, parentTag, l => l.indexOf(parentMarker) >= 0);
 
-    const openTag = Predicate.lift<helpers.LineByIndent>(
+    const openTag = Predicate.of<helpers.LineByIndent>(
         l => l.contents.indexOf("<" + childTag) >= 0);
 
     // the marker parent might be of the same tag, so keep it always.
@@ -53,7 +53,7 @@ function putStaticMethodsOnTop(parentTag: string, parentMarker: string, childTag
 
 function classPutStaticMethodsOnTop(classfilename: string): void {
     const lines = helpers.fileGetLinesByIndent(classesFolder + classfilename);
-    const fnStatic = Function4.lift(putStaticMethodsOnTop);
+    const fnStatic = Function4.of(putStaticMethodsOnTop);
     const transform = fnStatic.apply3("ul", "tsd-index-list", "li")
         .andThen(fnStatic.apply3("li", "current tsd-kind-class", "li"))
         .andThen(fnStatic.apply3("section", "tsd-panel-group tsd-member-group", "section"));

@@ -11,7 +11,7 @@
  *
  * Examples:
  *
- *     const check = Predicate.lift(x => x > 10).and(x => x < 20);
+ *     const check = Predicate.of(x => x > 10).and(x => x < 20);
  *     check(12); // => true
  *     check(21);
  *     => false
@@ -46,7 +46,7 @@ export interface Predicate<T> {
      * Combines two predicates with the 'and' logical operation.
      * For instance:
      *
-     *     Predicate.lift(x => x > 10).and(x => x < 20)
+     *     Predicate.of(x => x > 10).and(x => x < 20)
      */
     and(fn:(x:T)=>boolean): Predicate<T>;
 
@@ -54,7 +54,7 @@ export interface Predicate<T> {
      * Combines two predicates with the 'or' logical operation.
      * For instance:
      *
-     *     Predicate.lift(x => x < 5).or(x => x > 10)
+     *     Predicate.of(x => x < 5).or(x => x > 10)
      */
     or(fn:(x:T)=>boolean): Predicate<T>;
 
@@ -67,21 +67,21 @@ export interface Predicate<T> {
 /**
  * The Predicates class offers some helper functions to deal
  * with [[Predicate]] including the ability to build [[Predicate]]
- * from functions using [[PredicateStatic.lift]], some builtin predicates
+ * from functions using [[PredicateStatic.of]], some builtin predicates
  * like [[PredicateStatic.isIn]], and the ability to combine to combine
  * Predicates like with [[PredicateStatic.allOf]].
  */
 export class PredicateStatic {
 
     /**
-     * Take a predicate function and lift it to become a [[Predicate]]
+     * Take a predicate function and of it to become a [[Predicate]]
      * (enabling you to call [[Predicate.and]], and other logic operations on it)
      */
-    lift<T>(fn: (x:T)=>boolean): Predicate<T> {
+    of<T>(fn: (x:T)=>boolean): Predicate<T> {
         const r = <Predicate<T>>fn;
-        r.and = (other:(x:T)=>boolean) => Predicate.lift((x:T) => r(x) && other(x));
-        r.or = (other:(x:T)=>boolean) => Predicate.lift((x:T) => r(x) || other(x));
-        r.negate = () => Predicate.lift((x:T) => !fn(x));
+        r.and = (other:(x:T)=>boolean) => Predicate.of((x:T) => r(x) && other(x));
+        r.or = (other:(x:T)=>boolean) => Predicate.of((x:T) => r(x) || other(x));
+        r.negate = () => Predicate.of((x:T) => !fn(x));
         return r;
     }
 
@@ -90,7 +90,7 @@ export class PredicateStatic {
      * value you give as parameter.
      */
     equals<T>(other: T&WithEquality): Predicate<T&WithEquality> {
-        return Predicate.lift(x => areEqual(other, x));
+        return Predicate.of(x => areEqual(other, x));
     }
 
     /**
@@ -98,28 +98,28 @@ export class PredicateStatic {
      * list of values you give as parameter.
      */
     isIn<T>(others: Iterable<T&WithEquality>): Predicate<T&WithEquality> {
-        return Predicate.lift<T&WithEquality>(x => Vector.ofIterable(others).contains(x));
+        return Predicate.of<T&WithEquality>(x => Vector.ofIterable(others).contains(x));
     }
 
     /**
      * Return a [[Predicate]] checking whether all of the predicate functions given hold
      */
     allOf<T>(...predicates: Array<(x:T)=>boolean>): Predicate<T> {
-        return Predicate.lift<T>(x => Vector.ofIterable(predicates).allMatch(p=>p(x)));
+        return Predicate.of<T>(x => Vector.ofIterable(predicates).allMatch(p=>p(x)));
     }
 
     /**
      * Return a [[Predicate]] checking whether any of the predicate functions given hold
      */
     anyOf<T>(...predicates: Array<(x:T)=>boolean>): Predicate<T> {
-        return Predicate.lift<T>(x => Vector.ofIterable(predicates).anyMatch(p=>p(x)));
+        return Predicate.of<T>(x => Vector.ofIterable(predicates).anyMatch(p=>p(x)));
     }
 
     /**
      * Return a [[Predicate]] checking whether none of the predicate functions given hold
      */
     noneOf<T>(...predicates: Array<(x:T)=>boolean>): Predicate<T> {
-        return Predicate.lift<T>(x => !Vector.ofIterable(predicates).anyMatch(p=>p(x)));
+        return Predicate.of<T>(x => !Vector.ofIterable(predicates).anyMatch(p=>p(x)));
     }
 }
 
