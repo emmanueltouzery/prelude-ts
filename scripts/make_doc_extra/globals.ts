@@ -12,7 +12,7 @@ const CATEGORIES = Vector.of<[string,Vector<string>]>(
         "Collection", "Foldable", 
         "IMap","HashMap", "ISet", "HashSet",
         "Seq", "LinkedList", "Stream", "Vector", 
-        "Tuple2")],
+        "Tuple2", "SortOnSpec", "SortBySpec")],
     ["Core", Vector.of(
         "Comparison", "Value", "Contract")]);
 

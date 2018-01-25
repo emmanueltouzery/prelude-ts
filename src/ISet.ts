@@ -1,9 +1,32 @@
-import { WithEquality } from "./Comparison";
+import { WithEquality, Ordering } from "./Comparison";
 import { Value} from "./Value";
 import { Collection } from "./Collection";
 import { Vector } from "./Vector";
 import { LinkedList } from "./LinkedList";
 import { Option } from "./Option";
+
+/**
+ * Ability to specify a sorting function.
+ * See [[Seq.sortOn]].
+ *
+ * `{sortOn: ((v:T)=>number)|((v:T)=>string)}`
+ */
+export type SortOnSpec<T> = {sortOn: ((v:T)=>number)|((v:T)=>string)};
+
+/**
+ * Ability to specify a sorting function.
+ * See [[Seq.sortBy]].
+ *
+ * `{sortBy: (v1:T,v2:T)=>Ordering}`
+ */
+export type SortBySpec<T> = {sortBy: (v1:T,v2:T)=>Ordering};
+
+/**
+ * @hidden
+ */
+export function isSortOnSpec<T>(sortSpec: SortOnSpec<T> | SortBySpec<T>): sortSpec is SortOnSpec<T> {
+    return (<any>sortSpec).sortOn !== undefined;
+}
 
 /**
  * A generic interface for set-like implementations.
@@ -108,9 +131,21 @@ export interface ISet<T> extends Collection<T> {
     transform<U>(converter:(x:ISet<T>)=>U): U;
 
     /**
-     * Converts this set to an array
+     * Converts this set to an array. Since a Set is not ordered
+     * and since this method returns a JS array, it can be awkward
+     * to get an array sorted in the way you'd like. So you can pass
+     * an optional sorting function too.
+     *
+     *     HashSet.of(1,2,3).toArray().sort()
+     *     => [1,2,3]
+     *
+     *     HashSet.of(1,2,3).toArray({sortOn:x=>x})
+     *     => [1,2,3]
+     *
+     *     HashSet.of(1,2,3).toArray({sortBy:(x,y)=>x-y})
+     *     => [1,2,3]
      */
-    toArray(): Array<T & WithEquality>;
+    toArray(sort?: SortOnSpec<T> | SortBySpec<T>): Array<T & WithEquality>;
 
     /**
      * Converts this set to an vector

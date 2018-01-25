@@ -1,4 +1,4 @@
-import { ISet } from "./ISet";
+import { ISet, SortOnSpec, SortBySpec, isSortOnSpec } from "./ISet";
 import { Vector } from "./Vector";
 import { HashMap } from "./HashMap";
 import { LinkedList } from "./LinkedList";
@@ -211,10 +211,30 @@ export class HashSet<T> implements ISet<T> {
     }
 
     /**
-     * Converts this set to an array
+     * Converts this set to an array. Since a Set is not ordered
+     * and since this method returns a JS array, it can be awkward
+     * to get an array sorted in the way you'd like. So you can pass
+     * an optional sorting function too.
+     *
+     *     HashSet.of(1,2,3).toArray().sort()
+     *     => [1,2,3]
+     *
+     *     HashSet.of(1,2,3).toArray({sortOn:x=>x})
+     *     => [1,2,3]
+     *
+     *     HashSet.of(1,2,3).toArray({sortBy:(x,y)=>x-y})
+     *     => [1,2,3]
      */
-    toArray(): Array<T & WithEquality> {
-        return Array.from<T & WithEquality>(this.hamt.keys());
+    toArray(sort?: SortOnSpec<T> | SortBySpec<T>): Array<T & WithEquality> {
+        if (!sort) {
+            return Array.from<T&WithEquality>(this.hamt.keys());
+        }
+        if (isSortOnSpec(sort)) {
+            return Vector.ofIterable<T&WithEquality>(this.hamt.keys())
+                .sortOn(sort.sortOn)
+                .toArray();
+        }
+        return Array.from<T&WithEquality>(this.hamt.keys()).sort(sort.sortBy);
     }
 
     /**
@@ -597,7 +617,7 @@ class EmptyHashSet<T> extends HashSet<T> {
         return zero;
     }
 
-    toArray(): Array<T & WithEquality> {
+    toArray(sort?: SortOnSpec<T> | SortBySpec<T>): Array<T & WithEquality> {
         return [];
     }
 
