@@ -354,7 +354,7 @@ export interface Function5<T1,T2,T3,T4,T5,R> {
  * offers some helper functions to deal
  * with [[Function0]] including
  * the ability to build [[Function0]]
- * from functions using [[Function0Static.lift]].
+ * from functions using [[Function0Static.of]].
  * It also offers some builtin functions like [[Function0Static.constant]].
  */
 export class Function0Static {
@@ -370,7 +370,7 @@ export class Function0Static {
 
     /**
      * Take a one-parameter function and lift it to become a [[Function1Static]],
-     * enabling you to call [[Function1Static.andThen]] and other such methods on it.
+     * enabling you to call [[Function1.andThen]] and other such methods on it.
      */
     of<R>(fn:()=>R): Function0<R> {
         const r = <Function0<R>>(() => fn());
@@ -409,7 +409,7 @@ export class Function0Static {
     /**
      * Take a no-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Either]] instead.
-     * Note that unlike the [[Function1Static.liftOption]] version, if
+     * Note that unlike the [[Function1Static.of]] version, if
      * the function returns undefined, the liftEither version will throw
      * (the liftOption version returns None()).
      *
@@ -450,7 +450,7 @@ export const Function0 = new Function0Static();
  * offers some helper functions to deal
  * with [[Function1]] including
  * the ability to build [[Function1]]
- * from functions using [[Function1Static.lift]].
+ * from functions using [[Function1Static.of]].
  * It also offers some builtin functions like [[Function1Static.constant]].
  */
 export class Function1Static {
@@ -473,7 +473,7 @@ export class Function1Static {
 
     /**
      * Take a one-parameter function and lift it to become a [[Function1Static]],
-     * enabling you to call [[Function1Static.andThen]] and other such methods on it.
+     * enabling you to call [[Function1.andThen]] and other such methods on it.
      */
     of<T,U>(fn:(x:T)=>U): Function1<T,U> {
         const r = <Function1<T,U>>(x => fn(x));
@@ -554,7 +554,7 @@ export const Function1 = new Function1Static();
  * offers some helper functions to deal
  * with [[Function2]] including
  * the ability to build [[Function2]]
- * from functions using [[Function2Static.lift]].
+ * from functions using [[Function2Static.of]].
  * It also offers some builtin functions like [[Function2Static.constant]].
  */
 export class Function2Static {
@@ -652,7 +652,7 @@ export const Function2 = new Function2Static();
  * offers some helper functions to deal
  * with [[Function3]] including
  * the ability to build [[Function3]]
- * from functions using [[Function3Static.lift]].
+ * from functions using [[Function3Static.of]].
  * It also offers some builtin functions like [[Function3Static.constant]].
  */
 export class Function3Static {
@@ -755,7 +755,7 @@ export const Function3 = new Function3Static();
  * offers some helper functions to deal
  * with [[Function4]] including
  * the ability to build [[Function4]]
- * from functions using [[Function4Static.lift]].
+ * from functions using [[Function4Static.of]].
  * It also offers some builtin functions like [[Function4Static.constant]].
  */
 export class Function4Static {
@@ -861,7 +861,7 @@ export const Function4 = new Function4Static();
  * offers some helper functions to deal
  * with [[Function5]] including
  * the ability to build [[Function5]]
- * from functions using [[Function5Static.lift]].
+ * from functions using [[Function5Static.of]].
  * It also offers some builtin functions like [[Function5Static.constant]].
  */
 export class Function5Static {
