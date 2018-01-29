@@ -177,17 +177,12 @@ such as typescript.
   fluent-api style like `list.filter(..).sortBy(...)`. Also, ramda doesn't offer
   sets and maps. Ramda also uses currying a lot out of the box, which may not
   be intuitive to a number of developers. In prelude, 
-  [currying](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function2.html#curried) 
-  & [partial application](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function2.html#apply1)
+  [currying](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function.function2.html#curried) 
+  & [partial application](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function.function2.html#apply1)
   are opt-in.
 * [lodash](https://lodash.com) also has the global functions, and many functions
   mutate the collections.
 * [vavr](http://www.vavr.io/) -- it's a java library, but it's the main inspiration for prelude.ts.
-
-## Caveats
-
-* the API may change in the future (but types should protect you)
-* there could still be bugs, it's still early days
 
 ## Commands
 
