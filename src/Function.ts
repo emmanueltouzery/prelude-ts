@@ -109,7 +109,7 @@ export interface Function2<T1,T2,R> {
     /**
      * Returns a version of this function which takes a tuple
      * instead of individual parameters. Useful in combination
-     * with [[List.zip]] for instance.
+     * with [[Vector.zip]] for instance.
      */
     tupled(): Function1<[T1,T2],R>;
 

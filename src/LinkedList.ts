@@ -402,7 +402,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * the classifier, and in value we get the list of elements
      * matching that value.
      *
-     * also see [[LinkedList.arrangeBy]]
+     * also see [[ConsLinkedList.arrangeBy]]
      */
     groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,LinkedList<T>> {
         return HashMap.empty<C,LinkedList<T>>();
@@ -412,7 +412,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * Matches each element with a unique key that you extract from it.
      * If the same key is present twice, the function will return None.
      *
-     * also see [[LinkedList.groupBy]]
+     * also see [[ConsLinkedList.groupBy]]
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<HashMap<K,T>> {
         return SeqHelpers.arrangeBy<T,K>(this, getKey);
@@ -520,7 +520,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
-     * also see [[LinkedList.sortOn]]
+     * also see [[ConsLinkedList.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): LinkedList<T> {
         return this;
@@ -531,7 +531,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * elements from the collection, and the elements
      * are sorted according to that value.
      *
-     * also see [[LinkedList.sortBy]]
+     * also see [[ConsLinkedList.sortBy]]
      */
     sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): LinkedList<T> {
         return this;
@@ -569,7 +569,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * Compare values in the collection and return the smallest element.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[LinkedList.minOn]]
+     * also see [[ConsLinkedList.minOn]]
      */
     minBy(compare: (v1:T,v2:T)=>Ordering): Option<T> {
         return SeqHelpers.minBy(this, compare);
@@ -580,7 +580,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * and return the element for which the result was the smallest.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[LinkedList.minBy]]
+     * also see [[ConsLinkedList.minBy]]
      */
     minOn(getNumber: (v:T)=>number): Option<T> {
         return SeqHelpers.minOn(this, getNumber);
@@ -590,7 +590,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * Compare values in the collection and return the largest element.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[LinkedList.maxOn]]
+     * also see [[ConsLinkedList.maxOn]]
      */
     maxBy(compare: (v1:T,v2:T)=>Ordering): Option<T> {
         return SeqHelpers.maxBy(this, compare);
@@ -601,7 +601,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * and return the element for which the result was the largest.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[LinkedList.maxBy]]
+     * also see [[ConsLinkedList.maxBy]]
      */
     maxOn(getNumber: (v:T)=>number): Option<T> {
         return SeqHelpers.maxOn(this, getNumber);
@@ -1093,7 +1093,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      * the classifier, and in value we get the list of elements
      * matching that value.
      *
-     * also see [[LinkedList.arrangeBy]]
+     * also see [[ConsLinkedList.arrangeBy]]
      */
     groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,LinkedList<T>> {
         return this.foldLeft(
@@ -1110,7 +1110,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      * Matches each element with a unique key that you extract from it.
      * If the same key is present twice, the function will return None.
      *
-     * also see [[LinkedList.groupBy]]
+     * also see [[ConsLinkedList.groupBy]]
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<HashMap<K,T>> {
         return SeqHelpers.arrangeBy<T,K>(this, getKey);
@@ -1266,7 +1266,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
-     * also see [[LinkedList.sortOn]]
+     * also see [[ConsLinkedList.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): LinkedList<T> {
         return LinkedList.ofIterable<T>(this.toArray().sort(compare));
@@ -1277,7 +1277,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      * elements from the collection, and the elements
      * are sorted according to that value.
      *
-     * also see [[LinkedList.sortBy]]
+     * also see [[ConsLinkedList.sortBy]]
      */
     sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): LinkedList<T> {
         return <LinkedList<T>>SeqHelpers.sortOn<T>(this, getKey);
@@ -1320,7 +1320,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      * Compare values in the collection and return the smallest element.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[LinkedList.minOn]]
+     * also see [[ConsLinkedList.minOn]]
      */
     minBy(compare: (v1:T,v2:T)=>Ordering): Option<T> {
         return SeqHelpers.minBy(this, compare);
@@ -1331,7 +1331,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      * and return the element for which the result was the smallest.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[LinkedList.minBy]]
+     * also see [[ConsLinkedList.minBy]]
      */
     minOn(getNumber: (v:T)=>number): Option<T> {
         return SeqHelpers.minOn(this, getNumber);
@@ -1341,7 +1341,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      * Compare values in the collection and return the largest element.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[LinkedList.maxOn]]
+     * also see [[ConsLinkedList.maxOn]]
      */
     maxBy(compare: (v1:T,v2:T)=>Ordering): Option<T> {
         return SeqHelpers.maxBy(this, compare);
@@ -1352,7 +1352,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      * and return the element for which the result was the largest.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[LinkedList.maxBy]]
+     * also see [[ConsLinkedList.maxBy]]
      */
     maxOn(getNumber: (v:T)=>number): Option<T> {
         return SeqHelpers.maxOn(this, getNumber);

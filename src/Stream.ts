@@ -436,7 +436,7 @@ export class EmptyStream<T> implements Seq<T> {
      * the classifier, and in value we get the list of elements
      * matching that value.
      *
-     * also see [[Stream.arrangeBy]]
+     * also see [[ConsStream.arrangeBy]]
      */
     groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Stream<T>> {
         return HashMap.empty<C,Stream<T>>();
@@ -446,7 +446,7 @@ export class EmptyStream<T> implements Seq<T> {
      * Matches each element with a unique key that you extract from it.
      * If the same key is present twice, the function will return None.
      *
-     * also see [[Stream.groupBy]]
+     * also see [[ConsStream.groupBy]]
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<HashMap<K,T>> {
         return SeqHelpers.arrangeBy<T,K>(this, getKey);
@@ -475,7 +475,7 @@ export class EmptyStream<T> implements Seq<T> {
 
     /**
      * Removes the first element matching the predicate
-     * (use [[Stream.filter]] to remove all elements matching a predicate)
+     * (use [[ConsStream.filter]] to remove all elements matching a predicate)
      */
     removeFirst(predicate: (x:T)=>boolean): Stream<T> {
         return this;
@@ -576,7 +576,7 @@ export class EmptyStream<T> implements Seq<T> {
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
-     * also see [[Stream.sortOn]]
+     * also see [[ConsStream.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T> {
         return this;
@@ -587,7 +587,7 @@ export class EmptyStream<T> implements Seq<T> {
      * elements from the collection, and the elements
      * are sorted according to that value.
      *
-     * also see [[Stream.sortBy]]
+     * also see [[ConsStream.sortBy]]
      */
     sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Stream<T> {
         return this;
@@ -625,7 +625,7 @@ export class EmptyStream<T> implements Seq<T> {
      * Compare values in the collection and return the smallest element.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[Stream.minOn]]
+     * also see [[ConsStream.minOn]]
      */
     minBy(compare: (v1:T,v2:T)=>Ordering): Option<T> {
         return Option.none<T>();
@@ -636,7 +636,7 @@ export class EmptyStream<T> implements Seq<T> {
      * and return the element for which the result was the smallest.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[Stream.minBy]]
+     * also see [[ConsStream.minBy]]
      */
     minOn(getNumber: (v:T)=>number): Option<T> {
         return Option.none<T>();
@@ -646,7 +646,7 @@ export class EmptyStream<T> implements Seq<T> {
      * Compare values in the collection and return the largest element.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[Stream.maxOn]]
+     * also see [[ConsStream.maxOn]]
      */
     maxBy(compare: (v1:T,v2:T)=>Ordering): Option<T> {
         return Option.none<T>();
@@ -657,7 +657,7 @@ export class EmptyStream<T> implements Seq<T> {
      * and return the element for which the result was the largest.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[Stream.maxBy]]
+     * also see [[ConsStream.maxBy]]
      */
     maxOn(getNumber: (v:T)=>number): Option<T> {
         return Option.none<T>();
@@ -1136,7 +1136,7 @@ export class ConsStream<T> implements Seq<T> {
      * the classifier, and in value we get the list of elements
      * matching that value.
      *
-     * also see [[Stream.arrangeBy]]
+     * also see [[ConsStream.arrangeBy]]
      */
     groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Stream<T>> {
         return this.foldLeft(
@@ -1151,7 +1151,7 @@ export class ConsStream<T> implements Seq<T> {
      * Matches each element with a unique key that you extract from it.
      * If the same key is present twice, the function will return None.
      *
-     * also see [[Stream.groupBy]]
+     * also see [[ConsStream.groupBy]]
      */
     arrangeBy<K>(getKey: (v:T)=>K&WithEquality): Option<HashMap<K,T>> {
         return SeqHelpers.arrangeBy<T,K>(this, getKey);
@@ -1183,7 +1183,7 @@ export class ConsStream<T> implements Seq<T> {
 
     /**
      * Removes the first element matching the predicate
-     * (use [[Stream.filter]] to remove all elements matching a predicate)
+     * (use [[ConsStream.filter]] to remove all elements matching a predicate)
      */
     removeFirst(predicate: (x:T)=>boolean): Stream<T> {
         const tail = this._tail.get();
@@ -1309,7 +1309,7 @@ export class ConsStream<T> implements Seq<T> {
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
-     * also see [[Stream.sortOn]]
+     * also see [[ConsStream.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T> {
         return Stream.ofIterable<T>(this.toArray().sort(compare));
@@ -1320,7 +1320,7 @@ export class ConsStream<T> implements Seq<T> {
      * elements from the collection, and the elements
      * are sorted according to that value.
      *
-     * also see [[Stream.sortBy]]
+     * also see [[ConsStream.sortBy]]
      */
     sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Stream<T> {
         return <Stream<T>>SeqHelpers.sortOn<T>(this, getKey);
@@ -1363,7 +1363,7 @@ export class ConsStream<T> implements Seq<T> {
      * Compare values in the collection and return the smallest element.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[Stream.minOn]]
+     * also see [[ConsStream.minOn]]
      */
     minBy(compare: (v1:T,v2:T)=>Ordering): Option<T> {
         return SeqHelpers.minBy(this, compare);
@@ -1374,7 +1374,7 @@ export class ConsStream<T> implements Seq<T> {
      * and return the element for which the result was the smallest.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[Stream.minBy]]
+     * also see [[ConsStream.minBy]]
      */
     minOn(getNumber: (v:T)=>number): Option<T> {
         return SeqHelpers.minOn(this, getNumber);
@@ -1384,7 +1384,7 @@ export class ConsStream<T> implements Seq<T> {
      * Compare values in the collection and return the largest element.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[Stream.maxOn]]
+     * also see [[ConsStream.maxOn]]
      */
     maxBy(compare: (v1:T,v2:T)=>Ordering): Option<T> {
         return SeqHelpers.maxBy(this, compare);
@@ -1395,7 +1395,7 @@ export class ConsStream<T> implements Seq<T> {
      * and return the element for which the result was the largest.
      * Returns Option.none if the collection is empty.
      *
-     * also see [[Stream.maxBy]]
+     * also see [[ConsStream.maxBy]]
      */
     maxOn(getNumber: (v:T)=>number): Option<T> {
         return SeqHelpers.maxOn(this, getNumber);

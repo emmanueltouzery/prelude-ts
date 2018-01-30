@@ -141,7 +141,7 @@ export class OptionStatic {
      * Takes a function which operates on a simple JS object, and turns it
      * in a function that operates on the same JS object type except which each field
      * wrapped in an Option ('lifts' the function).
-     * It's an alternative to [[Option.liftA2]] when the number of parameters
+     * It's an alternative to [[OptionStatic.liftA2]] when the number of parameters
      * is not two.
      *
      *     const lifted = Option.liftAp((x:{a:number,b:number,c:number}) => x.a+x.b+x.c);
