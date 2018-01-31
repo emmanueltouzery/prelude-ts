@@ -146,7 +146,7 @@ export class OptionStatic {
      *
      *     const lifted = Option.liftAp((x:{a:number,b:number,c:number}) => x.a+x.b+x.c);
      *     lifted({a:Option.of(5), b:Option.of(6), c:Option.of(3)});
-     *     => Option.of(14)        
+     *     => Option.of(14)
      *
      *     const lifted = Option.liftAp((x:{a:number,b:number}) => x.a+x.b);
      *     lifted({a:Option.of(5), b:Option.none<number>()});
@@ -231,7 +231,7 @@ export class Some<T> implements Value {
     get(): T {
         return this.value;
     }
-    
+
     /**
      * Combines two options. If this option is a Some, returns it.
      * If it's a None, returns the other one.
@@ -304,9 +304,28 @@ export class Some<T> implements Value {
     /**
      * Execute a side-effecting function if the option
      * is a Some; returns the option.
+     * **Deprecated** please use [[Some.ifSome]] instead.
+     * @deprecated
      */
     ifPresent(fn:(v:T)=>void): Option<T> {
         fn(this.value);
+        return this;
+    }
+
+    /**
+     * Execute a side-effecting function if the option
+     * is a Some; returns the option.
+     */
+    ifSome(fn:(v:T)=>void): Option<T> {
+        fn(this.value);
+        return this;
+    }
+
+    /**
+     * Execute a side-effecting function if the option
+     * is a None; returns the option.
+     */
+    ifNone(fn:()=>void): Option<T> {
         return this;
     }
 
@@ -507,8 +526,27 @@ export class None<T> implements Value {
     /**
      * Execute a side-effecting function if the option
      * is a Some; returns the option.
+     * **Deprecated** please use [[None.ifSome]] instead.
+     * @deprecated
      */
     ifPresent(fn:(v:T)=>void): Option<T> {
+        return this;
+    }
+
+    /**
+     * Execute a side-effecting function if the option
+     * is a Some; returns the option.
+     */
+    ifSome(fn:(v:T)=>void): Option<T> {
+        return this;
+    }
+
+    /**
+     * Execute a side-effecting function if the option
+     * is a Some; returns the option.
+     */
+    ifNone(fn:()=>void): Option<T> {
+        fn();
         return this;
     }
 

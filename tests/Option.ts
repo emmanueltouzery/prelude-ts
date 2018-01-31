@@ -106,6 +106,26 @@ describe("Option helpers", () => {
     it("should abort liftAp on none", () => assert.ok(Option.none().equals(
         Option.liftAp((x:{a:number,b:number}) => x.a+x.b)
         ({a:Option.of(5), b:Option.none<number>()}))));
+    it("should support ifSome on Some", () => {
+        let x = 0;
+        Option.of(5).ifSome(v => x=v);
+        assert.equal(5, x);
+    });
+    it("should support ifSome on None", () => {
+        let x = 0;
+        Option.of(5).filter(x=>x<0).ifSome(v => x=v);
+        assert.equal(0, x);
+    });
+    it("should support ifNone on Some", () => {
+        let x = 0;
+        Option.of(5).ifNone(() => x=5);
+        assert.equal(0, x);
+    });
+    it("should support ifNone on None", () => {
+        let x = 0;
+        Option.of(5).filter(x=>x<0).ifNone(() => x=5);
+        assert.equal(5, x);
+    });
 });
 
 describe("option retrieval", () => {
@@ -124,7 +144,7 @@ describe("option retrieval", () => {
     it("should throw on None.getOrThrow with custom msg", () =>
        assert.throws(() => Option.none().getOrThrow("my custom msg"), /^my custom msg$/));
     it("should offer get() if i checked for isSome", () => {
-        const opt = <Option<number>>Option.of(5); 
+        const opt = <Option<number>>Option.of(5);
         if (opt.isSome()) {
             // what we are checking here is whether this does build
             // .get() is available only on Some not on None
@@ -132,7 +152,7 @@ describe("option retrieval", () => {
         }
     });
     it("should offer get() if i eliminated isNone", () => {
-        const opt = <Option<number>>Option.of(5); 
+        const opt = <Option<number>>Option.of(5);
         if (!opt.isNone()) {
             // what we are checking here is whether this does build
             // .get() is available only on Some not on None
