@@ -36,9 +36,9 @@
     },
     "homepage": "https://github.com/emmanueltouzery/prelude.ts#readme",
     "scripts": {
-        "prepublish": "scripts/prepublish.sh",
+        "prepublish": "rm tests/apidoc-*; scripts/prepublish.sh",
         "test": "rm tests/apidoc-*; tsc && node ./dist/tests/Comments.js && tsc && ./node_modules/mocha/bin/mocha --timeout 60000 ./dist/tests/*.js",
-        "clean": "rm -Rf ./dist",
+        "clean": "rm tests/apidoc-*; rm -Rf ./dist",
         "docgen": "./scripts/make_doc.sh",
         "benchmarks": "tsc && node ./dist/benchmarks/bench.js"
     }
