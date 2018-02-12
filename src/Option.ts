@@ -275,6 +275,20 @@ export class Some<T> implements Value {
     }
 
     /**
+     * Get the value from this option; if it's a None (no value
+     * present), then return the value returned by the function that you give.
+     *
+     *     Option.of(5).getOrCall(() => 6)
+     *     => 5
+     *
+     *     Option.none<number>().getOrCall(() => 6)
+     *     => 6
+     */
+    getOrCall(fn: ()=>T): T {
+        return this.value;
+    }
+
+    /**
      * Return a new option where the element (if present) was transformed
      * by the mapper function you give. If the option was None it'll stay None.
      */
@@ -494,6 +508,20 @@ export class None<T> implements Value {
      */
     getOrElse(alt: T): T {
         return alt;
+    }
+
+    /**
+     * Get the value from this option; if it's a None (no value
+     * present), then return the value returned by the function that you give.
+     *
+     *     Option.of(5).getOrCall(() => 6)
+     *     => 5
+     *
+     *     Option.none<number>().getOrCall(() => 6)
+     *     => 6
+     */
+    getOrCall(fn: ()=>T): T {
+        return fn();
     }
 
     /**
