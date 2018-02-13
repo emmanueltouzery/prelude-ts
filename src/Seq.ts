@@ -1,5 +1,6 @@
 import { WithEquality, Ordering } from "./Comparison";
 import { HashMap } from "./HashMap";
+import { HashSet } from "./HashSet";
 import { Option } from "./Option";
 import { Collection } from "./Collection";
 import { Stream } from "./Stream";
@@ -244,6 +245,16 @@ export interface Seq<T> extends Collection<T> {
      * entries will be lost.
      */
     toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): HashMap<K,V>;
+
+    /**
+     * Convert this collection to a set. Since the elements of the
+     * Seq may not support equality, you must pass a function returning
+     * a value supporting equality.
+     *
+     *     Vector.of(1,2,3,3,4).toSet(x=>x)
+     *     => HashSet.of(1,2,3,4)
+     */
+    toSet<K>(converter:(x:T)=>K&WithEquality): HashSet<K>;
 
     /**
      * Transform this value to another value type.

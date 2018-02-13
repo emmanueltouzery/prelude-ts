@@ -722,6 +722,18 @@ export class EmptyStream<T> implements Seq<T> {
     }
 
     /**
+     * Convert this collection to a set. Since the elements of the
+     * Seq may not support equality, you must pass a function returning
+     * a value supporting equality.
+     *
+     *     Stream.of(1,2,3,3,4).toSet(x=>x)
+     *     => HashSet.of(1,2,3,4)
+     */
+    toSet<K>(converter:(x:T)=>K&WithEquality): HashSet<K> {
+        return HashSet.empty<K>();
+    }
+
+    /**
      * Convert this collection to a list.
      */
     toLinkedList(): LinkedList<T> {
@@ -1476,6 +1488,20 @@ export class ConsStream<T> implements Seq<T> {
         return this.foldLeft(HashMap.empty<K,V>(), (acc,cur) => {
             const converted = converter(cur);
             return acc.put(converted[0], converted[1]);
+        });
+    }
+
+    /**
+     * Convert this collection to a set. Since the elements of the
+     * Seq may not support equality, you must pass a function returning
+     * a value supporting equality.
+     *
+     *     Stream.of(1,2,3,3,4).toSet(x=>x)
+     *     => HashSet.of(1,2,3,4)
+     */
+    toSet<K>(converter:(x:T)=>K&WithEquality): HashSet<K> {
+        return this.foldLeft(HashSet.empty<K>(), (acc,cur) => {
+            return acc.add(converter(cur));
         });
     }
 

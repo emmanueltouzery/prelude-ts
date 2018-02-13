@@ -1,5 +1,6 @@
 import { Seq } from "../src/Seq";
 import { HashMap } from "../src/HashMap";
+import { HashSet } from "../src/HashSet";
 import { Stream } from "../src/Stream";
 import { Option } from "../src/Option";
 import { Predicate } from "../src/Predicate";
@@ -148,6 +149,10 @@ export function runTests(seqName: string,
         it("transforms to map", () => {
             assert.ok(HashMap.empty<number,string>().put(1,"ok").put(2, "bad")
                       .equals(<HashMap<number,string>>of<[number,string]>([1,"ok"],[2,"bad"]).toMap(x => x)));
+        });
+        it("empty seq transforms to empty set", () => {
+            assert.ok(HashSet.empty<number>()
+                      .equals(empty<number>().toSet(x => x)));
         });
     });
     describe(seqName + " manipulation", () => {
