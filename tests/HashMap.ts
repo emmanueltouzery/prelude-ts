@@ -138,13 +138,13 @@ describe("hashmap equality", () => {
 
 describe("hashmap - toString should be nicely formatted", () => {
     it("should format strings and numbers", () => assert.equal(
-       "{key1: 6, key2: 7}",
-         ""+HashMap.empty<string,number>().put("key1", 6).put("key2", 7)));
+       "HashMap(key1: 6, key2: 7, key3: null)",
+        ""+HashMap.empty<string,number|null>().put("key1", 6).put("key2", 7).put("key3",null)));
     it("should format custom classes", () => assert.equal(
-       "{key1: {field1: test, field2: -1}}",
+       "HashMap(key1: {field1: test, field2: -1})",
          ""+HashMap.empty<string,MyClass>().put("key1", new MyClass('test', -1))));
    it("should format cust class keys as well", () => assert.equal(
-        "{{\"field1\":\"test\",\"field2\":-1}: 'value1'}",
+        "HashMap({\"field1\":\"test\",\"field2\":-1}: 'value1')",
         ""+HashMap.empty<any,string>().put({
             field1:'test',
             field2:-1,

@@ -1405,7 +1405,7 @@ export class ConsLinkedList<T> implements Seq<T> {
             if (isNotFirst) {
                 r += separator;
             }
-            r += SeqHelpers.toStringHelper(curItem.value);
+            r += SeqHelpers.toStringHelper(curItem.value, {quoteStrings:false});
             curItem = curItem._tail;
             isNotFirst = true;
         }

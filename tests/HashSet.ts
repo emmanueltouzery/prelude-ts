@@ -50,9 +50,11 @@ describe("hashset conversions", () => {
         assert.deepEqual(["a","b","c"], HashSet.of("a","b","c").toArray().sort());
     });
     it("should be displayed in a nice format by toString", () =>
-       assert.equal("{'a', 'b', 'c'}", HashSet.of("a","b","c").toString()));
+       assert.equal("HashSet('a', 'b', 'c')", HashSet.of("a","b","c").toString()));
+    it("should be displayed in a nice format by toString even when nulls", () =>
+       assert.equal("HashSet(null)", HashSet.of(null).toString()));
     it("converts to string using mkString", () =>
-       assert.equal("'a'|'b'|'c'", HashSet.of("a","b","c").mkString("|")));
+       assert.equal("a|c|null", HashSet.of("a",null,"c").mkString("|")));
 });
 
 describe("hashset access", () => {

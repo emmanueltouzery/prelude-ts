@@ -82,7 +82,7 @@ export class HashSet<T> implements ISet<T> {
             let checkedEq = false;
             const iterator = elts[Symbol.iterator]();
             let curItem = iterator.next();
-            if (!curItem.done && !checkedEq) {
+            if (!curItem.done && curItem.value && !checkedEq) {
                 contractTrueEquality("Error building a HashSet", curItem.value);
                 checkedEq = true;
             }
@@ -541,7 +541,11 @@ export class HashSet<T> implements ISet<T> {
      * Get a human-friendly string representation of that value.
      */
     toString(): string {
-        return "{" + this.mkString(", ") + "}";
+        return "HashSet(" +
+            this.hamt.fold(
+                (acc: string[], value: T, key: T) =>
+                    {acc.push(SeqHelpers.toStringHelper(key)); return acc;}, []).join(", ")
+            + ")";
     }
 
     inspect(): string {
@@ -560,7 +564,7 @@ export class HashSet<T> implements ISet<T> {
     mkString(separator: string): string {
         return this.hamt.fold(
             (acc: string[], value: T, key: T) =>
-                {acc.push(SeqHelpers.toStringHelper(key)); return acc;}, []).join(separator);
+                {acc.push(SeqHelpers.toStringHelper(key, {quoteStrings: false})); return acc;}, []).join(separator);
     }
 }
 
@@ -576,6 +580,17 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     add(elt: T & WithEquality): HashSet<T> {
         contractTrueEquality("Error building a HashSet", elt);
+        if (!elt) {
+            // special case if we get null for the first element...
+            // less optimized variant because we don't know
+            // if we should use '===' or 'equals'
+            return new HashSet<T>(hamt.make({
+                hash: (v: T & HasEquals) => getHashCode(v),
+                keyEq: (a: T & HasEquals, b: T & HasEquals) => areEqual(a, b)
+            }).set(elt,elt));
+        }
+        // if the element is not null, save a if later by finding
+        // out right now whether we should call equals or ===
         if (hasEquals(elt)) {
             return new HashSet<T>(hamt.make({
                 hash: (v: T & HasEquals) => v.hashCode(),
@@ -681,7 +696,7 @@ class EmptyHashSet<T> extends HashSet<T> {
     }
 
     toString(): string {
-        return "{}";
+        return "HashSet()";
     }
 
     mkString(separator: string): string {

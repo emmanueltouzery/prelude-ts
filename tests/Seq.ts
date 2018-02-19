@@ -144,8 +144,24 @@ export function runTests(seqName: string,
         })
     });
     describe(seqName + " conversions", () => {
+        it("mkString ok for null too", () => assert.equal(
+            "null", of(null).mkString(", ")));
         it("mkString works", () => assert.equal(
             "1, 2, 3", of(1,2,3).mkString(", ")));
+        it("mkString works for strings too", () => assert.equal(
+            "a, b, c", of("a","b","c").mkString(", ")));
+        const nullSeq = of(null);
+        nullSeq.last(); // needed to force the stream to get loaded
+        it("toString ok for null too", () => assert.equal(
+            seqName + "(null)", nullSeq.toString()));
+        const onetwothree = of(1,2,3);
+        onetwothree.last(); // needed to force the stream to get loaded
+        it("toString works", () => assert.equal(
+            seqName + "(1, 2, 3)", onetwothree.toString()));
+        const abc = of("a","b","c");
+        abc.last(); // needed to force the stream to get loaded
+        it("toString works for strings too", () => assert.equal(
+            seqName + "('a', 'b', 'c')", abc.toString()));
         it("transforms to map", () => {
             assert.ok(HashMap.empty<number,string>().put(1,"ok").put(2, "bad")
                       .equals(<HashMap<number,string>>of<[number,string]>([1,"ok"],[2,"bad"]).toMap(x => x)));

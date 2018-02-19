@@ -526,13 +526,13 @@ export class HashMap<K,V> implements IMap<K,V> {
      * Get a human-friendly string representation of that value.
      */
     toString(): string {
-        return "{" +
+        return "HashMap(" +
             this.hamt.fold(
                 (acc: string[], value: V, key: K) =>
                     {acc.push(
                         toStringHelper(key, {quoteStrings:false}) +
                             ": " + toStringHelper(value)); return acc;}, [])
-            .join(", ") + "}";
+            .join(", ") + ")";
     }
 
     inspect(): string {
@@ -672,7 +672,7 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
     }
 
     toString(): string {
-        return "";
+        return "HashMap()";
     }
 }
 

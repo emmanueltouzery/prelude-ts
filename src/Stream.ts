@@ -1448,7 +1448,7 @@ export class ConsStream<T> implements Seq<T> {
             if (isNotFirst) {
                 r += separator;
             }
-            r += curItem.value.toString();
+            r += SeqHelpers.toStringHelper(curItem.value, {quoteStrings:false});
             curItem = curItem._tail.get();
             isNotFirst = true;
         }

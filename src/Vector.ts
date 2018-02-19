@@ -812,7 +812,7 @@ export class Vector<T> implements Seq<T> {
             if (i>0) {
                 r += separator;
             }
-            r += (<T>this.internalGet(i)).toString();
+            r += SeqHelpers.toStringHelper(<T>this.internalGet(i), {quoteStrings:false});
         }
         return r;
     }

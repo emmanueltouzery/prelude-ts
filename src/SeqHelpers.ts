@@ -97,7 +97,7 @@ export function toStringHelper(
     if (typeof obj === "string") {
         return options.quoteStrings ? `'${obj}'` : obj;
     }
-    if (obj.toString !== Object.prototype.toString) {
+    if (obj && (obj.toString !== Object.prototype.toString)) {
         return obj.toString();
     }
     return JSON.stringify(obj);
