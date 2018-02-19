@@ -359,17 +359,6 @@ export class Some<T> implements Value {
     /**
      * Execute a side-effecting function if the option
      * is a Some; returns the option.
-     * **Deprecated** please use [[Some.ifSome]] instead.
-     * @deprecated
-     */
-    ifPresent(fn:(v:T)=>void): Option<T> {
-        fn(this.value);
-        return this;
-    }
-
-    /**
-     * Execute a side-effecting function if the option
-     * is a Some; returns the option.
      */
     ifSome(fn:(v:T)=>void): Option<T> {
         fn(this.value);
@@ -590,16 +579,6 @@ export class None<T> implements Value {
      */
     filter(fn: (v:T)=>boolean): Option<T> {
         return <None<T>>none;
-    }
-
-    /**
-     * Execute a side-effecting function if the option
-     * is a Some; returns the option.
-     * **Deprecated** please use [[None.ifSome]] instead.
-     * @deprecated
-     */
-    ifPresent(fn:(v:T)=>void): Option<T> {
-        return this;
     }
 
     /**
