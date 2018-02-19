@@ -381,7 +381,7 @@ export class Function0Static {
     /**
      * Take a no-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
-     * null and undefined become a [[None]], everything else a [[Some]]
+     * undefined becomes a [[None]], everything else a [[Some]]
      *
      *     const randOpt = Function0.liftOption(Math.random);
      *     randOpt();
@@ -390,6 +390,10 @@ export class Function0Static {
      *     const undef = Function0.liftOption(()=>undefined);
      *     undef();
      *     => Option.none()
+     *
+     *     const nl = Function0.liftOption(()=>null);
+     *     nl();
+     *     => Option.of(null)
      *
      *     const throws = Function0.liftOption(()=>{throw "x"});
      *     throws();
@@ -400,6 +404,38 @@ export class Function0Static {
         return Function0.of(() => {
             try {
                 return Option.of(fn());
+            } catch {
+                return Option.none<U>();
+            }
+        });
+    }
+
+    /**
+     * Take a no-parameter partial function (may return null, undefined or throw),
+     * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const randOpt = Function0.liftNullable(Math.random);
+     *     randOpt();
+     *     => Option.of(0.49884723907769635)
+     *
+     *     const undef = Function0.liftNullable(()=>undefined);
+     *     undef();
+     *     => Option.none()
+     *
+     *     const nl = Function0.liftNullable(()=>null);
+     *     nl();
+     *     => Option.none()
+     *
+     *     const throws = Function0.liftNullable(()=>{throw "x"});
+     *     throws();
+     *     => Option.none()
+     *
+     */
+    liftNullable<U>(fn:()=>U|null|undefined): Function0<Option<U>> {
+        return Function0.of(() => {
+            try {
+                return Option.ofNullable(fn());
             } catch {
                 return Option.none<U>();
             }
@@ -485,7 +521,7 @@ export class Function1Static {
     /**
      * Take a one-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
-     * null and undefined become a [[None]], everything else a [[Some]]
+     * undefined becomes a [[None]], everything else a [[Some]]
      *
      *     const add = Function1.liftOption((x:number)=>x+1);
      *     add(1);
@@ -494,6 +530,10 @@ export class Function1Static {
      *     const undef = Function1.liftOption((x:number)=>undefined);
      *     undef(1);
      *     => Option.none()
+     *
+     *     const nl = Function1.liftOption((x:number)=>null);
+     *     nl(1);
+     *     => Option.some(null)
      *
      *     const throws = Function1.liftOption((x:number)=>{throw "x"});
      *     throws(1);
@@ -504,6 +544,38 @@ export class Function1Static {
         return Function1.of(x => {
             try {
                 return Option.of(fn(x));
+            } catch {
+                return Option.none<U>();
+            }
+        });
+    }
+
+    /**
+     * Take a one-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const add = Function1.liftNullable((x:number)=>x+1);
+     *     add(1);
+     *     => Option.of(2)
+     *
+     *     const undef = Function1.liftNullable((x:number)=>undefined);
+     *     undef(1);
+     *     => Option.none()
+     *
+     *     const nl = Function1.liftNullable((x:number)=>null);
+     *     nl(1);
+     *     => Option.none()
+     *
+     *     const throws = Function1.liftNullable((x:number)=>{throw "x"});
+     *     throws(1);
+     *     => Option.none()
+     *
+     */
+    liftNullable<T,U>(fn:(x:T)=>U|null|undefined): Function1<T,Option<U>> {
+        return Function1.of(x => {
+            try {
+                return Option.ofNullable(fn(x));
             } catch {
                 return Option.none<U>();
             }
@@ -584,7 +656,7 @@ export class Function2Static {
     /**
      * Take a two-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
-     * null and undefined become a [[None]], everything else a [[Some]]
+     * undefined becomes a [[None]], everything else a [[Some]]
      *
      *     const plus = Function2.liftOption((x:number,y:number)=>x+y);
      *     plus(1,2);
@@ -594,6 +666,10 @@ export class Function2Static {
      *     undef(1,2);
      *     => Option.none()
      *
+     *     const nl = Function2.liftOption((x:number,y:number)=>null);
+     *     nl(1,2);
+     *     => Option.some(null)
+     *
      *     const throws = Function2.liftOption((x:number,y:number)=>{throw "x"});
      *     throws(1,2);
      *     => Option.none()
@@ -602,6 +678,37 @@ export class Function2Static {
         return Function2.of((x,y) => {
             try {
                 return Option.of(fn(x,y));
+            } catch {
+                return Option.none<R>();
+            }
+        });
+    }
+
+    /**
+     * Take a two-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const plus = Function2.liftNullable((x:number,y:number)=>x+y);
+     *     plus(1,2);
+     *     => Option.of(3)
+     *
+     *     const undef = Function2.liftNullable((x:number,y:number)=>undefined);
+     *     undef(1,2);
+     *     => Option.none()
+     *
+     *     const nl = Function2.liftNullable((x:number,y:number)=>null);
+     *     nl(1,2);
+     *     => Option.none()
+     *
+     *     const throws = Function2.liftNullable((x:number,y:number)=>{throw "x"});
+     *     throws(1,2);
+     *     => Option.none()
+     */
+    liftNullable<T1,T2,R>(fn:(x:T1,y:T2)=>R|null|undefined): Function2<T1,T2,Option<R>> {
+        return Function2.of((x,y) => {
+            try {
+                return Option.ofNullable(fn(x,y));
             } catch {
                 return Option.none<R>();
             }
@@ -683,7 +790,7 @@ export class Function3Static {
     /**
      * Take a three-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
-     * null and undefined become a [[None]], everything else a [[Some]]
+     * undefined becomes a [[None]], everything else a [[Some]]
      *
      *     const add3 = Function3.liftOption(
      *         (x:number,y:number,z:number)=>x+y+z);
@@ -695,6 +802,11 @@ export class Function3Static {
      *     undef(1,2,3);
      *     => Option.none()
      *
+     *     const nl = Function3.liftOption(
+     *         (x:number,y:number,z:number)=>null);
+     *     nl(1,2,3);
+     *     => Option.some(null)
+     *
      *     const throws = Function3.liftOption(
      *         (x:number,y:number,z:number)=>{throw "x"});
      *     throws(1,2,3);
@@ -705,6 +817,42 @@ export class Function3Static {
         return Function3.of((x,y,z) => {
             try {
                 return Option.of(fn(x,y,z));
+            } catch {
+                return Option.none<R>();
+            }
+        });
+    }
+
+    /**
+     * Take a three-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const add3 = Function3.liftNullable(
+     *         (x:number,y:number,z:number)=>x+y+z);
+     *     add3(1,2,3);
+     *     => Option.of(6)
+     *
+     *     const undef = Function3.liftNullable(
+     *         (x:number,y:number,z:number)=>undefined);
+     *     undef(1,2,3);
+     *     => Option.none()
+     *
+     *     const nl = Function3.liftNullable(
+     *         (x:number,y:number,z:number)=>undefined);
+     *     nl(1,2,3);
+     *     => Option.none()
+     *
+     *     const throws = Function3.liftNullable(
+     *         (x:number,y:number,z:number)=>{throw "x"});
+     *     throws(1,2,3);
+     *     => Option.none()
+     */
+    liftNullable<T1,T2,T3,R>(
+        fn:(x:T1,y:T2,z:T3)=>R|null|undefined): Function3<T1,T2,T3,Option<R>> {
+        return Function3.of((x,y,z) => {
+            try {
+                return Option.ofNullable(fn(x,y,z));
             } catch {
                 return Option.none<R>();
             }
@@ -789,7 +937,7 @@ export class Function4Static {
     /**
      * Take a four-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
-     * null and undefined become a [[None]], everything else a [[Some]]
+     * undefined becomes a [[None]], everything else a [[Some]]
      *
      *     const add4 = Function4.liftOption(
      *         (x:number,y:number,z:number,a:number)=>x+y+z+a);
@@ -801,6 +949,11 @@ export class Function4Static {
      *     undef(1,2,3,4);
      *     => Option.none()
      *
+     *     const nl = Function4.liftOption(
+     *         (x:number,y:number,z:number,a:number)=>null);
+     *     nl(1,2,3,4);
+     *     => Option.some(null)
+     *
      *     const throws = Function4.liftOption(
      *         (x:number,y:number,z:number,a:number)=>{throw "x"});
      *     throws(1,2,3,4);
@@ -811,6 +964,42 @@ export class Function4Static {
         return Function4.of((x,y,z,a) => {
             try {
                 return Option.of(fn(x,y,z,a));
+            } catch {
+                return Option.none<R>();
+            }
+        });
+    }
+
+    /**
+     * Take a four-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const add4 = Function4.liftNullable(
+     *         (x:number,y:number,z:number,a:number)=>x+y+z+a);
+     *     add4(1,2,3,4);
+     *     => Option.of(10)
+     *
+     *     const undef = Function4.liftNullable(
+     *         (x:number,y:number,z:number,a:number)=>undefined);
+     *     undef(1,2,3,4);
+     *     => Option.none()
+     *
+     *     const nl = Function4.liftNullable(
+     *         (x:number,y:number,z:number,a:number)=>null);
+     *     nl(1,2,3,4);
+     *     => Option.none()
+     *
+     *     const throws = Function4.liftNullable(
+     *         (x:number,y:number,z:number,a:number)=>{throw "x"});
+     *     throws(1,2,3,4);
+     *     => Option.none()
+     */
+    liftNullable<T1,T2,T3,T4,R>(
+        fn:(x:T1,y:T2,z:T3,a:T4)=>R|null|undefined): Function4<T1,T2,T3,T4,Option<R>> {
+        return Function4.of((x,y,z,a) => {
+            try {
+                return Option.ofNullable(fn(x,y,z,a));
             } catch {
                 return Option.none<R>();
             }
@@ -895,7 +1084,7 @@ export class Function5Static {
     /**
      * Take a five-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Option]] instead.
-     * null and undefined become a [[None]], everything else a [[Some]]
+     * undefined becomes a [[None]], everything else a [[Some]]
      *
      *     const add5 = Function5.liftOption(
      *         (x:number,y:number,z:number,a:number,b:number)=>x+y+z+a+b);
@@ -907,6 +1096,11 @@ export class Function5Static {
      *     undef(1,2,3,4,5);
      *     => Option.none()
      *
+     *     const nl = Function5.liftOption(
+     *         (x:number,y:number,z:number,a:number,b:number)=>null);
+     *     nl(1,2,3,4,5);
+     *     => Option.some(null)
+     *
      *     const throws = Function5.liftOption(
      *         (x:number,y:number,z:number,a:number,b:number)=>{throw "x"});
      *     throws(1,2,3,4,5);
@@ -917,6 +1111,42 @@ export class Function5Static {
         return Function5.of((x,y,z,a,b) => {
             try {
                 return Option.of(fn(x,y,z,a,b));
+            } catch {
+                return Option.none<R>();
+            }
+        });
+    }
+
+    /**
+     * Take a five-parameter partial function (may return undefined or throw),
+     * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const add5 = Function5.liftNullable(
+     *         (x:number,y:number,z:number,a:number,b:number)=>x+y+z+a+b);
+     *     add5(1,2,3,4,5);
+     *     => Option.of(15)
+     *
+     *     const undef = Function5.liftNullable(
+     *         (x:number,y:number,z:number,a:number,b:number)=>undefined);
+     *     undef(1,2,3,4,5);
+     *     => Option.none()
+     *
+     *     const nl = Function5.liftNullable(
+     *         (x:number,y:number,z:number,a:number,b:number)=>null);
+     *     nl(1,2,3,4,5);
+     *     => Option.none()
+     *
+     *     const throws = Function5.liftNullable(
+     *         (x:number,y:number,z:number,a:number,b:number)=>{throw "x"});
+     *     throws(1,2,3,4,5);
+     *     => Option.none()
+     */
+    liftNullable<T1,T2,T3,T4,T5,R>(
+        fn:(x:T1,y:T2,z:T3,a:T4,b:T5)=>R|null|undefined): Function5<T1,T2,T3,T4,T5,Option<R>> {
+        return Function5.of((x,y,z,a,b) => {
+            try {
+                return Option.ofNullable(fn(x,y,z,a,b));
             } catch {
                 return Option.none<R>();
             }

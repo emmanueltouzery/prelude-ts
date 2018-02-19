@@ -54,16 +54,57 @@ export class OptionStatic {
      * * undefined becomes a [[None]]
      * * null becomes a [[Some]].
      *
-     * Also see [[OptionStatic.some]]
+     *     Option.of(5).isSome()
+     *     => true
+     *
+     *     Option.of(undefined).isSome()
+     *     => false
+     *
+     *     Option.of(null).isSome()
+     *     => true
+     *
+     * Also see [[OptionStatic.some]], [[OptionStatic.ofNullable]]
      */
     of<T>(v: T|undefined): Option<T> {
         return (v === undefined) ? <None<T>>none : new Some(v);
     }
 
     /**
+     * Build an optional value from a nullable.
+     * * T is wrapped in a [[Some]]
+     * * undefined becomes a [[None]]
+     * * null becomes a [[None]].
+     *
+     *     Option.ofNullable(5).isSome()
+     *     => true
+     *
+     *     Option.ofNullable(undefined).isSome()
+     *     => false
+     *
+     *     Option.ofNullable(null).isSome()
+     *     => false
+     *
+     * Also see [[OptionStatic.some]], [[OptionStatic.of]]
+     */
+    ofNullable<T>(v:T|undefined|null): Option<T> {
+        return v ? new Some(v) : <None<T>>none;
+    }
+
+    /**
      * Build a [[Some]], unlike [[OptionStatic.of]], which may build a [[Some]]
      * or a [[None]].
      * Will throw if given undefined.
+     *
+     *     Option.some(5).isSome()
+     *     => true
+     *
+     *     Option.some(undefined).isSome()
+     *     => throws
+     *
+     *     Option.some(null).isSome()
+     *     => true
+     *
+     * Also see [[OptionStatic.of]], [[OptionStatic.ofNullable]]
      */
     some<T>(v: T): Some<T> {
         // the reason I decided to add a some in addition to 'of'
