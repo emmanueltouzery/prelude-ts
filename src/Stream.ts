@@ -568,6 +568,8 @@ export class EmptyStream<T> implements Seq<T> {
      * build a new collection holding only the elements
      * for which the predicate returned true.
      */
+    filter<U extends T>(predicate:(v:T)=>v is U): Stream<U>;
+    filter(predicate:(v:T)=>boolean): Stream<T>;
     filter(predicate:(v:T)=>boolean): Stream<T> {
         return this;
     }
@@ -1310,6 +1312,8 @@ export class ConsStream<T> implements Seq<T> {
      * build a new collection holding only the elements
      * for which the predicate returned true.
      */
+    filter<U extends T>(predicate:(v:T)=>v is U): Stream<U>;
+    filter(predicate:(v:T)=>boolean): Stream<T>;
     filter(predicate:(v:T)=>boolean): Stream<T> {
         return predicate(this.value) ?
             new ConsStream(this.value,

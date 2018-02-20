@@ -352,6 +352,8 @@ export class Some<T> implements Value {
      * and the contents match your predicate, return the option.
      * If the contents don't match the predicate, return None.
      */
+    filter<U extends T>(fn:(v:T)=>v is U): Option<U>;
+    filter(fn: (v:T)=>boolean): Option<T>;
     filter(fn: (v:T)=>boolean): Option<T> {
         return fn(this.value) ? this : Option.none<T>();
     }
@@ -577,6 +579,8 @@ export class None<T> implements Value {
      * and the contents match your predicate, return the option.
      * If the contents don't match the predicate, return None.
      */
+    filter<U extends T>(fn:(v:T)=>v is U): Option<U>;
+    filter(fn: (v:T)=>boolean): Option<T>;
     filter(fn: (v:T)=>boolean): Option<T> {
         return <None<T>>none;
     }

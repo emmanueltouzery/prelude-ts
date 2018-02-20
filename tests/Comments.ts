@@ -162,6 +162,7 @@ function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>
         import { Predicate } from "../src/Predicate";
         import { Either, Left, Right } from "../src/Either";
         import { Option, Some, None } from "../src/Option";
+        import { isInstance } from "../src/Comparison";
         import * as assert from 'assert';
 
         function myEq(a:any, b:any): boolean {

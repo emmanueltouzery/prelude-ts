@@ -142,6 +142,8 @@ export class HashSet<T> implements ISet<T> {
      * build a new collection holding only the elements
      * for which the predicate returned true.
      */
+    filter<U extends T>(fn:(v:T)=>v is U): HashSet<U>;
+    filter(predicate:(v:T)=>boolean): HashSet<T>;
     filter(predicate:(v:T)=>boolean): HashSet<T> {
         return new HashSet<T>(
             hamt.make({hash:this.hamt._config.hash, keyEq:this.hamt._config.keyEq}).mutate((h:any) => {
@@ -624,6 +626,8 @@ class EmptyHashSet<T> extends HashSet<T> {
         return <EmptyHashSet<U>>emptyHashSet;
     }
 
+    filter<U extends T>(fn:(v:T)=>v is U): HashSet<U>;
+    filter(predicate:(v:T)=>boolean): HashSet<T>;
     filter(predicate:(v:T)=>boolean): HashSet<T> {
         return this;
     }

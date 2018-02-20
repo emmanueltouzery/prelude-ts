@@ -512,6 +512,8 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * build a new collection holding only the elements
      * for which the predicate returned true.
      */
+    filter<U extends T>(predicate:(v:T)=>v is U): LinkedList<U>;
+    filter(predicate:(v:T)=>boolean): LinkedList<T>;
     filter(predicate:(v:T)=>boolean): LinkedList<T> {
         return this;
     }
@@ -1262,6 +1264,8 @@ export class ConsLinkedList<T> implements Seq<T> {
      * build a new collection holding only the elements
      * for which the predicate returned true.
      */
+    filter<U extends T>(predicate:(v:T)=>v is U): LinkedList<U>;
+    filter(predicate:(v:T)=>boolean): LinkedList<T>;
     filter(predicate:(v:T)=>boolean): LinkedList<T> {
         let curItem: LinkedList<T> = this;
         let result: LinkedList<T> = <EmptyLinkedList<T>>emptyLinkedList;

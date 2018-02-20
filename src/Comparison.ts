@@ -184,3 +184,20 @@ export const enum Ordering {
      */
     GT=1
 };
+
+/**
+ * Curried function returning a type guard telling us if a value
+ * is of a specific instance.
+ * Can be used when filtering to filter for the type and at the
+ * same time change the type of the generis on the container.
+ *
+ *     Vector.empty<any>().filter(isInstance(Date))
+ *     => Vector.empty<Date>()
+ *
+ *     Option.none<any>().filter(isInstance(Date))
+ *     => Option.none<Date>()
+ */
+export function isInstance<T>(ctor: new(...args: any[]) => T): (x: any) => x is T {
+    // https://github.com/Microsoft/TypeScript/issues/5101#issuecomment-145693151
+    return <(x: any) => x is T>(x => x instanceof ctor);
+}

@@ -340,6 +340,8 @@ export class HashMap<K,V> implements IMap<K,V> {
      *     HashMap.of<number,string>([1,"a"],[2,"b"]).filterKeys(k=>k%2===0)
      *     => HashMap.of<number,string>([2,"b"])
      */
+    filterKeys<U extends K>(fn:(v:K)=>v is U): HashMap<U,V>;
+    filterKeys(predicate:(k:K)=>boolean): HashMap<K,V>;
     filterKeys(predicate:(k:K)=>boolean): HashMap<K,V> {
         return this.filter((k,v)=>predicate(k));
     }
@@ -352,6 +354,8 @@ export class HashMap<K,V> implements IMap<K,V> {
      *     HashMap.of<number,string>([1,"a"],[2,"ab"]).filterValues(v=>v.length>1)
      *     => HashMap.of<number,string>([2,"ab"])
      */
+    filterValues<U extends V>(fn:(v:V)=>v is U): HashMap<K,U>;
+    filterValues(predicate:(k:V)=>boolean): HashMap<K,V>;
     filterValues(predicate:(k:V)=>boolean): HashMap<K,V> {
         return this.filter((k,v)=>predicate(v));
     }

@@ -25,3 +25,13 @@ export class MyClass {
         return `{field1: ${this.field1}, field2: ${this.field2}}`;
     }
 }
+
+export class MySubclass extends MyClass {
+    constructor(field1: string, field2:number, private field3:string) {
+        super(field1,field2);
+        this.field3 = field3;
+    }
+    getField3(): string {
+        return this.field3;
+    }
+}

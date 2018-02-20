@@ -4,7 +4,8 @@ import { Stream } from "../src/Stream";
 import { Option } from "../src/Option";
 import { Tuple2 } from "../src/Tuple2";
 import { HashMap } from "../src/HashMap";
-import { MyClass} from "./SampleData";
+import { isInstance } from "../src/Comparison";
+import { MyClass, MySubclass } from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as CollectionTest from './Collection';
 import * as assert from 'assert'
@@ -156,6 +157,13 @@ describe("hashset combinations", () => {
         HashSet.empty<number>().equals(HashSet.empty<number>().remove(3))));
     it("filters correctly", () => assert.ok(
         HashSet.of(2,4).equals(HashSet.of(1,2,3,4,5).filter(x => x%2==0))));
+    it("filter upcasts if possible", () => {
+        // here we only want to check that the code does compile,
+        // that 'x' is correctly seen has MySubclass in the 3rd line
+        HashSet.of<MyClass>(new MySubclass("a",1,"b"))
+            .filter(isInstance(MySubclass))
+            .filter(x => x.getField3().length>1);
+    });
     it("keeps the custom equal/hash on filter", () => assert.equal(
         1, HashSet.of(new MyClass("a",1)).filter(x=>true).add(new MyClass("a",1)).length()));
     it("confirms subset when correct", () =>

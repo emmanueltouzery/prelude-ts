@@ -26,6 +26,7 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      * build a new collection holding only the elements
      * for which the predicate returned true.
      */
+    filter<U extends T>(fn:(v:T)=>v is U): Collection<U>;
     filter(predicate:(v:T)=>boolean): Collection<T>;
 
     /**

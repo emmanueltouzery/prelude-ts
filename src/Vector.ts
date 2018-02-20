@@ -600,7 +600,9 @@ export class Vector<T> implements Seq<T> {
      * build a new collection holding only the elements
      * for which the predicate returned true.
      */
-    filter(fun:(x:T)=>boolean): Vector<T> {
+    filter<U extends T>(fun:(v:T)=>v is U): Vector<U>;
+    filter(fun:(v:T)=>boolean): Vector<T>;
+    filter(fun:(v:T)=>boolean): Vector<T> {
         const mutVec = Vector.emptyMutable<T>();
         for (let i = 0; i < this._length; i++) {
             const value = this.internalGet(i);
