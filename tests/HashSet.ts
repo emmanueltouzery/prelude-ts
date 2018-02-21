@@ -4,7 +4,7 @@ import { Stream } from "../src/Stream";
 import { Option } from "../src/Option";
 import { Tuple2 } from "../src/Tuple2";
 import { HashMap } from "../src/HashMap";
-import { isInstance } from "../src/Comparison";
+import { instanceOf } from "../src/Comparison";
 import { MyClass, MySubclass } from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as CollectionTest from './Collection';
@@ -161,7 +161,7 @@ describe("hashset combinations", () => {
         // here we only want to check that the code does compile,
         // that 'x' is correctly seen has MySubclass in the 3rd line
         HashSet.of<MyClass>(new MySubclass("a",1,"b"))
-            .filter(isInstance(MySubclass))
+            .filter(instanceOf(MySubclass))
             .filter(x => x.getField3().length>1);
     });
     it("keeps the custom equal/hash on filter", () => assert.equal(

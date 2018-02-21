@@ -189,15 +189,37 @@ export const enum Ordering {
  * Curried function returning a type guard telling us if a value
  * is of a specific instance.
  * Can be used when filtering to filter for the type and at the
- * same time change the type of the generis on the container.
+ * same time change the type of the generics on the container.
  *
- *     Vector.empty<any>().filter(isInstance(Date))
- *     => Vector.empty<Date>()
+ *     Vector.of<any>("bad", new Date('04 Dec 1995 00:12:00 GMT')).filter(instanceOf(Date))
+ *     => Vector.of<Date>(new Date('04 Dec 1995 00:12:00 GMT'))
  *
- *     Option.none<any>().filter(isInstance(Date))
+ *     Option.of<any>("test").filter(instanceOf(Date))
  *     => Option.none<Date>()
+ *
+ *     Option.of<any>(new Date('04 Dec 1995 00:12:00 GMT')).filter(instanceOf(Date))
+ *     => Option.of<Date>(new Date('04 Dec 1995 00:12:00 GMT'))
  */
-export function isInstance<T>(ctor: new(...args: any[]) => T): (x: any) => x is T {
+export function instanceOf<T>(ctor: new(...args: any[]) => T): (x: any) => x is T {
     // https://github.com/Microsoft/TypeScript/issues/5101#issuecomment-145693151
     return <(x: any) => x is T>(x => x instanceof ctor);
+}
+
+/**
+ * Curried function returning a type guard telling us if a value
+ * is of a specific type.
+ * Can be used when filtering to filter for the type and at the
+ * same time change the type of the generics on the container.
+ *
+ *     Vector.of<any>(1,"a",2,3,"b").filter(typeOf("string"))
+ *     => Vector.of<string>("a", "b")
+ *
+ *     Option.of<any>(1).filter(typeOf("string"))
+ *     => Option.none<string>()
+ *
+ *     Option.of<any>("str").filter(typeOf("string"))
+ *     => Option.of<string>("str")
+ */
+export function typeOf<T>(typ: string): (x:any) => x is typeof typ {
+    return <(x: any) => x is typeof typ>(x => typeof x === typ);
 }

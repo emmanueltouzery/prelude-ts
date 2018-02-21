@@ -162,7 +162,7 @@ function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>
         import { Predicate } from "../src/Predicate";
         import { Either, Left, Right } from "../src/Either";
         import { Option, Some, None } from "../src/Option";
-        import { isInstance } from "../src/Comparison";
+        import { instanceOf, typeOf } from "../src/Comparison";
         import * as assert from 'assert';
 
         function myEq(a:any, b:any): boolean {
@@ -187,6 +187,10 @@ function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>
              }
              return JSON.stringify(a) === JSON.stringify(b);
         }
+
+        // adding date support to myEq above isn't enough because I have Option<Date>
+        // in one of the tests...
+        (<any>Date.prototype).equals = function (other: Date) { return this.getTime() === other.getTime(); }
 
         const randomValues = [0.49884723907769635, 0.3226548779864311];
         let randomIndex = 0;

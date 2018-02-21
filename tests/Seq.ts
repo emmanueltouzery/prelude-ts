@@ -4,7 +4,7 @@ import { HashSet } from "../src/HashSet";
 import { Stream } from "../src/Stream";
 import { Option } from "../src/Option";
 import { Predicate } from "../src/Predicate";
-import { isInstance } from "../src/Comparison";
+import { instanceOf, typeOf } from "../src/Comparison";
 import { MyClass, MySubclass } from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as CollectionTest from './Collection';
@@ -286,12 +286,19 @@ export function runTests(seqName: string,
         it("filter works with prepend", () => assert.ok(
             of(2,4)
                 .equals(of(3,4).prepend(2).prepend(1).filter(x => x%2 === 0))));
-        it("filter upcasts if possible", () => {
+        it("filter upcasts if possible - instanceOf", () => {
             // here we only want to check that the code does compile,
-            // that 'x' is correctly seen has MySubclass in the 3rd line
+            // that 'x' is correctly seen as MySubclass in the 3rd line
             of<MyClass>(new MySubclass("a",1,"b"))
-                .filter(isInstance(MySubclass))
+                .filter(instanceOf(MySubclass))
                 .filter(x => x.getField3().length>1);
+        });
+        it("filter upcasts if possible - typeOf", () => {
+            // here we only want to check that the code does compile,
+            // that 'x' is correctly seen as string in the 3rd line
+            of<any>(1,3,"a","b")
+                .filter(typeOf("string"))
+                .filter(x => x.replace("x","").length > 0);
         });
         it("distinctBy", () => assert.deepEqual(
             [1,2,3], of(1,1,2,3,2,3,1).distinctBy(x => x).toArray()));

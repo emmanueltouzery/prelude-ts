@@ -1,6 +1,6 @@
 import { Option, Some, None } from "../src/Option";
 import { Vector } from "../src/Vector";
-import { isInstance } from "../src/Comparison";
+import { instanceOf } from "../src/Comparison";
 import { Seq } from "../src/Seq";
 import { MyClass, MySubclass } from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
@@ -72,7 +72,7 @@ describe("option transformation", () => {
         // here we only want to check that the code does compile,
         // that 'x' is correctly seen has MySubclass in the 3rd line
         Option.of<MyClass>(new MySubclass("a",1,"b"))
-            .filter(isInstance(MySubclass))
+            .filter(instanceOf(MySubclass))
             .filter(x => x.getField3().length>1);
     });
     it("should apply match to a some", () =>
