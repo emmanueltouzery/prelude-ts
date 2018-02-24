@@ -186,6 +186,20 @@ export const enum Ordering {
 };
 
 /**
+ * Typescript doesn't infer typeguards for lambdas; it only sees
+ * predicates. This type allows you to cast a predicate to a type
+ * guard in a handy manner.
+ *
+ * It comes in handy for discriminated unions with a 'kind' discriminator,
+ * for instance:
+ *
+ * .filter(<TypeGuard<InBoard>>(p => p.kind === "in_board"))
+ *
+ * Also see [[instanceOf]] and [[typeOf]].
+ */
+export type TypeGuard<T> = (x: any) => x is T;
+
+/**
  * Curried function returning a type guard telling us if a value
  * is of a specific instance.
  * Can be used when filtering to filter for the type and at the
@@ -199,10 +213,12 @@ export const enum Ordering {
  *
  *     Option.of<any>(new Date('04 Dec 1995 00:12:00 GMT')).filter(instanceOf(Date))
  *     => Option.of<Date>(new Date('04 Dec 1995 00:12:00 GMT'))
+ *
+ * Also see [[TypeGuard]] and [[typeOf]].
  */
 export function instanceOf<T>(ctor: new(...args: any[]) => T): (x: any) => x is T {
     // https://github.com/Microsoft/TypeScript/issues/5101#issuecomment-145693151
-    return <(x: any) => x is T>(x => x instanceof ctor);
+    return <TypeGuard<T>>(x => x instanceof ctor);
 }
 
 /**
@@ -219,7 +235,9 @@ export function instanceOf<T>(ctor: new(...args: any[]) => T): (x: any) => x is 
  *
  *     Option.of<any>("str").filter(typeOf("string"))
  *     => Option.of<string>("str")
+ *
+ * Also see [[instanceOf]] and [[TypeGuard]].
  */
 export function typeOf<T>(typ: string): (x:any) => x is typeof typ {
-    return <(x: any) => x is typeof typ>(x => typeof x === typ);
+    return <TypeGuard<typeof typ>>(x => typeof x === typ);
 }
