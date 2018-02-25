@@ -193,11 +193,32 @@ export const enum Ordering {
  * It comes in handy for discriminated unions with a 'kind' discriminator,
  * for instance:
  *
- * .filter(<TypeGuard<InBoard>>(p => p.kind === "in_board"))
+ * .filter(<TypeGuard<InBoard|OutBoard,InBoard>>(p => p.kind === "in_board"))
  *
- * Also see [[instanceOf]] and [[typeOf]].
+ * Also see [[typeGuard]], [[instanceOf]] and [[typeOf]].
  */
-export type TypeGuard<T> = (x: any) => x is T;
+export type TypeGuard<T,U extends T> = (x: T) => x is U;
+
+/**
+ * Typescript doesn't infer typeguards for lambdas; it only sees
+ * predicates. This type allows you to cast a predicate to a type
+ * guard in a handy manner.
+ *
+ * It comes in handy for discriminated unions with a 'kind' discriminator,
+ * for instance:
+ *
+ * .filter(typeGuard(p => p.kind === "in_board", {} as InBoard))
+ *
+ * Normally you'd have to give both type parameters, but you can use
+ * the type witness parameter as shown in that example to skip
+ * the first type parameter.
+ *
+ * Also see [[typeGuard]], [[instanceOf]] and [[typeOf]].
+ */
+export function typeGuard<T,U extends T>(predicate:(x:T)=>boolean,
+                                         typeWitness?: U): TypeGuard<T,U> {
+    return <TypeGuard<T,U>>predicate;
+}
 
 /**
  * Curried function returning a type guard telling us if a value
@@ -214,11 +235,11 @@ export type TypeGuard<T> = (x: any) => x is T;
  *     Option.of<any>(new Date('04 Dec 1995 00:12:00 GMT')).filter(instanceOf(Date))
  *     => Option.of<Date>(new Date('04 Dec 1995 00:12:00 GMT'))
  *
- * Also see [[TypeGuard]] and [[typeOf]].
+ * Also see [[typeGuard]] and [[typeOf]].
  */
-export function instanceOf<T>(ctor: new(...args: any[]) => T): (x: any) => x is T {
+export function instanceOf<T>(ctor: new(...args: any[]) => T): TypeGuard<any,T> {
     // https://github.com/Microsoft/TypeScript/issues/5101#issuecomment-145693151
-    return <TypeGuard<T>>(x => x instanceof ctor);
+    return <TypeGuard<any,T>>(x => x instanceof ctor);
 }
 
 /**
@@ -236,8 +257,8 @@ export function instanceOf<T>(ctor: new(...args: any[]) => T): (x: any) => x is 
  *     Option.of<any>("str").filter(typeOf("string"))
  *     => Option.of<string>("str")
  *
- * Also see [[instanceOf]] and [[TypeGuard]].
+ * Also see [[instanceOf]] and [[typeGuard]].
  */
-export function typeOf<T>(typ: string): (x:any) => x is typeof typ {
-    return <TypeGuard<typeof typ>>(x => typeof x === typ);
+export function typeOf<T>(typ: string): TypeGuard<any,typeof typ> {
+    return <TypeGuard<any,typeof typ>>(x => typeof x === typ);
 }
