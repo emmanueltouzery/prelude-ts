@@ -26,6 +26,9 @@ export class MyClass {
     }
 }
 
+/**
+ * @hidden
+ */
 export class MySubclass extends MyClass {
     constructor(field1: string, field2:number, private field3:string) {
         super(field1,field2);
