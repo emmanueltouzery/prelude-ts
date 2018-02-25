@@ -193,7 +193,7 @@ export const enum Ordering {
  * It comes in handy for discriminated unions with a 'kind' discriminator,
  * for instance:
  *
- * .filter(<TypeGuard<InBoard|OutBoard,InBoard>>(p => p.kind === "in_board"))
+ * .`filter(<TypeGuard<InBoard|OutBoard,InBoard>>(p => p.kind === "in_board"))`
  *
  * Also see [[typeGuard]], [[instanceOf]] and [[typeOf]].
  */
@@ -207,7 +207,7 @@ export type TypeGuard<T,U extends T> = (x: T) => x is U;
  * It comes in handy for discriminated unions with a 'kind' discriminator,
  * for instance:
  *
- * .filter(typeGuard(p => p.kind === "in_board", {} as InBoard))
+ * `.filter(typeGuard(p => p.kind === "in_board", {} as InBoard))`
  *
  * Normally you'd have to give both type parameters, but you can use
  * the type witness parameter as shown in that example to skip
