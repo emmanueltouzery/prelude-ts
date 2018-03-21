@@ -9,10 +9,10 @@ const CATEGORIES = Vector.of<[string,Vector<string>]>(
     ["Control", Vector.of(
         "Either", "Option", "Lazy", "Function", "Predicate")],
     ["Collection", Vector.of(
-        "Collection", "Foldable", 
+        "Collection", "Foldable",
         "IMap","HashMap", "ISet", "HashSet",
-        "Seq", "LinkedList", "Stream", "Vector", 
-        "Tuple2", "SortOnSpec", "SortBySpec")],
+        "Seq", "LinkedList", "Stream", "Vector",
+        "Tuple2", "SortOnSpec", "SortBySpec", "ToOrderable")],
     ["Core", Vector.of(
         "Comparison", "Value", "Contract")]);
 

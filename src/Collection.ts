@@ -3,6 +3,7 @@ import { Value } from "./Value";
 import { Option } from "./Option";
 import { HashMap } from "./HashMap";
 import { Foldable } from "./Foldable";
+import { ToOrderable } from "./Seq";
 
 export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
 
@@ -98,7 +99,7 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      *
      * also see [[Collection.minBy]]
      */
-    minOn(getNumber: (v:T)=>number): Option<T>;
+    minOn(getNumber: ToOrderable<T>): Option<T>;
 
     /**
      * Compare values in the collection and return the largest element.
@@ -115,7 +116,7 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      *
      * also see [[Collection.maxBy]]
      */
-    maxOn(getNumber: (v:T)=>number): Option<T>;
+    maxOn(getSortable: ToOrderable<T>): Option<T>;
 
     /**
      * Call the function you give for each element in the collection

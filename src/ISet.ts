@@ -4,6 +4,7 @@ import { Collection } from "./Collection";
 import { Vector } from "./Vector";
 import { LinkedList } from "./LinkedList";
 import { Option } from "./Option";
+import { ToOrderable } from "./Seq";
 
 /**
  * Ability to specify a sorting function.
@@ -11,7 +12,7 @@ import { Option } from "./Option";
  *
  * `{sortOn: ((v:T)=>number)|((v:T)=>string)}`
  */
-export type SortOnSpec<T> = {sortOn: ((v:T)=>number)|((v:T)=>string)};
+export type SortOnSpec<T> = {sortOn: ToOrderable<T>};
 
 /**
  * Ability to specify a sorting function.

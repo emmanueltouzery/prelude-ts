@@ -28,7 +28,7 @@ import { IMap } from "./IMap";
 import { HashMap } from "./HashMap";
 import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
-import { Seq } from "./Seq";
+import { Seq, ToOrderable } from "./Seq";
 import { Lazy } from "./Lazy";
 import { LinkedList } from "./LinkedList";
 import * as SeqHelpers from "./SeqHelpers";
@@ -591,7 +591,7 @@ export class EmptyStream<T> implements Seq<T> {
      *
      * also see [[ConsStream.sortBy]]
      */
-    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Stream<T> {
+    sortOn(getKey: ToOrderable<T>): Stream<T> {
         return this;
     }
 
@@ -640,7 +640,7 @@ export class EmptyStream<T> implements Seq<T> {
      *
      * also see [[ConsStream.minBy]]
      */
-    minOn(getNumber: (v:T)=>number): Option<T> {
+    minOn(getOrderable: ToOrderable<T>): Option<T> {
         return Option.none<T>();
     }
 
@@ -661,7 +661,7 @@ export class EmptyStream<T> implements Seq<T> {
      *
      * also see [[ConsStream.maxBy]]
      */
-    maxOn(getNumber: (v:T)=>number): Option<T> {
+    maxOn(getOrderable: ToOrderable<T>): Option<T> {
         return Option.none<T>();
     }
 
@@ -1338,7 +1338,7 @@ export class ConsStream<T> implements Seq<T> {
      *
      * also see [[ConsStream.sortBy]]
      */
-    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Stream<T> {
+    sortOn(getKey: ToOrderable<T>): Stream<T> {
         return <Stream<T>>SeqHelpers.sortOn<T>(this, getKey);
     }
 
@@ -1392,8 +1392,8 @@ export class ConsStream<T> implements Seq<T> {
      *
      * also see [[ConsStream.minBy]]
      */
-    minOn(getNumber: (v:T)=>number): Option<T> {
-        return SeqHelpers.minOn(this, getNumber);
+    minOn(getOrderable: ToOrderable<T>): Option<T> {
+        return SeqHelpers.minOn(this, getOrderable);
     }
 
     /**
@@ -1413,8 +1413,8 @@ export class ConsStream<T> implements Seq<T> {
      *
      * also see [[ConsStream.maxBy]]
      */
-    maxOn(getNumber: (v:T)=>number): Option<T> {
-        return SeqHelpers.maxOn(this, getNumber);
+    maxOn(getOrderable: ToOrderable<T>): Option<T> {
+        return SeqHelpers.maxOn(this, getOrderable);
     }
 
     /**

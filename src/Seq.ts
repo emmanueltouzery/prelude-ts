@@ -6,6 +6,14 @@ import { Collection } from "./Collection";
 import { Stream } from "./Stream";
 
 /**
+ * Sorting function for type T: function
+ * to convert this type to a type which is natively
+ * sortable in javascript, that is string or number.
+ * `((v:T)=>number)|((v:T)=>string)`
+ */
+export type ToOrderable<T> = ((v:T)=>number)|((v:T)=>string);
+
+/**
  * A generic interface for list-like implementations.
  * @param T the item type
  */
@@ -103,7 +111,7 @@ export interface Seq<T> extends Collection<T> {
      *
      * also see [[Seq.sortBy]]
      */
-    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Seq<T>;
+    sortOn(getKey: ToOrderable<T>): Seq<T>;
 
     /**
      * Prepend an element at the beginning of the collection.

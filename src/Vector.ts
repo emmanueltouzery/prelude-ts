@@ -3,7 +3,7 @@ import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
 import { IMap } from "./IMap";
 import { Stream } from "./Stream";
-import { Seq } from "./Seq";
+import { Seq, ToOrderable } from "./Seq";
 import { WithEquality, areEqual, getHashCode,
          Ordering } from "./Comparison";
 import { Collection } from "./Collection";
@@ -836,7 +836,7 @@ export class Vector<T> implements Seq<T> {
      *
      * also see [[Vector.sortBy]]
      */
-    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): Vector<T> {
+    sortOn(getKey: ToOrderable<T>): Vector<T> {
         return <Vector<T>>SeqHelpers.sortOn<T>(this, getKey);
     }
 
@@ -1132,8 +1132,8 @@ export class Vector<T> implements Seq<T> {
      *
      * also see [[Vector.minBy]]
      */
-    minOn(getNumber: (v:T)=>number): Option<T> {
-        return SeqHelpers.minOn(this, getNumber);
+    minOn(getOrderable: ToOrderable<T>): Option<T> {
+        return SeqHelpers.minOn(this, getOrderable);
     }
 
     /**
@@ -1153,8 +1153,8 @@ export class Vector<T> implements Seq<T> {
      *
      * also see [[Vector.maxBy]]
      */
-    maxOn(getNumber: (v:T)=>number): Option<T> {
-        return SeqHelpers.maxOn(this, getNumber);
+    maxOn(getOrderable: ToOrderable<T>): Option<T> {
+        return SeqHelpers.maxOn(this, getOrderable);
     }
 
     /**

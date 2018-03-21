@@ -6,6 +6,7 @@ import { Option } from "./Option";
 import { WithEquality, hasEquals, HasEquals,
          getHashCode, areEqual, Ordering } from "./Comparison";
 import * as SeqHelpers from "./SeqHelpers";
+import { ToOrderable } from "./Seq";
 import { contractTrueEquality } from "./Contract";
 const hamt: any = require("hamt_plus");
 
@@ -451,8 +452,8 @@ export class HashSet<T> implements ISet<T> {
      *
      * also see [[HashSet.minBy]]
      */
-    minOn(getNumber: (v:T)=>number): Option<T> {
-        return SeqHelpers.minOn(this, getNumber);
+    minOn(getOrderable: ToOrderable<T>): Option<T> {
+        return SeqHelpers.minOn(this, getOrderable);
     }
 
     /**
@@ -472,8 +473,8 @@ export class HashSet<T> implements ISet<T> {
      *
      * also see [[HashSet.maxBy]]
      */
-    maxOn(getNumber: (v:T)=>number): Option<T> {
-        return SeqHelpers.maxOn(this, getNumber);
+    maxOn(getOrderable: ToOrderable<T>): Option<T> {
+        return SeqHelpers.maxOn(this, getOrderable);
     }
 
     /**

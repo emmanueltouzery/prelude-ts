@@ -30,7 +30,7 @@ import { IMap } from "./IMap";
 import { HashMap } from "./HashMap";
 import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
-import { Seq } from "./Seq";
+import { Seq, ToOrderable } from "./Seq";
 import { Stream } from "./Stream";
 import * as SeqHelpers from "./SeqHelpers";
 
@@ -535,7 +535,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
      *
      * also see [[ConsLinkedList.sortBy]]
      */
-    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): LinkedList<T> {
+    sortOn(getKey: ToOrderable<T>): LinkedList<T> {
         return this;
     }
 
@@ -584,8 +584,8 @@ export class EmptyLinkedList<T> implements Seq<T> {
      *
      * also see [[ConsLinkedList.minBy]]
      */
-    minOn(getNumber: (v:T)=>number): Option<T> {
-        return SeqHelpers.minOn(this, getNumber);
+    minOn(getOrderable: ToOrderable<T>): Option<T> {
+        return SeqHelpers.minOn(this, getOrderable);
     }
 
     /**
@@ -605,8 +605,8 @@ export class EmptyLinkedList<T> implements Seq<T> {
      *
      * also see [[ConsLinkedList.maxBy]]
      */
-    maxOn(getNumber: (v:T)=>number): Option<T> {
-        return SeqHelpers.maxOn(this, getNumber);
+    maxOn(getOrderable: ToOrderable<T>): Option<T> {
+        return SeqHelpers.maxOn(this, getOrderable);
     }
 
     /**
@@ -1295,7 +1295,7 @@ export class ConsLinkedList<T> implements Seq<T> {
      *
      * also see [[ConsLinkedList.sortBy]]
      */
-    sortOn(getKey: ((v:T)=>number)|((v:T)=>string)): LinkedList<T> {
+    sortOn(getKey: ToOrderable<T>): LinkedList<T> {
         return <LinkedList<T>>SeqHelpers.sortOn<T>(this, getKey);
     }
 
@@ -1349,8 +1349,8 @@ export class ConsLinkedList<T> implements Seq<T> {
      *
      * also see [[ConsLinkedList.minBy]]
      */
-    minOn(getNumber: (v:T)=>number): Option<T> {
-        return SeqHelpers.minOn(this, getNumber);
+    minOn(getOrderable: ToOrderable<T>): Option<T> {
+        return SeqHelpers.minOn(this, getOrderable);
     }
 
     /**
@@ -1370,8 +1370,8 @@ export class ConsLinkedList<T> implements Seq<T> {
      *
      * also see [[ConsLinkedList.maxBy]]
      */
-    maxOn(getNumber: (v:T)=>number): Option<T> {
-        return SeqHelpers.maxOn(this, getNumber);
+    maxOn(getOrderable: ToOrderable<T>): Option<T> {
+        return SeqHelpers.maxOn(this, getOrderable);
     }
 
     /**

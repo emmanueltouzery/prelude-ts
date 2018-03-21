@@ -1,7 +1,7 @@
 import { Option } from "./Option";
 import { WithEquality, hasTrueEquality, Ordering } from "./Comparison";
 import { HashMap } from "./HashMap";
-import { Seq } from "./Seq";
+import { Seq, ToOrderable } from "./Seq";
 import { Collection } from "./Collection";
 import { Stream, ConsStream } from "./Stream";
 import { Lazy } from "./Lazy";
@@ -56,7 +56,7 @@ export function zipWithIndex<T>(seq: Seq<T>): Seq<[T,number]> {
 /**
  * @hidden
  */
-export function sortOn<T>(seq: Seq<T>, getKey: ((v:T)=>number)|((v:T)=>string)): Seq<T> {
+export function sortOn<T>(seq: Seq<T>, getKey: ToOrderable<T>): Seq<T> {
     return seq.sortBy((x,y) => {
         const a = getKey(x);
         const b = getKey(y);
@@ -113,16 +113,16 @@ export function minBy<T>(coll: Collection<T>, compare: (v1:T,v2:T)=>Ordering): O
 /**
  * @hidden
  */
-export function minOn<T>(coll: Collection<T>, getNumber: (v:T)=>number): Option<T> {
+export function minOn<T>(coll: Collection<T>, getSortable: ToOrderable<T>): Option<T> {
     if (coll.isEmpty()) {
         return Option.none<T>();
     }
     let iter = coll[Symbol.iterator]();
     let step = iter.next();
-    let val = getNumber(step.value);
+    let val = getSortable(step.value);
     let result = step.value;
     while (!(step = iter.next()).done) {
-        const curVal = getNumber(step.value);
+        const curVal = getSortable(step.value);
         if (curVal < val) {
             val = curVal;
             result = step.value;
@@ -141,16 +141,16 @@ export function maxBy<T>(coll: Collection<T>, compare: (v1:T,v2:T)=>Ordering): O
 /**
  * @hidden
  */
-export function maxOn<T>(coll: Collection<T>, getNumber: (v:T)=>number): Option<T> {
+export function maxOn<T>(coll: Collection<T>, getSortable: ToOrderable<T>): Option<T> {
     if (coll.isEmpty()) {
         return Option.none<T>();
     }
     let iter = coll[Symbol.iterator]();
     let step = iter.next();
-    let val = getNumber(step.value);
+    let val = getSortable(step.value);
     let result = step.value;
     while (!(step = iter.next()).done) {
-        const curVal = getNumber(step.value);
+        const curVal = getSortable(step.value);
         if (curVal > val) {
             val = curVal;
             result = step.value;
