@@ -4,10 +4,10 @@ import { Vector } from "./Vector";
 /**
  * Sorting function for type T: function
  * to convert this type to a type which is natively
- * sortable in javascript, that is string or number.
- * `((v:T)=>number)|((v:T)=>string)`
+ * sortable in javascript, that is string, number or boolean.
+ * `((v:T)=>number) | ((v:T)=>string) | ((v:T)=>boolean`
  */
-export type ToOrderable<T> = ((v:T)=>number)|((v:T)=>string);
+export type ToOrderable<T> = ((v:T)=>number) | ((v:T)=>string) | ((v:T)=>boolean);
 
 /**
  * List of types which provide equality semantics:

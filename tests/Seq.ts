@@ -396,11 +396,7 @@ export function runTests(seqName: string,
                 original.equals(shuffle4)))
     });
 
-    interface SortingTest {
-        a: number;
-        b: string;
-    }
-    const list = of<SortingTest>({a:1, b:"aa"}, {a:2, b:"aa"}, {a:1, b:"ba"});
+    const list = of({a:1, b:"aa"}, {a:2, b:"aa"}, {a:1, b:"ba"});
 
     describe(seqName + " multiple criteria sorting", () => {
         it ("sorts normally, descending on b", () => {
@@ -414,6 +410,17 @@ export function runTests(seqName: string,
         });
         it ("sorts normally descending on both", () => {
             assert.deepEqual([{a:2,b:"aa"},{a:1,b:"ba"},{a:1,b:"aa"}], list.sortOn({desc:x=>x.a},{desc:x=>x.b}).toArray());
+        });
+    });
+
+    const list1 = of({a:1, b:true}, {a:2, b:false}, {a:1, b:false});
+
+    describe(seqName + " multiple criteria sorting (including booleans)", () => {
+        it ("sorts normally, descending on b", () => {
+            assert.deepEqual([{a:1,b:true},{a:1,b:false},{a:2,b:false}], list1.sortOn(x=>x.a,{desc:x=>x.b}).toArray());
+        });
+        it ("sorts normally ascending on b", () => {
+            assert.deepEqual([{a:1,b:false},{a:2,b:false},{a:1,b:true}], list1.sortOn(x=>x.b, x=>x.a).toArray());
         });
     });
 }
