@@ -4,7 +4,6 @@
 // Seq<T>.equals is a lot less type-precise than Vector<T>.equals, so I'd rather
 // the users use concrete types.
 export * from "./Option";
-export { ToOrderable } from "./Seq";
 export * from "./Either";
 export * from "./Lazy";
 export * from "./Vector";

@@ -1,18 +1,21 @@
-import { WithEquality, Ordering } from "./Comparison";
+import { WithEquality, Ordering, ToOrderable } from "./Comparison";
 import { Value} from "./Value";
 import { Collection } from "./Collection";
 import { Vector } from "./Vector";
 import { LinkedList } from "./LinkedList";
 import { Option } from "./Option";
-import { ToOrderable } from "./Seq";
 
 /**
  * Ability to specify a sorting function.
  * See [[Seq.sortOn]].
  *
- * `{sortOn: ((v:T)=>number)|((v:T)=>string)}`
+ * You can give a lambda getting a sortable value (number or string) from your
+ * object, or a list of lambdas, and in the list you can also put {desc:lambda}
+ * items to request descending sorting
+ *
+ * `{sortOn: ToOrderable<T>|Array<ToOrderable<T>|{desc:ToOrderable<T>}>}`
  */
-export type SortOnSpec<T> = {sortOn: ToOrderable<T>};
+export type SortOnSpec<T> = {sortOn: ToOrderable<T>|Array<ToOrderable<T>|{desc:ToOrderable<T>}>};
 
 /**
  * Ability to specify a sorting function.
@@ -145,6 +148,10 @@ export interface ISet<T> extends Collection<T> {
      *
      *     HashSet.of(1,2,3).toArray({sortBy:(x,y)=>x-y})
      *     => [1,2,3]
+     *
+     * You can also pass an array in sortOn, listing lambdas to
+     * several fields to sort by those fields, and also {desc:lambda}
+     * to sort by some fields descending.
      */
     toArray(sort?: SortOnSpec<T> | SortBySpec<T>): Array<T & WithEquality>;
 

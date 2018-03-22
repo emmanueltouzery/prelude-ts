@@ -395,4 +395,25 @@ export function runTests(seqName: string,
                 original.equals(shuffle3) &&
                 original.equals(shuffle4)))
     });
+
+    interface SortingTest {
+        a: number;
+        b: string;
+    }
+    const list = of<SortingTest>({a:1, b:"aa"}, {a:2, b:"aa"}, {a:1, b:"ba"});
+
+    describe(seqName + " multiple criteria sorting", () => {
+        it ("sorts normally, descending on b", () => {
+            assert.deepEqual([{a:1,b:"ba"},{a:1,b:"aa"},{a:2,b:"aa"}], list.sortOn(x=>x.a,{desc:x=>x.b}).toArray());
+        });
+        it ("sorts normally ascending on b", () => {
+            assert.deepEqual([{a:1,b:"aa"},{a:1,b:"ba"},{a:2,b:"aa"}], list.sortOn(x=>x.a, x=>x.b).toArray());
+        });
+        it ("sorts normally descending on a", () => {
+            assert.deepEqual([{a:2,b:"aa"},{a:1,b:"aa"},{a:1,b:"ba"}], list.sortOn({desc:x=>x.a},x=>x.b).toArray());
+        });
+        it ("sorts normally descending on both", () => {
+            assert.deepEqual([{a:2,b:"aa"},{a:1,b:"ba"},{a:1,b:"aa"}], list.sortOn({desc:x=>x.a},{desc:x=>x.b}).toArray());
+        });
+    });
 }

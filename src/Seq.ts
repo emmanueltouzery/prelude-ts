@@ -1,17 +1,9 @@
-import { WithEquality, Ordering } from "./Comparison";
+import { WithEquality, Ordering, ToOrderable } from "./Comparison";
 import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
 import { Option } from "./Option";
 import { Collection } from "./Collection";
 import { Stream } from "./Stream";
-
-/**
- * Sorting function for type T: function
- * to convert this type to a type which is natively
- * sortable in javascript, that is string or number.
- * `((v:T)=>number)|((v:T)=>string)`
- */
-export type ToOrderable<T> = ((v:T)=>number)|((v:T)=>string);
 
 /**
  * A generic interface for list-like implementations.
@@ -109,9 +101,18 @@ export interface Seq<T> extends Collection<T> {
      * elements from the collection, and the elements
      * are sorted according to that value.
      *
+     *     Vector.of({a:3,b:"b"},{a:1,b:"test"},{a:2,b:"a"}).sortOn(elt=>elt.a)
+     *     => Vector.of({a:1,b:"test"},{a:2,b:"a"},{a:3,b:"b"})
+     *
+     * You can also sort by multiple criteria, and request 'descending'
+     * sorting:
+     *
+     *     Vector.of({a:1,b:"b"},{a:1,b:"test"},{a:2,b:"a"}).sortOn(elt=>elt.a,{desc:elt=>elt.b})
+     *     => Vector.of({a:1,b:"test"},{a:1,b:"b"},{a:2,b:"a"})
+     *
      * also see [[Seq.sortBy]]
      */
-    sortOn(getKey: ToOrderable<T>): Seq<T>;
+    sortOn(...getKeys: Array<ToOrderable<T>|{desc:ToOrderable<T>}>): Seq<T>;
 
     /**
      * Prepend an element at the beginning of the collection.

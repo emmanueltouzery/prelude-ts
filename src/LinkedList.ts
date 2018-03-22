@@ -23,14 +23,14 @@
 import { Option, Some, None } from "./Option";
 import { Vector } from "./Vector";
 import { WithEquality, getHashCode,
-         areEqual, Ordering } from "./Comparison";
+         areEqual, Ordering, ToOrderable } from "./Comparison";
 import { contractTrueEquality } from "./Contract";
 import { Value } from "./Value";
 import { IMap } from "./IMap";
 import { HashMap } from "./HashMap";
 import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
-import { Seq, ToOrderable } from "./Seq";
+import { Seq } from "./Seq";
 import { Stream } from "./Stream";
 import * as SeqHelpers from "./SeqHelpers";
 
@@ -533,9 +533,18 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * elements from the collection, and the elements
      * are sorted according to that value.
      *
+     *     LinkedList.of({a:3,b:"b"},{a:1,b:"test"},{a:2,b:"a"}).sortOn(elt=>elt.a)
+     *     => LinkedList.of({a:1,b:"test"},{a:2,b:"a"},{a:3,b:"b"})
+     *
+     * You can also sort by multiple criteria, and request 'descending'
+     * sorting:
+     *
+     *     LinkedList.of({a:1,b:"b"},{a:1,b:"test"},{a:2,b:"a"}).sortOn(elt=>elt.a,{desc:elt=>elt.b})
+     *     => LinkedList.of({a:1,b:"test"},{a:1,b:"b"},{a:2,b:"a"})
+     *
      * also see [[ConsLinkedList.sortBy]]
      */
-    sortOn(getKey: ToOrderable<T>): LinkedList<T> {
+    sortOn(...getKeys: Array<ToOrderable<T>|{desc:ToOrderable<T>}>): LinkedList<T> {
         return this;
     }
 
@@ -1293,10 +1302,19 @@ export class ConsLinkedList<T> implements Seq<T> {
      * elements from the collection, and the elements
      * are sorted according to that value.
      *
+     *     LinkedList.of({a:3,b:"b"},{a:1,b:"test"},{a:2,b:"a"}).sortOn(elt=>elt.a)
+     *     => LinkedList.of({a:1,b:"test"},{a:2,b:"a"},{a:3,b:"b"})
+     *
+     * You can also sort by multiple criteria, and request 'descending'
+     * sorting:
+     *
+     *     LinkedList.of({a:1,b:"b"},{a:1,b:"test"},{a:2,b:"a"}).sortOn(elt=>elt.a,{desc:elt=>elt.b})
+     *     => LinkedList.of({a:1,b:"test"},{a:1,b:"b"},{a:2,b:"a"})
+     *
      * also see [[ConsLinkedList.sortBy]]
      */
-    sortOn(getKey: ToOrderable<T>): LinkedList<T> {
-        return <LinkedList<T>>SeqHelpers.sortOn<T>(this, getKey);
+    sortOn(...getKeys: Array<ToOrderable<T>|{desc:ToOrderable<T>}>): LinkedList<T> {
+        return <LinkedList<T>>SeqHelpers.sortOn<T>(this, getKeys);
     }
 
     /**

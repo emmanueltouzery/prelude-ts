@@ -3,9 +3,9 @@ import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
 import { IMap } from "./IMap";
 import { Stream } from "./Stream";
-import { Seq, ToOrderable } from "./Seq";
+import { Seq } from "./Seq";
 import { WithEquality, areEqual, getHashCode,
-         Ordering } from "./Comparison";
+         Ordering, ToOrderable } from "./Comparison";
 import { Collection } from "./Collection";
 import * as SeqHelpers from "./SeqHelpers";
 
@@ -834,10 +834,19 @@ export class Vector<T> implements Seq<T> {
      * elements from the collection, and the elements
      * are sorted according to that value.
      *
+     *     Vector.of({a:3,b:"b"},{a:1,b:"test"},{a:2,b:"a"}).sortOn(elt=>elt.a)
+     *     => Vector.of({a:1,b:"test"},{a:2,b:"a"},{a:3,b:"b"})
+     *
+     * You can also sort by multiple criteria, and request 'descending'
+     * sorting:
+     *
+     *     Vector.of({a:1,b:"b"},{a:1,b:"test"},{a:2,b:"a"}).sortOn(elt=>elt.a,{desc:elt=>elt.b})
+     *     => Vector.of({a:1,b:"test"},{a:1,b:"b"},{a:2,b:"a"})
+     *
      * also see [[Vector.sortBy]]
      */
-    sortOn(getKey: ToOrderable<T>): Vector<T> {
-        return <Vector<T>>SeqHelpers.sortOn<T>(this, getKey);
+    sortOn(...getKeys: Array<ToOrderable<T>|{desc:ToOrderable<T>}>): Vector<T> {
+        return <Vector<T>>SeqHelpers.sortOn<T>(this, getKeys);
     }
 
     /**

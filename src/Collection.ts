@@ -1,9 +1,8 @@
-import { WithEquality, Ordering } from "./Comparison";
+import { WithEquality, Ordering, ToOrderable } from "./Comparison";
 import { Value } from "./Value";
 import { Option } from "./Option";
 import { HashMap } from "./HashMap";
 import { Foldable } from "./Foldable";
-import { ToOrderable } from "./Seq";
 
 export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
 

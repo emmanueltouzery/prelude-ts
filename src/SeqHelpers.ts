@@ -1,7 +1,8 @@
 import { Option } from "./Option";
-import { WithEquality, hasTrueEquality, Ordering } from "./Comparison";
+import { WithEquality, hasTrueEquality,
+         Ordering, ToOrderable } from "./Comparison";
 import { HashMap } from "./HashMap";
-import { Seq, ToOrderable } from "./Seq";
+import { Seq } from "./Seq";
 import { Collection } from "./Collection";
 import { Stream, ConsStream } from "./Stream";
 import { Lazy } from "./Lazy";
@@ -56,14 +57,26 @@ export function zipWithIndex<T>(seq: Seq<T>): Seq<[T,number]> {
 /**
  * @hidden
  */
-export function sortOn<T>(seq: Seq<T>, getKey: ToOrderable<T>): Seq<T> {
+export function sortOn<T>(seq: Seq<T>, getKeys: Array<ToOrderable<T>|{desc:ToOrderable<T>}>): Seq<T> {
     return seq.sortBy((x,y) => {
-        const a = getKey(x);
-        const b = getKey(y);
-        if (a === b) {
-            return 0;
+        for (const getKey of getKeys) {
+            if ((<any>getKey).desc) {
+                const a = (<ToOrderable<T>>(<any>getKey).desc)(x);
+                const b = (<ToOrderable<T>>(<any>getKey).desc)(y);
+                if (a === b) {
+                    continue;
+                }
+                return a<b?Ordering.GT:Ordering.LT;
+            } else {
+                const a = (<ToOrderable<T>>getKey)(x);
+                const b = (<ToOrderable<T>>getKey)(y);
+                if (a === b) {
+                    continue;
+                }
+                return a>b?Ordering.GT:Ordering.LT;
+            }
         }
-        return a>b?1:-1;
+        return Ordering.EQ;
     });
 }
 

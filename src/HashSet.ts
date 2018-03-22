@@ -1,12 +1,12 @@
-import { ISet, SortOnSpec, SortBySpec, isSortOnSpec } from "./ISet";
+import { ISet,
+         SortOnSpec, SortBySpec, isSortOnSpec } from "./ISet";
 import { Vector } from "./Vector";
 import { HashMap } from "./HashMap";
 import { LinkedList } from "./LinkedList";
 import { Option } from "./Option";
 import { WithEquality, hasEquals, HasEquals,
-         getHashCode, areEqual, Ordering } from "./Comparison";
+         getHashCode, areEqual, Ordering, ToOrderable  } from "./Comparison";
 import * as SeqHelpers from "./SeqHelpers";
-import { ToOrderable } from "./Seq";
 import { contractTrueEquality } from "./Contract";
 const hamt: any = require("hamt_plus");
 
@@ -227,14 +227,19 @@ export class HashSet<T> implements ISet<T> {
      *
      *     HashSet.of(1,2,3).toArray({sortBy:(x,y)=>x-y})
      *     => [1,2,3]
+     *
+     * You can also pass an array in sortOn, listing lambdas to
+     * several fields to sort by those fields, and also {desc:lambda}
+     * to sort by some fields descending.
      */
     toArray(sort?: SortOnSpec<T> | SortBySpec<T>): Array<T & WithEquality> {
         if (!sort) {
             return Array.from<T&WithEquality>(this.hamt.keys());
         }
         if (isSortOnSpec(sort)) {
+            const sortOn = sort.sortOn instanceof Array ? sort.sortOn : [sort.sortOn];
             return Vector.ofIterable<T&WithEquality>(this.hamt.keys())
-                .sortOn(sort.sortOn)
+                .sortOn(...sortOn)
                 .toArray();
         }
         return Array.from<T&WithEquality>(this.hamt.keys()).sort(sort.sortBy);

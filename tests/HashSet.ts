@@ -56,6 +56,24 @@ describe("hashset conversions", () => {
        assert.equal("HashSet(null)", HashSet.of(null).toString()));
     it("converts to string using mkString", () =>
        assert.equal("a|c|null", HashSet.of("a",null,"c").mkString("|")));
+    const testSet = HashSet.of(
+        new MyClass("aa",1), new MyClass("aa",2), new MyClass("ba",1));
+    it("converts to array with multiple field sorting descending on field1", () => {
+        assert.deepEqual([new MyClass("ba",1), new MyClass("aa",1), new MyClass("aa",2)],
+                         testSet.toArray({sortOn:[x=>x.getField2(), {desc:x=>x.getField1()}]}));
+    });
+    it("converts to array with multiple field sorting descending on field1", () => {
+        assert.deepEqual([new MyClass("aa",1), new MyClass("ba",1), new MyClass("aa",2)],
+                         testSet.toArray({sortOn:[x=>x.getField2(), x=>x.getField1()]}));
+    });
+    it("converts to array with multiple field sorting descending on field2", () => {
+        assert.deepEqual([new MyClass("aa",2), new MyClass("aa",1), new MyClass("ba",1)],
+                         testSet.toArray({sortOn:[{desc:x=>x.getField2()}, x=>x.getField1()]}));
+    });
+    it("converts to array with multiple field sorting both descending", () => {
+        assert.deepEqual([new MyClass("aa",2), new MyClass("ba",1), new MyClass("aa",1)],
+                         testSet.toArray({sortOn:[{desc:x=>x.getField2()}, {desc:x=>x.getField1()}]}));
+    });
 });
 
 describe("hashset access", () => {
