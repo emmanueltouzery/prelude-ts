@@ -166,6 +166,18 @@ function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>
         import * as assert from 'assert';
 
         function myEq(a:any, b:any): boolean {
+             if (a === null && b === null) {
+                 return true;
+             }
+             if ((a === null) !== (b === null)) {
+                 return false;
+             }
+             if ((<any>a).isSome && (<any>b).isSome &&
+                     (<any>a).isSome() && (<any>b).isSome()) {
+                 // workaround for Option<array> equality
+                 // useful in HashMap tests
+                 return myEq(a.getOrThrow(), b.getOrThrow());
+             }
              if (a.toArray) {
                  // workaround for the zip test Vector.of([1,"a"]) equality
                  // real Vector returns false, compilation error otherwise

@@ -160,6 +160,31 @@ export class HashSet<T> implements ISet<T> {
     }
 
     /**
+     * Search for an item matching the predicate you pass,
+     * return Option.Some of that element if found,
+     * Option.None otherwise.
+     * We name the method findAny instead of find to emphasize
+     * that there is not ordering in a hashset.
+     *
+     *     HashSet.of(1,2,3).findAny(x => x>=3)
+     *     => Option.of(3)
+     *
+     *     HashSet.of(1,2,3).findAny(x => x>=4)
+     *     => Option.none<number>()
+     */
+    findAny(predicate:(v:T)=>boolean): Option<T> {
+        const iterator: Iterator<T> = this.hamt.values();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (predicate(curItem.value)) {
+                return Option.of(curItem.value);
+            }
+            curItem = iterator.next();
+        }
+        return Option.none<T>();
+    }
+
+    /**
      * Reduces the collection to a single value using the
      * associative binary function you give. Since the function
      * is associative, order of application doesn't matter.
@@ -636,6 +661,10 @@ class EmptyHashSet<T> extends HashSet<T> {
     filter(predicate:(v:T)=>boolean): HashSet<T>;
     filter(predicate:(v:T)=>boolean): HashSet<T> {
         return this;
+    }
+
+    findAny(predicate:(v:T)=>boolean): Option<T> {
+        return Option.none();
     }
 
     foldLeft<U>(zero: U, fn:(soFar:U,cur:T)=>U): U {

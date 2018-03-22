@@ -333,6 +333,33 @@ export class HashMap<K,V> implements IMap<K,V> {
     }
 
     /**
+     * Search for an item matching the predicate you pass,
+     * return Option.Some of that element if found,
+     * Option.None otherwise.
+     * We name the method findAny instead of find to emphasize
+     * that there is not ordering in a hashset.
+     *
+     *     HashMap.of<number,string>([1,'a'],[2,'b'],[3,'c'])
+     *         .findAny((k,v) => k>=2 && v === "c")
+     *     => Option.of([3,'c'])
+     *
+     *     HashMap.of<number,string>([1,'a'],[2,'b'],[3,'c'])
+     *         .findAny((k,v) => k>=3 && v === "b")
+     *     => Option.none<[number,string]>()
+     */
+    findAny(predicate:(k:K,v:V)=>boolean): Option<[K,V]> {
+        const iterator: Iterator<[K,V]> = this.hamt.entries();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            if (predicate(curItem.value[0], curItem.value[1])) {
+                return Option.of(curItem.value);
+            }
+            curItem = iterator.next();
+        }
+        return Option.none<[K,V]>();
+    }
+
+    /**
      * Call a predicate for each key in the collection,
      * build a new collection holding only the elements
      * for which the predicate returned true.
