@@ -477,6 +477,8 @@ export class Vector<T> implements Seq<T> {
      *     Vector.of(1,2,3,4).partition(x => x%2===0)
      *     => [Vector.of(2,4),Vector.of(1,3)]
      */
+    partition<U extends T>(predicate:(x:T)=> x is U): [Vector<U>,Vector<T>];
+    partition(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>];
     partition(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>] {
         // TODO goes twice over the list, can be optimized...
         return [this.filter(predicate), this.filter(x => !predicate(x))];

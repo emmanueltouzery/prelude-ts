@@ -39,6 +39,7 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      *     Vector.of(1,2,3,4).partition(x => x%2===0)
      *     => [Vector.of(2,4), Vector.of(1,3)]
      */
+    partition<U extends T>(predicate:(x:T)=> x is U): [Collection<U>,Collection<T>];
     partition(predicate:(x:T)=>boolean): [Collection<T>,Collection<T>];
 
     /**

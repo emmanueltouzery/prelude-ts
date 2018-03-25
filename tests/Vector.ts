@@ -1,6 +1,7 @@
 import { Vector } from "../src/Vector";
 import { Stream } from "../src/Stream";
 import { MyClass } from "./SampleData";
+import { typeOf } from "../src/Comparison";
 import * as SeqTest from "./Seq";
 import * as assert from 'assert'
 
@@ -57,6 +58,14 @@ describe("Vector extra methods", () => {
         x.replace(1,4);
         assert.deepEqual(
             [1,2,3], x.toArray())
+    });
+    it("correctly infers the more precise left type on partition in case of typeguard", () => {
+        // just checking that this compiles. 'charAt' is available on strings not numbers.
+        // the get(0) is to make sure that partition returns me a Vector
+        // not a Collection or something less precise than Vector.
+        Vector.of<string|number>(1,"test",2,"a")
+            .partition(typeOf("string"))[0]
+            .get(0).getOrThrow().charAt(0);
     });
 });
 

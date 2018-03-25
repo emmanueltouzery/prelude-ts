@@ -435,6 +435,8 @@ export class HashSet<T> implements ISet<T> {
      *     HashSet.of(1,2,3,4).partition(x => x%2===0)
      *     => [HashSet.of(2,4), HashSet.of(1,3)]
      */
+    partition<U extends T>(predicate:(x:T)=> x is U): [HashSet<U>,HashSet<T>];
+    partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>];
     partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>] {
         let r1 = hamt.make({
             hash:this.hamt._config.hash, keyEq:this.hamt._config.keyEq
@@ -715,6 +717,8 @@ class EmptyHashSet<T> extends HashSet<T> {
         return true;
     }
 
+    partition<U extends T>(predicate:(x:T)=> x is U): [HashSet<U>,HashSet<T>];
+    partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>];
     partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>] {
         return [this, this];
     }

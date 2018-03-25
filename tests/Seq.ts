@@ -219,6 +219,11 @@ export function runTests(seqName: string,
             [[1,3,5,7],[2,4,6,8]],
             of(2,3,4,5,6,7,8).prepend(1).partition(x => x%2!==0)
                 .map(v => v.toArray())));
+        it("correctly infers the more precise left type on partition in case of typeguard", () => {
+            // just checking that this compiles. 'charAt' is available on strings not numbers.
+            of<string|number>(1,2,"a")
+                .partition(typeOf("string"))[0].single().getOrThrow().charAt(0);
+        });
         it("zips with an array", () => assert.deepEqual(
             [[1,"a"], [2,"b"]], of(1,2,3).zip(["a","b"]).toArray()));
         it("zips with a stream", () => assert.deepEqual(

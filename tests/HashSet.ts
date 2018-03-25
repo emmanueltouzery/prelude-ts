@@ -4,7 +4,7 @@ import { Stream } from "../src/Stream";
 import { Option } from "../src/Option";
 import { Tuple2 } from "../src/Tuple2";
 import { HashMap } from "../src/HashMap";
-import { instanceOf } from "../src/Comparison";
+import { instanceOf, typeOf } from "../src/Comparison";
 import { MyClass, MySubclass } from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as CollectionTest from './Collection';
@@ -124,6 +124,15 @@ describe("hashset access", () => {
         [[1,3,5,7],[2,4,6,8]],
         HashSet.of(2,3,4,5,6,7,8).add(1).partition(x => x%2!==0)
             .map(v => v.toVector().sortOn(x=>x).toArray())));
+    it("correctly infers the more precise left type on partition in case of typeguard", () => {
+        // just checking that this compiles. 'charAt' is available on strings not numbers.
+        // the intersect is to make sure that partition returns me a HashSet
+        // not a Collection or something less precise than HashSet.
+        HashSet.of<string|number>(1,"test",2,"a")
+            .partition(typeOf("string"))[0]
+            .intersect(HashSet.of<string>("a"))
+            .single().getOrThrow().charAt(0);
+    });
 });
 
 describe("hashset equality", () => {

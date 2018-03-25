@@ -426,6 +426,8 @@ export class EmptyStream<T> implements Seq<T> {
      *     Stream.of(1,2,3,4).partition(x => x%2===0)
      *     => [Stream.of(2,4),Stream.of(1,3)]
      */
+    partition<U extends T>(predicate:(x:T)=> x is U): [Stream<U>,Stream<T>];
+    partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>];
     partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
         return [Stream.empty<T>(), Stream.empty<T>()];
     }
@@ -1148,6 +1150,8 @@ export class ConsStream<T> implements Seq<T> {
      *     Stream.of(1,2,3,4).partition(x => x%2===0)
      *     => [Stream.of(2,4),Stream.of(1,3)]
      */
+    partition<U extends T>(predicate:(x:T)=> x is U): [Stream<U>,Stream<T>];
+    partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>];
     partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
         // TODO goes twice over the list, can be optimized...
         return [this.filter(predicate), this.filter(x => !predicate(x))];
