@@ -69,6 +69,31 @@ export class LinkedListStatic {
     }
 
     /**
+     * Curried type guard for LinkedList.
+     * Sometimes needed also due to https://github.com/Microsoft/TypeScript/issues/20218
+     *
+     *     Vector.of(LinkedList.of(1), LinkedList.empty<number>())
+     *         .filter(LinkedList.isEmpty)
+     *     => Vector.of(LinkedList.empty<number>())
+     */
+    isEmpty<T>(l: LinkedList<T>): l is EmptyLinkedList<T> {
+        return l.isEmpty();
+    }
+
+    /**
+     * Curried type guard for LinkedList.
+     * Sometimes needed also due to https://github.com/Microsoft/TypeScript/issues/20218
+     *
+     *     Vector.of(Stream.of(1), Stream.empty<number>())
+     *         .filter(Stream.isNotEmpty)
+     *         .map(s => s.head().get()+1)
+     *     => Vector.of(2)
+     */
+    isNotEmpty<T>(l: LinkedList<T>): l is ConsLinkedList<T> {
+        return !l.isEmpty();
+    }
+
+    /**
      * Dual to the foldRight function. Build a collection from a seed.
      * Takes a starting element and a function.
      * It applies the function on the starting element; if the

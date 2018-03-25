@@ -127,6 +127,31 @@ export class OptionStatic {
     }
 
     /**
+     * Curried type guard for Option
+     * Sometimes needed also due to https://github.com/Microsoft/TypeScript/issues/20218
+     *
+     *     Vector.of(Option.of(2), Option.none<number>())
+     *         .filter(Option.isSome)
+     *         .map(o => o.get())
+     *     => Vector.of(2)
+     */
+    isSome<T>(o: Option<T>): o is Some<T> {
+        return o.isSome();
+    }
+
+    /**
+     * Curried type guard for Option
+     * Sometimes needed also due to https://github.com/Microsoft/TypeScript/issues/20218
+     *
+     *     Vector.of(Option.of(2), Option.none<number>())
+     *         .filter(Option.isNone)
+     *     => Vector.of(Option.none<number>())
+     */
+    isNone<T>(o: Option<T>): o is None<T> {
+        return o.isNone();
+    }
+
+    /**
      * Turns a list of options in an option containing a list of items.
      * Useful in many contexts.
      *

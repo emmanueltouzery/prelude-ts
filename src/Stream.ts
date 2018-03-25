@@ -77,6 +77,31 @@ export class StreamStatic {
     }
 
     /**
+     * Curried type guard for Stream.
+     * Sometimes needed also due to https://github.com/Microsoft/TypeScript/issues/20218
+     *
+     *     Vector.of(Stream.of(1), Stream.empty<number>())
+     *         .filter(Stream.isEmpty)
+     *     => Vector.of(Stream.empty<number>())
+     */
+    isEmpty<T>(s: Stream<T>): s is EmptyStream<T> {
+        return s.isEmpty();
+    }
+
+    /**
+     * Curried type guard for Stream.
+     * Sometimes needed also due to https://github.com/Microsoft/TypeScript/issues/20218
+     *
+     *     Vector.of(Stream.of(1), Stream.empty<number>())
+     *         .filter(Stream.isNotEmpty)
+     *         .map(s => s.head().get()+1)
+     *     => Vector.of(2)
+     */
+    isNotEmpty<T>(s: Stream<T>): s is ConsStream<T> {
+        return !s.isEmpty();
+    }
+
+    /**
      * @hidden
      */
     private ofArray<T>(elts: Array<T>): Stream<T> {

@@ -46,6 +46,32 @@ export class EitherStatic {
     }
 
     /**
+     * Curried type guard for Either
+     * Sometimes needed also due to https://github.com/Microsoft/TypeScript/issues/20218
+     *
+     *     Vector.of(Either.right<number,number>(2), Either.left<number,number>(1))
+     *         .filter(Either.isLeft)
+     *         .map(o => o.getLeft())
+     *     => Vector.of(1)
+     */
+    isLeft<L,R>(e: Either<L,R>): e is Left<L,R> {
+        return e.isLeft();
+    }
+
+    /**
+     * Curried type guard for Either
+     * Sometimes needed also due to https://github.com/Microsoft/TypeScript/issues/20218
+     *
+     *     Vector.of(Either.right<number,number>(2), Either.left<number,number>(1))
+     *         .filter(Either.isRight)
+     *         .map(o => o.get())
+     *     => Vector.of(2)
+     */
+    isRight<L,R>(e: Either<L,R>): e is Right<L,R> {
+        return e.isRight();
+    }
+
+    /**
      * Turns a list of eithers in an either containing a list of items.
      * Useful in many contexts.
      *
@@ -54,7 +80,7 @@ export class EitherStatic {
      *         Either.right<number,number>(2)));
      *     => Either.right(Vector.of(1,2))
      *
-     * But if a single element is None, everything is discarded:
+     * But if a single element is Left, everything is discarded:
      *
      *     Either.sequence(Vector.of(
      *           Either.right<number,number>(1),
