@@ -104,6 +104,32 @@ export class EitherStatic {
     }
 
     /**
+     * Turns a list of eithers in an either containing a list of items.
+     * Compared to [[EitherStatic.sequence]], sequenceAcc 'accumulates'
+     * the errors, instead of short-circuiting on the first error.
+     *
+     *     Either.sequenceAcc(Vector.of(
+     *         Either.right<number,number>(1),
+     *         Either.right<number,number>(2)));
+     *     => Either.right(Vector.of(1,2))
+     *
+     * But if a single element is Left, you get all the lefts:
+     *
+     *     Either.sequenceAcc(Vector.of(
+     *           Either.right<number,number>(1),
+     *           Either.left<number,number>(2),
+     *           Either.left<number,number>(3)));
+     *     => Either.left(Vector.of(2,3))
+     */
+    sequenceAcc<L,R>(elts:Iterable<Either<L,R>>): Either<Vector<L>,Vector<R>> {
+        const [lefts,rights] = Vector.ofIterable(elts).partition(Either.isLeft);
+        if (lefts.isEmpty()) {
+            return Either.right<Vector<L>,Vector<R>>(rights.map(r => r.getOrThrow()));
+        }
+        return Either.left<Vector<L>,Vector<R>>(lefts.map(l => l.getLeft()));
+    }
+
+    /**
      * Applicative lifting for Either.
      * Takes a function which operates on basic values, and turns it
      * in a function that operates on eithers of these values ('lifts'
@@ -144,11 +170,17 @@ export class EitherStatic {
      *
      *     const fn = (x:{a:number,b:number,c:number}) => x.a+x.b+x.c;
      *     const lifted = Either.liftAp(fn, {} as number);
-     *     lifted({a:Either.right<number,number>(5), b:Either.right<number,number>(6), c:Either.right<number,number>(3)});
+     *     lifted({
+     *         a: Either.right<number,number>(5),
+     *         b: Either.right<number,number>(6),
+     *         c: Either.right<number,number>(3)});
      *     => Either.right(14)
      *
-     *     const lifted = Either.liftAp<number,{a:number,b:number},number>(x => x.a+x.b);
-     *     lifted({a:Either.right<number,number>(5), b:Either.left<number,number>(2)});
+     *     const lifted = Either.liftAp<number,{a:number,b:number},number>(
+     *         x => x.a+x.b);
+     *     lifted({
+     *         a: Either.right<number,number>(5),
+     *         b: Either.left<number,number>(2)});
      *     => Either.left(2)
      *
      * @param L the left type
@@ -165,6 +197,57 @@ export class EitherStatic {
                 copy[p] = x[p].getOrThrow();
             }
             return Either.right<L,B>(fn(copy));
+        }
+    }
+
+    /**
+     * Applicative lifting for Either. 'p' stands for 'properties'.
+     * Compared to [[EitherStatic.liftAp]], liftApAcc 'accumulates'
+     * the errors, instead of short-circuiting on the first error.
+     *
+     * Takes a function which operates on a simple JS object, and turns it
+     * in a function that operates on the same JS object type except which each field
+     * wrapped in an Either ('lifts' the function).
+     * It's an alternative to [[EitherStatic.liftA2]] when the number of parameters
+     * is not two.
+     *
+     *     const fn = (x:{a:number,b:number,c:number}) => x.a+x.b+x.c;
+     *     const lifted = Either.liftApAcc(fn, {} as number);
+     *     lifted({
+     *         a: Either.right<number,number>(5),
+     *         b: Either.right<number,number>(6),
+     *         c:Either.right<number,number>(3)});
+     *     => Either.right(14)
+     *
+     *     const fn = (x:{a:number,b:number,c:number}) => x.a+x.b+x.c;
+     *     const lifted = Either.liftApAcc(fn, {} as number);
+     *     lifted({
+     *         a: Either.right<number,number>(5),
+     *         b: Either.left<number,number>(2),
+     *         c: Either.left<number,number>(6)});
+     *     => Either.left(Vector.of(2, 6))
+     *
+     * @param L the left type
+     * @param A the object property type specifying the parameters for your function
+     * @param B the type returned by your function, returned wrapped in an either by liftAp.
+     */
+    liftApAcc<L,A,B>(fn:(x:A)=>B, leftWitness?: L): (x: {[K in keyof A]: Either<L,A[K]>;}) => Either<Vector<L>,B> {
+        const leftErrs: L[] = [];
+        return x => {
+            const copy:A = <any>{};
+            for (let p in x) {
+                const field = x[p];
+                if (field.isLeft()) {
+                    leftErrs.push(field.getLeft());
+                } else {
+                    copy[p] = x[p].getOrThrow();
+                }
+            }
+            if (leftErrs.length === 0) {
+                return Either.right<Vector<L>,B>(fn(copy));
+            } else {
+                return Either.left<Vector<L>,B>(Vector.ofIterable(leftErrs));
+            }
         }
     }
 }
