@@ -121,6 +121,28 @@ export class Vector<T> implements Seq<T> {
     }
 
     /**
+     * Curried predicate to find out whether the vector is empty.
+     *
+     *     LinkedList.of(Vector.of(1), Vector.empty<number>())
+     *         .filter(Vector.isEmpty)
+     *     => LinkedList.of(Vector.empty<number>())
+     */
+    static isEmpty<T>(v: Vector<T>): boolean {
+        return v.isEmpty();
+    }
+
+    /**
+     * Curried predicate to find out whether the vector is empty.
+     *
+     *     LinkedList.of(Vector.of(1), Vector.empty<number>())
+     *         .filter(Vector.isNotEmpty)
+     *     => LinkedList.of(Vector.of(1))
+     */
+    static isNotEmpty<T>(v: Vector<T>): boolean {
+        return !v.isEmpty();
+    }
+
+    /**
      * Get the length of the collection.
      */
     length(): number {

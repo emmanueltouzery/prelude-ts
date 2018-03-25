@@ -102,6 +102,28 @@ export class HashMap<K,V> implements IMap<K,V> {
     }
 
     /**
+     * Curried predicate to find out whether the HashMap is empty.
+     *
+     *     Vector.of(HashMap.of([1,2]), HashMap.empty<number,number>())
+     *         .filter(HashMap.isEmpty)
+     *     => Vector.of(HashMap.empty<number,number>())
+     */
+    static isEmpty<K,V>(v: HashMap<K,V>): boolean {
+        return v.isEmpty();
+    }
+
+    /**
+     * Curried predicate to find out whether the HashMap is empty.
+     *
+     *     Vector.of(HashMap.of([1,2]), HashMap.empty<number,number>())
+     *         .filter(HashMap.isNotEmpty)
+     *     => Vector.of(HashMap.of([1,2]))
+     */
+    static isNotEmpty<K,V>(v: HashMap<K,V>): boolean {
+        return !v.isEmpty();
+    }
+
+    /**
      * Get the value for the key you give, if the key is present.
      */
     get(k: K & WithEquality): Option<V> {

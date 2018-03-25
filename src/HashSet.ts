@@ -48,6 +48,28 @@ export class HashSet<T> implements ISet<T> {
     }
 
     /**
+     * Curried predicate to find out whether the HashSet is empty.
+     *
+     *     Vector.of(HashSet.of(1), HashSet.empty<number>())
+     *         .filter(HashSet.isEmpty)
+     *     => Vector.of(HashSet.empty<number>())
+     */
+    static isEmpty<T>(v: HashSet<T>): boolean {
+        return v.isEmpty();
+    }
+
+    /**
+     * Curried predicate to find out whether the HashSet is empty.
+     *
+     *     Vector.of(HashSet.of(1), HashSet.empty<number>())
+     *         .filter(HashSet.isNotEmpty)
+     *     => Vector.of(HashSet.of(1))
+     */
+    static isNotEmpty<T>(v: HashSet<T>): boolean {
+        return !v.isEmpty();
+    }
+
+    /**
      * Implementation of the Iterator interface.
      */
     [Symbol.iterator](): Iterator<T> {
