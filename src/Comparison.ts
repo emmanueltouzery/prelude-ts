@@ -257,8 +257,8 @@ export function instanceOf<T>(ctor: new(...args: any[]) => T): TypeGuard<any,T> 
  * Can be used when filtering to filter for the type and at the
  * same time change the type of the generics on the container.
  *
- *     Vector.of<any>(1,"a",2,3,"b").filter(typeOf("string"))
- *     => Vector.of<string>("a", "b")
+ *     Vector.of<any>(1,"a",2,3,"b").filter(typeOf("number"))
+ *     => Vector.of<number>(1,2,3)
  *
  *     Option.of<any>(1).filter(typeOf("string"))
  *     => Option.none<string>()
@@ -268,6 +268,10 @@ export function instanceOf<T>(ctor: new(...args: any[]) => T): TypeGuard<any,T> 
  *
  * Also see [[instanceOf]] and [[typeGuard]].
  */
-export function typeOf<T>(typ: string): TypeGuard<any,typeof typ> {
-    return <TypeGuard<any,typeof typ>>(x => typeof x === typ);
+export function typeOf(typ: "string"): TypeGuard<any,string>;
+export function typeOf(typ: "number"): TypeGuard<any,number>;
+export function typeOf(typ: "boolean"): TypeGuard<any,boolean>;
+export function typeOf(typ: "symbol"): TypeGuard<any,symbol>;
+export function typeOf(typ: string): TypeGuard<any,any> {
+    return <any>((x:any) => typeof x === typ);
 }
