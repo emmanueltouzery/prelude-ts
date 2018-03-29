@@ -146,7 +146,6 @@ then you can get
 ## Wishlist/upcoming features
 
 * CharSeq, a string wrapper?
-* Validation
 * Future, wrapping promises?
 * Non-empty vector? (already have [non-empty linkedlist](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/classes/linkedlist.conslinkedlist.html))
 * More functions on existing classes
