@@ -38,7 +38,8 @@ immutable collections, `list.append(newItem)` keeps `list` unchanged; `append()`
 returns a new list. Immutability helps reasonning about code.
 
 You can check the **[User Guide](https://github.com/emmanueltouzery/prelude.ts/wiki/Prelude.ts-user-guide)**, and browse the
-**[API documentation](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html)**.
+**[API documentation](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html)**,
+or our **[blog](http://emmanueltouzery.github.io/blog/tags/prelude.ts.html)**.
 Note that the constructors are private, and you should use static methods to build
 items, for instance `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
 
