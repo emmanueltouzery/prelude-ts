@@ -187,6 +187,13 @@ export interface Seq<T> extends Collection<T> {
     dropRight(n:number): Seq<T>;
 
     /**
+     * Returns a new collection, discarding the last elements
+     * until one element fails the predicate. All elements
+     * before that point are retained.
+     */
+    dropRightWhile(predicate:(x:T)=>boolean): Seq<T>;
+
+    /**
      * Returns a new collection, discarding the elements
      * after the first element which fails the predicate.
      */

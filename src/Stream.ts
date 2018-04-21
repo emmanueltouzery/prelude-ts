@@ -332,6 +332,15 @@ export class EmptyStream<T> implements Seq<T> {
     }
 
     /**
+     * Returns a new collection, discarding the last elements
+     * until one element fails the predicate. All elements
+     * before that point are retained.
+     */
+    dropRightWhile(predicate:(x:T)=>boolean): Stream<T> {
+        return this;
+    }
+
+    /**
      * Reduces the collection to a single value using the
      * associative binary function you give. Since the function
      * is associative, order of application doesn't matter.
@@ -1038,6 +1047,15 @@ export class ConsStream<T> implements Seq<T> {
         // going twice through the list...
         const length = this.length();
         return this.take(length-n);
+    }
+
+    /**
+     * Returns a new collection, discarding the last elements
+     * until one element fails the predicate. All elements
+     * before that point are retained.
+     */
+    dropRightWhile(predicate:(x:T)=>boolean): Stream<T> {
+        return this.reverse().dropWhile(predicate).reverse();
     }
 
     /**

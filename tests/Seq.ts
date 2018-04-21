@@ -316,7 +316,21 @@ export function runTests(seqName: string,
         it("distinctBy with prepend", () => assert.deepEqual(
             [1,2,3], of(2,3,2,3,1).prepend(1).distinctBy(x => x).toArray()));
         it("correctly dropsWhile", () => assert.deepEqual(
-            [4,5,6], of(1,2,3,4,5,6).dropWhile(x=>x<4).toArray()));
+            [4,3,5,6], of(1,2,3,4,3,5,6).dropWhile(x=>x<4).toArray()));
+        it("correctly dropsWhile, only the first one is removed", () => assert.deepEqual(
+            [2,3,4,3,5,6], of(1,2,3,4,3,5,6).dropWhile(x=>x<2).toArray()));
+        it("correctly dropsWhile, nothing matches", () => assert.deepEqual(
+            [], of(1,2,3,4,3,5,6).dropWhile(x=>x>=0).toArray()));
+        it("correctly dropsWhile, everything matches", () => assert.deepEqual(
+            [1,2,3,4,3,5,6], of(1,2,3,4,3,5,6).dropWhile(x=>x<0).toArray()));
+        it("correctly dropsRightWhile", () => assert.deepEqual(
+            [1,4,2,3], of(1,4,2,3,4,5,6).dropRightWhile(x=>x>=4).toArray()));
+        it("correctly dropsRightWhile, only the last one is removed", () => assert.deepEqual(
+            [1,4,2,3,4,5], of(1,4,2,3,4,5,6).dropRightWhile(x=>x>5).toArray()));
+        it("correctly dropsRightWhile, nothing matches", () => assert.deepEqual(
+            [], of(1,4,2,3,4,5,6).dropRightWhile(x=>x>=0).toArray()));
+        it("correctly dropsRightWhile, everything matches", () => assert.deepEqual(
+            [1,4,2,3,4,5,6], of(1,4,2,3,4,5,6).dropRightWhile(x=>x<0).toArray()));
         it("correctly drops n items", () => assert.deepEqual(
             [4,5,6], of(1,2,3,4,5,6).drop(3).toArray()));
         it("returns an empty stream when dropping too much", () => assert.deepEqual(

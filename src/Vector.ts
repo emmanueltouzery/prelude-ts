@@ -1131,6 +1131,21 @@ export class Vector<T> implements Seq<T> {
     }
 
     /**
+     * Returns a new collection, discarding the last elements
+     * until one element fails the predicate. All elements
+     * before that point are retained.
+     */
+    dropRightWhile(predicate:(x:T)=>boolean): Vector<T> {
+        let i=this._length-1;
+        for (;i>=0;i--) {
+            if (!predicate(<T>this.internalGet(i))) {
+                return this.take(i+1);
+            }
+        }
+        return Vector.empty<T>();
+    }
+
+    /**
      * Get all the elements in the collection but the first one.
      * If the collection is empty, return None.
      */
