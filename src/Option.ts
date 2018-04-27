@@ -327,8 +327,28 @@ export class Some<T> implements Value {
     /**
      * Get the value contained in the option if it's a Some,
      * return undefined if it's a None.
+     *
+     *     Option.of(5).getOrUndefined()
+     *     => 5
+     *
+     *     Option.none<number>().getOrUndefined()
+     *     => undefined
      */
     getOrUndefined(): T | undefined {
+        return this.value;
+    }
+
+    /**
+     * Get the value contained in the option if it's a Some,
+     * return null if it's a None.
+     *
+     *     Option.of(5).getOrNull()
+     *     => 5
+     *
+     *     Option.none<number>().getOrNull()
+     *     => null
+     */
+    getOrNull(): T | null {
         return this.value;
     }
 
@@ -554,9 +574,29 @@ export class None<T> implements Value {
     /**
      * Get the value contained in the option if it's a Some,
      * return undefined if it's a None.
+     *
+     *     Option.of(5).getOrUndefined()
+     *     => 5
+     *
+     *     Option.none<number>().getOrUndefined()
+     *     => undefined
      */
     getOrUndefined(): T|undefined {
         return undefined;
+    }
+
+    /**
+     * Get the value contained in the option if it's a Some,
+     * return null if it's a None.
+     *
+     *     Option.of(5).getOrNull()
+     *     => 5
+     *
+     *     Option.none<number>().getOrNull()
+     *     => null
+     */
+    getOrNull(): T|null {
+        return null;
     }
 
     /**

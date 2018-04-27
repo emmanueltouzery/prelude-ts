@@ -172,6 +172,12 @@ function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>
              if ((a === null) !== (b === null)) {
                  return false;
              }
+             if (a === undefined && b === undefined) {
+                 return true;
+             }
+             if ((a === undefined) !== (b === undefined)) {
+                 return false;
+             }
              if ((<any>a).isSome && (<any>b).isSome &&
                      (<any>a).isSome() && (<any>b).isSome()) {
                  // workaround for Option<array> equality
