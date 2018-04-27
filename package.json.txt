@@ -1,0 +1,6 @@
+Comments for the package.json cause I can't put them in the file itself...
+
+   "@types/node": "9.6.7"
+   => pin the types/node dependency for a more reliable build
+      example https://github.com/DefinitelyTyped/DefinitelyTyped/issues/25342
+      @types/node is a transitive dep from typedoc, typedoc doesn't lock it
