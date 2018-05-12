@@ -399,6 +399,8 @@ export class Function0Static {
      *     throws();
      *     => Option.none()
      *
+     * Also see [[Function0Static.liftNullable]], [[OptionStatic.try_]] and
+     * [[OptionStatic.tryNull]]
      */
     liftOption<U>(fn:()=>U|undefined): Function0<Option<U>> {
         return Function0.of(() => {
@@ -431,6 +433,8 @@ export class Function0Static {
      *     throws();
      *     => Option.none()
      *
+     * Also see [[Function0Static.liftOption]], [[OptionStatic.try_]] and
+     * [[OptionStatic.tryNull]]
      */
     liftNullable<U>(fn:()=>U|null|undefined): Function0<Option<U>> {
         return Function0.of(() => {
@@ -445,9 +449,16 @@ export class Function0Static {
     /**
      * Take a no-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Either]] instead.
-     * Note that unlike the [[Function1Static.of]] version, if
+     *
+     * Note that unlike the [[Function0Static.liftOption]] version, if
      * the function returns undefined, the liftEither version will throw
-     * (the liftOption version returns None()).
+     * (the liftOption version returns None()): if you want to do
+     * pure side-effects which may throw, you're better off just using
+     * javascript try blocks.
+     *
+     * When using typescript, to help the compiler infer the left type,
+     * you can either pass a second parameter like `{} as <type>`, or
+     * call with `try_<L,R>(...)`.
      *
      *     const eitherRand = Function0.liftEither(Math.random, {} as string);
      *     eitherRand();
@@ -460,6 +471,8 @@ export class Function0Static {
      *     const throws = Function0.liftEither(() => {throw "x"});
      *     throws();
      *     => Either.left("x")
+     *
+     * Also see [[EitherStatic.try_]]
      */
     liftEither<L,U>(fn:()=>U, witness?: L): Function0<Either<L,U>> {
         return Function0.of(() => {
@@ -585,9 +598,16 @@ export class Function1Static {
     /**
      * Take a one-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Either]] instead.
+     *
      * Note that unlike the [[Function1Static.liftOption]] version, if
      * the function returns undefined, the liftEither version will throw
-     * (the liftOption version returns None()).
+     * (the liftOption version returns None()): if you want to do
+     * pure side-effects which may throw, you're better off just using
+     * javascript try blocks.
+     *
+     * When using typescript, to help the compiler infer the left type,
+     * you can either pass a second parameter like `{} as <type>`, or
+     * call with `try_<L,R>(...)`.
      *
      *     const add1 = Function1.liftEither((x:number) => x+1, {} as string);
      *     add1(1);
@@ -718,9 +738,16 @@ export class Function2Static {
     /**
      * Take a two-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Either]] instead.
+     *
      * Note that unlike the [[Function2Static.liftOption]] version, if
      * the function returns undefined, the liftEither version will throw
-     * (the liftOption version returns None()).
+     * (the liftOption version returns None()): if you want to do
+     * pure side-effects which may throw, you're better off just using
+     * javascript try blocks.
+     *
+     * When using typescript, to help the compiler infer the left type,
+     * you can either pass a second parameter like `{} as <type>`, or
+     * call with `try_<L,R>(...)`.
      *
      *     const add = Function2.liftEither((x:number,y:number) => x+y, {} as string);
      *     add(1,2);
@@ -862,9 +889,16 @@ export class Function3Static {
     /**
      * Take a three-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Either]] instead.
+     *
      * Note that unlike the [[Function3Static.liftOption]] version, if
      * the function returns undefined, the liftEither version will throw
-     * (the liftOption version returns None()).
+     * (the liftOption version returns None()): if you want to do
+     * pure side-effects which may throw, you're better off just using
+     * javascript try blocks.
+     *
+     * When using typescript, to help the compiler infer the left type,
+     * you can either pass a second parameter like `{} as <type>`, or
+     * call with `try_<L,R>(...)`.
      *
      *     const add3 = Function3.liftEither((x:number,y:number,z:number) => x+y+z, {} as string);
      *     add3(1,2,3);
@@ -1009,9 +1043,16 @@ export class Function4Static {
     /**
      * Take a four-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Either]] instead.
+     *
      * Note that unlike the [[Function4Static.liftOption]] version, if
      * the function returns undefined, the liftEither version will throw
-     * (the liftOption version returns None()).
+     * (the liftOption version returns None()): if you want to do
+     * pure side-effects which may throw, you're better off just using
+     * javascript try blocks.
+     *
+     * When using typescript, to help the compiler infer the left type,
+     * you can either pass a second parameter like `{} as <type>`, or
+     * call with `try_<L,R>(...)`.
      *
      *     const add4 = Function4.liftEither((x:number,y:number,z:number,a:number) => x+y+z+a, {} as string);
      *     add4(1,2,3,4);
@@ -1156,9 +1197,16 @@ export class Function5Static {
     /**
      * Take a five-parameter partial function (may return undefined or throw),
      * and lift it to return an [[Either]] instead.
+     *
      * Note that unlike the [[Function5Static.liftOption]] version, if
      * the function returns undefined, the liftEither version will throw
-     * (the liftOption version returns None()).
+     * (the liftOption version returns None()): if you want to do
+     * pure side-effects which may throw, you're better off just using
+     * javascript try blocks.
+     *
+     * When using typescript, to help the compiler infer the left type,
+     * you can either pass a second parameter like `{} as <type>`, or
+     * call with `try_<L,R>(...)`.
      *
      *     const add5 = Function5.liftEither(
      *         (x:number,y:number,z:number,a:number,b:number) => x+y+z+a+b, {} as string);

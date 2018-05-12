@@ -31,6 +31,7 @@ import { Value } from "./Value";
 import { Seq } from "./Seq";
 import { Vector } from "./Vector";
 import { Either } from "./Either";
+import { Function0 } from "./Function";
 import { WithEquality, areEqual, hasTrueEquality,
          getHashCode, } from "./Comparison";
 import { toStringHelper } from "./SeqHelpers";
@@ -232,6 +233,54 @@ export class OptionStatic {
             }
             return Option.of(fn(copy));
         }
+    }
+
+    /**
+     * Take a no-parameter partial function (may return undefined or throw),
+     * and call it, return an [[Option]] instead.
+     * undefined becomes a [[None]], everything else a [[Some]]
+     *
+     *     Option.try_(Math.random);
+     *     => Option.of(0.49884723907769635)
+     *
+     *     Option.try_(()=>undefined);
+     *     => Option.none()
+     *
+     *     Option.try_(()=>null);
+     *     => Option.of(null)
+     *
+     *     Option.try_(()=>{throw "x"});
+     *     => Option.none()
+     *
+     * Also see [[OptionStatic.tryNull]], [[Function0Static.liftOption]],
+     * [[Function0Static.liftNullable]], [[EitherStatic.try_]].
+     */
+    try_<T>(fn:()=>T|undefined): Option<T> {
+        return Function0.liftOption(fn)();
+    }
+
+    /**
+     * Take a no-parameter partial function (may return null, undefined or throw),
+     * and call it, return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     Option.tryNull(Math.random);
+     *     => Option.of(0.49884723907769635)
+     *
+     *     Option.tryNull(()=>undefined);
+     *     => Option.none()
+     *
+     *     Option.tryNull(()=>null);
+     *     => Option.none()
+     *
+     *     Option.tryNull(()=>{throw "x"});
+     *     => Option.none()
+     *
+     * Also see [[OptionStatic.try_]], [[Function0Static.liftNullable]],
+     * [[Function0Static.liftOption]], [[EitherStatic.try_]].
+     */
+    tryNull<T>(fn:()=>T|null|undefined): Option<T> {
+        return Function0.liftNullable(fn)();
     }
 }
 

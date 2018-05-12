@@ -23,6 +23,7 @@ import { Value } from "./Value";
 import { Option } from "./Option";
 import { LinkedList } from "./LinkedList";
 import { Vector } from "./Vector";
+import { Function0 } from "./Function";
 import { WithEquality, areEqual,
          hasTrueEquality, getHashCode } from "./Comparison";
 import { contractTrueEquality} from "./Contract";
@@ -249,6 +250,36 @@ export class EitherStatic {
                 return Either.left<Vector<L>,B>(Vector.ofIterable(leftErrs));
             }
         }
+    }
+
+    /**
+     * Take a no-parameter partial function (may return undefined or throw),
+     * call it, and return an [[Either]] instead.
+     *
+     * Note that unlike the [[OptionStatic.try_]] version, if
+     * the function returns undefined, this function will throw
+     * (the Option.try_ version returns None()): if you want to do
+     * pure side-effects which may throw, you're better off just using
+     * javascript try blocks.
+     *
+     * When using typescript, to help the compiler infer the left type,
+     * you can either pass a second parameter like `{} as <type>`, or
+     * call with `try_<L,R>(...)`.
+     *
+     *     Either.try_(Math.random, {} as string);
+     *     => Either.right(0.49884723907769635)
+     *
+     *     Either.try_(() => undefined);
+     *     => throws
+     *
+     *     Either.try_(() => {throw "x"});
+     *     => Either.left("x")
+     *
+     * Also see [[Function0.liftEither]], [[OptionStatic.try_]],
+     * [[OptionStatic.tryNull]]
+     */
+    try_<L,T>(fn:()=>T, witness?: L): Either<L,T> {
+        return Function0.liftEither<L,T>(fn)();
     }
 }
 
