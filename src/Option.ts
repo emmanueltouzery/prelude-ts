@@ -252,7 +252,7 @@ export class OptionStatic {
      *     Option.try_(()=>{throw "x"});
      *     => Option.none()
      *
-     * Also see [[OptionStatic.tryNull]], [[Function0Static.liftOption]],
+     * Also see [[OptionStatic.tryNullable]], [[Function0Static.liftOption]],
      * [[Function0Static.liftNullable]], [[EitherStatic.try_]].
      */
     try_<T>(fn:()=>T|undefined): Option<T> {
@@ -264,22 +264,22 @@ export class OptionStatic {
      * and call it, return an [[Option]] instead.
      * null and undefined become a [[None]], everything else a [[Some]]
      *
-     *     Option.tryNull(Math.random);
+     *     Option.tryNullable(Math.random);
      *     => Option.of(0.49884723907769635)
      *
-     *     Option.tryNull(()=>undefined);
+     *     Option.tryNullable(()=>undefined);
      *     => Option.none()
      *
-     *     Option.tryNull(()=>null);
+     *     Option.tryNullable(()=>null);
      *     => Option.none()
      *
-     *     Option.tryNull(()=>{throw "x"});
+     *     Option.tryNullable(()=>{throw "x"});
      *     => Option.none()
      *
      * Also see [[OptionStatic.try_]], [[Function0Static.liftNullable]],
      * [[Function0Static.liftOption]], [[EitherStatic.try_]].
      */
-    tryNull<T>(fn:()=>T|null|undefined): Option<T> {
+    tryNullable<T>(fn:()=>T|null|undefined): Option<T> {
         return Function0.liftNullable(fn)();
     }
 }

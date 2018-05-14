@@ -276,7 +276,7 @@ export class EitherStatic {
      *     => Either.left("x")
      *
      * Also see [[Function0.liftEither]], [[OptionStatic.try_]],
-     * [[OptionStatic.tryNull]]
+     * [[OptionStatic.tryNullable]]
      */
     try_<L,T>(fn:()=>T, witness?: L): Either<L,T> {
         return Function0.liftEither<L,T>(fn)();

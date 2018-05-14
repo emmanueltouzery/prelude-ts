@@ -400,7 +400,7 @@ export class Function0Static {
      *     => Option.none()
      *
      * Also see [[Function0Static.liftNullable]], [[OptionStatic.try_]] and
-     * [[OptionStatic.tryNull]]
+     * [[OptionStatic.tryNullable]]
      */
     liftOption<U>(fn:()=>U|undefined): Function0<Option<U>> {
         return Function0.of(() => {
@@ -434,7 +434,7 @@ export class Function0Static {
      *     => Option.none()
      *
      * Also see [[Function0Static.liftOption]], [[OptionStatic.try_]] and
-     * [[OptionStatic.tryNull]]
+     * [[OptionStatic.tryNullable]]
      */
     liftNullable<U>(fn:()=>U|null|undefined): Function0<Option<U>> {
         return Function0.of(() => {
