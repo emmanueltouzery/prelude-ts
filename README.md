@@ -46,7 +46,7 @@ items, for instance `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
 `HashSet` and `HashMap` are implemented using the
 [HAMT algorithm](http://en.wikipedia.org/wiki/Hash_array_mapped_trie),
 and concretely the [hamt_plus library](https://www.npmjs.com/package/hamt_plus).
-Besides this dependency, I'll try to limit the number of dependencies.
+This is the only dependency of `prelude.ts`.
 `Vector` is implemented through a
 [bit-mapped vector trie](http://hypirion.com/musings/understanding-persistent-vector-pt-1).
 In addition the library is written in idiomatic javascript style, with loops
