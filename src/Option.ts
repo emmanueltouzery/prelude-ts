@@ -426,9 +426,35 @@ export class Some<T> implements Value {
     /**
      * Return a new option where the element (if present) was transformed
      * by the mapper function you give. If the option was None it'll stay None.
+     *
+     *     Option.of(5).map(x => x*2)
+     *     => Option.of(10)
+     *
+     *     Option.of(5).map(x => null)
+     *     => Option.of(null)
+     *
+     * Also see [[Some.mapNullable]], [[Some.flatMap]]
      */
     map<U>(fn: (v:T)=>U): Option<U> {
         return Option.of(fn(this.value));
+    }
+
+    /**
+     * Return a new option where the element (if present) was transformed
+     * by the mapper function you give. If the mapped value is `null` or
+     * `undefined`, then a Some will turn into a None.
+     * If the option was None it'll stay None.
+     *
+     *     Option.of(5).mapNullable(x => x*2)
+     *     => Option.of(10)
+     *
+     *     Option.of(5).mapNullable(x => null)
+     *     => Option.none()
+     *
+     * Also see [[Some.map]], [[Some.flatMap]]
+     */
+    mapNullable<U>(fn: (v:T)=>U|null|undefined): Option<U> {
+        return Option.ofNullable(fn(this.value));
     }
 
     /**
@@ -673,8 +699,34 @@ export class None<T> implements Value {
     /**
      * Return a new option where the element (if present) was transformed
      * by the mapper function you give. If the option was None it'll stay None.
+     *
+     *     Option.of(5).map(x => x*2)
+     *     => Option.of(10)
+     *
+     *     Option.of(5).map(x => null)
+     *     => Option.of(null)
+     *
+     * Also see [[None.mapNullable]], [[None.flatMap]]
      */
     map<U>(fn: (v:T)=>U): Option<U> {
+        return <None<U>>none;
+    }
+
+    /**
+     * Return a new option where the element (if present) was transformed
+     * by the mapper function you give. If the mapped value is `null` or
+     * `undefined`, then a Some will turn into a None.
+     * If the option was None it'll stay None.
+     *
+     *     Option.of(5).mapNullable(x => x*2)
+     *     => Option.of(10)
+     *
+     *     Option.of(5).mapNullable(x => null)
+     *     => Option.none()
+     *
+     * Also see [[None.map]], [[None.flatMap]]
+     */
+    mapNullable<U>(fn: (v:T)=>U|null|undefined): Option<U> {
         return <None<U>>none;
     }
 
