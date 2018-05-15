@@ -54,8 +54,10 @@ export class StreamStatic {
     /**
      * Create a Stream with the elements you give.
      */
-    of<T>(elt: T, ...elts:T[]): ConsStream<T> {
-        return new ConsStream(elt, Lazy.of(()=>Stream.ofIterable(elts)));
+    of<T>(elt:T, ...elts:T[]): ConsStream<T>;
+    of<T>(...elts:T[]): Stream<T>;
+    of<T>(...elts:T[]): Stream<T> {
+        return Stream.ofIterable(elts);
     }
 
     /**

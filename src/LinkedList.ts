@@ -48,8 +48,10 @@ export class LinkedListStatic {
     /**
      * Create a LinkedList with the elements you give.
      */
-    of<T>(elt:T,...elts:T[]): ConsLinkedList<T> {
-        return new ConsLinkedList(elt, LinkedList.ofIterable(elts));
+    of<T>(elt: T, ...elts:T[]): ConsLinkedList<T>;
+    of<T>(...elts:T[]): LinkedList<T>;
+    of<T>(...elts:T[]): LinkedList<T> {
+        return LinkedList.ofIterable(elts);
     }
 
     /**

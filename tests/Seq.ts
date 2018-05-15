@@ -24,6 +24,8 @@ export function runTests(seqName: string,
     const nonEmptySeqName = nonEmptySeqName_ || seqName;
     CollectionTest.runTests(seqName, of, empty);
     describe(seqName + " creation", () => {
+        it("handles of() without parameters ok", () => assert.deepEqual(
+            [], of().toArray()));
         it("creates from a JS array", () => assert.deepEqual(
             ["a","b", "c"],
             ofIterable<string>(["a","b","c"]).toArray()));
