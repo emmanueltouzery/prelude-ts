@@ -128,6 +128,10 @@ export function runTests(seqName: string,
         it("foldsRight correctly", () => assert.equal(
             "!cba",
             of("a", "b", "c").foldRight("!", (x,xs) => xs+x)));
+        it("handles scanLeft correctly on an empty seq", () => assert.deepEqual(
+            [0], empty<number>().scanLeft(0, (i,j)=>i+j).toArray()));
+        it("handles scanRight correctly on an empty seq", () => assert.deepEqual(
+            [0], empty<number>().scanRight(0, (j,i)=>i+j).toArray()));
         it("calls forEach correctly", () => {
             let ar: number[] = [];
             of(1,2,3).forEach((v:number) => ar.push(v));

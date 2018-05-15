@@ -1224,4 +1224,44 @@ export class Vector<T> implements Seq<T> {
     sliding(count:number): Stream<Vector<T>> {
         return <Stream<Vector<T>>>SeqHelpers.sliding(this, count);
     }
+
+    /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     * The last element of the result is the final cumulative result.
+     *
+     *     Vector.of(1,2,3).scanLeft(0, (soFar,cur)=>soFar+cur)
+     *     => Vector.of(0,1,3,6)
+     */
+    scanLeft<U>(init:U, fn:(soFar:U,cur:T)=>U): Vector<U> {
+        const mutVec = Vector.emptyMutable<U>();
+        mutVec.append(init);
+        let cur = init;
+        for (let i = 0; i < this._length; i++) {
+            cur = fn(cur, this.internalGet(i));
+            mutVec.append(cur);
+        }
+        return mutVec.getVector();
+    }
+
+    /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     * The first element of the result is the final cumulative result.
+     *
+     *     Vector.of(1,2,3).scanRight(0, (cur,soFar)=>soFar+cur)
+     *     => Vector.of(6,5,3,0)
+     */
+    scanRight<U>(init:U, fn:(cur:T,soFar:U)=>U): Vector<U> {
+        const r:U[] = [];
+        r.unshift(init);
+        let cur = init;
+        for (let i = this._length-1; i>=0; i--) {
+            cur = fn(this.internalGet(i), cur);
+            r.unshift(cur);
+        }
+        return Vector.ofIterable(r);
+    }
 }

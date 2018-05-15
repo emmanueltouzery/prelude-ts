@@ -731,6 +731,31 @@ export class EmptyStream<T> implements Seq<T> {
     }
 
     /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     *
+     *     Stream.of(1,2,3).scanLeft(0, (soFar,cur)=>soFar+cur)
+     *     => Stream.of(0,1,3,6)
+     */
+    scanLeft<U>(init:U, fn:(soFar:U,cur:T)=>U): Stream<U> {
+        return new ConsStream(init, Lazy.of(()=><EmptyStream<U>>emptyStream));
+    }
+
+    /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     * The first element of the result is the final cumulative result.
+     *
+     *     Stream.of(1,2,3).scanRight(0, (cur,soFar)=>soFar+cur)
+     *     => Stream.of(6,5,3,0)
+     */
+    scanRight<U>(init:U, fn:(cur:T,soFar:U)=>U): Stream<U> {
+        return new ConsStream(init, Lazy.of(()=><EmptyStream<U>>emptyStream));
+    }
+
+    /**
      * Joins elements of the collection by a separator.
      * Example:
      *
@@ -1500,6 +1525,35 @@ export class ConsStream<T> implements Seq<T> {
      */
     sliding(count:number): Stream<Stream<T>> {
         return <Stream<Stream<T>>>SeqHelpers.sliding(this, count);
+    }
+
+    /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     *
+     *     Stream.of(1,2,3).scanLeft(0, (soFar,cur)=>soFar+cur)
+     *     => Stream.of(0,1,3,6)
+     */
+    scanLeft<U>(init:U, fn:(soFar:U,cur:T)=>U): Stream<U> {
+        return new ConsStream(
+            init,
+            Lazy.of(()=>this._tail.get().scanLeft(fn(init, this.value), fn)));
+    }
+
+    /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     * The first element of the result is the final cumulative result.
+     *
+     *     Stream.of(1,2,3).scanRight(0, (cur,soFar)=>soFar+cur)
+     *     => Stream.of(6,5,3,0)
+     */
+    scanRight<U>(init:U, fn:(cur:T,soFar:U)=>U): Stream<U> {
+        // can't be lazy
+        const fn2 = (x:U,y:T)=>fn(y,x);
+        return this.reverse().scanLeft(init, fn2).reverse();
     }
 
     /**

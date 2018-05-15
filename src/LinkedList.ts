@@ -675,6 +675,32 @@ export class EmptyLinkedList<T> implements Seq<T> {
     }
 
     /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     * The last element of the result is the final cumulative result.
+     *
+     *     LinkedList.of(1,2,3).scanLeft(0, (soFar,cur)=>soFar+cur)
+     *     => LinkedList.of(0,1,3,6)
+     */
+    scanLeft<U>(init:U, fn:(soFar:U,cur:T)=>U): LinkedList<U> {
+        return LinkedList.of<U>(init);
+    }
+
+    /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     * The first element of the result is the final cumulative result.
+     *
+     *     LinkedList.of(1,2,3).scanRight(0, (cur,soFar)=>soFar+cur)
+     *     => LinkedList.of(6,5,3,0)
+     */
+    scanRight<U>(init:U, fn:(cur:T,soFar:U)=>U): LinkedList<U> {
+        return LinkedList.of<U>(init);
+    }
+
+    /**
      * Joins elements of the collection by a separator.
      * Example:
      *
@@ -1457,6 +1483,47 @@ export class ConsLinkedList<T> implements Seq<T> {
      */
     sliding(count:number): Stream<ConsLinkedList<T>> {
         return <Stream<ConsLinkedList<T>>>SeqHelpers.sliding(this, count);
+    }
+
+    /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     *
+     *     LinkedList.of(1,2,3).scanLeft(0, (soFar,cur)=>soFar+cur)
+     *     => LinkedList.of(0,1,3,6)
+     */
+    scanLeft<U>(init:U, fn:(soFar:U,cur:T)=>U): LinkedList<U> {
+        let result = LinkedList.of(init);
+        let curItem: LinkedList<T> = this;
+        let soFar = init;
+        while (!curItem.isEmpty()) {
+            soFar = fn(soFar, curItem.value);
+            result = new ConsLinkedList(soFar, result);
+            curItem = curItem._tail;
+        }
+        return result.reverse();
+    }
+
+    /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     * The first element of the result is the final cumulative result.
+     *
+     *     LinkedList.of(1,2,3).scanRight(0, (cur,soFar)=>soFar+cur)
+     *     => LinkedList.of(6,5,3,0)
+     */
+    scanRight<U>(init:U, fn:(cur:T,soFar:U)=>U): LinkedList<U> {
+        let result = LinkedList.of(init);
+        let curItem: LinkedList<T> = this.reverse();
+        let soFar = init;
+        while (!curItem.isEmpty()) {
+            soFar = fn(curItem.value, soFar);
+            result = new ConsLinkedList(soFar, result);
+            curItem = curItem._tail;
+        }
+        return result;
     }
 
     /**

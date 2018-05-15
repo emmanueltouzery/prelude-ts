@@ -254,6 +254,28 @@ export interface Seq<T> extends Collection<T> {
     sliding(count:number): Stream<Seq<T>>;
 
     /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     * The last element of the result is the final cumulative result.
+     *
+     *     Vector.of(1,2,3).scanLeft(0, (cur,soFar)=>soFar+cur)
+     *     => Vector.of(0,1,3,6)
+     */
+    scanLeft<U>(init:U, fn:(soFar:U,cur:T)=>U): Seq<U>;
+
+    /**
+     * Apply the function you give to all elements of the sequence
+     * in turn, keeping the intermediate results and returning them
+     * along with the final result in a list.
+     * The first element of the result is the final cumulative result.
+     *
+     *     Vector.of(1,2,3).scanRight(0, (cur,soFar)=>soFar+cur)
+     *     => Vector.of(6,5,3,0)
+     */
+    scanRight<U>(init:U, fn:(cur:T,soFar:U)=>U): Seq<U>;
+
+    /**
      * Convert this collection to a map. You give a function which
      * for each element in the collection returns a pair. The
      * key of the pair will be used as a key in the map, the value,
