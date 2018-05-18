@@ -35,7 +35,7 @@ HashMap.of(["a",1],["b",2]).get("a")
 The collections are also javascript iterables, so if you have an ES6 runtime,
 you can use the `for .. of` construct on them. If you're not familiar with
 immutable collections, `list.append(newItem)` keeps `list` unchanged; `append()`
-returns a new list. Immutability helps reasonning about code.
+returns a new list. Immutability helps reasoning about code.
 
 You can check the **[User Guide](https://github.com/emmanueltouzery/prelude.ts/wiki/Prelude.ts-user-guide)**, and browse the
 **[API documentation](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html)**,
