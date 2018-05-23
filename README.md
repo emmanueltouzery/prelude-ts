@@ -164,7 +164,8 @@ such as typescript.
 ## Alternatives and Influences
 
 * [monet.js](https://monet.github.io/monet.js/) -- only has the `List` and
-  `Option` collections, implemented in functional-style ES5.
+  `Option` collections, implemented in functional-style ES5. The implementation,
+  using recursion, means its list type is noticeably slower than prelude.ts's.
 * [immutables.js](https://facebook.github.io/immutable-js/) -- doesn't have the
   `Option` concept, the types can be clunky.
 * [sanctuary](https://github.com/sanctuary-js/sanctuary)
