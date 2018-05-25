@@ -16,10 +16,5 @@
         "tests/**/*",
         "benchmarks/**/*",
         "scripts/**/*"
-    ],
-    "exclude": [
-        // the typedoc plugin needs an older tsc to build..
-        // it has its own tsconfig.json
-        "scripts/typedoc_plugin_inherit_apidoc"
     ]
 }
