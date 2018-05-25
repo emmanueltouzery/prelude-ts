@@ -5,7 +5,14 @@ import { Vector } from "../src/Vector";
 import { HashSet } from "../src/HashSet";
 import { HashMap } from "../src/HashMap";
 import { LinkedList } from "../src/LinkedList";
-import * as imm from 'immutable';
+
+// import immutables through require for now so that
+// the immutables typescript type definitions are not
+// parsed: as of typescript 2.9rc and immutables 4.0.0rc9
+// they don't compile.
+const imm: any = require('immutable');
+// import * as imm from 'immutable';
+
 const hamt: any = require("hamt_plus");
 const hamtBase: any = require("hamt");
 
@@ -51,16 +58,19 @@ function getPrerequisites(length:number): Prerequisites {
 
 interface Prerequisites {
     vec: Vector<number>;
-    immList: imm.List<number>;
+    // immList: imm.List<number>;
+    immList: any;
     array: number[];
     list:LinkedList<number>;
     idxThreeQuarters: number;
     rawhamt: any;
     rawhamtBase: any;
     hashset: HashSet<number>;
-    immSet: imm.Set<number>;
+    // immSet: imm.Set<number>;
+    immSet: any;
     hashmap: HashMap<string,number>;
-    immMap: imm.Map<string,number>;
+    // immMap: imm.Map<string,number>;
+    immMap: any;
     length:number;
 }
 
@@ -102,17 +112,17 @@ compare(['Vector.take', (p:Prerequisites) => p.vec.take(p.idxThreeQuarters)],
 
 compare(['Vector.filter', (p:Prerequisites) => p.vec.filter(x => x%2===0)],
         ['Array.filter', (p:Prerequisites) => p.array.filter(x => x%2===0)],
-        ['immList.filter', (p:Prerequisites) => p.immList.filter(x => x%2===0)],
+        ['immList.filter', (p:Prerequisites) => p.immList.filter((x:number) => x%2===0)],
         ['LinkedList.filter', (p:Prerequisites) => p.list.filter(x => x%2===0)]);
 
 compare(['Vector.map', (p:Prerequisites) => p.vec.map(x => x*2)],
         ['Array.map', (p:Prerequisites) => p.array.map(x => x*2)],
-        ['immList.map', (p:Prerequisites) => p.immList.map(x => x*2)],
+        ['immList.map', (p:Prerequisites) => p.immList.map((x:number) => x*2)],
         ['LinkedList.map', (p:Prerequisites) => p.list.map(x => x*2)]);
 
 compare(['Vector.find', (p:Prerequisites) => p.vec.find(x => x===p.idxThreeQuarters)],
         ['Array.find', (p:Prerequisites) => p.array.find(x => x===p.idxThreeQuarters)],
-        ['immList.find', (p:Prerequisites) => p.immList.find(x => x===p.idxThreeQuarters)],
+        ['immList.find', (p:Prerequisites) => p.immList.find((x:number) => x===p.idxThreeQuarters)],
         ['LinkedList.find', (p:Prerequisites) => p.list.find(x => x===p.idxThreeQuarters)]);
 
 compare(['Vector.ofIterable', (p:Prerequisites) => Vector.ofIterable(p.array)],
@@ -156,7 +166,7 @@ compare(['Vector.get(i)', (p:Prerequisites) => p.vec.get(p.length/2)],
 
 compare(['Vector.flatMap', (p:Prerequisites) => p.vec.flatMap(x => Vector.of(1,2))],
         ['LinkedList.flatMap', (p:Prerequisites) => p.list.flatMap(x =>LinkedList.of(1,2))],
-        ['immList.flatMap', (p:Prerequisites) => p.immList.flatMap(x => imm.List([1,2]))]);
+        ['immList.flatMap', (p:Prerequisites) => p.immList.flatMap((x:number) => imm.List([1,2]))]);
 
 compare(['Vector.reverse', (p:Prerequisites) => p.vec.reverse()],
         ['Array.reverse', (p:Prerequisites) => p.array.reverse()],
@@ -165,7 +175,7 @@ compare(['Vector.reverse', (p:Prerequisites) => p.vec.reverse()],
 
 compare(['Vector.groupBy', (p:Prerequisites) => p.vec.groupBy(x => x%2)],
         ['LinkedList.groupBy', (p:Prerequisites) => p.list.groupBy(x => x%2)],
-        ['immList.groupBy', (p:Prerequisites) => p.immList.groupBy(x => x%2)]);
+        ['immList.groupBy', (p:Prerequisites) => p.immList.groupBy((x:number) => x%2)]);
 
 compare(
     ['Vector.append', (p:Prerequisites) => {
@@ -181,7 +191,8 @@ compare(
         }
     }],
     ['immList.push', (p:Prerequisites) => {
-        let v = imm.List<number>();
+        // let v = imm.List<number>();
+        let v = imm.List();
         for (let item of p.array) {
             v = v.push(item);
         }
@@ -204,11 +215,11 @@ compare(['Vector.prependAll', (p:Prerequisites) => p.vec.prependAll(p.vec)],
 
 compare(['Vector.foldLeft', (p:Prerequisites) => p.vec.foldLeft(0, (acc,i)=>acc+i)],
         ['Array.foldLeft', (p:Prerequisites) => p.array.reduce((acc,i)=>acc+i)],
-        ['immList.foldLeft', (p:Prerequisites) => p.immList.reduce((acc,i)=>acc+i,0)],
+        ['immList.foldLeft', (p:Prerequisites) => p.immList.reduce((acc:number,i:number)=>acc+i,0)],
         ['LinkedList.foldLeft', (p:Prerequisites) => p.vec.foldLeft(0, (acc,i)=>acc+i)]);
 
 compare(['Vector.foldRight', (p:Prerequisites) => p.vec.foldRight(0, (i,acc)=>acc+i)],
-        ['immList.foldRight', (p:Prerequisites) => p.immList.reduceRight((acc,i)=>acc+i,0)],
+        ['immList.foldRight', (p:Prerequisites) => p.immList.reduceRight((acc:number,i:number)=>acc+i,0)],
         ['LinkedList.foldRight', (p:Prerequisites) => p.vec.foldRight(0, (i,acc)=>acc+i)]);
 
 compare(['HashSet.ofIterable', (p:Prerequisites) => HashSet.ofIterable(p.array)],
@@ -221,7 +232,7 @@ compare(['HashSet.contains', (p:Prerequisites) => p.hashset.contains(p.array[Mat
         ['immSet.contains', (p:Prerequisites) => p.immSet.contains(p.array[Math.floor(Math.random()*p.array.length)])]);
 
 compare(['HashSet.filter', (p:Prerequisites) => p.hashset.filter(x => x<p.length/2)],
-        ['immSet.filter', (p:Prerequisites) => p.immSet.filter(x => x<p.length/2)]);
+        ['immSet.filter', (p:Prerequisites) => p.immSet.filter((x:number) => x<p.length/2)]);
 
 compare(['HashMap.ofIterable', (p:Prerequisites) =>
          HashMap.ofIterable<string,number>(p.array.map<[string,number]>(x => [x+"",x]))],
@@ -236,4 +247,4 @@ compare(['HashMap.get', (p:Prerequisites) => p.hashmap.get(p.array[Math.floor(Ma
         ['immMap.get', (p:Prerequisites) => p.immMap.get(p.array[Math.floor(Math.random()*p.array.length)]+"")]);
 
 compare(['HashMap.filter', (p:Prerequisites) => p.hashmap.filter((k,v) => parseInt(k)<p.length/2)],
-        ['immMap.filter', (p:Prerequisites) => p.immMap.filter((v,k) => parseInt(k)<p.length/2)]);
+        ['immMap.filter', (p:Prerequisites) => p.immMap.filter((v:number,k:string) => parseInt(k)<p.length/2)]);
