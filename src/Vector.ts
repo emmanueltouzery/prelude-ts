@@ -22,14 +22,16 @@ const nodeBitmask = nodeSize - 1;
  * Note that since we can never modify nodes of an immutable vector,
  * we must consider long and hard before adding more operations besides
  * append to this interface.
+ * @hidden
+ * this is accessible only within the library because index.ts
+ * doesn't export it.
  */
-interface MutableVector<T> {
+export interface MutableVector<T> {
     append:(x:T)=>void;
     appendAll:(x:Iterable<T>)=>void;
     getVector(): Vector<T>;
     internalGet(idx:number): T|undefined;
 }
-
 
 /**
  * A general-purpose list class with all-around good performance.
@@ -1265,3 +1267,12 @@ export class Vector<T> implements Seq<T> {
         return Vector.ofIterable(r);
     }
 }
+
+/**
+ * even though emptyMutable is private, we can in fact read it
+ * https://stackoverflow.com/a/12827621/516188
+ * this is accessible only within the library because index.ts
+ * doesn't export it.
+ * @hidden
+ */
+export const vectorEmptyMutable: <T> ()=>MutableVector<T> = (<any>Vector).emptyMutable;

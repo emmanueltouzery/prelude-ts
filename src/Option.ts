@@ -29,7 +29,7 @@
 
 import { Value } from "./Value";
 import { Seq } from "./Seq";
-import { Vector } from "./Vector";
+import { Vector, vectorEmptyMutable, MutableVector } from "./Vector";
 import { Either } from "./Either";
 import { Function0 } from "./Function";
 import { WithEquality, areEqual, hasTrueEquality,
@@ -165,7 +165,7 @@ export class OptionStatic {
      *     => Option.none()
      */
     sequence<T>(elts:Iterable<Option<T>>): Option<Vector<T>> {
-        let r = Vector.empty<T>();
+        let r = vectorEmptyMutable<T>();
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
         while (!curItem.done) {
@@ -173,10 +173,10 @@ export class OptionStatic {
             if (v.isNone()) {
                 return <None<Vector<T>>>none;
             }
-            r = r.append(v.get());
+            r.append(v.get());
             curItem = iterator.next();
         }
-        return Option.of(r);
+        return Option.of(r.getVector());
     }
 
     /**
