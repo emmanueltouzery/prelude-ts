@@ -163,15 +163,40 @@ export class OptionStatic {
      *
      *     Option.sequence(Vector.of(Option.of(1), Option.none()))
      *     => Option.none()
+     *
+     * Also see [[OptionStatic.traverse]]
      */
     sequence<T>(elts:Iterable<Option<T>>): Option<Vector<T>> {
-        let r = vectorEmptyMutable<T>();
+        return Option.traverse(elts, x=>x);
+    }
+
+    /**
+     * Takes a list, a function that can transform list elements
+     * to options, then return an option containing a list of
+     * the transformed elements. 
+     *
+     *     const getUserById: (x:number)=>Option<string> = x => x > 0 ?
+     *         Option.of("user" + x.toString()) : Option.none();
+     *     Option.traverse([4, 3, 2], getUserById);
+     *     => Option.of(Vector.of("user4", "user3", "user2"))
+     *
+     * But if a single element results in None, everything is discarded:
+     *
+     *     const getUserById: (x:number)=>Option<string> = x => x > 0 ?
+     *         Option.of("user" + x.toString()) : Option.none();
+     *     Option.traverse([4, -3, 2], getUserById);
+     *     => Option.none()
+     *
+     * Also see [[OptionStatic.sequence]]
+     */
+    traverse<T,U>(elts:Iterable<T>, fn: (x:T)=>Option<U>): Option<Vector<U>> {
+        let r = vectorEmptyMutable<U>();
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
         while (!curItem.done) {
-            const v = curItem.value;
+            const v = fn(curItem.value);
             if (v.isNone()) {
-                return <None<Vector<T>>>none;
+                return <None<Vector<U>>>none;
             }
             r.append(v.get());
             curItem = iterator.next();

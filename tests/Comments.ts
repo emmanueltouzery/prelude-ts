@@ -92,11 +92,11 @@ function getCodeSampleInfo(identifier: string, codeSample: string): SampleInfo {
 function storeInVariable(code: string) {
     if (code.replace(/[^;]/g, "").length <= 1) {
         // only one ";" or less => single line.
-        return "const x = " + code;
+        return "const xvar = " + code;
     }
     // assuming several lines
     // we rely on indentation to find out where to insert
-    // the const x = ...
+    // the const xvar = ...
     //
     // for instance...
     //
@@ -116,7 +116,7 @@ function storeInVariable(code: string) {
 
     const [before,after] = lines.splitAt(lines.length()-constExprLines);
     return before
-        .append(" const x = ")
+        .append(" const xvar = ")
         .appendAll(after)
         .mkString("\n");
 }
@@ -137,8 +137,8 @@ function generateTestContents(fname: string, sampleInfo: SampleInfo) {
             it("${sampleInfo.identifier}", () => {
                 resetMathRandom();
                 ${storeInVariable(sampleInfo.code)};
-                assert.ok(myEq(${sampleInfo.expectedResult}, x),
-                    ${sampleInfo.expectedResult} + " !== " + x);
+                assert.ok(myEq(${sampleInfo.expectedResult}, xvar),
+                    ${sampleInfo.expectedResult} + " !== " + xvar);
                 Math.random = origMathRandom;
             });
 `);

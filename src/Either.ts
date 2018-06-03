@@ -88,13 +88,38 @@ export class EitherStatic {
      *           Either.left<number,number>(2),
      *           Either.left<number,number>(3)));
      *     => Either.left(2)
+     *
+     * Also see [[EitherStatic.traverse]]
      */
     sequence<L,R>(elts:Iterable<Either<L,R>>): Either<L,Vector<R>> {
+        return Either.traverse(elts, x=>x);
+    }
+
+    /**
+     * Takes a list, a function that can transform list elements
+     * to eithers, then return an option containing a list of
+     * the transformed elements. 
+     *
+     *     const getUserById: (x:number)=>Either<string,string> = x => x > 0 ?
+     *         Either.right("user" + x.toString()) : Either.left("invalid id!");
+     *     Either.traverse([4, 3, 2], getUserById);
+     *     => Either.right(Vector.of("user4", "user3", "user2"))
+     *
+     * But if a single element results in Left, everything is discarded:
+     *
+     *     const getUserById: (x:number)=>Either<string,string> = x => x > 0 ?
+     *         Either.right("user" + x.toString()) : Either.left("invalid id!");
+     *     Either.traverse([4, -3, 2], getUserById);
+     *     => Either.left("invalid id!")
+     *
+     * Also see [[EitherStatic.sequence]]
+     */
+    traverse<T,L,R>(elts:Iterable<T>, fn: (x:T)=>Either<L,R>): Either<L,Vector<R>> {
         let r = vectorEmptyMutable<R>();
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
         while (!curItem.done) {
-            const v = curItem.value;
+            const v = fn(curItem.value);
             if (v.isLeft()) {
                 return <any>v;
             }
