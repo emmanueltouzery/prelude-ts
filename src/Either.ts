@@ -368,6 +368,22 @@ export class Left<L,R> implements Value {
     }
 
     /**
+     * "filter" the either. If it was a Left, it stays a Left.
+     * If it was a Right and the predicate you pass returns
+     * true for its value, return the either unchanged.
+     * But if it was a left and the predicate returns false,
+     * return a Left with the value returned by the function
+     * passed as second parameter.
+     *
+     *     Either.right<string,number>(-3)
+     *         .filter(x => x >= 0, v => "got negative value: " + v);
+     *     => Either.left<string,number>("got negative value: -3")
+     */
+    filter(p: (x:R)=>boolean, ifLeft: (x:R)=>L): Either<L,R> {
+        return this;
+    }
+
+    /**
      * Combines two eithers. If this either is a right, returns it.
      * If it's a left, returns the other one.
      */
@@ -602,6 +618,25 @@ export class Right<L,R> implements Value {
      */
     bimap<S,T>(fnL: (x:L)=>S,fnR: (x:R)=>T): Either<S,T> {
         return new Right<S,T>(fnR(this.value));
+    }
+
+    /**
+     * "filter" the either. If it was a Left, it stays a Left.
+     * If it was a Right and the predicate you pass returns
+     * true for its value, return the either unchanged.
+     * But if it was a left and the predicate returns false,
+     * return a Left with the value returned by the function
+     * passed as second parameter.
+     *
+     *     Either.right<string,number>(-3)
+     *         .filter(x => x >= 0, v => "got negative value: " + v);
+     *     => Either.left<string,number>("got negative value: -3")
+     */
+    filter(p: (x:R)=>boolean, ifLeft: (x:R)=>L): Either<L,R> {
+        if (p(this.value)) {
+            return this;
+        }
+        return new Left(ifLeft(this.value));
     }
 
     /**

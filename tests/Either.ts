@@ -100,6 +100,12 @@ describe("either transformation", () => {
         6, Either.left<number,number>(5).transform(x => 6)));
     it("right should provide transform", () => assert.equal(
         6, Either.right<number,number>(5).transform(x => 6)));
+    it("should return the unchanged either if it was a left on filter", () => assert.ok(
+        Either.left("bad").equals(
+            Either.left<string,number>("bad").filter(x => x<0, v => ""))));
+    it("should return the unchanged either if it was a right and predicate passes on filter", () => assert.ok(
+        Either.right(5).equals(
+            Either.right<string,number>(5).filter(x => x>0, v => ""))));
 });
 
 describe("Either helpers", () => {
