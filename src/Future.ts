@@ -89,7 +89,7 @@ export class Future<T> {
     /**
      * Returns a `Future` that'll complete when the first `Future` of
      * the iterable you give will complete, with the value of that first
-     * promise. Be careful, completing doesn't necessarily mean completing
+     * future. Be careful, completing doesn't necessarily mean completing
      * successfully!
      *
      * Also see [[Future.firstSuccessfulOf]]
@@ -102,7 +102,7 @@ export class Future<T> {
     /**
      * Returns a `Future` that'll complete when the first `Future` of
      * the iterable you give will complete successfully, with the value of that first
-     * promise.
+     * future.
      *
      * Also see [[Future.firstCompletedOf]]
      */
