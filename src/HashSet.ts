@@ -457,9 +457,9 @@ export class HashSet<T> implements ISet<T> {
      *     HashSet.of(1,2,3,4).partition(x => x%2===0)
      *     => [HashSet.of(2,4), HashSet.of(1,3)]
      */
-    partition<U extends T>(predicate:(x:T)=> x is U): [HashSet<U>,HashSet<T>];
+    partition<U extends T>(predicate:(v:T)=>v is U): [HashSet<U>,HashSet<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>];
-    partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>] {
+    partition<U extends T>(predicate:(v:T)=>boolean): [HashSet<U>,HashSet<any>] {
         let r1 = hamt.make({
             hash:this.hamt._config.hash, keyEq:this.hamt._config.keyEq
         }).beginMutation();
@@ -476,7 +476,7 @@ export class HashSet<T> implements ISet<T> {
             }
             curItem = iterator.next();
         }
-        return [new HashSet<T>(r1), new HashSet<T>(r2)];
+        return [new HashSet<U>(r1), new HashSet<T>(r2)];
     }
 
     /**
@@ -739,10 +739,10 @@ class EmptyHashSet<T> extends HashSet<T> {
         return true;
     }
 
-    partition<U extends T>(predicate:(x:T)=> x is U): [HashSet<U>,HashSet<T>];
+    partition<U extends T>(predicate:(v:T)=>v is U): [HashSet<U>,HashSet<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>];
-    partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>] {
-        return [this, this];
+    partition<U extends T>(predicate:(v:T)=>boolean): [HashSet<U>,HashSet<any>] {
+        return [<any>this, this];
     }
 
     remove(elt: T&WithEquality): HashSet<T> {
@@ -769,4 +769,4 @@ class EmptyHashSet<T> extends HashSet<T> {
     }
 }
 
-const emptyHashSet = new EmptyHashSet();
+const emptyHashSet = new EmptyHashSet<any>();

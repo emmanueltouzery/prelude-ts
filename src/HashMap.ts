@@ -729,4 +729,4 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
     }
 }
 
-const emptyHashMap = new EmptyHashMap();
+const emptyHashMap = new EmptyHashMap<any,any>();

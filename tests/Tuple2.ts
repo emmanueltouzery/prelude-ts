@@ -28,5 +28,5 @@ describe("Tuple2 manipulation", () => {
     it("build from array works - success", () => assert.ok(
         Option.of(Tuple2.of(1,2)).equals(Tuple2.ofArray<number,number>([1,2]))));
     it("build from array works - failure", () => assert.ok(
-        Option.none().equals(Tuple2.ofArray([1,2,3]))));
+        Tuple2.ofArray([1,2,3]).isNone()));
 });

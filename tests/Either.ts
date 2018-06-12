@@ -66,18 +66,18 @@ describe("either transformation", () => {
             Either.left<number,number>(4).flatMap(x=>Either.right<number,number>(x+1))));
     });
     it("should apply bimap on the left value", () =>
-       assert.ok(Either.left(4).equals(
+       assert.ok(Either.left<number,number>(4).equals(
            Either.left<number,number>(3).bimap(x=>x+1,x=>x-1))));
     it("should apply bimap on the right value", () =>
-       assert.ok(Either.right(2).equals(
+       assert.ok(Either.right<number,number>(2).equals(
            Either.right<number,number>(3).bimap(x=>x+1,x=>x-1))));
     it("should apply match to a right", () =>
-       assert.equal(5, Either.right(4).match({
+       assert.equal(5, Either.right<number,number>(4).match({
            Right: x=>x+1,
            Left:  x=>-1
        })));
     it("should apply match to a left", () =>
-       assert.equal(4, Either.left(5).match({
+       assert.equal(4, Either.left<number,number>(5).match({
            Right: x=>1,
            Left:  x=>x-1
        })));
@@ -112,11 +112,15 @@ describe("Either helpers", () => {
     it("should do sequence when all are right", () =>
        assert.ok(
            Either.right(<Seq<number>>Vector.of(1,2,3)).equals(
-               Either.sequence(Vector.of(Either.right(1), Either.right(2), Either.right(3))))));
+               Either.sequence(Vector.of(Either.right<number,number>(1),
+                                         Either.right<number,number>(2),
+                                         Either.right<number,number>(3))))));
     it("should fail sequence when some are left", () =>
        assert.ok(
            Either.left(2).equals(
-               Either.sequence(Vector.of(Either.right(1), Either.left(2), Either.left(3))))));
+               Either.sequence(Vector.of(Either.right<number,number>(1),
+                                         Either.left<number,number>(2),
+                                         Either.left<number,number>(3))))));
 });
 
 describe("either retrieval", () => {
@@ -135,7 +139,7 @@ describe("either retrieval", () => {
     it("should throw on Left.getOrThrow with custom msg", () =>
        assert.throws(() => Either.left<number,number>(5).getOrThrow("my custom msg"), /^my custom msg$/));
     it("should offer get() if i checked for isRight", () => {
-        const either = <Either<string,number>>Either.right(5); 
+        const either = <Either<string,number>>Either.right(5);
         if (either.isRight()) {
             // what we are checking here is whether this does build
             // .get() is available only on Right
@@ -143,7 +147,7 @@ describe("either retrieval", () => {
         }
     });
     it("should offer get() if i checked against isLeft", () => {
-        const either = <Either<string,number>>Either.right(5); 
+        const either = <Either<string,number>>Either.right(5);
         if (!either.isLeft()) {
             // what we are checking here is whether this does build
             // .get() is available only on Right
@@ -151,7 +155,7 @@ describe("either retrieval", () => {
         }
     });
     it("should offer getLeft() if i checked for isLeft", () => {
-        const either = <Either<string,number>>Either.left("5"); 
+        const either = <Either<string,number>>Either.left("5");
         if (either.isLeft()) {
             // what we are checking here is whether this does build
             // .get() is available only on Left
@@ -159,7 +163,7 @@ describe("either retrieval", () => {
         }
     });
     it("should offer getLeft() if i checked against isRight", () => {
-        const either = <Either<string,number>>Either.left("5"); 
+        const either = <Either<string,number>>Either.left("5");
         if (!either.isRight()) {
             // what we are checking here is whether this does build
             // .get() is available only on Left

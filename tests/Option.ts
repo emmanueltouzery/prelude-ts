@@ -12,7 +12,7 @@ describe("option comparison", () => {
     it("should mark different options as not equal", () =>
        assert.ok(!Option.of(5).equals(Option.of(6))))
     it("should mark none as equals to none", () =>
-       assert.ok(Option.none().equals(Option.none<string>())));
+       assert.ok(Option.none<string>().equals(Option.none<string>())));
     it("should mark none and some as not equal", () =>
        assert.ok(!Option.of(5).equals(Option.none<number>())));
     it("should mark none and some as not equal", () =>
@@ -48,7 +48,7 @@ describe("option transformation", () => {
         assert.ok(Option.of(5).equals(Option.of(4).map(x=>x+1)));
     });
     it("should handle null as Some", () =>
-       assert.ok(Option.of(5).map<number|null>(x => null).equals(Option.of(null))));
+       assert.ok(Option.of(5).map<number|null>(x => null).equals(Option.of<number|null>(null))));
     it("should transform a Some to string properly", () =>
        assert.equal("Some(5)", Option.of(5).toString()));
     it("should transform a None to string properly", () =>
@@ -57,10 +57,10 @@ describe("option transformation", () => {
         assert.ok(Option.of(5).equals(Option.of(4).flatMap(x=>Option.of(x+1))));
     });
     it("should transform with flatMap x->none", () => {
-        assert.ok(Option.none().equals(Option.of(4).flatMap(x=>Option.none<number>())));
+        assert.ok(Option.none<number>().equals(Option.of(4).flatMap(x=>Option.none<number>())));
     });
     it("should transform with flatMap none->none", () => {
-        assert.ok(Option.none().equals(Option.none<number>().flatMap(x=>Option.of(x+1))));
+        assert.ok(Option.none<number>().equals(Option.none<number>().flatMap(x=>Option.of(x+1))));
     });
     it("should filter some->some", () =>
        assert.ok(Option.of(5).equals(Option.of(5).filter(x => x>2))));
@@ -103,16 +103,15 @@ describe("Option helpers", () => {
                Option.sequence(Vector.of(Option.of(1), Option.of(2), Option.of(3))))));
     it("should fail sequence when some are none", () =>
        assert.ok(
-           Option.none().equals(
-               Option.sequence(Vector.of(Option.of(1), Option.none(), Option.of(3))))));
+           Option.sequence(Vector.of(Option.of(1), Option.none<number>(), Option.of(3))).isNone()));
     it("should liftA2", () => assert.ok(Option.of(11).equals(
         Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.of(6)))));
-    it("should abort liftA2 on none", () => assert.ok(Option.none().equals(
+    it("should abort liftA2 on none", () => assert.ok(Option.none<number>().equals(
         Option.liftA2((x:number,y:number) => x+y)(Option.of(5), Option.none<number>()))));
     it("should liftAp", () => assert.ok(Option.of(14).equals(
         Option.liftAp((x:{a:number,b:number,c:number}) => x.a+x.b+x.c)
         ({a:Option.of(5), b:Option.of(6), c:Option.of(3)}))));
-    it("should abort liftAp on none", () => assert.ok(Option.none().equals(
+    it("should abort liftAp on none", () => assert.ok(Option.none<number>().equals(
         Option.liftAp((x:{a:number,b:number}) => x.a+x.b)
         ({a:Option.of(5), b:Option.none<number>()}))));
     it("should support ifSome on Some", () => {

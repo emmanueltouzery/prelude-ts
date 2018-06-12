@@ -873,4 +873,4 @@ export class None<T> implements Value {
 /**
  * @hidden
  */
-export const none = new None();
+export const none = new None<any>();

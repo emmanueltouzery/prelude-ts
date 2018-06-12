@@ -10,7 +10,7 @@ written in typescript, it's perfectly usable from javascript (including ES5)!
 
 It provides [persistent](https://en.wikipedia.org/wiki/Persistent_data_structure)
 immutable collections (Vector, Set, Map, Stream), and constructs such as Option,
-Either and Predicate.
+Either, Predicate and Future.
 
 ```typescript
 Vector.of(1,2,3)
@@ -147,7 +147,6 @@ then you can get
 ## Wishlist/upcoming features
 
 * CharSeq, a string wrapper?
-* Future, wrapping promises?
 * Non-empty vector? (already have [non-empty linkedlist](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/classes/linkedlist.conslinkedlist.html))
 * More functions on existing classes
 
@@ -184,6 +183,13 @@ such as typescript.
 * [lodash](https://lodash.com) also has the global functions, and many functions
   mutate the collections.
 * [vavr](http://www.vavr.io/) -- it's a java library, but it's the main inspiration for prelude.ts.
+
+## Typescript version
+
+If you're getting the error `error TS2304: Cannot find name 'Exclude'` when building
+prelude.ts, it means your version of typescript is too old. You can try prelude.ts
+0.7.5, which didn't require such a new version, but versions after 0.7.5 require
+typescript 2.8.3 or newer.
 
 ## Commands
 

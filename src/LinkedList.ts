@@ -428,10 +428,10 @@ export class EmptyLinkedList<T> implements Seq<T> {
      *     LinkedList.of(1,2,3,4).partition(x => x%2===0)
      *     => [LinkedList.of(2,4),LinkedList.of(1,3)]
      */
-    partition<U extends T>(predicate:(x:T)=> x is U): [LinkedList<U>,LinkedList<T>];
+    partition<U extends T>(predicate:(v:T)=>v is U): [LinkedList<U>,LinkedList<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>];
-    partition(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>] {
-        return [LinkedList.empty<T>(), LinkedList.empty<T>()];
+    partition<U extends T>(predicate:(v:T)=>boolean): [LinkedList<U>,LinkedList<any>] {
+        return [LinkedList.empty<U>(), LinkedList.empty<T>()];
     }
 
     /**
@@ -1178,11 +1178,11 @@ export class ConsLinkedList<T> implements Seq<T> {
      *     LinkedList.of(1,2,3,4).partition(x => x%2===0)
      *     => [LinkedList.of(2,4),LinkedList.of(1,3)]
      */
-    partition<U extends T>(predicate:(x:T)=> x is U): [LinkedList<U>,LinkedList<T>];
+    partition<U extends T>(predicate:(v:T)=>v is U): [LinkedList<U>,LinkedList<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>];
-    partition(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>] {
+    partition<U extends T>(predicate:(v:T)=>boolean): [LinkedList<U>,LinkedList<any>] {
         // TODO goes twice over the list, can be optimized...
-        return [this.filter(predicate), this.filter(x => !predicate(x))];
+        return [<any>this.filter(predicate), this.filter(x => !predicate(x))];
     }
 
     /**
@@ -1689,4 +1689,4 @@ export class ConsLinkedList<T> implements Seq<T> {
     }
 }
 
-const emptyLinkedList = new EmptyLinkedList();
+const emptyLinkedList = new EmptyLinkedList<any>();

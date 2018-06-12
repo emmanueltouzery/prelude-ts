@@ -225,10 +225,21 @@ export function runTests(seqName: string,
             [[1,3,5,7],[2,4,6,8]],
             of(2,3,4,5,6,7,8).prepend(1).partition(x => x%2!==0)
                 .map(v => v.toArray())));
-        it("correctly infers the more precise left type on partition in case of typeguard", () => {
+        it("correctly infers the more precise left and right type on partition in case of typeguard", () => {
             // just checking that this compiles. 'charAt' is available on strings not numbers.
-            of<string|number>(1,2,"a")
-                .partition(typeOf("string"))[0].single().getOrThrow().charAt(0);
+            // 'toExponential' is available on numbers not strings.
+            const [a,b] = of<string|number>(1,"a")
+                .partition(typeOf("number"))
+            a.single().getOrThrow().toExponential(2);
+            b.single().getOrThrow().charAt(0);
+        });
+        it("correctly infers the more precise right type on partition in case of typeguard", () => {
+            // just checking that this compiles. 'charAt' is available on strings not numbers.
+            // 'toExponential' is available on numbers not strings.
+            const [a,b] = of<string|number>(1,"a")
+                .partition(typeOf("string"))
+            a.single().getOrThrow().charAt(0);
+            b.single().getOrThrow().toExponential(2);
         });
         it("zips with an array", () => assert.deepEqual(
             [[1,"a"], [2,"b"]], of(1,2,3).zip(["a","b"]).toArray()));
@@ -245,7 +256,7 @@ export function runTests(seqName: string,
             of(5,6,7).equals(of(1,2,3).map(x=>x+4))));
         it("mapOption works", () => assert.deepEqual(
             [3,5,7],of(1,2,3,4,5,6).mapOption(
-                x => x%2==0 ? Option.of(x+1):Option.none()).toArray()));
+                x => x%2==0 ? Option.of(x+1):Option.none<number>()).toArray()));
         it("supports append", () => assert.deepEqual(
             [1,2,3,4], of(1,2,3).append(4).toArray()));
         it("doesn't modify the receiver upon append", () => {
@@ -372,9 +383,9 @@ export function runTests(seqName: string,
         it("get finds when present after prepend", () => assert.ok(
             Option.of(5).equals(of(2,3,4,5,6).prepend(1).get(4))));
         it("get doesn't find when stream too short", () => assert.ok(
-            Option.none().equals(of(1,2,3).get(4))));
+            Option.none<number>().equals(of(1,2,3).get(4))));
         it("get doesn't find when negative index", () => assert.ok(
-            Option.none().equals(of(1,2,3).get(-1))));
+            Option.none<number>().equals(of(1,2,3).get(-1))));
         it("correctly gets the tail of the empty vector", () => assert.ok(
             empty().tail().isNone()));
         it("correctly gets the tail of a simple vector", () => assert.ok(

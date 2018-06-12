@@ -17,7 +17,7 @@
         "typedoc": "0.7.2",
         "@types/node": "9.6.7",
         "benchmark": "2.1.4",
-        "typescript": "2.5.3",
+        "typescript": "2.9.1",
         "browserify": "14.4.0",
         "uglify-js": "3.1.2",
         "immutable": "4.0.0-rc.9",

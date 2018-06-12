@@ -462,10 +462,10 @@ export class EmptyStream<T> implements Seq<T> {
      *     Stream.of(1,2,3,4).partition(x => x%2===0)
      *     => [Stream.of(2,4),Stream.of(1,3)]
      */
-    partition<U extends T>(predicate:(x:T)=> x is U): [Stream<U>,Stream<T>];
+    partition<U extends T>(predicate:(v:T)=>v is U): [Stream<U>,Stream<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>];
-    partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
-        return [Stream.empty<T>(), Stream.empty<T>()];
+    partition<U extends T>(predicate:(v:T)=>boolean): [Stream<U>,Stream<any>] {
+        return [Stream.empty<U>(), Stream.empty<T>()];
     }
 
     /**
@@ -1220,11 +1220,11 @@ export class ConsStream<T> implements Seq<T> {
      *     Stream.of(1,2,3,4).partition(x => x%2===0)
      *     => [Stream.of(2,4),Stream.of(1,3)]
      */
-    partition<U extends T>(predicate:(x:T)=> x is U): [Stream<U>,Stream<T>];
+    partition<U extends T>(predicate:(v:T)=>v is U): [Stream<U>,Stream<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>];
-    partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>] {
+    partition<U extends T>(predicate:(v:T)=>boolean): [Stream<U>,Stream<any>] {
         // TODO goes twice over the list, can be optimized...
-        return [this.filter(predicate), this.filter(x => !predicate(x))];
+        return [<any>this.filter(predicate), this.filter(x => !predicate(x))];
     }
 
     /**
@@ -1730,4 +1730,4 @@ export class ConsStream<T> implements Seq<T> {
     }
 }
 
-const emptyStream = new EmptyStream();
+const emptyStream = new EmptyStream<any>();

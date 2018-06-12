@@ -20,7 +20,7 @@ export function runTests(seqName: string,
             HashMap.empty<string,string>().equals(
                 empty<string>().arrangeBy(x => x[0]).getOrThrow())));
         it("groupBy works", () => assert.ok(
-            HashMap.empty().put(0, of(2,4)).put(1, of(1,3))
+            HashMap.empty<number,Collection<number>>().put(0, of(2,4)).put(1, of(1,3))
                 .equals(of(1,2,3,4).groupBy(x => x%2))));
         it("reduce works", () => assert.equal(
             6, of(1,2,3).reduce((a,b)=>a+b).getOrThrow()));
