@@ -7,7 +7,8 @@ import * as helpers from "./helpers";
 // group classes & interfaces by category.
 const CATEGORIES = Vector.of<[string,Vector<string>]>(
     ["Control", Vector.of(
-        "Either", "Option", "Lazy", "Function", "Predicate")],
+        "Either", "Option", "Lazy",
+        "Function", "Predicate", "Future")],
     ["Collection", Vector.of(
         "Collection", "Foldable",
         "IMap","HashMap", "ISet", "HashSet",

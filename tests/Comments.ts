@@ -153,6 +153,7 @@ function generateTestContents(fname: string, sampleInfo: SampleInfo) {
 function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>) {
     return `
         import { Vector } from "../src/Vector";
+        import { Future } from "../src/Future";
         import { LinkedList, ConsLinkedList, EmptyLinkedList } from "../src/LinkedList";
         import { HashSet } from "../src/HashSet";
         import { HashMap } from "../src/HashMap";
