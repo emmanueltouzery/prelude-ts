@@ -97,7 +97,7 @@ export class EitherStatic {
 
     /**
      * Takes a list, a function that can transform list elements
-     * to eithers, then return an option containing a list of
+     * to eithers, then return an either containing a list of
      * the transformed elements. 
      *
      *     const getUserById: (x:number)=>Either<string,string> = x => x > 0 ?
