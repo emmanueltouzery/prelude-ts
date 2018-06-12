@@ -173,6 +173,10 @@ export class HashMap<K,V> implements IMap<K,V> {
      * entry with the same key, the merge function will be invoked
      * with the old and the new value to produce the value to take
      * into account.
+     *
+     * It is guaranteed that the merge function first parameter
+     * will be the entry from this map, and the second parameter
+     * from the map you give.
      * @param k the key
      * @param v the value
      * @param merge a function to merge old and new values in case of conflict.
@@ -231,6 +235,10 @@ export class HashMap<K,V> implements IMap<K,V> {
      * the other map you give. In case an entry from this map
      * and the other map have the same key, the merge function
      * will be invoked to get a combined value.
+     *
+     * It is guaranteed that the merge function first parameter
+     * will be the entry from this map, and the second parameter
+     * from the map you give.
      * @param other another map to merge with this one
      * @param merge a merge function to combine two values
      *        in case two entries share the same key.

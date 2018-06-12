@@ -62,10 +62,18 @@ describe("hashmap construction basic sanity tests", () => {
         HashMap.empty<number,string>()
             .put(5,"test").putWithMerge(5,"a",(a,b)=>a+b)
             .equals(HashMap.empty<number,string>().put(5, "testa"))));
+    it("should enforce the callback parameter order on put with merge", () => assert.ok(
+        HashMap.of<number,string>([1,"2"],[2,"4"])
+            .putWithMerge(2,"a",(a,b)=>a)
+            .equals(HashMap.of<number,string>([1,"2"],[2,"4"]))));
     it("should mergeWith", () => assert.ok(
         HashMap.empty<number,string>().put(1,"a").put(2,"bc").put(3,"d")
             .equals(HashMap.empty<number,string>().put(1,"a").put(2,"b")
                     .mergeWith(HashMap.empty<number,string>().put(2,"c").put(3,"d"), (v1,v2)=>v1+v2))));
+    it("should enforce the callback parameter order on mergeWith", () => assert.ok(
+        HashMap.of<number,number>([1,2],[2,4],[3,5]).equals(
+            HashMap.of<number,number>([1,2],[2,4]).mergeWith(
+                HashMap.of([1,3],[2,2],[3,5]), (x,y)=>x))));
     it("should remove keys", () => assert.ok(
         HashMap.of<number,string>([2,"b"]).equals(
             HashMap.of<number,string>([1,"a"],[2,"b"]).remove(1))));
