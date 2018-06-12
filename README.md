@@ -50,8 +50,8 @@ This is the only dependency of `prelude.ts`.
 `Vector` is implemented through a
 [bit-mapped vector trie](http://hypirion.com/musings/understanding-persistent-vector-pt-1).
 In addition the library is written in idiomatic javascript style, with loops
-instead of recursion, so the performance should be reasonable
-([see benchmarks here](https://github.com/emmanueltouzery/prelude.ts/wiki/Benchmarks)).
+instead of recursion, so the performance should be good
+([see benchmarks here comparing to immutable.js and more](https://github.com/emmanueltouzery/prelude.ts/wiki/Benchmarks)).
 
 ## Set, Map and equality
 
@@ -183,6 +183,8 @@ such as typescript.
 * [lodash](https://lodash.com) also has the global functions, and many functions
   mutate the collections.
 * [vavr](http://www.vavr.io/) -- it's a java library, but it's the main inspiration for prelude.ts.
+  Note that vavr is inspired by the scala library, so prelude.ts also is,
+  transitively.
 
 ## Typescript version
 
