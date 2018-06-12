@@ -92,7 +92,7 @@ export class Future<T> {
      * promise. Be careful, completing doesn't necessarily mean completing
      * successfully!
      *
-     * Also see [[Promise.firstSuccessfulOf]]
+     * Also see [[Future.firstSuccessfulOf]]
      */
     static firstCompletedOf<T>(elts: Iterable<Future<T>>): Future<T> {
         return Future.of(
@@ -104,7 +104,7 @@ export class Future<T> {
      * the iterable you give will complete successfully, with the value of that first
      * promise.
      *
-     * Also see [[Promise.firstCompletedOf]]
+     * Also see [[Future.firstCompletedOf]]
      */
     static firstSuccessfulOf<T>(elts: Iterable<Future<T>>): Future<T> {
         // https://stackoverflow.com/a/37235274/516188
