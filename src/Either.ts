@@ -404,7 +404,7 @@ export class Left<L,R> implements Value {
      *         .filter(x => x >= 0, v => "got negative value: " + v);
      *     => Either.left<string,number>("got negative value: -3")
      */
-    filter(p: (x:R)=>boolean, ifLeft: (x:R)=>L): Either<L,R> {
+    filter(p: (x:R)=>boolean, filterVal: (x:R)=>L): Either<L,R> {
         return this;
     }
 
@@ -657,11 +657,11 @@ export class Right<L,R> implements Value {
      *         .filter(x => x >= 0, v => "got negative value: " + v);
      *     => Either.left<string,number>("got negative value: -3")
      */
-    filter(p: (x:R)=>boolean, ifLeft: (x:R)=>L): Either<L,R> {
+    filter(p: (x:R)=>boolean, filterVal: (x:R)=>L): Either<L,R> {
         if (p(this.value)) {
             return this;
         }
-        return new Left(ifLeft(this.value));
+        return new Left(filterVal(this.value));
     }
 
     /**
