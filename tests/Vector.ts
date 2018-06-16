@@ -35,6 +35,11 @@ describe("Vector over one node", () => {
 })
 
 describe("Vector extra methods", () => {
+    it("map calls the conversion function once per element", () => {
+        let i = 0;
+        Vector.of(1,2,3).map(x=>{i+=1; return x+4;});
+        assert.equal(3, i);
+    });
     it("handles init correctly on a non-empty vector", () => assert.deepEqual(
         [1,2,3], Vector.of(1,2,3,4).init().toArray()));
     it("handles init correctly on an empty vector", () => assert.deepEqual(

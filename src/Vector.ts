@@ -614,11 +614,28 @@ export class Vector<T> implements Seq<T> {
      * by the mapper function you give.
      */
     map<U>(fun:(x:T)=>U): Vector<U> {
-        const mutVec = Vector.emptyMutable<U>();
-        for (let i = 0; i < this._length; i++) {
-            mutVec.append(fun(this.internalGet(i)));
+        const leafNodes = this.getLeafNodes(this._length);
+        const newLeafNodes: U[][] = [];
+        newLeafNodes.length = leafNodes.length;
+        // don't do the last leaf node
+        for (let i=0;i<leafNodes.length-1;i++) {
+            newLeafNodes[i] = [];
+            newLeafNodes[i].length = nodeSize;
+            const curLeafNode = leafNodes[i];
+            const curNewLeafNode = newLeafNodes[i];
+            for (let j=0;j<nodeSize;j++) {
+                curNewLeafNode[j] = fun(curLeafNode[j]);
+            }
         }
-        return mutVec.getVector();
+        // last leaf node, the last node may not be full
+        newLeafNodes[leafNodes.length-1] = [];
+        newLeafNodes[leafNodes.length-1].length = nodeSize;
+        const curLeafNode = leafNodes[leafNodes.length-1];
+        const curNewLeafNode = newLeafNodes[leafNodes.length-1];
+        for (let j=0;j<this._length-(leafNodes.length-1)*nodeSize;j++) {
+            curNewLeafNode[j] = fun(curLeafNode[j]);
+        }
+        return Vector.fromLeafNodes(newLeafNodes, this._length);
     }
 
     /**
@@ -919,6 +936,46 @@ export class Vector<T> implements Seq<T> {
         // return [].concat.apply([], nodes).slice(0,this._length);
     };
 
+    /**
+     * get the leaf nodes, which contain the data, from the vector.
+     * return only the leaf nodes containing the first n items from the vector.
+     * (give n=_length to get all the data)
+     */
+    private getLeafNodes(_n:number): T[][] {
+        if (_n<=0) {
+            return [];
+        }
+        const n = Math.min(_n, this._length);
+        let _index = 0;
+        let _stack: any[] = [];
+        let _node = this._contents;
+        let result:T[][] = new Array(Math.floor(n/nodeSize)+1);
+        if (!_node) {
+            // empty vector
+            return result;
+        }
+
+        while (_index*nodeSize < n) {
+            if (_index > 0) {
+                // Using the stack, go back up the tree, stopping when we reach a node
+                // whose children we haven't fully iterated over.
+                let step;
+                while ((step = _stack.pop())[1] === nodeSize - 1) ;
+                step[1]++;
+                _stack.push(step);
+                _node = step[0][step[1]];
+            }
+
+            let shift;
+            for (shift=_stack.length*nodeBits; shift<this._maxShift; shift+=nodeBits) {
+                _stack.push([_node, 0]);
+                _node = (<any[]>_node)[0];
+            }
+
+            result[_index++] = <any>_node;
+        }
+        return result;
+    }
 
     /**
      * @hidden
