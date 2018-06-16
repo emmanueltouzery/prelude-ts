@@ -22,7 +22,8 @@
         "uglify-js": "3.1.2",
         "immutable": "4.0.0-rc.9",
         "hamt": "2.2.2",
-        "mocha-testcheck": "1.0.0-rc.0"
+        "mocha-testcheck": "1.0.0-rc.0",
+        "list": "2.0.13"
     },
     "keywords": [
         "typescript",

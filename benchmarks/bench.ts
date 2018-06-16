@@ -16,6 +16,8 @@ const imm: any = require('immutable');
 const hamt: any = require("hamt_plus");
 const hamtBase: any = require("hamt");
 
+import * as Funkia from "list";
+
 const lengths = [200, 10000];
 
 function getPrerequisites(length:number): Prerequisites {
@@ -42,6 +44,7 @@ function getPrerequisites(length:number): Prerequisites {
 
     const list = LinkedList.ofIterable(array);
     const immList = imm.List(array);
+    const funkiaList = Funkia.fromArray(array);
 
     const idxThreeQuarters = array.length*3/4;
     const atThreeQuarters = array[idxThreeQuarters];
@@ -53,7 +56,7 @@ function getPrerequisites(length:number): Prerequisites {
     const immMap = imm.Map(array.map<[string,number]>(x => [x+"",x]));
 
     return {vec,immList,array,list,idxThreeQuarters,
-            rawhamt,rawhamtBase,hashset,immSet,length,hashmap,immMap};
+            rawhamt,rawhamtBase,hashset,immSet,length,hashmap,immMap, funkiaList};
 }
 
 interface Prerequisites {
@@ -72,6 +75,7 @@ interface Prerequisites {
     // immMap: imm.Map<string,number>;
     immMap: any;
     length:number;
+    funkiaList: Funkia.List<number>;
 }
 
 const preReqs = lengths.map(getPrerequisites);
@@ -96,6 +100,7 @@ function compare(...items: Array<[string, (x:Prerequisites)=>any]>) {
 }
 
 console.log("immList, immSet are the immutablejs list,set... https://facebook.github.io/immutable-js/");
+console.log("funkiaList is the list from https://github.com/funkia/list");
 
 process.stdout.write("node version: ");
 execSync("node --version", {stdio:[0,1,2]});
@@ -103,27 +108,32 @@ console.log();
 
 compare(['Vector.toArray', (p:Prerequisites) => p.vec.toArray()],
         ['LinkedList.toArray', (p:Prerequisites) => p.list.toArray()],
-        ['immList.toArray', (p:Prerequisites) => p.immList.toArray()]);
+        ['immList.toArray', (p:Prerequisites) => p.immList.toArray()],
+        ['funkiaList.toArray', (p:Prerequisites) => Funkia.toArray(p.funkiaList)]);
 
 compare(['Vector.take', (p:Prerequisites) => p.vec.take(p.idxThreeQuarters)],
         ['Array.slice', (p:Prerequisites) => p.array.slice(0,p.idxThreeQuarters)],
         ['immList.take', (p:Prerequisites) => p.immList.take(p.idxThreeQuarters)],
-        ['LinkedList.take', (p:Prerequisites) => p.list.take(p.idxThreeQuarters)]);
+        ['LinkedList.take', (p:Prerequisites) => p.list.take(p.idxThreeQuarters)],
+        ['funkiaList.take', (p:Prerequisites) => Funkia.take(p.idxThreeQuarters, p.funkiaList)]);
 
 compare(['Vector.filter', (p:Prerequisites) => p.vec.filter(x => x%2===0)],
         ['Array.filter', (p:Prerequisites) => p.array.filter(x => x%2===0)],
         ['immList.filter', (p:Prerequisites) => p.immList.filter((x:number) => x%2===0)],
-        ['LinkedList.filter', (p:Prerequisites) => p.list.filter(x => x%2===0)]);
+        ['LinkedList.filter', (p:Prerequisites) => p.list.filter(x => x%2===0)],
+        ['funkiaList.filter', (p:Prerequisites) => Funkia.filter(x => x%2===0, p.funkiaList)]);
 
 compare(['Vector.map', (p:Prerequisites) => p.vec.map(x => x*2)],
         ['Array.map', (p:Prerequisites) => p.array.map(x => x*2)],
         ['immList.map', (p:Prerequisites) => p.immList.map((x:number) => x*2)],
-        ['LinkedList.map', (p:Prerequisites) => p.list.map(x => x*2)]);
+        ['LinkedList.map', (p:Prerequisites) => p.list.map(x => x*2)],
+        ['funkiaList.map', (p:Prerequisites) => Funkia.map(x => x*2, p.funkiaList)]);
 
 compare(['Vector.find', (p:Prerequisites) => p.vec.find(x => x===p.idxThreeQuarters)],
         ['Array.find', (p:Prerequisites) => p.array.find(x => x===p.idxThreeQuarters)],
         ['immList.find', (p:Prerequisites) => p.immList.find((x:number) => x===p.idxThreeQuarters)],
-        ['LinkedList.find', (p:Prerequisites) => p.list.find(x => x===p.idxThreeQuarters)]);
+        ['LinkedList.find', (p:Prerequisites) => p.list.find(x => x===p.idxThreeQuarters)],
+        ['funkiaList.find', (p:Prerequisites) => Funkia.find(x => x===p.idxThreeQuarters, p.funkiaList)]);
 
 compare(['Vector.ofIterable', (p:Prerequisites) => Vector.ofIterable(p.array)],
         ['rawhamt.build from iterable', (p:Prerequisites) => {
@@ -155,23 +165,27 @@ compare(['Vector.ofIterable', (p:Prerequisites) => Vector.ofIterable(p.array)],
             }
         }],
         ['LinkedList.ofIterable', (p:Prerequisites) =>LinkedList.ofIterable(p.array)],
-        ['immList.ofIterable', (p:Prerequisites) => imm.List(p.array)]);
+        ['immList.ofIterable', (p:Prerequisites) => imm.List(p.array)],
+        ['funkiaList.ofArray', (p:Prerequisites) => Funkia.fromArray(p.array)]);
 
 compare(['Vector.get(i)', (p:Prerequisites) => p.vec.get(p.length/2)],
         ['rawhamt.get(i)', (p:Prerequisites) => p.rawhamt.get(p.length/2)],
         ['rawhamtBase.get(i)', (p:Prerequisites) => p.rawhamtBase.get(p.length/2)],
         ['LinkedList.get(i)', (p:Prerequisites) => p.list.get(p.length/2)],
         ['Array.get(i)', (p:Prerequisites) => p.array[p.length/2]],
-        ['immList.get(i)', (p:Prerequisites) => p.immList.get(p.length/2)]);
+        ['immList.get(i)', (p:Prerequisites) => p.immList.get(p.length/2)],
+        ['funkiaList.get(i)', (p:Prerequisites) => Funkia.nth(p.length/2, p.funkiaList)]);
 
 compare(['Vector.flatMap', (p:Prerequisites) => p.vec.flatMap(x => Vector.of(1,2))],
         ['LinkedList.flatMap', (p:Prerequisites) => p.list.flatMap(x =>LinkedList.of(1,2))],
-        ['immList.flatMap', (p:Prerequisites) => p.immList.flatMap((x:number) => imm.List([1,2]))]);
-
+        ['immList.flatMap', (p:Prerequisites) => p.immList.flatMap((x:number) => imm.List([1,2]))],
+        ['funkiaList.chain', (p:Prerequisites) => Funkia.chain(x => Funkia.list(1,2), p.funkiaList)]);
+        
 compare(['Vector.reverse', (p:Prerequisites) => p.vec.reverse()],
         ['Array.reverse', (p:Prerequisites) => p.array.reverse()],
         ['immList.reverse', (p:Prerequisites) => p.immList.reverse()],
-        ['LinkedList.reverse', (p:Prerequisites) => p.list.reverse()]);
+        ['LinkedList.reverse', (p:Prerequisites) => p.list.reverse()],
+        ['funkiaList.reverse', (p:Prerequisites) => Funkia.reverse(p.funkiaList)]);
 
 compare(['Vector.groupBy', (p:Prerequisites) => p.vec.groupBy(x => x%2)],
         ['LinkedList.groupBy', (p:Prerequisites) => p.list.groupBy(x => x%2)],
@@ -198,16 +212,23 @@ compare(
         }
     }],
     ['LinkedList.append', (p:Prerequisites) => {
-        let v =LinkedList.empty<number>();
+        let v = LinkedList.empty<number>();
         for (let item of p.array) {
             v = v.append(item);
+        }
+    }],
+    ['Funkia.append', (p:Prerequisites) => {
+        let v = Funkia.empty();
+        for (let item of p.array) {
+            v = Funkia.append(item, v);
         }
     }]);
 
 compare(['Vector.appendAll', (p:Prerequisites) => p.vec.appendAll(p.vec)],
         ['Array.appendAll', (p:Prerequisites) => p.array.concat(p.array)],
         ['immList.appendAll', (p:Prerequisites) => p.immList.concat(p.immList)],
-        ['LinkedList.appendAll', (p:Prerequisites) => p.list.appendAll(p.list)]);
+        ['LinkedList.appendAll', (p:Prerequisites) => p.list.appendAll(p.list)],
+        ['Funkia.concat', (p:Prerequisites) => Funkia.concat(p.funkiaList, Funkia.fromArray(p.array))]);
 
 compare(['Vector.prependAll', (p:Prerequisites) => p.vec.prependAll(p.vec)],
         ['Array.prependAll', (p:Prerequisites) => p.array.concat(p.array)],
@@ -216,11 +237,13 @@ compare(['Vector.prependAll', (p:Prerequisites) => p.vec.prependAll(p.vec)],
 compare(['Vector.foldLeft', (p:Prerequisites) => p.vec.foldLeft(0, (acc,i)=>acc+i)],
         ['Array.foldLeft', (p:Prerequisites) => p.array.reduce((acc,i)=>acc+i)],
         ['immList.foldLeft', (p:Prerequisites) => p.immList.reduce((acc:number,i:number)=>acc+i,0)],
-        ['LinkedList.foldLeft', (p:Prerequisites) => p.vec.foldLeft(0, (acc,i)=>acc+i)]);
+        ['LinkedList.foldLeft', (p:Prerequisites) => p.vec.foldLeft(0, (acc,i)=>acc+i)],
+        ['Funkia.foldl', (p:Prerequisites) => Funkia.foldl((i,acc)=>acc+i, 0, p.funkiaList)]);
 
 compare(['Vector.foldRight', (p:Prerequisites) => p.vec.foldRight(0, (i,acc)=>acc+i)],
         ['immList.foldRight', (p:Prerequisites) => p.immList.reduceRight((acc:number,i:number)=>acc+i,0)],
-        ['LinkedList.foldRight', (p:Prerequisites) => p.vec.foldRight(0, (i,acc)=>acc+i)]);
+        ['LinkedList.foldRight', (p:Prerequisites) => p.vec.foldRight(0, (i,acc)=>acc+i)],
+        ['Funkia.foldr', (p:Prerequisites) => Funkia.foldr((i,acc)=>acc+i, 0, p.funkiaList)]);
 
 compare(['HashSet.ofIterable', (p:Prerequisites) => HashSet.ofIterable(p.array)],
         ['immSet', (p:Prerequisites) => imm.Set(p.array)]);
