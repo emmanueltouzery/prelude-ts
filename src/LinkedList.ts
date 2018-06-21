@@ -1180,9 +1180,19 @@ export class ConsLinkedList<T> implements Seq<T> {
      */
     partition<U extends T>(predicate:(v:T)=>v is U): [LinkedList<U>,LinkedList<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [LinkedList<T>,LinkedList<T>];
-    partition<U extends T>(predicate:(v:T)=>boolean): [LinkedList<U>,LinkedList<any>] {
-        // TODO goes twice over the list, can be optimized...
-        return [<any>this.filter(predicate), this.filter(x => !predicate(x))];
+    partition(predicate:(v:T)=>boolean): [LinkedList<T>,LinkedList<T>] {
+        let fst = LinkedList.empty<T>();
+        let snd = LinkedList.empty<T>();
+        let curItem: LinkedList<T> = this;
+        while (!curItem.isEmpty()) {
+            if (predicate(curItem.value)) {
+                fst = new ConsLinkedList(curItem.value, fst);
+            } else {
+                snd = new ConsLinkedList(curItem.value, snd);
+            }
+            curItem = curItem._tail;
+        }
+        return [fst.reverse(), snd.reverse()];
     }
 
     /**

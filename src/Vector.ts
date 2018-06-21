@@ -651,9 +651,18 @@ export class Vector<T> implements Seq<T> {
      */
     partition<U extends T>(predicate:(v:T)=>v is U): [Vector<U>,Vector<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>];
-    partition<U extends T>(predicate:(v:T)=>boolean): [Vector<U>,Vector<any>] {
-        // TODO goes twice over the list, can be optimized...
-        return [<Vector<U>>this.filter(predicate), this.filter(x => !predicate(x))];
+    partition(predicate:(v:T)=>boolean): [Vector<T>,Vector<T>] {
+        const fst = Vector.emptyMutable<T>();
+        const snd = Vector.emptyMutable<T>();
+        for (let i=0;i<this._length;i++) {
+            const val = this.internalGet(i);
+            if (predicate(val)) {
+                fst.append(val);
+            } else {
+                snd.append(val);
+            }
+        }
+        return [fst.getVector(), snd.getVector()];
     }
 
     /**

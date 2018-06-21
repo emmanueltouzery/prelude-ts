@@ -1222,9 +1222,9 @@ export class ConsStream<T> implements Seq<T> {
      */
     partition<U extends T>(predicate:(v:T)=>v is U): [Stream<U>,Stream<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [Stream<T>,Stream<T>];
-    partition<U extends T>(predicate:(v:T)=>boolean): [Stream<U>,Stream<any>] {
-        // TODO goes twice over the list, can be optimized...
-        return [<any>this.filter(predicate), this.filter(x => !predicate(x))];
+    partition(predicate:(v:T)=>boolean): [Stream<T>,Stream<T>] {
+        // goes twice over the list, but since we want a lazy behavior...
+        return [this.filter(predicate), this.filter(x => !predicate(x))];
     }
 
     /**
