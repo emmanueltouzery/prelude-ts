@@ -224,6 +224,20 @@ compare(
         }
     }]);
 
+function iterateOn<T>(coll: Iterable<T>) {
+    const it = coll[Symbol.iterator]();
+    let item = it.next();
+    while (!item.done) {
+        item = it.next();
+    }
+}
+
+compare(['Vector.iterate', (p:Prerequisites) => iterateOn(p.vec)],
+        ['Array.iterate', (p:Prerequisites) => iterateOn(p.array)],
+        ['immList.iterate', (p:Prerequisites) => iterateOn(p.immList)],
+        ['LinkedList.iterate', (p:Prerequisites) => iterateOn(p.list)],
+        ['Funkia.iterate', (p:Prerequisites) => iterateOn(p.funkiaList)]);
+
 compare(['Vector.appendAll', (p:Prerequisites) => p.vec.appendAll(p.vec)],
         ['Array.appendAll', (p:Prerequisites) => p.array.concat(p.array)],
         ['immList.appendAll', (p:Prerequisites) => p.immList.concat(p.immList)],
