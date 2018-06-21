@@ -32,6 +32,9 @@ describe("Vector over one node", () => {
         [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,
          25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
         Array.from(Stream.iterate(1,x=>x+1).take(40).toVector())));
+    it("actually broke once", () => assert.ok(
+        Stream.iterate(0,i=>i+1).take(33).toVector().equals(
+            Stream.iterate(0,i=>i+1).take(31).toVector().appendAll([31,32]))));
 })
 
 describe("Vector extra methods", () => {
@@ -134,7 +137,15 @@ describe("Vector.appendAll() implementation", () => {
         checkAppend(Vector.of(1,2,3), [4,5,6,7,8], Vector.of(1,2,3,4,5,6,7,8));
     });
     it("handles adding nodes correctly", () => {
-        checkAppend(Vector.of(1,2,3), Stream.iterate(4,i=>i+1).take(30),
-                    Vector.ofIterable(Stream.iterate(0,i=>i+1).take(34)));
+        checkAppend(Vector.of(1,2,3), Stream.iterate(4,i=>i+1).take(70),
+                    Vector.ofIterable(Stream.iterate(0,i=>i+1).take(74)));
+    });
+    it("handles adding nodes correctly, adding an array", () => {
+        checkAppend(Vector.of(1,2,3), Stream.iterate(4,i=>i+1).take(70).toArray(),
+                    Vector.ofIterable(Stream.iterate(0,i=>i+1).take(74)));
+    });
+    it("handles adding nodes correctly, adding a vector", () => {
+        checkAppend(Vector.of(1,2,3), Stream.iterate(4,i=>i+1).take(70).toVector(),
+                    Vector.ofIterable(Stream.iterate(0,i=>i+1).take(74)));
     });
 });

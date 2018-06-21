@@ -200,7 +200,9 @@ export class Vector<T> implements Seq<T> {
                 ++vec._length;
             } else {
                 // We'll need a new root node.
-                vec = Vector.setupNewRootNode(vec, val);
+                const newNode = new Array(nodeSize);
+                newNode[0] = val;
+                vec = Vector.setupNewRootNode(vec, newNode, 1);
             }
         };
         return {
@@ -256,6 +258,17 @@ export class Vector<T> implements Seq<T> {
             shift -= nodeBits;
         }
         return (<any>node)[index & nodeBitmask];
+    }
+
+    // will blow on an empty vector
+    private getLastNode(): T[] {
+        let shift = this._maxShift;
+        let node = this._contents;
+        while (shift > 0) {
+            node = (<any>node)[(this._length >> shift) & nodeBitmask];
+            shift -= nodeBits;
+        }
+        return <any[]>node;
     }
 
     /**
@@ -326,23 +339,54 @@ export class Vector<T> implements Seq<T> {
             return newVec;
         } else {
             // We'll need a new root node.
-            return Vector.setupNewRootNode(this,val);
+            const newNode = new Array(nodeSize);
+            newNode[0] = val;
+            return Vector.setupNewRootNode(this, newNode, 1);
         }
     }
 
-    private static setupNewRootNode<T>(vec: Vector<T>, val:T): Vector<T> {
+    private appendNode(val:T[], length:number): Vector<T> {
+        if (this._length % nodeSize !== 0) {
+            throw "prelude.ts Vector: invalid state, can't append a node if the previous node isn't full";
+        }
+        if (this._length === 0) {
+            return Vector.ofArray<T>(val);
+        } else if (this._length < (nodeSize << this._maxShift)) { // here i know the this._length is a multiple of nodeSize so < is enough
+            let newVec = this.cloneVec();
+            // next line will crash on empty vector
+            let node = newVec._contents = (<any[]>this._contents).slice();
+            let shift = this._maxShift;
+            while (shift > nodeBits) {
+                let childIndex = (this._length >> shift) & nodeBitmask;
+                if (node[childIndex]) {
+                    node[childIndex] = node[childIndex].slice();
+                } else {
+                    // Need to create new node. Can happen when appending element.
+                    node[childIndex] = new Array(nodeSize);
+                }
+                node = node[childIndex];
+                shift -= nodeBits;
+            }
+            node[(this._length >> shift) & nodeBitmask] = val;
+            newVec._length += length;
+            return newVec;
+        } else {
+            // We'll need a new root node.
+            return Vector.setupNewRootNode(this, val, length);
+        }
+    }
+
+    private static setupNewRootNode<T>(vec: Vector<T>, nodeToAdd:T[], length: number): Vector<T> {
         const newVec = vec.cloneVec();
-        newVec._length++;
+        newVec._length += length;
         newVec._maxShift += nodeBits;
-        let node:any[] = [];
-        newVec._contents = [vec._contents, node];
         let depth = newVec._maxShift / nodeBits + 1;
+        let node:any[] = nodeToAdd;
         for (let i = 2; i < depth; i++) {
-            const newNode: any[] = [];
-            node.push(newNode);
+            const newNode = [node];
             node = newNode;
         }
-        node[0] = val;
+        newVec._contents = [vec._contents, node];
         return newVec;
     }
 
@@ -351,6 +395,99 @@ export class Vector<T> implements Seq<T> {
      * Note that arrays are also iterables.
      */
     appendAll(elts: Iterable<T>): Vector<T> {
+        if (Number.isInteger((<any>elts)._maxShift) && (<any>elts).sortOn) {
+            // elts is a Vector too!
+            if ((<Vector<T>>elts).isEmpty()) {
+                return this;
+            }
+            return this.appendAllArrays(
+                { [Symbol.iterator]: () => (<Vector<T>>elts).iterateLeafNodes() },
+                (<Vector<T>>elts).length());
+        }
+        if (Array.isArray(elts)) {
+            return this.appendAllArrays([elts], elts.length);
+        }
+        return this.appendAllIterable(elts);
+    }
+
+    private static iteratorPrepend<T>(it: Iterator<T>, toPrepend: T): Iterator<T> {
+        let gaveFirst = false;
+        return {
+            next: () => {
+                const v = gaveFirst ?
+                    it.next() :
+                    { value: toPrepend, done: false};
+                gaveFirst = true;
+                return v;
+            }
+        };
+    }
+
+    private appendAllArrays(_arrays: Iterable<T[]>, length: number): Vector<T> {
+        if (length === 0) {
+            return this;
+        }
+        // first need to create a new Vector through the first append
+        // call, and then we can mutate that new Vector, otherwise
+        // we'll mutate the receiver which is a big no-no!!
+        // also, make sure 'baseVec' is never empty as the rest
+        // of the code won't know what do with an empty array
+        const _it = _arrays[Symbol.iterator]();
+        const firstArray = _it.next().value; // I know the iterable of arrays is not empty
+        let [baseVec, it, copied] = this.isEmpty()
+            ? [Vector.ofArray(firstArray.slice(0, Math.min(length, firstArray.length))),
+               _it,
+               Math.min(length, firstArray.length)]
+            : [this.append(firstArray[0]),
+               Vector.iteratorPrepend(_it, firstArray.slice(1)),
+               1];
+
+        // first finish the last node
+        const lastNode = baseVec.getLastNode();
+        let idxInNode = baseVec._length % nodeSize;
+        let curInArrayIdx = 0;
+        let curArray = it.next().value;
+        while (copied < length && idxInNode > 0 && idxInNode < nodeSize) {
+            lastNode[idxInNode++] = curArray[curInArrayIdx++];
+            ++copied;
+            ++baseVec._length;
+            if (curInArrayIdx === curArray.length) {
+                curInArrayIdx = 0;
+                curArray = it.next().value;
+            }
+        }
+        if (copied === length) {
+            // already done, didn't need to add new nodes!
+            return baseVec;
+        }
+
+        // we're now at node boundary, add remaining array items
+        // by adding nodes one by one
+        let curNewVec = new Array(nodeSize);
+        idxInNode = 0;
+        while (copied < length && idxInNode < nodeSize) {
+            curNewVec[idxInNode++] = curArray[curInArrayIdx++];
+            ++copied;
+            if (idxInNode === nodeSize) {
+                baseVec = baseVec.appendNode(curNewVec, nodeSize);
+                idxInNode = 0;
+                curNewVec = new Array(nodeSize);
+            }
+            if (curInArrayIdx === curArray.length) {
+                curInArrayIdx = 0;
+                curArray = it.next().value;
+            }
+        }
+        return idxInNode > 0
+            ? baseVec.appendNode(curNewVec, idxInNode)
+            : baseVec;
+    }
+
+    /**
+     * Append multiple elements at the end of the collection.
+     * Note that arrays are also iterables.
+     */
+    private appendAllIterable(elts: Iterable<T>): Vector<T> {
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
         if (curItem.done) {
@@ -558,6 +695,8 @@ export class Vector<T> implements Seq<T> {
         return <Vector<T>>SeqHelpers.distinctBy(this, keyExtractor);
     }
 
+    // TODO lots of duplication between iterateLeafNodes & [Symbol.iterator],
+    // but don't know how merge some code while keeping performance.
     [Symbol.iterator](): Iterator<T> {
         let _index = -1;
         let _stack: any[] = [];
@@ -595,6 +734,51 @@ export class Vector<T> implements Seq<T> {
 
                 ++_index;
                 return {value: (<any[]>_node)[_index & nodeBitmask], done: false};
+            }
+        };
+    }
+
+    // TODO lots of duplication between iterateLeafNodes & [Symbol.iterator],
+    // but don't know how merge some code while keeping performance.
+    private iterateLeafNodes(): Iterator<T[]> {
+        let _index = -1;
+        let _stack: any[] = [];
+        let _node = this._contents;
+        const sz = nodeSize - 1;
+        return {
+            next: () => {
+                // Iterator state:
+                //  _node: "Current" leaf node, meaning the one we returned a value from
+                //         on the previous call.
+                //  _index: Index (within entire vector, not node) of value returned last
+                //          time.
+                //  _stack: Path we traveled to current node, as [node, local index]
+                //          pairs, starting from root node, not including leaf.
+
+                // need >= not === since we add nodeSize everytime, we'll pass
+                // over the end for vectors with a length not multiple of nodeSize.
+                if (_index >= this._length - 1) {
+                    return {done: true, value: <any>undefined};
+                }
+
+                if (_index > 0) {
+                    // Using the stack, go back up the tree, stopping when we reach a node
+                    // whose children we haven't fully iterated over.
+                    let step;
+                    while ((step = _stack.pop())[1] === sz) ;
+                    step[1]++;
+                    _stack.push(step);
+                    _node = step[0][step[1]];
+                }
+
+                for (let shift = _stack.length * nodeBits; shift < this._maxShift;
+                     shift += nodeBits) {
+                    _stack.push([_node, 0]);
+                    _node = (<any[]>_node)[0];
+                }
+
+                _index += nodeSize;
+                return {value: _node, done: false};
             }
         };
     }

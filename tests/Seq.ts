@@ -1,4 +1,6 @@
 import { Seq } from "../src/Seq";
+import { LinkedList } from "../src/LinkedList";
+import { Vector } from "../src/Vector";
 import { HashMap } from "../src/HashMap";
 import { HashSet } from "../src/HashSet";
 import { Stream } from "../src/Stream";
@@ -269,6 +271,20 @@ export function runTests(seqName: string,
         it("doesn't modify the receiver upon appendAll", () => {
             const x = of(1,2,3);
             x.appendAll([4,5]);
+            assert.deepEqual([1,2,3], x.toArray())
+        });
+        it("supports appendAll of a linkedlist iterable", () => assert.deepEqual(
+            [1,2,3,4,5], of(1,2,3).appendAll(LinkedList.of(4,5)).toArray()));
+        it("doesn't modify the receiver upon appendAll of a linkedlist iterable", () => {
+            const x = of(1,2,3);
+            x.appendAll(LinkedList.of(4,5));
+            assert.deepEqual([1,2,3], x.toArray())
+        });
+        it("supports appendAll of a vector iterable", () => assert.deepEqual(
+            [1,2,3,4,5], of(1,2,3).appendAll(Vector.of(4,5)).toArray()));
+        it("doesn't modify the receiver upon appendAll of a vector iterable", () => {
+            const x = of(1,2,3);
+            x.appendAll(Vector.of(4,5));
             assert.deepEqual([1,2,3], x.toArray())
         });
         it("supports take", () => assert.deepEqual(
