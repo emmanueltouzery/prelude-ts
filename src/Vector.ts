@@ -182,8 +182,17 @@ export class Vector<T> implements Seq<T> {
         if (typeof toAppend !== "undefined") {
             vec = vec.append(toAppend);
         }
+        let lastNode: T[]|undefined = undefined;
         const append = (val:T) => {
-            if (vec._length < (nodeSize << vec._maxShift)) {
+            if (vec._length % nodeSize !== 0) {
+                // in the middle of a node
+                if (!lastNode) {
+                    lastNode = vec.getLastNode();
+                }
+                lastNode[vec._length%nodeSize] = val;
+                ++vec._length;
+            } else if (vec._length < (nodeSize << vec._maxShift)) {
+                // finishing a node, no need to add a new root node
                 const index = vec._length;
                 let node = vec._contents || (vec._contents = new Array(nodeSize));
                 let shift = vec._maxShift;
@@ -197,12 +206,14 @@ export class Vector<T> implements Seq<T> {
                     shift -= nodeBits;
                 }
                 node[index & nodeBitmask] = val;
+                lastNode = node;
                 ++vec._length;
             } else {
                 // We'll need a new root node.
                 const newNode = new Array(nodeSize);
                 newNode[0] = val;
                 vec = Vector.setupNewRootNode(vec, newNode, 1);
+                lastNode = newNode;
             }
         };
         return {
