@@ -33,6 +33,58 @@ export interface MutableVector<T> {
     internalGet(idx:number): T|undefined;
 }
 
+// We store a bit field in list. From right to left, the first five
+// bits are suffix length, the next five are prefix length and the
+// rest is depth. The functions below are for working with the bits in
+// a sane way.
+
+const affixBits = 6;
+const affixMask = 0b111111;
+
+// https://github.com/Microsoft/TypeScript/issues/15807#issuecomment-301196459
+// is this even doing anything? check it.
+type DepthHeadTailLength = number & {_type: "__DEPTHHEADTAILLENGTH__"};
+
+function dhtlGetDepth(dhtl: DepthHeadTailLength): number {
+    return dhtl >> (affixBits * 2);
+}
+
+function dhtlInit(depth: number, headLength: number, tailLength: number): DepthHeadTailLength {
+    return <any>((depth << (affixBits * 2)) | (headLength << affixBits) | tailLength);
+}
+
+function dhtlIncrementDepth(dhtl: DepthHeadTailLength): DepthHeadTailLength {
+    return <any>(dhtl + (1 << (affixBits * 2)));
+}
+
+function dhtlDecrementDepth(dhtl: DepthHeadTailLength): DepthHeadTailLength {
+    return <any>(dhtl - (1 << (affixBits * 2)));
+}
+
+function dhtlGetTailLength(dhtl: DepthHeadTailLength): number {
+    return dhtl & affixMask;
+}
+
+function dhtlSetTailLength(dhtl: DepthHeadTailLength, length: number): DepthHeadTailLength {
+    return <any>(length | (dhtl & ~affixMask));
+}
+
+function dhtlGetHeadLength(dhtl: DepthHeadTailLength): number {
+    return (dhtl >> affixBits) & affixMask;
+}
+
+function dhtlSetHeadLength(dhtl: DepthHeadTailLength, length: number): DepthHeadTailLength {
+    return <any>((length << affixBits) | (dhtl & ~(affixMask << affixBits)));
+}
+
+function dhtlIncrementTailLength(dhtl: DepthHeadTailLength): DepthHeadTailLength {
+    return <any>(dhtl+1);
+}
+
+function dhtlIncrementHeadLength(dhtl: DepthHeadTailLength): DepthHeadTailLength {
+    return <any>(dhtl+(1 << affixBits));
+}
+
 /**
  * A general-purpose list class with all-around good performance.
  * quasi-O(1) (actually O(log32(n))) access, append, replace.
@@ -46,9 +98,32 @@ export class Vector<T> implements Seq<T> {
      * @hidden
      */
     // _contents will be undefined only if length===0
+    // we want to fill in the contents in this order:
+    // 1. _head
+    // 2. _tail
+    // 3. _contents
+    // the reason being that access to _head and _tail are faster.
     protected constructor(private _contents: any[]|undefined,
                           private _length: number,
-                          private _maxShift: number) {}
+                          private _depthHeadTailLength: DepthHeadTailLength,
+                          private _head: T[],
+                          private _tail: T[]) {}
+
+    getDepth(): number {
+        return dhtlGetDepth(this._depthHeadTailLength);
+    }
+
+    private getShift(): number {
+        return dhtlGetDepth(this._depthHeadTailLength)*nodeBits;
+    }
+
+    private getHeadLength(): number {
+        return dhtlGetHeadLength(this._depthHeadTailLength);
+    }
+
+    private getTailLength(): number {
+        return dhtlGetTailLength(this._depthHeadTailLength);
+    }
 
     /**
      * The empty vector.
@@ -92,11 +167,11 @@ export class Vector<T> implements Seq<T> {
 
         // potentially one non-full node to add.
         if (data.length-i>0) {
-            const extraNode = new Array(nodeSize);
+            const tail = [];
             for (let idx=0;i+idx<data.length;idx++) {
-                extraNode[idx] = data[i+idx];
+                tail.push(data[i+idx]);
             }
-            nodes.push(extraNode);
+            nodes.push(tail);
         }
 
         return Vector.fromLeafNodes(nodes, data.length);
@@ -105,7 +180,26 @@ export class Vector<T> implements Seq<T> {
     /**
      * Build a new vector from the leaf nodes containing data.
      */
-    private static fromLeafNodes<T>(nodes: T[][], length: number): Vector<T> {
+    private static fromLeafNodes<T>(nodesHeadTail: T[][], length: number): Vector<T> {
+        let nodes: T[][], head: T[], tail: T[];
+        if (nodesHeadTail.length >= 3) {
+            nodes = nodesHeadTail.slice(1, -1);
+            head = nodesHeadTail[0];
+            tail = nodesHeadTail[nodesHeadTail.length - 1];
+        } else if (nodesHeadTail.length === 2) {
+            nodes = [];
+            head = nodesHeadTail[0];
+            tail = nodesHeadTail[1];
+        } else if (nodesHeadTail.length === 1) {
+            nodes = [];
+            head = [];
+            tail = nodesHeadTail[0];
+        } else {
+            nodes = [];
+            head = [];
+            tail = [];
+        }
+
         let depth = 1;
         while (nodes.length > 1) {
             let lowerNodes:any[] = nodes;
@@ -118,8 +212,10 @@ export class Vector<T> implements Seq<T> {
         }
 
         const _contents = nodes[0];
-        const _maxShift = _contents ? nodeBits * (depth - 1) : 0;
-        return new Vector<T>(_contents, length, _maxShift);
+        const _depth = _contents ? depth - 1 : 0;
+        return new Vector<T>(_contents, length,
+                             dhtlInit(_depth, head.length, tail.length),
+                             head, tail);
     }
 
     /**
@@ -182,38 +278,46 @@ export class Vector<T> implements Seq<T> {
         if (typeof toAppend !== "undefined") {
             vec = vec.append(toAppend);
         }
-        let lastNode: T[]|undefined = undefined;
+        if (vec._tail.length !== vec.getTailLength()) {
+            vec._tail = vec._tail.slice(0, vec.getTailLength());
+        }
         const append = (val:T) => {
-            if (vec._length % nodeSize !== 0) {
-                // in the middle of a node
-                if (!lastNode) {
-                    lastNode = vec.getLastNode();
-                }
-                lastNode[vec._length%nodeSize] = val;
+            if (vec._tail.length < nodeSize) {
+                vec._tail.push(val);
+                vec._depthHeadTailLength = dhtlIncrementTailLength(vec._depthHeadTailLength);
                 ++vec._length;
-            } else if (vec._length < (nodeSize << vec._maxShift)) {
-                // finishing a node, no need to add a new root node
-                const index = vec._length;
-                let node = vec._contents || (vec._contents = new Array(nodeSize));
-                let shift = vec._maxShift;
-                while (shift > 0) {
-                    let childIndex = (index >> shift) & nodeBitmask;
-                    if (!node[childIndex]) {
-                        // Need to create new node. Can happen when appending element.
-                        node[childIndex] = new Array(nodeSize);
-                    }
-                    node = node[childIndex];
-                    shift -= nodeBits;
-                }
-                node[index & nodeBitmask] = val;
-                lastNode = node;
-                ++vec._length;
+                return vec;
             } else {
-                // We'll need a new root node.
-                const newNode = new Array(nodeSize);
-                newNode[0] = val;
-                vec = Vector.setupNewRootNode(vec, newNode, 1);
-                lastNode = newNode;
+                // the tail is full
+                const vecShift = vec.getShift();
+                const effectiveLength = vec._length - vec.getHeadLength() - vec.getTailLength();
+                if (vecShift === 0) {
+                    vec._contents = [vec._tail]; // TODO copy?
+                    vec._depthHeadTailLength = dhtlIncrementDepth(vec._depthHeadTailLength);
+                } else if (effectiveLength < (nodeSize << vecShift)) {
+                    // no need to add a new root node
+                    var index = effectiveLength;
+                    let node = vec._contents || (vec._contents = new Array(nodeSize));
+                    let shift = vecShift;
+                    while (shift > nodeBits) {
+                        let childIndex = (index >> shift) & nodeBitmask;
+                        if (!node[childIndex]) {
+                            // Need to create new node. Can happen when appending element.
+                            node[childIndex] = new Array(nodeSize);
+                        }
+                        node = node[childIndex];
+                        shift -= nodeBits;
+                    }
+                    node[(index >> shift) & nodeBitmask] = vec._tail;
+                } else {
+                    // We'll need a new root node.
+                    vec = Vector.setupNewRootNode(vec, vec._tail, nodeSize);
+                    vec._length -= nodeSize;
+                }
+                vec._tail = [val];
+                vec._depthHeadTailLength = dhtlSetTailLength(vec._depthHeadTailLength, 1);
+                ++vec._length;
+                return vec;
             }
         };
         return {
@@ -256,30 +360,31 @@ export class Vector<T> implements Seq<T> {
     }
 
     private cloneVec(): Vector<T> {
-        return new Vector<T>(this._contents, this._length, this._maxShift);
+        return new Vector<T>(this._contents, this._length,
+                             this._depthHeadTailLength, this._head, this._tail);
     }
 
     // WILL blow up if you give out of bounds index!
     // it's the caller's responsability to check bounds.
     private internalGet(index: number): T {
-        let shift = this._maxShift;
-        let node = this._contents;
-        while (shift > 0) {
-            node = (<any>node)[(index >> shift) & nodeBitmask];
-            shift -= nodeBits;
-        }
-        return (<any>node)[index & nodeBitmask];
-    }
+        const headLength = this.getHeadLength();
+        const tailLength = this.getTailLength();
 
-    // will blow on an empty vector
-    private getLastNode(): T[] {
-        let shift = this._maxShift;
+        if (index < headLength) {
+            return this._head[index];
+        }
+        if (index >= this._length - tailLength) {
+            return this._tail[index - (this._length - tailLength)];
+        }
+
+        const correctedIndex = index - headLength;
         let node = this._contents;
+        let shift = this.getShift();
         while (shift > 0) {
-            node = (<any>node)[(this._length >> shift) & nodeBitmask];
+            node = (<any>node)[(correctedIndex >> shift) & nodeBitmask];
             shift -= nodeBits;
         }
-        return <any[]>node;
+        return (<any>node)[correctedIndex & nodeBitmask];
     }
 
     /**
@@ -307,11 +412,22 @@ export class Vector<T> implements Seq<T> {
     // OK to call with index === vec.length (an append) as long as vector
     // length is not a (nonzero) power of the branching factor (32, 1024, ...).
     // Cannot be called on the empty vector!! It would crash
-    private internalSet(index: number, val: T|null): Vector<T> {
-        let newVec = this.cloneVec();
+    private internalSet(rawIndex: number, val: T|null): Vector<T> {
+        const newVec = this.cloneVec();
+        if (rawIndex < this.getHeadLength()) {
+            newVec._head = this._head.slice();
+            newVec._head[rawIndex] = <T>val;
+            return newVec;
+        }
+        if (rawIndex >= this._length - this.getTailLength()) {
+            newVec._tail = this._tail.slice();
+            newVec._tail[rawIndex - (this._length - this.getTailLength())] = <T>val;
+            return newVec;
+        }
         // next line will crash on empty vector
         let node = newVec._contents = (<any[]>this._contents).slice();
-        let shift = this._maxShift;
+        let shift = this.getShift();
+        const index = rawIndex - this.getHeadLength();
         while (shift > 0) {
             let childIndex = (index >> shift) & nodeBitmask;
             if (node[childIndex]) {
@@ -342,33 +458,40 @@ export class Vector<T> implements Seq<T> {
      * Append an element at the end of the collection.
      */
     append(val:T): Vector<T> {
-        if (this._length === 0) {
-            return Vector.ofArray<T>([val]);
-        } else if (this._length < (nodeSize << this._maxShift)) {
-            const newVec = this.internalSet(this._length, val);
-            newVec._length++;
-            return newVec;
+        if (this._tail.length !== this.getTailLength()) {
+            this._tail = this._tail.slice(0, this.getTailLength());
+        }
+
+        if (this._tail.length < nodeSize) {
+            this._tail.push(val);
+            return new Vector(this._contents, this._length+1, dhtlIncrementTailLength(this._depthHeadTailLength), this._head, this._tail);
         } else {
-            // We'll need a new root node.
-            const newNode = new Array(nodeSize);
-            newNode[0] = val;
-            return Vector.setupNewRootNode(this, newNode, 1);
+            // the tail is full
+            const withTailMerged = this.appendNode(this._tail, this._length);
+            withTailMerged._length -= nodeSize-1; // appendNode added nodeSize though it shouldn't, add +1
+            withTailMerged._tail = [val];
+            withTailMerged._depthHeadTailLength = dhtlSetTailLength(withTailMerged._depthHeadTailLength, 1);
+            return withTailMerged;
         }
     }
 
+    // TODO add parameter increaseLength:boolean?
     private appendNode(val:T[], length:number): Vector<T> {
-        if (this._length % nodeSize !== 0) {
-            throw "prelude.ts Vector: invalid state, can't append a node if the previous node isn't full";
-        }
+        const effectiveLength = this._length - this.getHeadLength() - this.getTailLength();
         if (this._length === 0) {
             return Vector.ofArray<T>(val);
-        } else if (this._length < (nodeSize << this._maxShift)) { // here i know the this._length is a multiple of nodeSize so < is enough
+        } else if (effectiveLength < (nodeSize << this.getShift())) { // here i know the this._length is a multiple of nodeSize so < is enough
             let newVec = this.cloneVec();
-            // next line will crash on empty vector
-            let node = newVec._contents = (<any[]>this._contents).slice();
-            let shift = this._maxShift;
+            let node;
+            if (this._contents) {
+                node = newVec._contents = (<any[]>this._contents).slice();
+            } else {
+                node = newVec._contents = new Array(nodeSize);
+                newVec._depthHeadTailLength = dhtlIncrementDepth(newVec._depthHeadTailLength);
+            }
+            let shift = this.getShift();
             while (shift > nodeBits) {
-                let childIndex = (this._length >> shift) & nodeBitmask;
+                let childIndex = (effectiveLength >> shift) & nodeBitmask;
                 if (node[childIndex]) {
                     node[childIndex] = node[childIndex].slice();
                 } else {
@@ -376,9 +499,9 @@ export class Vector<T> implements Seq<T> {
                     node[childIndex] = new Array(nodeSize);
                 }
                 node = node[childIndex];
-                shift -= nodeBits;
+                shift -= nodeBits
             }
-            node[(this._length >> shift) & nodeBitmask] = val;
+            node[(effectiveLength >> shift) & nodeBitmask] = val;
             newVec._length += length;
             return newVec;
         } else {
@@ -390,8 +513,8 @@ export class Vector<T> implements Seq<T> {
     private static setupNewRootNode<T>(vec: Vector<T>, nodeToAdd:T[], length: number): Vector<T> {
         const newVec = vec.cloneVec();
         newVec._length += length;
-        newVec._maxShift += nodeBits;
-        let depth = newVec._maxShift / nodeBits + 1;
+        newVec._depthHeadTailLength = dhtlIncrementDepth(vec._depthHeadTailLength);
+        let depth = newVec.getDepth();
         let node:any[] = nodeToAdd;
         for (let i = 2; i < depth; i++) {
             const newNode = [node];
@@ -453,15 +576,16 @@ export class Vector<T> implements Seq<T> {
                Vector.iteratorPrepend(_it, firstArray.slice(1)),
                1];
 
-        // first finish the last node
-        const lastNode = baseVec.getLastNode();
-        let idxInNode = baseVec._length % nodeSize;
+        // first finish the tail
+        const tail = baseVec._tail;
+        let idxInNode = baseVec.getTailLength();
         let curInArrayIdx = 0;
         let curArray = it.next().value;
         while (copied < length && idxInNode > 0 && idxInNode < nodeSize) {
-            lastNode[idxInNode++] = curArray[curInArrayIdx++];
+            tail[idxInNode++] = curArray[curInArrayIdx++];
             ++copied;
             ++baseVec._length;
+            baseVec._depthHeadTailLength = dhtlIncrementTailLength(baseVec._depthHeadTailLength);
             if (curInArrayIdx === curArray.length) {
                 curInArrayIdx = 0;
                 curArray = it.next().value;
@@ -471,6 +595,13 @@ export class Vector<T> implements Seq<T> {
             // already done, didn't need to add new nodes!
             return baseVec;
         }
+
+        // right now the tail should be full, merge it
+        // in the vector
+        baseVec = baseVec.appendNode(baseVec._tail, nodeSize);
+        baseVec._length -= nodeSize; // appendNode counted twice
+        // right now the length length in the metadata is wrong,
+        // but we'll overwrite it later.
 
         // we're now at node boundary, add remaining array items
         // by adding nodes one by one
@@ -489,9 +620,11 @@ export class Vector<T> implements Seq<T> {
                 curArray = it.next().value;
             }
         }
-        return idxInNode > 0
-            ? baseVec.appendNode(curNewVec, idxInNode)
-            : baseVec;
+        baseVec._tail = curNewVec.slice(0, idxInNode);
+        baseVec._length += baseVec._tail.length;
+        baseVec._depthHeadTailLength = dhtlInit(
+            baseVec.getDepth(), baseVec.getHeadLength(), idxInNode);
+        return baseVec;
     }
 
     /**
@@ -547,8 +680,6 @@ export class Vector<T> implements Seq<T> {
      *     => Vector.of(1,2)
      */
     init(): Vector<T> {
-        let popped;
-
         if (this._length === 0) {
             return this;
         }
@@ -556,36 +687,68 @@ export class Vector<T> implements Seq<T> {
             return Vector.empty<T>();
         }
 
-        if ((this._length & nodeBitmask) !== 1) {
-            popped = this.internalSet(this._length - 1, null);
+        const popped = this.cloneVec();
+        if (this.getTailLength() > 1) {
+            popped._depthHeadTailLength = dhtlSetTailLength(
+                this._depthHeadTailLength, this.getTailLength()-1);
+            popped._length--;
+            return popped;
         }
-        // If the length is a power of the branching factor plus one,
-        // reduce the tree's depth and install the root's first child as
-        // the new root.
-        else if (this._length - 1 === nodeSize << (this._maxShift - nodeBits)) {
-            popped = this.cloneVec();
-            popped._contents = (<any[]>this._contents)[0]; // length>0 => _contents!==undefined
-            popped._maxShift = this._maxShift - nodeBits;
-        }
-        // Otherwise, the root stays the same but we remove a leaf node.
-        else {
-            popped = this.cloneVec();
 
-            // we know the vector is not empty, there is a if at the top
-            // of the function => ok to cast to any[]
-            let node = popped._contents = (<any[]>popped._contents).slice();
-            let shift = this._maxShift;
-            let removedIndex = this._length - 1;
+        // the tail has only 1 element. must remove the last
+        // node & set it as the tail.
+        popped._depthHeadTailLength = dhtlSetTailLength(this._depthHeadTailLength, nodeSize);
 
-            while (shift > nodeBits) { // i.e., Until we get to lowest non-leaf node.
-                let localIndex = (removedIndex >> shift) & nodeBitmask;
-                node = node[localIndex] = node[localIndex].slice();
-                shift -= nodeBits;
+        if (popped._contents) {
+            popped._tail = this.getTrieLastNode().slice();
+
+            if (popped.getHeadLength() + popped.getTailLength() === popped._length -1) {
+                popped._contents = undefined;
+            } else {
+                // If the length is a power of the branching factor plus one,
+                // reduce the tree's depth and install the root's first child as
+                // the new root.
+                if (this._length - 1 === nodeSize << (this.getShift() - nodeBits)) {
+                    popped._contents = (<any[]>this._contents)[0]; // length>0 => _contents!==undefined
+                    popped._depthHeadTailLength = dhtlDecrementDepth(this._depthHeadTailLength);
+                }
+                // Otherwise, the root stays the same but we remove a leaf node.
+                else {
+                    // we know the vector is not empty, there is a if at the top
+                    // of the function => ok to cast to any[]
+                    let node = popped._contents = (<any[]>popped._contents).slice();
+                    let shift = this.getShift();
+                    let removedIndex = this._length - 1;
+
+                    while (shift > nodeBits) { // i.e., Until we get to lowest non-leaf node.
+                        let localIndex = (removedIndex >> shift) & nodeBitmask;
+                        node = node[localIndex] = node[localIndex].slice();
+                        shift -= nodeBits;
+                    }
+                    node[(removedIndex >> shift) & nodeBitmask] = null;
+                }
             }
-            node[(removedIndex >> shift) & nodeBitmask] = null;
+        } else {
+            // no contents but I know the length is >1
+            // => the rest is in the head.
+            popped._tail = popped._head;
+            popped._depthHeadTailLength = dhtlSetHeadLength(popped._depthHeadTailLength, 0);
+            popped._head = [];
         }
         popped._length--;
         return popped;
+    }
+
+    // will blow on an empty vector
+    private getTrieLastNode(): T[] {
+        let shift = this.getShift();
+        let node = this._contents;
+        const trieLength = this._length - this.getHeadLength() - this.getTailLength();
+        while (shift > 0) {
+            node = (<any>node)[(trieLength >> shift) & nodeBitmask];
+            shift -= nodeBits;
+        }
+        return <any[]>node;
     }
 
     /**
@@ -722,6 +885,8 @@ export class Vector<T> implements Seq<T> {
         let _stack: any[] = [];
         let _node = this._contents;
         const sz = nodeSize - 1;
+        const headLength = this.getHeadLength();
+        const tailLength = this.getTailLength();
         return {
             next: () => {
                 // Iterator state:
@@ -732,11 +897,17 @@ export class Vector<T> implements Seq<T> {
                 //  _stack: Path we traveled to current node, as [node, local index]
                 //          pairs, starting from root node, not including leaf.
 
+                if (_index < headLength - 1) {
+                    return {done: false, value: this._head[++_index]};
+                }
                 if (_index === this._length - 1) {
                     return {done: true, value: <any>undefined};
                 }
+                if (_index >= this._length - tailLength - 1) {
+                    return {done: false, value: this._tail[(++_index) - (this._length - tailLength)]};
+                }
 
-                if (_index > 0 && (_index & nodeBitmask) === sz) {
+                if (_index - headLength > 0 && ((_index - headLength) & nodeBitmask) === sz) {
                     // Using the stack, go back up the tree, stopping when we reach a node
                     // whose children we haven't fully iterated over.
                     let step;
@@ -746,14 +917,14 @@ export class Vector<T> implements Seq<T> {
                     _node = step[0][step[1]];
                 }
 
-                for (let shift = _stack.length * nodeBits; shift < this._maxShift;
+                for (let shift = _stack.length * nodeBits; shift < this.getShift();
                      shift += nodeBits) {
                     _stack.push([_node, 0]);
                     _node = (<any[]>_node)[0];
                 }
 
                 ++_index;
-                return {value: (<any[]>_node)[_index & nodeBitmask], done: false};
+                return {value: (<any[]>_node)[(_index - headLength) & nodeBitmask], done: false};
             }
         };
     }
@@ -791,8 +962,7 @@ export class Vector<T> implements Seq<T> {
                     _node = step[0][step[1]];
                 }
 
-                for (let shift = _stack.length * nodeBits; shift < this._maxShift;
-                     shift += nodeBits) {
+                for (let depth = _stack.length; depth < this.getDepth(); ++depth) {
                     _stack.push([_node, 0]);
                     _node = (<any[]>_node)[0];
                 }
@@ -818,11 +988,12 @@ export class Vector<T> implements Seq<T> {
      * by the mapper function you give.
      */
     map<U>(fun:(x:T)=>U): Vector<U> {
-        const leafNodes = this.getLeafNodes(this._length);
+        const leafNodes = this.getLeafNodes(
+            this._length - this.getHeadLength() - this.getTailLength());
         const newLeafNodes: U[][] = [];
         newLeafNodes.length = leafNodes.length;
-        // don't do the last leaf node
-        for (let i=0;i<leafNodes.length-1;i++) {
+        for (let i=0;i<leafNodes.length;i++) {
+            // TODO try and just use Array.map here, benchmark it
             newLeafNodes[i] = [];
             newLeafNodes[i].length = nodeSize;
             const curLeafNode = leafNodes[i];
@@ -831,14 +1002,8 @@ export class Vector<T> implements Seq<T> {
                 curNewLeafNode[j] = fun(curLeafNode[j]);
             }
         }
-        // last leaf node, the last node may not be full
-        newLeafNodes[leafNodes.length-1] = [];
-        newLeafNodes[leafNodes.length-1].length = nodeSize;
-        const curLeafNode = leafNodes[leafNodes.length-1];
-        const curNewLeafNode = newLeafNodes[leafNodes.length-1];
-        for (let j=0;j<this._length-(leafNodes.length-1)*nodeSize;j++) {
-            curNewLeafNode[j] = fun(curLeafNode[j]);
-        }
+        newLeafNodes.unshift(this._head.map(fun));
+        newLeafNodes.push(this._tail.map(fun));
         return Vector.fromLeafNodes(newLeafNodes, this._length);
     }
 
@@ -991,7 +1156,7 @@ export class Vector<T> implements Seq<T> {
         if (<any>other === this) {
             return true;
         }
-        if (!other || (other._maxShift === undefined)) {
+        if (!other || (other._depthHeadTailLength === undefined)) {
             return false;
         }
         if (this._length !== other._length) return false;
@@ -1149,13 +1314,15 @@ export class Vector<T> implements Seq<T> {
         if (_n<=0) {
             return [];
         }
-        const n = Math.min(_n, this._length);
+        const n = Math.min(
+            _n,
+            this._length - this.getHeadLength() - this.getTailLength());
         let _index = 0;
         let _stack: any[] = [];
         let _node = this._contents;
-        let result:T[][] = new Array(Math.floor(n/nodeSize)+1);
+        let result:T[][] = new Array(Math.floor(n/nodeSize));
         if (!_node) {
-            // empty vector
+            // empty trie
             return result;
         }
 
@@ -1170,8 +1337,8 @@ export class Vector<T> implements Seq<T> {
                 _node = step[0][step[1]];
             }
 
-            let shift;
-            for (shift=_stack.length*nodeBits; shift<this._maxShift; shift+=nodeBits) {
+            let depth;
+            for (depth=_stack.length; depth<this.getDepth(); ++depth) {
                 _stack.push([_node, 0]);
                 _node = (<any[]>_node)[0];
             }
@@ -1326,32 +1493,79 @@ export class Vector<T> implements Seq<T> {
 
         let newVec = this.cloneVec();
         newVec._length = index;
-        // next line will crash on empty vector
-        let node = newVec._contents = (<any[]>this._contents).slice();
-        let shift = this._maxShift;
-        let underRoot = true;
-        while (shift > 0) {
-            const childIndex = (index >> shift) & nodeBitmask;
-            if (underRoot && childIndex === 0) {
-                // root killing, skip this node, we don't want
-                // root nodes with only 1 child
-                newVec._contents = node[childIndex].slice();
-                newVec._maxShift -= nodeBits;
-                node = <any[]>newVec._contents;
-            } else {
-                underRoot = false;
-                for (let i=childIndex+1;i<nodeSize;i++) {
+        if (index < this.getHeadLength()) {
+            newVec._depthHeadTailLength = dhtlSetHeadLength(this._depthHeadTailLength, index);
+            newVec._head = this._head.slice(0, index); // wouldn't have to copy, but remove elts to enable GC
+            return newVec;
+        }
+        if (this._contents) {
+            const indexInTrie = index - this.getHeadLength();
+            if (indexInTrie < this._length - this.getHeadLength() - this.getTailLength()) {
+                let node = newVec._contents = (<any[]>this._contents).slice();
+                let shift = this.getShift();
+                let underRoot = true;
+                while (shift > 0) {
+                    const childIndex = (indexInTrie >> shift) & nodeBitmask;
+                    if (underRoot && childIndex === 0) {
+                        // root killing, skip this node, we don't want
+                        // root nodes with only 1 child
+                        newVec._contents = node[childIndex].slice();
+                        newVec._depthHeadTailLength = dhtlDecrementDepth(newVec._depthHeadTailLength);
+                        node = <any[]>newVec._contents;
+                    } else {
+                        underRoot = false;
+                        for (let i=childIndex+1;i<nodeSize;i++) {
+                            // remove pointers if present, to enable GC
+                            node[i] = undefined;
+                        }
+                        node[childIndex] = node[childIndex].slice();
+                        node = node[childIndex];
+                    }
+                    shift -= nodeBits;
+                }
+                for (let i=(index & nodeBitmask);i<nodeSize;i++) {
                     // remove pointers if present, to enable GC
                     node[i] = undefined;
                 }
-                node[childIndex] = node[childIndex].slice();
-                node = node[childIndex];
             }
-            shift -= nodeBits;
         }
-        for (let i=(index & nodeBitmask);i<nodeSize;i++) {
-            // remove pointers if present, to enable GC
-            node[i] = undefined;
+        if (index >= this._length - this.getTailLength()) {
+            const newTailLength = index - (this._length - this.getTailLength());
+            newVec._depthHeadTailLength = dhtlSetTailLength(this._depthHeadTailLength, newTailLength);
+            newVec._tail = this._tail.slice(0, newTailLength); // wouldn't have to copy, but remove elts to enable GC
+        } else {
+            const indexInTrie = index - newVec.getHeadLength();
+            if (indexInTrie % nodeSize !== 0) {
+                // extract the tail from the trie
+                const tailLength = indexInTrie % nodeSize;
+
+                // remove the last node from the trie
+                if (tailLength + this.getHeadLength() === index) {
+                    if (newVec.getDepth() !== 0) {
+                        throw "prelude.ts internal error: expected depth of 0, take on vector "
+                            + this._length + " of " + n;
+                    }
+                    newVec._tail = <any>newVec._contents;
+                    newVec._contents = undefined;
+                } else {
+                    // get the parent of the last node...
+                    let shift = newVec.getShift();
+                    let node = newVec._contents;
+                    while (shift > nodeBits) {
+                        node = (<any>node)[(indexInTrie >> shift) & nodeBitmask];
+                        shift -= nodeBits;
+                    }
+                    const lastNode = <any[]>(<any>node)[(indexInTrie >> shift) & nodeBitmask];
+                    newVec._tail = lastNode.slice(0, tailLength);
+                    (<any>node)[(indexInTrie >> shift) & nodeBitmask] = undefined;
+                }
+                newVec._depthHeadTailLength = dhtlSetTailLength(
+                    newVec._depthHeadTailLength, tailLength);
+            } else {
+                // wipe the tail entirely
+                newVec._depthHeadTailLength = dhtlSetTailLength(newVec._depthHeadTailLength, 0);
+                newVec._tail = [];
+            }
         }
         return newVec;
     }
@@ -1360,15 +1574,35 @@ export class Vector<T> implements Seq<T> {
      * Prepend an element at the beginning of the collection.
      */
     prepend(elt: T): Vector<T> {
-        // TODO must be optimized!!
-        return this.prependAll([elt]);
+        if (this._head.length !== this.getHeadLength()) {
+            this._head = this._head.slice(this._head.length - this.getHeadLength());
+        }
+
+        if (this._head.length < nodeSize) {
+            this._head.unshift(elt);
+            return new Vector(this._contents, this._length+1, dhtlIncrementHeadLength(this._depthHeadTailLength), this._head, this._tail);
+        } else {
+            // the head is full
+            const withTailMerged = this.prependNode(this._tail, this._length);
+            withTailMerged._head = [elt];
+            withTailMerged._depthHeadTailLength = dhtlSetHeadLength(withTailMerged._depthHeadTailLength, 1);
+            return withTailMerged;
+        }
     }
 
     /**
      * Prepend multiple elements at the beginning of the collection.
      */
     prependAll(elts: Iterable<T>): Vector<T> {
+        // TODO prepend in a loop is probably faster, measure it
         return Vector.ofIterable(elts).appendAll(this);
+    }
+
+    private prependNode(val:T[], length: number): Vector<T> {
+        const leafNodes = this.getLeafNodes(this._length);
+        leafNodes.unshift(val);
+        leafNodes.push(this._tail);
+        return Vector.fromLeafNodes(leafNodes, this._length);
     }
 
     /**
