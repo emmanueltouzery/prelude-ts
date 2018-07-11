@@ -281,12 +281,11 @@ export class Vector<T> implements Seq<T> {
         if (vec._tail.length !== vec.getTailLength()) {
             vec._tail = vec._tail.slice(0, vec.getTailLength());
         }
-        const append = (val:T) => {
+        const append = (val:T):void => {
             if (vec._tail.length < nodeSize) {
                 vec._tail.push(val);
                 vec._depthHeadTailLength = dhtlIncrementTailLength(vec._depthHeadTailLength);
                 ++vec._length;
-                return vec;
             } else {
                 // the tail is full
                 const vecShift = vec.getShift();
@@ -317,7 +316,6 @@ export class Vector<T> implements Seq<T> {
                 vec._tail = [val];
                 vec._depthHeadTailLength = dhtlSetTailLength(vec._depthHeadTailLength, 1);
                 ++vec._length;
-                return vec;
             }
         };
         return {
