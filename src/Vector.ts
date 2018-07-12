@@ -383,14 +383,7 @@ export class Vector<T> implements Seq<T> {
             return this._tail[index - tailStart];
         }
 
-        const correctedIndex = index - headLength;
-        let node = this._contents;
-        let shift = this.getShift();
-        while (shift > 0) {
-            node = (<any>node)[(correctedIndex >> shift) & nodeBitmask];
-            shift -= nodeBits;
-        }
-        return (<any>node)[correctedIndex & nodeBitmask];
+        return this.trieGet(index - headLength, this.getShift())
     }
 
     private trieGet(correctedIndex:number, shift: number): T {
