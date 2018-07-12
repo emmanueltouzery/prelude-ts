@@ -45,10 +45,6 @@ const affixMask = 0b111111;
 // is this even doing anything? check it.
 type DepthHeadTailLength = number & {_type: "__DEPTHHEADTAILLENGTH__"};
 
-function dhtlGetDepth(dhtl: DepthHeadTailLength): number {
-    return dhtl >> (affixBits * 2);
-}
-
 function dhtlInit(depth: number, headLength: number, tailLength: number): DepthHeadTailLength {
     return <any>((depth << (affixBits * 2)) | (headLength << affixBits) | tailLength);
 }
@@ -61,16 +57,8 @@ function dhtlDecrementDepth(dhtl: DepthHeadTailLength): DepthHeadTailLength {
     return <any>(dhtl - (1 << (affixBits * 2)));
 }
 
-function dhtlGetTailLength(dhtl: DepthHeadTailLength): number {
-    return dhtl & affixMask;
-}
-
 function dhtlSetTailLength(dhtl: DepthHeadTailLength, length: number): DepthHeadTailLength {
     return <any>(length | (dhtl & ~affixMask));
-}
-
-function dhtlGetHeadLength(dhtl: DepthHeadTailLength): number {
-    return (dhtl >> affixBits) & affixMask;
 }
 
 function dhtlSetHeadLength(dhtl: DepthHeadTailLength, length: number): DepthHeadTailLength {
@@ -110,19 +98,19 @@ export class Vector<T> implements Seq<T> {
                           private _tail: T[]) {}
 
     getDepth(): number {
-        return dhtlGetDepth(this._depthHeadTailLength);
+        return this._depthHeadTailLength >> (affixBits * 2);
     }
 
     private getShift(): number {
-        return dhtlGetDepth(this._depthHeadTailLength)*nodeBits;
+        return nodeBits * (this._depthHeadTailLength >> (affixBits * 2));
     }
 
     private getHeadLength(): number {
-        return dhtlGetHeadLength(this._depthHeadTailLength);
+        return (this._depthHeadTailLength >> affixBits) & affixMask;
     }
 
     private getTailLength(): number {
-        return dhtlGetTailLength(this._depthHeadTailLength);
+        return this._depthHeadTailLength & affixMask;
     }
 
     /**
