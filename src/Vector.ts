@@ -278,21 +278,34 @@ export class Vector<T> implements Seq<T> {
         if (typeof toAppend !== "undefined") {
             vec = vec.append(toAppend);
         }
-        if (vec._tail.length !== vec.getTailLength()) {
-            vec._tail = vec._tail.slice(0, vec.getTailLength());
+        let vecShift = vec.getShift();
+        let headLength = vec.getHeadLength();
+        let tailLength = vec.getTailLength();
+        const newTail = new Array(nodeSize);
+        for (let i=0;i<tailLength;i++) {
+            newTail[i] = vec._tail[i];
+        }
+        vec._tail = newTail;
+        const mergeTailNewRootNode = () => {
+            let node:any[] = vec._tail;
+            for (let i = 2*nodeBits; i < vecShift; i+=nodeBits) {
+                const newNode = [node];
+                node = newNode;
+            }
+            vec._contents = [vec._contents, node];
+            vecShift += nodeBits;
         }
         const append = (val:T):void => {
-            if (vec._tail.length < nodeSize) {
-                vec._tail.push(val);
-                vec._depthHeadTailLength = dhtlIncrementTailLength(vec._depthHeadTailLength);
+            if (tailLength < nodeSize) {
+                vec._tail[tailLength] = val;
+                ++tailLength;
                 ++vec._length;
             } else {
                 // the tail is full
-                const vecShift = vec.getShift();
-                const effectiveLength = vec._length - vec.getHeadLength() - vec.getTailLength();
+                const effectiveLength = vec._length - headLength - tailLength;
                 if (vecShift === 0) {
-                    vec._contents = [vec._tail]; // TODO copy?
-                    vec._depthHeadTailLength = dhtlIncrementDepth(vec._depthHeadTailLength);
+                    vec._contents = [vec._tail];
+                    vecShift += nodeBits;
                 } else if (effectiveLength < (nodeSize << vecShift)) {
                     // no need to add a new root node
                     var index = effectiveLength;
@@ -310,11 +323,11 @@ export class Vector<T> implements Seq<T> {
                     node[(index >> shift) & nodeBitmask] = vec._tail;
                 } else {
                     // We'll need a new root node.
-                    vec = Vector.setupNewRootNode(vec, vec._tail, nodeSize);
-                    vec._length -= nodeSize;
+                    mergeTailNewRootNode();
                 }
-                vec._tail = [val];
-                vec._depthHeadTailLength = dhtlSetTailLength(vec._depthHeadTailLength, 1);
+                vec._tail = new Array(nodeSize);
+                vec._tail[0] = val;
+                tailLength = 1;
                 ++vec._length;
             }
         };
@@ -328,8 +341,15 @@ export class Vector<T> implements Seq<T> {
                     curItem = iterator.next();
                 }
             },
-            internalGet: (idx:number) => vec.internalGet(idx),
-            getVector: () => vec
+            internalGet: (idx:number) => {
+                vec._depthHeadTailLength = dhtlInit(vecShift/nodeBits, headLength, tailLength);
+                return vec.internalGet(idx);
+            },
+            getVector: () => {
+                vec._depthHeadTailLength = dhtlInit(vecShift/nodeBits, headLength, tailLength);
+                vec._tail = vec._tail.slice(0, tailLength);
+                return vec;
+            }
         };
     }
 
