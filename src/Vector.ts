@@ -366,18 +366,27 @@ export class Vector<T> implements Seq<T> {
     // it's the caller's responsability to check bounds.
     private internalGet(index: number): T {
         const headLength = this.getHeadLength();
-        const tailLength = this.getTailLength();
-
         if (index < headLength) {
             return this._head[index];
         }
-        if (index >= this._length - tailLength) {
-            return this._tail[index - (this._length - tailLength)];
+
+        const tailStart = this._length - this.getTailLength();
+        if (index >= tailStart) {
+            return this._tail[index - tailStart];
         }
 
         const correctedIndex = index - headLength;
         let node = this._contents;
         let shift = this.getShift();
+        while (shift > 0) {
+            node = (<any>node)[(correctedIndex >> shift) & nodeBitmask];
+            shift -= nodeBits;
+        }
+        return (<any>node)[correctedIndex & nodeBitmask];
+    }
+
+    private trieGet(correctedIndex:number, shift: number): T {
+        let node = this._contents;
         while (shift > 0) {
             node = (<any>node)[(correctedIndex >> shift) & nodeBitmask];
             shift -= nodeBits;
@@ -1014,8 +1023,25 @@ export class Vector<T> implements Seq<T> {
     filter(fun:(v:T)=>boolean): Vector<T>;
     filter(fun:(v:T)=>boolean): Vector<T> {
         const mutVec = Vector.emptyMutable<T>();
-        for (let i = 0; i < this._length; i++) {
-            const value = this.internalGet(i);
+        const headLength = this.getHeadLength();
+        const tailLength = this.getTailLength();
+        const shift = this.getShift();
+        let i;
+        for (i = 0; i < headLength; i++) {
+            const value = this._head[i];
+            if (fun(value)) {
+                mutVec.append(value);
+            }
+        }
+        for (i = 0; i < this._length-headLength-tailLength; i++) {
+            // could also use filter on the children nodes...
+            const value = this.trieGet(i, shift);
+            if (fun(value)) {
+                mutVec.append(value);
+            }
+        }
+        for (i = 0; i < tailLength; i++) {
+            const value = this._tail[i];
             if (fun(value)) {
                 mutVec.append(value);
             }
@@ -1084,8 +1110,18 @@ export class Vector<T> implements Seq<T> {
      */
     foldLeft<U>(zero:U, fn:(soFar:U,cur:T)=>U):U {
         let acc = zero;
-        for (let i = 0; i < this._length; i++) {
-            acc = fn(acc, this.internalGet(i));
+        const headLength = this.getHeadLength();
+        const tailLength = this.getTailLength();
+        let i;
+        for (i = 0; i < headLength; i++) {
+            acc = fn(acc, this._head[i]);
+        }
+        const shift = this.getShift();
+        for (i = 0; i < this._length-headLength-tailLength; i++) {
+            acc = fn(acc, this.trieGet(i, shift));
+        }
+        for (i = 0; i < tailLength; i++) {
+            acc = fn(acc, this._tail[i]);
         }
         return acc;
     }
