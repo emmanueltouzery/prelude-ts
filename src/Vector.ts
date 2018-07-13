@@ -1024,25 +1024,8 @@ export class Vector<T> implements Seq<T> {
     filter(fun:(v:T)=>boolean): Vector<T>;
     filter(fun:(v:T)=>boolean): Vector<T> {
         const mutVec = Vector.emptyMutable<T>();
-        const headLength = this.getHeadLength();
-        const tailLength = this.getTailLength();
-        const shift = this.getShift();
-        let i;
-        for (i = 0; i < headLength; i++) {
-            const value = this._head[i];
-            if (fun(value)) {
-                mutVec.append(value);
-            }
-        }
-        for (i = 0; i < this._length-headLength-tailLength; i++) {
-            // could also use filter on the children nodes...
-            const value = this.trieGet(i, shift);
-            if (fun(value)) {
-                mutVec.append(value);
-            }
-        }
-        for (i = 0; i < tailLength; i++) {
-            const value = this._tail[i];
+        for (let i = 0; i < this._length; i++) {
+            const value = this.internalGet(i);
             if (fun(value)) {
                 mutVec.append(value);
             }
