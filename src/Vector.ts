@@ -1511,18 +1511,20 @@ export class Vector<T> implements Seq<T> {
 
         let newVec = this.cloneVec();
         newVec._length = index;
-        if (index < this.getHeadLength()) {
+        const thisHeadLength = this.getHeadLength();
+        const thisTailLength = this.getTailLength();
+        if (index < thisHeadLength) {
             newVec._depthHeadTailLength = dhtlSetHeadLength(this._depthHeadTailLength, index);
             newVec._head = this._head.slice(0, index); // wouldn't have to copy, but remove elts to enable GC
             return newVec;
         }
         if (this._contents) {
-            const indexInTrie = index - this.getHeadLength();
-            if (indexInTrie < this._length - this.getHeadLength() - this.getTailLength()) {
+            const indexInTrie = index - thisHeadLength;
+            if (indexInTrie < this._length - thisHeadLength - thisTailLength) {
                 let node = newVec._contents = (<any[]>this._contents).slice();
                 let shift = this.getShift();
                 let underRoot = true;
-                while (shift > 0) {
+                while (shift > nodeBits) {
                     const childIndex = (indexInTrie >> shift) & nodeBitmask;
                     if (underRoot && childIndex === 0) {
                         // root killing, skip this node, we don't want
@@ -1541,49 +1543,27 @@ export class Vector<T> implements Seq<T> {
                     }
                     shift -= nodeBits;
                 }
-                for (let i=(index & nodeBitmask);i<nodeSize;i++) {
-                    // remove pointers if present, to enable GC
-                    node[i] = undefined;
+                // the last node which should be truncated will be taken
+                // out of the trie and moved to be the tail of the new vector.
+                const childIndex = (indexInTrie >> shift) & nodeBitmask;
+                newVec._tail = (shift === 0 ? node : node[childIndex]).slice(0, index & nodeBitmask);
+                newVec._depthHeadTailLength = dhtlSetTailLength(this._depthHeadTailLength, newVec._tail.length);
+
+                if (newVec.getHeadLength() + newVec.getTailLength() === newVec._length) {
+                    newVec._contents = undefined;
+                } else {
+                    node[childIndex] = undefined;
                 }
             }
         }
-        if (index >= this._length - this.getTailLength()) {
-            const newTailLength = index - (this._length - this.getTailLength());
+        if (index >= this._length - thisTailLength) {
+            const newTailLength = index - (this._length - thisTailLength);
             newVec._depthHeadTailLength = dhtlSetTailLength(this._depthHeadTailLength, newTailLength);
             newVec._tail = this._tail.slice(0, newTailLength); // wouldn't have to copy, but remove elts to enable GC
-        } else {
-            const indexInTrie = index - newVec.getHeadLength();
-            if (indexInTrie % nodeSize !== 0) {
-                // extract the tail from the trie
-                const tailLength = indexInTrie % nodeSize;
-
-                // remove the last node from the trie
-                if (tailLength + this.getHeadLength() === index) {
-                    if (newVec.getDepth() !== 0) {
-                        throw "prelude.ts internal error: expected depth of 0, take on vector "
-                            + this._length + " of " + n;
-                    }
-                    newVec._tail = <any>newVec._contents;
-                    newVec._contents = undefined;
-                } else {
-                    // get the parent of the last node...
-                    let shift = newVec.getShift();
-                    let node = newVec._contents;
-                    while (shift > nodeBits) {
-                        node = (<any>node)[(indexInTrie >> shift) & nodeBitmask];
-                        shift -= nodeBits;
-                    }
-                    const lastNode = <any[]>(<any>node)[(indexInTrie >> shift) & nodeBitmask];
-                    newVec._tail = lastNode.slice(0, tailLength);
-                    (<any>node)[(indexInTrie >> shift) & nodeBitmask] = undefined;
-                }
-                newVec._depthHeadTailLength = dhtlSetTailLength(
-                    newVec._depthHeadTailLength, tailLength);
-            } else {
-                // wipe the tail entirely
-                newVec._depthHeadTailLength = dhtlSetTailLength(newVec._depthHeadTailLength, 0);
-                newVec._tail = [];
-            }
+        } else if (index - newVec.getHeadLength() % nodeSize === 0) {
+            // wipe the tail entirely
+            newVec._depthHeadTailLength = dhtlSetTailLength(newVec._depthHeadTailLength, 0);
+            newVec._tail = [];
         }
         return newVec;
     }

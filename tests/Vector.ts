@@ -95,11 +95,21 @@ function arraySetUndefineds(ar:any[]) {
     return ar;
 }
 
-function checkTake<T>(longer: Vector<T>, n: number, shorter: Vector<T>) {
+function checkTake<T>(longer: Vector<T>, n: number, shorter: Vector<T>, regenerated: boolean) {
     const arrayBefore = longer.toArray();
     assert.deepEqual(
-        arraySetUndefineds((<any>shorter)._contents),
-        (<any>longer.take(n))._contents);
+        shorter.toArray(),
+        longer.take(n).toArray());
+    if (regenerated) {
+        // if the vector was just kept as-is by the take,
+        // we wouldn't want to check these
+        assert.equal(0, (<any>shorter).getHeadLength());
+        assert.equal(0, (<any>shorter)._head.length);
+        assert.equal(n%32, (<any>shorter)._tail.length);
+    }
+    // check the tail has the proper length, longer would make
+    // us keep some pointers in memory which could be GC'd otherwise.
+    assert.equal((<any>shorter)._tail.length, (<any>shorter).getTailLength());
     // taking should not have modified the original vector
     assert.deepEqual(arrayBefore, longer.toArray());
 }
@@ -108,19 +118,19 @@ function checkTake<T>(longer: Vector<T>, n: number, shorter: Vector<T>) {
 // is correct after take, that means also root killing and so on.
 describe("Vector.take() implementation", () => {
     it("handles simple cases correctly", () =>
-       checkTake(Vector.of(1,2,3,4,5,6), 3, Vector.of(1,2,3)));
+       checkTake(Vector.of(1,2,3,4,5,6), 3, Vector.of(1,2,3), true));
     it("handles root killing correctly", () => checkTake(
         Vector.ofIterable(Stream.iterate(1,i=>i+1).take(40)),
-        3, Vector.of(1,2,3)));
+        3, Vector.of(1,2,3), true));
     it("handles double root killing correctly", () => checkTake(
         Vector.ofIterable(Stream.iterate(1,i=>i+1).take(1100)),
-        3, Vector.of(1,2,3)));
+        3, Vector.of(1,2,3), true));
     it("handles taking all on length multiple of node size correctly", () => checkTake(
         Stream.iterate(1,i=>i+1).take(128).toVector(),
-        128, Stream.iterate(1,i=>i+1).take(128).toVector()));
+        128, Stream.iterate(1,i=>i+1).take(128).toVector(), false));
     it("handles taking more than the whole length on length multiple of node size correctly", () => checkTake(
         Stream.iterate(1,i=>i+1).take(128).toVector(),
-        129, Stream.iterate(1,i=>i+1).take(128).toVector()));
+        129, Stream.iterate(1,i=>i+1).take(128).toVector(), false));
 });
 
 function checkAppend<T>(base: Vector<T>, toAppend: Iterable<T>, combined: Vector<T>) {
