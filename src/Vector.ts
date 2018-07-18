@@ -985,8 +985,18 @@ export class Vector<T> implements Seq<T> {
      * Call a function for element in the collection.
      */
     forEach(fun:(x:T)=>void):Vector<T> {
-        for (let i = 0; i < this._length; i++) {
-            fun(this.internalGet(i));
+        const headLength = this.getHeadLength();
+        const tailLength = this.getTailLength();
+        let i;
+        for (i = 0; i < headLength; i++) {
+            fun(this._head[i]);
+        }
+        const shift = this.getShift();
+        for (i = 0; i < this._length-headLength-tailLength; i++) {
+            fun(this.trieGet(i, shift));
+        }
+        for (i = 0; i < tailLength; i++) {
+            fun(this._tail[i]);
         }
         return this;
     }
@@ -1312,16 +1322,15 @@ export class Vector<T> implements Seq<T> {
      */
     toArray(): T[] {
         let out = new Array(this._length);
-        for (let i = 0; i < this._length; i++) {
-            out[i] = <T>this.internalGet(i);
-        }
+        let i=0;
+        this.forEach(v => out[i++] = v);
         return out;
         // alternative implementation, measured slower
         // (concat is creating a new array everytime) =>
         //
         // const nodes = this.getLeafNodes(this._length);
         // return [].concat.apply([], nodes).slice(0,this._length);
-    };
+    }
 
     /**
      * get the leaf nodes, which contain the data, from the vector.
