@@ -1321,7 +1321,7 @@ export class Vector<T> implements Seq<T> {
      * Convert to array.
      */
     toArray(): T[] {
-        let out = new Array(this._length);
+        const out = new Array(this._length);
         let i=0;
         this.forEach(v => out[i++] = v);
         return out;
@@ -1523,8 +1523,9 @@ export class Vector<T> implements Seq<T> {
         const thisHeadLength = this.getHeadLength();
         const thisTailLength = this.getTailLength();
         if (index < thisHeadLength) {
-            newVec._depthHeadTailLength = dhtlSetHeadLength(this._depthHeadTailLength, index);
+            newVec._depthHeadTailLength = dhtlInit(0, index, 0);
             newVec._head = this._head.slice(0, index); // wouldn't have to copy, but remove elts to enable GC
+            newVec._tail = [];
             return newVec;
         }
         if (this._contents) {
