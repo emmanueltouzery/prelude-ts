@@ -1517,12 +1517,32 @@ export class Vector<T> implements Seq<T> {
         if (n>=this._length) {
             return Vector.empty<T>();
         }
-        const mutVec = Vector.emptyMutable<T>();
-        for (let i=n;i<this._length;i++) {
-            const val = <T>this.internalGet(i);
-            mutVec.append(val);
+        const headLength = this.getHeadLength();
+        if (n <= headLength) {
+            return new Vector(
+                this._contents, this._length-n,
+                dhtlSetHeadLength(this._depthHeadTailLength, headLength-n),
+                this._head.slice(n), this._tail);
         }
-        return mutVec.getVector();
+        const tailLength = this.getTailLength();
+        if (n >= this._length - tailLength) {
+            // need to drop the whole head, the trie and possibly
+            // part of the tail.
+            return new Vector(
+                undefined, this._length-n,
+                dhtlInit(0, 0, this._length - n),
+                [], this._tail.slice(n));
+        }
+        // need to drop the whole head and modify the trie...
+        // the plan is to modulate on the head length so that we
+        // can keep most of the nodes in the trie unchanged.
+        let nodes = this.getLeafNodes(this._length);
+        nodes.push(this._tail.slice(0, tailLength));
+        nodes = nodes.slice(Math.floor((n-headLength)/nodeSize));
+        // still need to truncate the first node,
+        // which will become the vector head
+        nodes[0] = nodes[0].slice(n%nodeSize);
+        return Vector.fromLeafNodes(nodes, this._length-n);
     }
 
     /**
