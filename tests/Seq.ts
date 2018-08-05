@@ -303,9 +303,15 @@ export function runTests(seqName: string,
                              ofIterable(ar).toArray());
         });
         check.it("calling take() on the seq is the same as on the array",
-                 gen.array(gen.string), gen.int.suchThat((n:number) => !Number.isNaN(n)), (ar:number[],n:number) => {
+                 gen.array(gen.string), gen.int.suchThat((n:number) => !Number.isNaN(n)), (ar:string[],n:number) => {
             assert.deepEqual(ofIterable(ar).take(n).toArray(),
                              ar.slice(0,Math.max(0,n)));
+        });
+        check.it("calling foldLeft() on the seq is the same as reduce on the array",
+                 gen.array(gen.int.suchThat((n:number) => !Number.isNaN(n))).suchThat((ar:number[])=>ar.length>0),
+                           gen.int.suchThat((n:number) => !Number.isNaN(n)), (ar:number[],n:number) => {
+                     assert.deepEqual(ofIterable(ar).foldLeft(0, (i,j)=>i+j),
+                                      ar.reduce((i,j)=>i+j));
         });
         it("correctly implements sliding on a non-empty seq", () => {
             assert.deepEqual([[1,2],[3,4],[5,6]], of(1,2,3,4,5,6).sliding(2).map(x => x.toArray()).toArray())

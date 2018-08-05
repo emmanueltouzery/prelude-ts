@@ -395,6 +395,15 @@ export class Vector<T> implements Seq<T> {
         return (<any>node)[correctedIndex & nodeBitmask];
     }
 
+    private trieGetNode(correctedIndex:number, shift: number): T[] {
+        let node = this._contents;
+        while (shift > 0) {
+            node = (<any>node)[(correctedIndex >> shift) & nodeBitmask];
+            shift -= nodeBits;
+        }
+        return <T[]>node;
+    }
+
     /**
      * Retrieve the element at index idx.
      * Returns an option because the collection may
@@ -1111,8 +1120,11 @@ export class Vector<T> implements Seq<T> {
             acc = fn(acc, this._head[i]);
         }
         const shift = this.getShift();
-        for (i = 0; i < this._length-headLength-tailLength; i++) {
-            acc = fn(acc, this.trieGet(i, shift));
+        for (i = 0; i < this._length-headLength-tailLength; i+=nodeSize) {
+            const node = this.trieGetNode(i, shift);
+            for (let j = 0; j < nodeSize; j++) {
+                acc = fn(acc, node[j]);
+            }
         }
         for (i = 0; i < tailLength; i++) {
             acc = fn(acc, this._tail[i]);
