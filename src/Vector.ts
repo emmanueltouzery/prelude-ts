@@ -1590,7 +1590,7 @@ export class Vector<T> implements Seq<T> {
                 // out of the trie and moved to be the tail of the new vector.
                 const childIndex = (indexInTrie >> shift) & nodeBitmask;
                 newVec._tail = (shift === 0 ? node : node[childIndex]).slice(0, index & nodeBitmask);
-                newVec._depthHeadTailLength = dhtlSetTailLength(this._depthHeadTailLength, newVec._tail.length);
+                newVec._depthHeadTailLength = dhtlSetTailLength(newVec._depthHeadTailLength, newVec._tail.length);
 
                 if (newVec.getHeadLength() + newVec.getTailLength() === newVec._length) {
                     newVec._contents = undefined;
@@ -1627,6 +1627,7 @@ export class Vector<T> implements Seq<T> {
             const withTailMerged = this.prependNode(this._tail, this._length);
             withTailMerged._head = [elt];
             withTailMerged._depthHeadTailLength = dhtlSetHeadLength(withTailMerged._depthHeadTailLength, 1);
+            ++withTailMerged._length;
             return withTailMerged;
         }
     }
@@ -1641,8 +1642,9 @@ export class Vector<T> implements Seq<T> {
 
     private prependNode(val:T[], length: number): Vector<T> {
         const leafNodes = this.getLeafNodes(this._length);
+        leafNodes.unshift(this._head.slice(0, this.getHeadLength()));
         leafNodes.unshift(val);
-        leafNodes.push(this._tail);
+        leafNodes.push(this._tail.slice(0, this.getTailLength()));
         return Vector.fromLeafNodes(leafNodes, this._length);
     }
 

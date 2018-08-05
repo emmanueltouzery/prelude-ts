@@ -35,6 +35,9 @@ describe("Vector over one node", () => {
     it("actually broke once", () => assert.ok(
         Stream.iterate(0,i=>i+1).take(33).toVector().equals(
             Stream.iterate(0,i=>i+1).take(31).toVector().appendAll([31,32]))));
+    it("prepends correctly on longer lists", () => assert.deepEqual(
+        Stream.iterate(0,i=>i+1).take(10000).toVector().prepend(-1).toArray(),
+        Stream.iterate(0,i=>i+1).take(10000).prepend(-1).toArray()));
 })
 
 describe("Vector extra methods", () => {
