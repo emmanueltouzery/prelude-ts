@@ -38,6 +38,10 @@ describe("Vector over one node", () => {
     it("prepends correctly on longer lists", () => assert.deepEqual(
         Stream.iterate(0,i=>i+1).take(10000).toVector().prepend(-1).toArray(),
         Stream.iterate(0,i=>i+1).take(10000).prepend(-1).toArray()));
+    it("drops correctly on longer lists", () => assert.deepEqual(
+        Stream.iterate(0,i=>i+1).take(10000).toVector().drop(9700).toArray(),
+        Stream.iterate(9700,i=>i+1).take(300).toArray()
+    ))
 })
 
 describe("Vector extra methods", () => {
