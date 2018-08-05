@@ -1147,11 +1147,24 @@ export class Vector<T> implements Seq<T> {
      *           an updated value.
      */
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U {
-        let r = zero;
-        for (let i=this._length-1;i>=0;i--) {
-            r = fn(<T>this.internalGet(i), r);
+        let acc = zero;
+        const headLength = this.getHeadLength();
+        const tailLength = this.getTailLength();
+        let i;
+        for (i = tailLength-1; i >= 0; i--) {
+            acc = fn(this._tail[i], acc);
         }
-        return r;
+        const shift = this.getShift();
+        for (i = this._length-headLength-tailLength-1; i>=0; i-=nodeSize) {
+            const node = this.trieGetNode(i, shift);
+            for (let j = nodeSize-1; j >= 0; j--) {
+                acc = fn(node[j], acc);
+            }
+        }
+        for (i = headLength-1; i >= 0; i--) {
+            acc = fn(this._head[i], acc);
+        }
+        return acc;
     }
 
     // indexOf(element:T, fromIndex:number): number {
