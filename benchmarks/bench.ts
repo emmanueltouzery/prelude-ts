@@ -224,6 +224,39 @@ compare(
         }
     }]);
 
+compare(
+    ['Vector.prepend', (p:Prerequisites) => {
+        let v = Vector.empty<number>();
+        for (let item of p.array) {
+            v = v.prepend(item);
+        }
+    }],
+    ['Array.unshift', (p:Prerequisites) => {
+        let v = [];
+        for (let item of p.array) {
+            v.unshift(item);
+        }
+    }],
+    ['immList.unshift', (p:Prerequisites) => {
+        // let v = imm.List<number>();
+        let v = imm.List();
+        for (let item of p.array) {
+            v = v.unshift(item);
+        }
+    }],
+    ['LinkedList.prepend', (p:Prerequisites) => {
+        let v = LinkedList.empty<number>();
+        for (let item of p.array) {
+            v = v.prepend(item);
+        }
+    }],
+    ['Funkia.prepend', (p:Prerequisites) => {
+        let v = Funkia.empty();
+        for (let item of p.array) {
+            v = Funkia.prepend(item, v);
+        }
+    }]);
+
 function iterateOn<T>(coll: Iterable<T>) {
     const it = coll[Symbol.iterator]();
     let item = it.next();
