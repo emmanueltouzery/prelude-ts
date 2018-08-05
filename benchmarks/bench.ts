@@ -117,6 +117,12 @@ compare(['Vector.take', (p:Prerequisites) => p.vec.take(p.idxThreeQuarters)],
         ['LinkedList.take', (p:Prerequisites) => p.list.take(p.idxThreeQuarters)],
         ['funkiaList.take', (p:Prerequisites) => Funkia.take(p.idxThreeQuarters, p.funkiaList)]);
 
+compare(['Vector.drop', (p:Prerequisites) => p.vec.drop(p.idxThreeQuarters)],
+        ['Array.slice', (p:Prerequisites) => p.array.slice(p.idxThreeQuarters)],
+        ['immList.slice', (p:Prerequisites) => p.immList.slice(p.idxThreeQuarters)],
+        ['LinkedList.drop', (p:Prerequisites) => p.list.drop(p.idxThreeQuarters)],
+        ['funkiaList.drop', (p:Prerequisites) => Funkia.drop(p.idxThreeQuarters, p.funkiaList)]);
+
 compare(['Vector.filter', (p:Prerequisites) => p.vec.filter(x => x%2===0)],
         ['Array.filter', (p:Prerequisites) => p.array.filter(x => x%2===0)],
         ['immList.filter', (p:Prerequisites) => p.immList.filter((x:number) => x%2===0)],
