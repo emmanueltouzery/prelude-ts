@@ -546,7 +546,7 @@ export class Vector<T> implements Seq<T> {
      * Note that arrays are also iterables.
      */
     appendAll(elts: Iterable<T>): Vector<T> {
-        if (Number.isInteger((<any>elts)._maxShift) && (<any>elts).sortOn) {
+        if (Number.isInteger((<any>elts)._depthHeadTailLength) && (<any>elts).sortOn) {
             // elts is a Vector too!
             if ((<Vector<T>>elts).isEmpty()) {
                 return this;
@@ -953,6 +953,8 @@ export class Vector<T> implements Seq<T> {
         let _stack: any[] = [];
         let _node = this._contents;
         const sz = nodeSize - 1;
+        const headLength = this.getHeadLength();
+        const tailLength = this.getTailLength();
         return {
             next: () => {
                 // Iterator state:
@@ -963,13 +965,18 @@ export class Vector<T> implements Seq<T> {
                 //  _stack: Path we traveled to current node, as [node, local index]
                 //          pairs, starting from root node, not including leaf.
 
-                // need >= not === since we add nodeSize everytime, we'll pass
-                // over the end for vectors with a length not multiple of nodeSize.
-                if (_index >= this._length - 1) {
+                if (_index < headLength - 1) {
+                    _index = headLength;
+                    return {done: false, value: this._head};
+                }
+                if (_index === this._length - 1) {
                     return {done: true, value: <any>undefined};
                 }
+                if (_index >= this._length - tailLength - 1) {
+                    return {done: true, value: this._tail};
+                }
 
-                if (_index > 0) {
+                if (_index - headLength > 0 && ((_index - headLength) & nodeBitmask) === sz) {
                     // Using the stack, go back up the tree, stopping when we reach a node
                     // whose children we haven't fully iterated over.
                     let step;
@@ -979,7 +986,8 @@ export class Vector<T> implements Seq<T> {
                     _node = step[0][step[1]];
                 }
 
-                for (let depth = _stack.length; depth < this.getDepth(); ++depth) {
+                for (let shift = _stack.length * nodeBits; shift < this.getShift();
+                     shift += nodeBits) {
                     _stack.push([_node, 0]);
                     _node = (<any[]>_node)[0];
                 }

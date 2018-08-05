@@ -19,7 +19,7 @@ function getWithToArrayBody(elt: any): any {
 
 class VectorHandler implements ElementHandler {
     isElement(object:any): boolean {
-        return object.hashCode && object.equals && object.sortOn && Number.isInteger(object._maxShift);
+        return object.hashCode && object.equals && object.sortOn && Number.isInteger(object._depthHeadTailLength);
     }
     getHeader(object:any): any {
         return ["span", {}, "Vector(" + object.length() + ")"];
