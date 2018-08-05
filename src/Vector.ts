@@ -1616,7 +1616,7 @@ export class Vector<T> implements Seq<T> {
      */
     prepend(elt: T): Vector<T> {
         if (this._head.length !== this.getHeadLength()) {
-            this._head = this._head.slice(this._head.length - this.getHeadLength());
+            this._head = this._head.slice(0, this.getHeadLength());
         }
 
         if (this._head.length < nodeSize) {
