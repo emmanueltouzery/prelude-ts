@@ -1563,16 +1563,11 @@ export class Vector<T> implements Seq<T> {
         // than nodeSize items. So if we must split the node, we'll put
         // the bit that must be kept in the vector _head.
         const childIndex = (indexInTrie >> shift) & nodeBitmask;
-        if (childIndex < node.length) {
-            const child = node[childIndex];
-            // remove previous pointers and the child
-            node.splice(0, childIndex+1); 
-            // remove previous values in the node & store it in the head.
-            newVec._head = child.slice(indexInTrie & nodeBitmask); 
-        } else {
-            newVec._head = [];
-            node.splice(0, childIndex); // remove previous pointers
-        }
+        const child = node[childIndex];
+        // remove previous pointers and the child
+        node.splice(0, childIndex+1);
+        // remove previous values in the node & store it in the head.
+        newVec._head = child.slice(indexInTrie & nodeBitmask);
 
         newVec._depthHeadTailLength = dhtlSetHeadLength(
             newVec._depthHeadTailLength, newVec._head.length);
