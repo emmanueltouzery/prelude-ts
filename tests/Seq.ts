@@ -358,9 +358,9 @@ export function runTests(seqName: string,
             [4,3,5,6], of(1,2,3,4,3,5,6).dropWhile(x=>x<4).toArray()));
         it("correctly dropsWhile, only the first one is removed", () => assert.deepEqual(
             [2,3,4,3,5,6], of(1,2,3,4,3,5,6).dropWhile(x=>x<2).toArray()));
-        it("correctly dropsWhile, nothing matches", () => assert.deepEqual(
-            [], of(1,2,3,4,3,5,6).dropWhile(x=>x>=0).toArray()));
         it("correctly dropsWhile, everything matches", () => assert.deepEqual(
+            [], of(1,2,3,4,3,5,6).dropWhile(x=>x>=0).toArray()));
+        it("correctly dropsWhile, nothing matches", () => assert.deepEqual(
             [1,2,3,4,3,5,6], of(1,2,3,4,3,5,6).dropWhile(x=>x<0).toArray()));
         it("correctly dropsRightWhile", () => assert.deepEqual(
             [1,4,2,3], of(1,4,2,3,4,5,6).dropRightWhile(x=>x>=4).toArray()));
