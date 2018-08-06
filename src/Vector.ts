@@ -1370,32 +1370,22 @@ export class Vector<T> implements Seq<T> {
      * return only the leaf nodes containing the first n items from the vector.
      * (give n=_length to get all the data)
      */
-    private getLeafNodes(_n:number, startIndex?:number): T[][] {
+    private getLeafNodes(_n:number): T[][] {
         if (_n<=0) {
             return [];
         }
         const n = Math.min(
             _n,
             this._length - this.getHeadLength() - this.getTailLength());
-        let _index = startIndex ? Math.ceil(startIndex/nodeSize) : 0;
-        let _resultIndex = 0;
+        let _index = 0;
         let _stack: any[] = [];
         let _node = this._contents;
-        let result:T[][] = new Array(Math.floor((n-(startIndex||0))/nodeSize));
+        let result:T[][] = new Array(Math.floor(n/nodeSize));
         if (!_node) {
             // empty trie
             return result;
         }
-        if (startIndex) {
-            let shift = this.getShift();
-            while (shift > 0) {
-                const idx = (startIndex >> shift) & nodeBitmask;
-                _stack.push([_node, idx]);
-                _node = (<any>_node)[idx];
-                shift -= nodeBits;
-            }
-            result[_resultIndex++] = <any>_node;
-        }
+
         while (_index*nodeSize < n) {
             if (_index > 0) {
                 // Using the stack, go back up the tree, stopping when we reach a node
@@ -1413,8 +1403,7 @@ export class Vector<T> implements Seq<T> {
                 _node = (<any[]>_node)[0];
             }
 
-            result[_resultIndex++] = <any>_node;
-            ++_index;
+            result[_index++] = <any>_node;
         }
         return result;
     }
@@ -1547,8 +1536,9 @@ export class Vector<T> implements Seq<T> {
         // need to drop the whole head and modify the trie...
         // the plan is to modulate on the head length so that we
         // can keep most of the nodes in the trie unchanged.
-        let nodes = this.getLeafNodes(this._length, n-headLength);
+        let nodes = this.getLeafNodes(this._length);
         nodes.push(this._tail.slice(0, tailLength));
+        nodes = nodes.slice(Math.floor((n-headLength)/nodeSize));
         // still need to truncate the first node,
         // which will become the vector head
         nodes[0] = nodes[0].slice(n%nodeSize);
