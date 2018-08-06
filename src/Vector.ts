@@ -774,18 +774,12 @@ export class Vector<T> implements Seq<T> {
      * after that point are retained.
      */
     dropWhile(predicate:(x:T)=>boolean): Vector<T> {
-        let r = Vector.emptyMutable<T>();
-        let skip = true;
-        for (let i=0;i<this._length;i++) {
-            const val = <T>this.internalGet(i);
-            if (skip && !predicate(val)) {
-                skip = false;
-            }
-            if (!skip) {
-                r.append(val);
+        for (let i=0;i<this._length-1;i++) {
+            if (!predicate(<T>this.internalGet(i))) {
+                return this.drop(i);
             }
         }
-        return r.getVector();
+        return Vector.empty<T>();
     }
 
     /**
