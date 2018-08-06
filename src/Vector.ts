@@ -1534,15 +1534,49 @@ export class Vector<T> implements Seq<T> {
                 [], this._tail.slice(n));
         }
         // need to drop the whole head and modify the trie...
-        // the plan is to modulate on the head length so that we
-        // can keep most of the nodes in the trie unchanged.
-        let nodes = this.getLeafNodes(this._length);
-        nodes.push(this._tail.slice(0, tailLength));
-        nodes = nodes.slice(Math.floor((n-headLength)/nodeSize));
-        // still need to truncate the first node,
-        // which will become the vector head
-        nodes[0] = nodes[0].slice(n%nodeSize);
-        return Vector.fromLeafNodes(nodes, this._length-n);
+        const indexInTrie = n - headLength;
+        const newVec = this.cloneVec();
+        newVec._length = newVec._length - n;
+        let node = newVec._contents = (<any[]>this._contents).slice();
+        let shift = this.getShift();
+        let underRoot = true;
+        while (shift > nodeBits) {
+            const childIndex = (indexInTrie >> shift) & nodeBitmask;
+            if (underRoot && childIndex === node.length-1) {
+                // root killing, skip this node, we don't want
+                // root nodes with only 1 child
+                newVec._contents = node[childIndex].slice();
+                newVec._depthHeadTailLength = dhtlDecrementDepth(newVec._depthHeadTailLength);
+                node = <any[]>newVec._contents;
+            } else {
+                underRoot = false;
+                node[childIndex] = node[childIndex].slice();
+                node.splice(0, childIndex); // remove previous pointers
+                node = node[0];
+            }
+            shift -= nodeBits;
+        }
+
+        // we are now at the parent of the nodes containing the data.
+        // the index at which we want to cut is probably not a multiple
+        // of nodeSize, and we don't want to have trie nodes with less
+        // than nodeSize items. So if we must split the node, we'll put
+        // the bit that must be kept in the vector _head.
+        const childIndex = (indexInTrie >> shift) & nodeBitmask;
+        if (childIndex < node.length) {
+            const child = node[childIndex];
+            // remove previous pointers and the child
+            node.splice(0, childIndex+1); 
+            // remove previous values in the node & store it in the head.
+            newVec._head = child.slice(indexInTrie & nodeBitmask); 
+        } else {
+            newVec._head = [];
+            node.splice(0, childIndex); // remove previous pointers
+        }
+
+        newVec._depthHeadTailLength = dhtlSetHeadLength(
+            newVec._depthHeadTailLength, newVec._head.length);
+        return newVec;
     }
 
     /**
@@ -1571,7 +1605,7 @@ export class Vector<T> implements Seq<T> {
         // the last item we want to keep)
         const index = Math.min(n, this._length);
 
-        let newVec = this.cloneVec();
+        const newVec = this.cloneVec();
         newVec._length = index;
         const thisHeadLength = this.getHeadLength();
         const thisTailLength = this.getTailLength();
