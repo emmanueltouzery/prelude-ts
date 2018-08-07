@@ -484,21 +484,22 @@ export class Vector<T> implements Seq<T> {
             return new Vector(this._trie, this._length+1, dhtlIncrementTailLength(this._depthHeadTailLength), this._head, this._tail);
         } else {
             // the tail is full
-            const withTailMerged = this.appendNode(this._tail, this._length);
-            withTailMerged._length -= nodeSize-1; // appendNode added nodeSize though it shouldn't, add +1
+            const withTailMerged = this.appendNode(this._tail);
             withTailMerged._tail = [val];
             withTailMerged._depthHeadTailLength = dhtlSetTailLength(withTailMerged._depthHeadTailLength, 1);
+            ++withTailMerged._length;
             return withTailMerged;
         }
     }
 
-    // TODO add parameter increaseLength:boolean?
-    private appendNode(val:T[], length:number): Vector<T> {
+    // does not update the vector _length
+    private appendNode(val:T[]): Vector<T> {
+        const newVec = this.cloneVec();
         const effectiveLength = this._length - this.getHeadLength() - this.getTailLength();
-        if (this._length === 0) {
-            return Vector.ofArray<T>(val);
+        if (!this._trie) {
+            newVec._trie = val;
+            return newVec;
         } else if (effectiveLength < (nodeSize << this.getShift())) { // here i know the this._length is a multiple of nodeSize so < is enough
-            let newVec = this.cloneVec();
             let node;
             if (this._trie) {
                 node = newVec._trie = (<any[]>this._trie).slice();
@@ -519,17 +520,15 @@ export class Vector<T> implements Seq<T> {
                 shift -= nodeBits
             }
             node[(effectiveLength >> shift) & nodeBitmask] = val;
-            newVec._length += length;
             return newVec;
         } else {
             // We'll need a new root node.
-            return Vector.setupNewRootNode(this, val, length);
+            return Vector.setupNewRootNode(this, val);
         }
     }
 
-    private static setupNewRootNode<T>(vec: Vector<T>, nodeToAdd:T[], length: number): Vector<T> {
+    private static setupNewRootNode<T>(vec: Vector<T>, nodeToAdd:T[]): Vector<T> {
         const newVec = vec.cloneVec();
-        newVec._length += length;
         newVec._depthHeadTailLength = dhtlIncrementDepth(vec._depthHeadTailLength);
         let depth = newVec.getDepth();
         let node:any[] = nodeToAdd;
@@ -615,8 +614,7 @@ export class Vector<T> implements Seq<T> {
 
         // right now the tail should be full, merge it
         // in the vector
-        baseVec = baseVec.appendNode(baseVec._tail, nodeSize);
-        baseVec._length -= nodeSize; // appendNode counted twice
+        baseVec = baseVec.appendNode(baseVec._tail);
         // right now the length length in the metadata is wrong,
         // but we'll overwrite it later.
 
@@ -628,7 +626,8 @@ export class Vector<T> implements Seq<T> {
             curNewVec[idxInNode++] = curArray[curInArrayIdx++];
             ++copied;
             if (idxInNode === nodeSize) {
-                baseVec = baseVec.appendNode(curNewVec, nodeSize);
+                baseVec = baseVec.appendNode(curNewVec);
+                baseVec._length += nodeSize;
                 idxInNode = 0;
                 curNewVec = new Array(nodeSize);
             }
