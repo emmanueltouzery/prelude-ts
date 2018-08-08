@@ -84,24 +84,6 @@ describe("Vector extra methods", () => {
     });
 });
 
-// that's needed due to node's assert.deepEqual
-// saying that new Array(2) is NOT the same as
-// [undefined, undefined].
-// (empty vs undefined)
-// => forcing undefined
-function arraySetUndefineds(ar:any[]) {
-    if (!ar) {return ar;}
-    for (let i=0;i<ar.length;i++) {
-        if (Array.isArray(ar[i])) {
-            arraySetUndefineds(ar[i]);
-        }
-        if (typeof ar[i] === "undefined") {
-            ar[i] = undefined;
-        }
-    }
-    return ar;
-}
-
 function checkTake<T>(longer: Vector<T>, n: number, shorter: Vector<T>, regenerated: boolean) {
     const arrayBefore = longer.toArray();
     assert.deepEqual(
@@ -143,8 +125,8 @@ describe("Vector.take() implementation", () => {
 function checkAppend<T>(base: Vector<T>, toAppend: Iterable<T>, combined: Vector<T>) {
     const arrayBefore = base.toArray();
     assert.deepEqual(
-        arraySetUndefineds((<any>combined)._content),
-        (<any>base.appendAll(toAppend))._content);
+        combined.toArray(),
+        base.appendAll(toAppend).toArray());
     // appending should not have modified the original vector
     assert.deepEqual(arrayBefore, base.toArray());
 }
@@ -155,14 +137,14 @@ describe("Vector.appendAll() implementation", () => {
     });
     it("handles adding nodes correctly", () => {
         checkAppend(Vector.of(1,2,3), Stream.iterate(4,i=>i+1).take(70),
-                    Vector.ofIterable(Stream.iterate(0,i=>i+1).take(74)));
+                    Vector.ofIterable(Stream.iterate(1,i=>i+1).take(73)));
     });
     it("handles adding nodes correctly, adding an array", () => {
         checkAppend(Vector.of(1,2,3), Stream.iterate(4,i=>i+1).take(70).toArray(),
-                    Vector.ofIterable(Stream.iterate(0,i=>i+1).take(74)));
+                    Vector.ofIterable(Stream.iterate(1,i=>i+1).take(73)));
     });
     it("handles adding nodes correctly, adding a vector", () => {
         checkAppend(Vector.of(1,2,3), Stream.iterate(4,i=>i+1).take(70).toVector(),
-                    Vector.ofIterable(Stream.iterate(0,i=>i+1).take(74)));
+                    Vector.ofIterable(Stream.iterate(1,i=>i+1).take(73)));
     });
 });

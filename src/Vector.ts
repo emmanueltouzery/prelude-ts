@@ -615,8 +615,7 @@ export class Vector<T> implements Seq<T> {
         // right now the tail should be full, merge it
         // in the vector
         baseVec = baseVec.appendNode(baseVec._tail);
-        // right now the length length in the metadata is wrong,
-        // but we'll overwrite it later.
+        baseVec._depthHeadTailLength = dhtlSetTailLength(baseVec._depthHeadTailLength, 0);
 
         // we're now at node boundary, add remaining array items
         // by adding nodes one by one
