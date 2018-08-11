@@ -22,7 +22,7 @@
 import { Value } from "./Value";
 import { Option } from "./Option";
 import { LinkedList } from "./LinkedList";
-import { Vector, vectorEmptyMutable, MutableVector } from "./Vector";
+import { Vector } from "./Vector";
 import { Function0 } from "./Function";
 import { WithEquality, areEqual,
          hasTrueEquality, getHashCode } from "./Comparison";
@@ -115,7 +115,7 @@ export class EitherStatic {
      * Also see [[EitherStatic.sequence]]
      */
     traverse<T,L,R>(elts:Iterable<T>, fn: (x:T)=>Either<L,R>): Either<L,Vector<R>> {
-        let r = vectorEmptyMutable<R>();
+        let r = Vector.empty<R>();
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
         while (!curItem.done) {
@@ -123,10 +123,10 @@ export class EitherStatic {
             if (v.isLeft()) {
                 return <any>v;
             }
-            r.append(v.get());
+            r = r.append(v.get());
             curItem = iterator.next();
         }
-        return Either.right<L,Vector<R>>(r.getVector());
+        return Either.right<L,Vector<R>>(r);
     }
 
     /**

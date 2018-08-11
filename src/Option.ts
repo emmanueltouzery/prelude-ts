@@ -29,7 +29,7 @@
 
 import { Value } from "./Value";
 import { Seq } from "./Seq";
-import { Vector, vectorEmptyMutable, MutableVector } from "./Vector";
+import { Vector } from "./Vector";
 import { Either } from "./Either";
 import { Function0 } from "./Function";
 import { WithEquality, areEqual, hasTrueEquality,
@@ -190,7 +190,7 @@ export class OptionStatic {
      * Also see [[OptionStatic.sequence]]
      */
     traverse<T,U>(elts:Iterable<T>, fn: (x:T)=>Option<U>): Option<Vector<U>> {
-        let r = vectorEmptyMutable<U>();
+        let r = Vector.empty<U>();
         const iterator = elts[Symbol.iterator]();
         let curItem = iterator.next();
         while (!curItem.done) {
@@ -198,10 +198,10 @@ export class OptionStatic {
             if (v.isNone()) {
                 return <None<Vector<U>>>none;
             }
-            r.append(v.get());
+            r = r.append(v.get());
             curItem = iterator.next();
         }
-        return Option.of(r.getVector());
+        return Option.of(r);
     }
 
     /**

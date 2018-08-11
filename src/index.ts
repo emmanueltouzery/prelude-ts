@@ -6,7 +6,7 @@
 export * from "./Option";
 export * from "./Either";
 export * from "./Lazy";
-export { Vector } from "./Vector"; // don't export MutableVector and vectorEmptyMutable
+export * from "./Vector";
 export * from "./LinkedList";
 export * from "./HashMap";
 export * from "./HashSet";

@@ -9,7 +9,8 @@
         "url": "git+https://github.com/emmanueltouzery/prelude.ts.git"
     },
     "dependencies": {
-        "hamt_plus": "1.0.2"
+        "hamt_plus": "1.0.2",
+        "list": "2.0.13"
     },
     "devDependencies": {
         "@types/mocha": "2.2.41",

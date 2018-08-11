@@ -46,12 +46,13 @@ items, for instance `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
 `HashSet` and `HashMap` are implemented using the
 [HAMT algorithm](http://en.wikipedia.org/wiki/Hash_array_mapped_trie),
 and concretely the [hamt_plus library](https://www.npmjs.com/package/hamt_plus).
-This is the only dependency of `prelude.ts`.
 `Vector` is implemented through a
-[bit-mapped vector trie](http://hypirion.com/musings/understanding-persistent-vector-pt-1).
+[bit-mapped vector trie](http://hypirion.com/musings/understanding-persistent-vector-pt-1)
+and concretely the [list library](https://github.com/funkia/list/), as of 0.7.7.
 In addition the library is written in idiomatic javascript style, with loops
 instead of recursion, so the performance should be good
 ([see benchmarks here comparing to immutable.js and more](https://github.com/emmanueltouzery/prelude.ts/wiki/Benchmarks)).
+`list` and `hamt_plus` are the two only dependencies of prelude.ts.
 
 ## Set, Map and equality
 
