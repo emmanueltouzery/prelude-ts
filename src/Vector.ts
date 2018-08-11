@@ -92,6 +92,8 @@ export class Vector<T> implements Seq<T> {
     // 3. _trie
     // the reason being that access to _head and _tail are faster.
     protected constructor(private _trie: any[]|undefined,
+                          // trieOffset is always a multiple of nodeSize
+                          private _trieOffset: number,
                           private _length: number,
                           private _depthHeadTailLength: DepthHeadTailLength,
                           private _head: T[],
@@ -201,7 +203,7 @@ export class Vector<T> implements Seq<T> {
 
         const _trie = nodes[0];
         const _depth = _trie ? depth - 1 : 0;
-        return new Vector<T>(_trie, length,
+        return new Vector<T>(_trie, 0, length,
                              dhtlInit(_depth, head.length, tail.length),
                              head, tail);
     }
@@ -290,7 +292,7 @@ export class Vector<T> implements Seq<T> {
                 ++vec._length;
             } else {
                 // the tail is full
-                const effectiveLength = vec._length - headLength - tailLength;
+                const effectiveLength = vec._length - headLength - tailLength - vec._trieOffset;
                 if (vecShift === 0) {
                     vec._trie = [vec._tail];
                     vecShift += nodeBits;
@@ -366,7 +368,7 @@ export class Vector<T> implements Seq<T> {
     }
 
     private cloneVec(): Vector<T> {
-        return new Vector<T>(this._trie, this._length,
+        return new Vector<T>(this._trie, this._trieOffset, this._length,
                              this._depthHeadTailLength, this._head, this._tail);
     }
 
@@ -383,7 +385,7 @@ export class Vector<T> implements Seq<T> {
             return this._tail[index - tailStart];
         }
 
-        return this.trieGet(index - headLength, this.getShift())
+        return this.trieGet(index - headLength + this._trieOffset, this.getShift())
     }
 
     private trieGet(correctedIndex:number, shift: number): T {
@@ -481,7 +483,9 @@ export class Vector<T> implements Seq<T> {
 
         if (this._tail.length < nodeSize) {
             this._tail.push(val);
-            return new Vector(this._trie, this._length+1, dhtlIncrementTailLength(this._depthHeadTailLength), this._head, this._tail);
+            return new Vector(this._trie, this._trieOffset, this._length+1,
+                              dhtlIncrementTailLength(this._depthHeadTailLength),
+                              this._head, this._tail);
         } else {
             // the tail is full
             const withTailMerged = this.appendNode(this._tail);
@@ -495,7 +499,8 @@ export class Vector<T> implements Seq<T> {
     // does not update the vector _length
     private appendNode(val:T[]): Vector<T> {
         const newVec = this.cloneVec();
-        const effectiveLength = this._length - this.getHeadLength() - this.getTailLength();
+        const effectiveLength = this._length - this.getHeadLength() -
+            this.getTailLength() - this._trieOffset;
         if (!this._trie) {
             newVec._trie = val;
             return newVec;
@@ -523,21 +528,22 @@ export class Vector<T> implements Seq<T> {
             return newVec;
         } else {
             // We'll need a new root node.
-            return Vector.setupNewRootNode(this, val);
+            Vector.setupNewRootNode(newVec, val, {isPrepend:false});
+            return newVec;
         }
     }
 
-    private static setupNewRootNode<T>(vec: Vector<T>, nodeToAdd:T[]): Vector<T> {
-        const newVec = vec.cloneVec();
-        newVec._depthHeadTailLength = dhtlIncrementDepth(vec._depthHeadTailLength);
-        let depth = newVec.getDepth();
+    // the vector in parameter will be modified!!!
+    private static setupNewRootNode<T>(vec: Vector<T>, nodeToAdd:T[], opts: {isPrepend:boolean}): void {
+        vec._depthHeadTailLength = dhtlIncrementDepth(vec._depthHeadTailLength);
+        let depth = vec.getDepth();
         let node:any[] = nodeToAdd;
+        const oneFree = new Array(nodeSize-1);
         for (let i = 2; i < depth; i++) {
-            const newNode = [node];
+            const newNode = opts.isPrepend ? [...oneFree, node] : [node];
             node = newNode;
         }
-        newVec._trie = [vec._trie, node];
-        return newVec;
+        vec._trie = opts.isPrepend ? [node, vec._trie] : [vec._trie, node];
     }
 
     /**
@@ -1001,7 +1007,7 @@ export class Vector<T> implements Seq<T> {
             fun(this._head[i]);
         }
         const shift = this.getShift();
-        for (i = 0; i < this._length-headLength-tailLength; i++) {
+        for (i = this._trieOffset; i < this._length-headLength-tailLength+this._trieOffset; i++) {
             fun(this.trieGet(i, shift));
         }
         for (i = 0; i < tailLength; i++) {
@@ -1120,7 +1126,9 @@ export class Vector<T> implements Seq<T> {
             acc = fn(acc, this._head[i]);
         }
         const shift = this.getShift();
-        for (i = 0; i < this._length-headLength-tailLength; i+=nodeSize) {
+        for (i = this._trieOffset;
+             i < this._length-headLength-tailLength+this._trieOffset;
+             i+=nodeSize) {
             const node = this.trieGetNode(i, shift);
             for (let j = 0; j < nodeSize; j++) {
                 acc = fn(acc, node[j]);
@@ -1155,7 +1163,9 @@ export class Vector<T> implements Seq<T> {
             acc = fn(this._tail[i], acc);
         }
         const shift = this.getShift();
-        for (i = this._length-headLength-tailLength-1; i>=0; i-=nodeSize) {
+        for (i = this._trieOffset+this._length-headLength-tailLength-1;
+             i>=this._trieOffset;
+             i-=nodeSize) {
             const node = this.trieGetNode(i, shift);
             for (let j = nodeSize-1; j >= 0; j--) {
                 acc = fn(node[j], acc);
@@ -1512,7 +1522,7 @@ export class Vector<T> implements Seq<T> {
         const headLength = this.getHeadLength();
         if (n <= headLength) {
             return new Vector(
-                this._trie, this._length-n,
+                this._trie, this._trieOffset, this._length-n,
                 dhtlSetHeadLength(this._depthHeadTailLength, headLength-n),
                 this._head.slice(n), this._tail);
         }
@@ -1521,12 +1531,12 @@ export class Vector<T> implements Seq<T> {
             // need to drop the whole head, the trie and possibly
             // part of the tail.
             return new Vector(
-                undefined, this._length-n,
+                undefined, 0, this._length-n,
                 dhtlInit(0, 0, this._length - n),
                 [], this._tail.slice(n));
         }
         // need to drop the whole head and modify the trie...
-        const indexInTrie = n - headLength;
+        const indexInTrie = n - headLength + this._trieOffset;
         const newVec = this.cloneVec();
         newVec._length = newVec._length - n;
         let node = newVec._trie = (<any[]>this._trie).slice();
@@ -1538,6 +1548,8 @@ export class Vector<T> implements Seq<T> {
                 // root killing, skip this node, we don't want
                 // root nodes with only 1 child
                 newVec._trie = node[childIndex].slice();
+                // in case of root killing wipe the trie offset
+                newVec._trieOffset = 0;
                 newVec._depthHeadTailLength = dhtlDecrementDepth(newVec._depthHeadTailLength);
                 node = <any[]>newVec._trie;
             } else {
@@ -1545,6 +1557,9 @@ export class Vector<T> implements Seq<T> {
                 node[childIndex] = node[childIndex].slice();
                 node.splice(0, childIndex); // remove previous pointers
                 node = node[0];
+                // reduce the trieOffset due to the left trimming
+                newVec._trieOffset -= (nodeSize << shift)*childIndex;
+                console.log("reducing trie offset by " + (nodeSize << shift)*childIndex + " is now " + newVec._trieOffset);
             }
             shift -= nodeBits;
         }
@@ -1558,6 +1573,10 @@ export class Vector<T> implements Seq<T> {
         const child = node[childIndex];
         // remove previous pointers and the child
         node.splice(0, childIndex+1);
+        // reduce the trieOffset due to the left trimming
+        newVec._trieOffset -= (nodeSize << (shift-nodeBits))*(childIndex+1);
+        console.log("reducing trie offset by " + (nodeSize << (shift-nodeBits))*(childIndex+1) + " is now " + newVec._trieOffset);
+
         // remove previous values in the node & store it in the head.
         newVec._head = child.slice(indexInTrie & nodeBitmask);
 
@@ -1662,10 +1681,12 @@ export class Vector<T> implements Seq<T> {
 
         if (this._head.length < nodeSize) {
             this._head.unshift(elt);
-            return new Vector(this._trie, this._length+1, dhtlIncrementHeadLength(this._depthHeadTailLength), this._head, this._tail);
+            return new Vector(this._trie, this._trieOffset, this._length+1,
+                              dhtlIncrementHeadLength(this._depthHeadTailLength),
+                              this._head, this._tail);
         } else {
             // the head is full
-            const withTailMerged = this.prependNode(this._tail, this._length);
+            const withTailMerged = this.prependNode(this._head);
             withTailMerged._head = [elt];
             withTailMerged._depthHeadTailLength = dhtlSetHeadLength(withTailMerged._depthHeadTailLength, 1);
             ++withTailMerged._length;
@@ -1681,12 +1702,69 @@ export class Vector<T> implements Seq<T> {
         return Vector.ofIterable(elts).appendAll(this);
     }
 
-    private prependNode(val:T[], length: number): Vector<T> {
-        const leafNodes = this.getLeafNodes(this._length);
-        leafNodes.unshift(this._head.slice(0, this.getHeadLength()));
-        leafNodes.unshift(val);
-        leafNodes.push(this._tail.slice(0, this.getTailLength()));
-        return Vector.fromLeafNodes(leafNodes, this._length);
+    // https://stackoverflow.com/a/49917196/516188
+    private prependNode(val:T[]): Vector<T> {
+        const newVec = this.cloneVec();
+        if (!newVec._trie) {
+            newVec._trie = val;
+            return newVec;
+        }
+        const depth = newVec.getDepth();
+        if (depth === 0) {
+            newVec._trie = [val, newVec._trie];
+            newVec._depthHeadTailLength = dhtlIncrementDepth(newVec._depthHeadTailLength);
+            return newVec;
+        }
+        if (this._trieOffset > 0) {
+            // trieOffset is always a multiple of nodeSize
+            newVec._trieOffset -= nodeSize;
+            let node = newVec._trie = (<any[]>this._trie).slice();
+            let shift = this.getShift();
+            while (shift > nodeSize) {
+                const childIndex = (newVec._trieOffset >> shift) & nodeBitmask;
+                node[childIndex] = node[childIndex].slice();
+                node = node[childIndex];
+                shift -= nodeBits;
+            }
+            node[(newVec._trieOffset >> shift) & nodeBitmask] = val;
+            return newVec;
+        }
+
+        const effectiveLength = newVec._length -
+            newVec.getHeadLength() - newVec.getTailLength() - newVec._trieOffset;
+        if (effectiveLength < (nodeSize << newVec.getShift())) {
+            // the trie is not full. go up the trie searching for the first
+            // non-full node
+            let node = newVec._trie = (<any[]>this._trie).slice();
+            const stack = [node];
+            let shift = this.getShift();
+            while (shift > nodeSize) {
+                node[0] = node[0].slice();
+                stack.unshift(node);
+                node = node[0];
+                shift -= nodeBits;
+            }
+            for (let i=0;i<stack.length;i++) {
+                // console.log("level " + i + " length " + stack[i].length)
+                if (stack[i].length < nodeSize) {
+                    const addingDepth = shift/nodeBits - i - 1;
+                    // console.log("addingDepth " + addingDepth)
+                    const oneFree = new Array(nodeSize-1);
+                    let node: any[] = val;
+                    for (let level=0;level<addingDepth;level++) {
+                        node = [...oneFree, node];
+                    }
+                    stack[i].splice(0, 0, node);
+                    newVec._trieOffset = (nodeSize << (addingDepth*nodeBits)) - nodeSize;
+                    return newVec;
+                }
+            }
+        } else {
+            // the trie is full, add a new level
+            newVec._trieOffset = (nodeSize << (depth*nodeBits)) - nodeSize;
+            Vector.setupNewRootNode(newVec, val, {isPrepend:true});
+        }
+        return newVec;
     }
 
     /**

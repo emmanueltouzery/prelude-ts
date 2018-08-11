@@ -42,6 +42,10 @@ describe("Vector over one node", () => {
         Stream.iterate(0,i=>i+1).take(10000).toVector().drop(9700).toArray(),
         Stream.iterate(9700,i=>i+1).take(300).toArray()
     ));
+    it("drops correctly on longer lists after prepend", () => assert.deepEqual(
+        Stream.iterate(0,i=>i+1).take(10000).prepend(-1).drop(20),
+        Stream.iterate(0,i=>i+1).take(10000).toVector().prepend(-1).drop(20)
+    ));
 })
 
 describe("Vector extra methods", () => {
@@ -120,6 +124,17 @@ describe("Vector.take() implementation", () => {
     it("handles taking more than the whole length on length multiple of node size correctly", () => checkTake(
         Stream.iterate(1,i=>i+1).take(128).toVector(),
         129, Stream.iterate(1,i=>i+1).take(128).toVector(), false));
+});
+
+describe("Vector.prepend() implementation", () => {
+    it("handles passing nodeSize items", () => {
+        let v = Vector.empty<number>();
+        for (let i=0;i<33;i++) {
+            v = v.prepend(i);
+        }
+        assert.deepEqual(Stream.iterate(32, i=>i-1).takeWhile(i=>i>=0).toArray(),
+                         v.toArray());
+    });
 });
 
 function checkAppend<T>(base: Vector<T>, toAppend: Iterable<T>, combined: Vector<T>) {
