@@ -269,7 +269,7 @@ export class Future<T> {
      * This method is eager, will trigger the underlying Promise.
      */
     mapFailure(fn: (x:any)=>any): Future<T> {
-        const lazy = Lazy.of(()=>this.promise.get().catch(x => {throw [fn(x)]}));
+        const lazy = Lazy.of(()=>this.promise.get().catch(x => {throw fn(x)}));
         lazy.get();
         return new Future<T>(lazy);
     }

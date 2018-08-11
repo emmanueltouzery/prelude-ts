@@ -9,7 +9,7 @@ async function ensureFailedWithValue<T>(val: any, promise:Promise<T>) {
         v = await promise;
         assert.ok(false);
     } catch (err) {
-        assert.equal(val, err);
+        assert.deepEqual(val, err);
     }
 }
 
@@ -96,7 +96,7 @@ describe("Future.map*", () => {
     });
     it("mapFailure works", async () => {
         return ensureFailedWithValue(
-            "oops, sorry", Future.failed("sorry").mapFailure(err => "oops, " + err).toPromise());
+            "SORRY", Future.failed("sorry").mapFailure(err => err.toUpperCase()).toPromise());
     });
     it("mapFailure is a nop on successful futures", async () => {
         assert.deepEqual(5, await Future.ok(5).mapFailure(_ => "oops"));
