@@ -3,15 +3,21 @@ import { Option } from "../src/Option";
 import { Either } from "../src/Either";
 import * as assert from 'assert';
 
-function ensureFailedWithValue<T>(val: any, promise:Promise<T>):Promise<boolean> {
-    return promise.then(x=>false, f=>f===val);
+async function ensureFailedWithValue<T>(val: any, promise:Promise<T>) {
+    let v;
+    try {
+        v = await promise;
+        assert.ok(false);
+    } catch (err) {
+        assert.equal(val, err);
+    }
 }
 
 describe("Future.of", () => {
     it("properly wraps successful promises with of", async () => {
         assert.deepEqual(5, await Future.of(new Promise((a,r) => a(5))));
     });
-    it("properly wraps failed promises with of", () => {
+    it("properly wraps failed promises with of", async () => {
         // shows the need for future.catch!?
         // await Future.of(new Promise((a,r) => r(5)))
         return ensureFailedWithValue(5, Future.of(Promise.reject(5)).toPromise());
@@ -42,13 +48,13 @@ describe("Future basics", () => {
                     assert.deepEqual("oops", msg);
                 });
     });
-    it("handles a throw in map", () => {
+    it("handles a throw in map", async () => {
         // i'm not crazy about this behaviour (not really functor-law like)
         // but it's JS we're dealing with in the end :-(
         return ensureFailedWithValue(
             "oops", Future.ok(5).map<number>(x => {throw "oops"}).toPromise());
     });
-    it("handles a throw in flatMap", () => {
+    it("handles a throw in flatMap", async () => {
         // i'm not crazy about this behaviour (not really functor-law like)
         // but it's JS we're dealing with in the end :-(
         return ensureFailedWithValue(
@@ -131,7 +137,7 @@ describe("Future.traverse", () => {
     it("traverses properly", async () => {
         assert.deepEqual([1,2,3], await Future.traverse([1,2,3], Future.ok).map(v => v.toArray()));
     });
-    it("traverses properly in case of failure", () => {
+    it("traverses properly in case of failure", async () => {
         return ensureFailedWithValue("3", Future.traverse(
             [1, 2, 3], x => Future.ofCallbackApi(() => { if (x < 3) { x } else { throw x; } }))
             .map(v => v.toArray()).toPromise());
@@ -142,7 +148,7 @@ describe("Future.sequence", () => {
         assert.deepEqual([1,2,3], await Future.sequence(
             [Future.ok(1),Future.ok(2),Future.ok(3)]).map(v => v.toArray()));
     });
-    it("sequences properly in case of failure", () => {
+    it("sequences properly in case of failure", async () => {
         return ensureFailedWithValue("3", Future.sequence(
             [Future.ok(1), Future.ok(2), Future.failed("3")])
             .map(v => v.toArray()).toPromise());
@@ -154,7 +160,7 @@ describe("Future.firstCompletedOf", () => {
         assert.deepEqual(1, await Future.firstCompletedOf(
             [Future.ofCallbackApi(done=>setTimeout(done,100,3)), Future.ok(1)]));
     });
-    it("returns the one finishing even if it's a failure", () => {
+    it("returns the one finishing even if it's a failure", async () => {
         return ensureFailedWithValue("3", Future.firstCompletedOf(
             [Future.ofCallbackApi(done=>setTimeout(done, 100, 1)), Future.failed("3")]).toPromise());
     });
@@ -165,9 +171,10 @@ describe("Future.firstSuccessfulOf", () => {
         assert.deepEqual(1, await Future.firstSuccessfulOf(
             [Future.ofCallbackApi(done=>setTimeout(done,100,3)), Future.ok(1)]));
     });
-    it("returns the one finishing slower if the other one is a failure", () => {
-        return ensureFailedWithValue("1", Future.firstSuccessfulOf(
-            [Future.ofCallbackApi(done=>setTimeout(done, 20, 1)), Future.failed("3")]).toPromise());
+    it("returns the one finishing slower if the other one is a failure", async () => {
+        const v = await Future.firstSuccessfulOf(
+            [Future.ofCallbackApi(done=>setTimeout(done, 20, 1)), Future.failed("3")]).toPromise();
+       assert.equal(1, v);
     });
 });
 describe("Future.filter", () => {
