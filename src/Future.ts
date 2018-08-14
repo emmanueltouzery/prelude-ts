@@ -67,6 +67,15 @@ export class Future<T> {
     }
 
     /**
+     * Creates a Future from a do-notation block. asyncc/await can use
+     * inside the block, the result value will be wrapped into a new Future,
+     * without be worry about add try/catch to the async/await code.
+     */
+    static do<T>(doNotationBlock: ()=>Promise<T>): Future<T> {
+        return Future.of(doNotationBlock())
+    }
+
+    /**
      * The `then` call is not meant to be a part of the `Future` API,
      * we need then so that `await` works directly.
      * This method is eager, will trigger the underlying Promise.
