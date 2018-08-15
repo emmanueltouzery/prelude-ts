@@ -252,28 +252,38 @@ export class Future<T> {
 
     /**
      * Execute the side-effecting function you give if the Future is a failure.
+     *
+     * The Future is unchanged by this call.
      */
     onFailure(fn: (x:any)=>void): Future<T> {
-        // rethrow in the catch to make sure the promise chain stays rejected
-        return new Future(this.promise.catch(x => {fn(x); throw x;}));
+        this.promise.catch(x => fn(x));
+        return this;
     }
 
     /**
      * Execute the side-effecting function you give if the Future is a success.
+     *
+     * The Future is unchanged by this call.
      */
     onSuccess(fn: (x:T)=>void): Future<T> {
-        return new Future(this.promise.then(x => {fn(x[0]); return x;}));
+        // we create a new promise here, need to catch errors on it,
+        // to avoid node UnhandledPromiseRejectionWarning warnings
+        this.promise.then(x => {fn(x[0]); return x;}).catch(_ => {});
+        return this;
     }
 
     /**
      * Execute the side-effecting function you give when the Future is
      * completed. You get an [[Either]], a `Right` if the Future is a
      * success, a `Left` if it's a failure.
+     *
+     * The Future is unchanged by this call.
      */
     onComplete(fn: (x:Either<any,T>)=>void): Future<T> {
-        return new Future(this.promise.then(
+        this.promise.then(
             x => {fn(Either.right(x[0])); return x;},
-            x => {fn(Either.left(x)); throw x;}));
+            x => fn(Either.left(x)));
+        return this;
     }
 
     /**

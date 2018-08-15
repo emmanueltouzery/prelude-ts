@@ -231,10 +231,14 @@ describe("Future.on*", () => {
     });
     it("doesn't calls onSuccess when it shouldn't", async () => {
         let v = 0;
+        let failed = false;
         try {
             await Future.failed<number>(5)
                 .onSuccess(x => v = x);
-        } catch { }
+        } catch {
+            failed = true;
+        }
+        assert.ok(failed);
         assert.deepEqual(0, v);
     });
     it("doesn't call onFailure when it shouldn't", async () => {
@@ -245,10 +249,14 @@ describe("Future.on*", () => {
     });
     it("calls onFailure when it should", async () => {
         let v = 0;
+        let failed = false;
         try {
             await Future.failed(5)
                 .onFailure(x => v = x);
-        } catch { }
+        } catch {
+            failed = true;
+        }
+        assert.ok(failed);
         assert.deepEqual(5, v);
     });
     it("calls onComplete on success", async () => {
