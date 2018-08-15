@@ -297,11 +297,15 @@ describe("Future.on*", () => {
     });
     it("doesn't calls onSuccess when it shouldn't", async () => {
         let v = 0;
+        let failed = false;
         try {
             await Future.failed<number>(5)
                 .onSuccess(x => v = x);
-        } catch { }
+        } catch {
+            failed = true;
+        }
         assert.deepEqual(0, v);
+        assert.ok(failed);
     });
     it("doesn't call onFailure when it shouldn't", async () => {
         let v = 0;

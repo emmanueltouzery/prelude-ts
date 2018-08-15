@@ -335,7 +335,10 @@ export class Future<T> {
      * Execute the side-effecting function you give if the Future is a success.
      */
     onSuccess(fn: (x:T)=>void): Future<T> {
-        this.promise.get().then(x => {fn(x[0]); return x;});
+        // we create a new promise here, need to catch errors on it,
+        // to avoid node UnhandledPromiseRejectionWarning warnings
+        // 
+        this.promise.get().then(x => {fn(x[0]); return x;}).catch(_ => {});
         return this;
     }
 
