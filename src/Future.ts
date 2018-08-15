@@ -2,6 +2,7 @@ import { Vector } from "./Vector";
 import { Lazy } from "./Lazy";
 import { Option } from "./Option";
 import { Either } from "./Either";
+import { HashMap } from "./HashMap";
 
 /**
  * A Future is the equivalent, and ultimately wraps, a javascript Promise.
@@ -58,6 +59,15 @@ export class Future<T> {
     static ok<T>(val:T): Future<T> {
         return new Future(Lazy.of(()=>Promise.resolve([val])));
     }
+
+    // /**
+    //  * Build a Future from a lazy javascript Promise.
+    //  * The advantage compared to [Future.of] is that the
+    //  * Future is not started after this call, so it's really lazy.
+    //  */
+    // static ofLazyPromise<T>(promiseProducer: ()=>Promise<T>): Future<T> {
+    //     return new Future(Lazy.of(promiseProducer));
+    // }
 
     /**
      * Build a failed Future with the error data you provide.
@@ -148,10 +158,48 @@ export class Future<T> {
      *
      * Also see [[Future.sequence]]
      */
-    static traverse<T,U>(elts: Iterable<T>, fn: (x:T)=>Future<U>): Future<Vector<U>> {
-        return Future.of(
-            Promise.all(Vector.ofIterable(elts).map(x => fn(x).toPromise()))
-                .then(Vector.ofIterable));
+    static traverse<T,U>(elts: Iterable<T>, fn: (x:T)=>Future<U>,
+                         opts?: {maxConcurrent:number}): Future<Vector<U>> {
+        if (!opts) {
+            return Future.of(
+                Promise.all(Vector.ofIterable(elts).map(x => fn(x).toPromise()))
+                    .then(Vector.ofIterable));
+        }
+        // maxConcurrent algorithm inspired by https://stackoverflow.com/a/38778887/516188
+        let index = 0;
+        let active: Future<U>[] = [];
+        const results: {[idx:number]:U} = {};
+        const it = elts[Symbol.iterator]();
+        let failed: any;
+        const addAsNeeded = (_?:U): Future<Vector<U>> => {
+            if (failed) {
+                return Future.failed(failed);
+            }
+            let cur;
+            while (active.length < opts.maxConcurrent &&
+                   !(cur = it.next()).done) {
+                const p = fn(cur.value);
+                active.push(p);
+                const curIdx = index++;
+                p.onComplete(eitherRes => {
+                    active.splice(active.indexOf(p), 1)
+                    if (eitherRes.isLeft()) {
+                        failed = eitherRes.getLeft();
+                    } else {
+                        results[curIdx] = eitherRes.get();
+                    }
+                });
+            }
+            if (active.length === 0 && cur && cur.done) {
+                return Future.ok(
+                    HashMap.ofObjectDictionary<U>(results)
+                        .toVector()
+                        .sortOn(kv => parseInt(kv[0]))
+                        .map(kv => kv[1]));
+            }
+            return Future.firstCompletedOf(active).flatMap(addAsNeeded);
+        };
+        return addAsNeeded();
     }
 
     /**
@@ -279,18 +327,16 @@ export class Future<T> {
      */
     onFailure(fn: (x:any)=>void): Future<T> {
         // rethrow in the catch to make sure the promise chain stays rejected
-        const lazy = Lazy.of(()=>this.promise.get().catch(x => {fn(x); throw x;}));
-        lazy.get();
-        return new Future(lazy);
+        this.promise.get().catch(x => fn(x));
+        return this;
     }
 
     /**
      * Execute the side-effecting function you give if the Future is a success.
      */
     onSuccess(fn: (x:T)=>void): Future<T> {
-        const lazy = Lazy.of(()=>this.promise.get().then(x => {fn(x[0]); return x;}));
-        lazy.get();
-        return new Future(lazy);
+        this.promise.get().then(x => {fn(x[0]); return x;});
+        return this;
     }
 
     /**
@@ -299,11 +345,10 @@ export class Future<T> {
      * success, a `Left` if it's a failure.
      */
     onComplete(fn: (x:Either<any,T>)=>void): Future<T> {
-        const lazy = Lazy.of(()=>this.promise.get().then(
+        this.promise.get().then(
             x => {fn(Either.right(x[0])); return x;},
-            x => {fn(Either.left(x)); throw x;}));
-        lazy.get();
-        return new Future(lazy);
+            x => fn(Either.left(x)));
+        return this;
     }
 
     /**
