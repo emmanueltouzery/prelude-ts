@@ -170,10 +170,10 @@ export class Future<T> {
         let active: Future<U>[] = [];
         const results: {[idx:number]:U} = {};
         const it = elts[Symbol.iterator]();
-        let failed: any;
+        let failed: Future<U>|undefined;
         const addAsNeeded = (_?:U): Future<Vector<U>> => {
             if (failed) {
-                return Future.failed(failed);
+                return <any>failed;
             }
             let cur;
             while (active.length < opts.maxConcurrent &&
@@ -184,13 +184,13 @@ export class Future<T> {
                 p.onComplete(eitherRes => {
                     active.splice(active.indexOf(p), 1)
                     if (eitherRes.isLeft()) {
-                        failed = eitherRes.getLeft();
+                        failed = p;
                     } else {
                         results[curIdx] = eitherRes.get();
                     }
                 });
             }
-            if (active.length === 0 && cur && cur.done) {
+            if (!failed && active.length === 0 && cur && cur.done) {
                 return Future.ok(
                     HashMap.ofObjectDictionary<U>(results)
                         .toVector()
