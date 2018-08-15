@@ -24,11 +24,6 @@ describe("Future.of", () => {
     });
 });
 describe("Future basics", () => {
-    it("is lazy", () => {
-        let i=0;
-        Future.ofCallbackApi<number>(done=>{++i; done(i)});
-        assert.deepEqual(0, i);
-    });
     it("works when triggered", async () => {
         let i=0;
         await Future.ofCallbackApi(done=>done(++i));
@@ -66,13 +61,6 @@ describe("Future basics", () => {
         await f;
         assert.deepEqual(1, i);
         await f;
-        assert.deepEqual(1, i);
-    });
-    it("is async also when triggered", async () => {
-        let i=0;
-        const f = Future.ofCallbackApi(done=>setTimeout(done, 20, ++i));
-        assert.deepEqual(0, i);
-        assert.deepEqual(1, await f);
         assert.deepEqual(1, i);
     });
 });
@@ -191,12 +179,6 @@ describe("Future.filter", () => {
     });
 });
 describe("Future.orElse", () => {
-    it("is lazy", () => {
-        let called = false;
-        Future.ofCallbackApi(done => {called=true; done(2)})
-            .orElse(Future.ofCallbackApi(done => { called=true; done(3)}));
-        assert.deepEqual(false, called);
-    });
     it("is a nop if the first promise succeeds, even if it's slower", async () => {
         assert.deepEqual(1, await Future.ofCallbackApi(done => setTimeout(done, 50, 1))
                      .orElse(Future.ok(2)));
