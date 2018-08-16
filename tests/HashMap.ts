@@ -278,6 +278,12 @@ describe("hashmap transformation", () => {
         !HashMap.empty<number,string>().put(1,"a").put(2,"b").contains([2,"c"])));
     it("should support contains, empty map", () => assert.ok(
         !HashMap.empty<number,string>().contains([2,"b"])));
+    it("should support containsKey, positive case", () => assert.ok(
+        HashMap.empty<number,string>().put(1,"a").put(2,"b").containsKey(2)));
+    it("should support containsKey, negative case", () => assert.ok(
+        !HashMap.empty<number,string>().put(1,"a").put(2,"b").containsKey(3)));
+    it("should support containsKey, empty map", () => assert.ok(
+        !HashMap.empty<number,string>().containsKey(2)));
     it("should fold correctly", () => assert.deepEqual(
         [6,"c"], HashMap.of<number,string>([1,"a"],[2,"b"],[3,"c"])
             .fold([0,""], ([a,b],[c,d])=>[a+c, b>d?b:d])));

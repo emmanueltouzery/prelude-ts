@@ -701,6 +701,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return false;
     }
 
+    containsKey(key: K&WithEquality) : boolean {
+        return false;
+    }
+
     filter(predicate:(k:K,v:V)=>boolean): HashMap<K,V> {
         return this;
     }
