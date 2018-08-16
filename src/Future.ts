@@ -159,7 +159,7 @@ export class Future<T> {
             .map(
                 f => f
                     .map<FutOptPair>(item => [f, Option.of(item)])
-                    .orElse(Future.ok<FutOptPair>([f, Option.none<T>()])));
+                    .recoverWith(_=>Future.ok<FutOptPair>([f, Option.none<T>()])));
         // go for the first completed of the iterable
         // remember after our map they're all successful now
         const success = Future.firstCompletedOf(velts);
@@ -303,10 +303,12 @@ export class Future<T> {
     
     /**
      * Has no effect if this Future is successful. If it's failed however,
-     * a Future equivalent to the one given as parameter is returned.
+     * the function you give will be called, receiving as parameter
+     * the error contents, and a Future equivalent to the one your
+     * function returns will be returned.
      */
-    orElse(other: Future<T>): Future<T> {
-        return new Future<T>(this.promise.catch(_ => other.promise));
+    recoverWith(f: (err:any)=>Future<T>): Future<T> {
+        return new Future<T>(this.promise.catch(err => f(err).promise));
     }
 
     /**

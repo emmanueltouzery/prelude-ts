@@ -178,13 +178,19 @@ describe("Future.filter", () => {
             "value was 1", Future.ok(1).filter(x => x >= 2, v => "value was " + v).toPromise());
     });
 });
-describe("Future.orElse", () => {
+describe("Future.recoverWith", () => {
     it("is a nop if the first promise succeeds, even if it's slower", async () => {
         assert.deepEqual(1, await Future.ofCallbackApi(done => setTimeout(done, 50, 1))
-                     .orElse(Future.ok(2)));
+                         .recoverWith(_=>Future.ok(2)));
     });
     it("falls back to the second promise in case the first one fails", async () => {
-        assert.deepEqual(2, await Future.failed("oops").orElse(Future.ok(2)));
+        assert.deepEqual("oops", await Future.failed("oops").recoverWith(Future.ok));
+    });
+    it("falls back to the second promise in case both fail", async () => {
+        return ensureFailedWithValue(
+            "still not",
+            Future.failed("oops")
+                .recoverWith(_ => Future.failed("still not")).toPromise());
     });
 });
 describe("Future.find", () => {
