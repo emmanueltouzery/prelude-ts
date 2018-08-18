@@ -310,3 +310,38 @@ describe("Future.on*", () => {
         assert.ok(Either.left(5).equals(v));
     });
 });
+
+describe("Future do notation*", () => {
+    it("do notation creates a successful future", async () => {
+        const f1 = Future.ok(1)
+        const f2 = Future.ok(2)
+      
+        const f3 = Future.do(async () => {
+            const v1 = await f1
+            const v2 = await f2
+            return v1 + v2
+        })
+      
+        const v3 = await f3
+        assert.deepEqual(3, v3);
+    });
+
+    it("do notation creates a failable future", async () => {
+        const f1 = Future.ok(1)
+        const f2 = Future.failed<number>("bad number")
+        
+        const f3 = Future.do(async () => {
+            const v1 = await f1
+            const v2 = await f2
+            return v1 + v2
+        })
+
+        try {
+          const v3 = await f3
+          assert.fail("Error: Future must fail")
+
+        } catch (error) {
+          assert.deepEqual(error, "bad number");
+        }
+    });
+});
