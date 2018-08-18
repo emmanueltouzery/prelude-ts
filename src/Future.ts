@@ -41,6 +41,21 @@ export class Future<T> {
     }
 
     /**
+     * Build a Future from a node-style callback API, for instance:
+     *
+     *     Future.ofCallback<string>(cb => fs.readFile('/etc/passwd', 'utf-8', cb))
+     */
+    static ofCallback<T>(fn: (cb:(err:any, val:T)=>void)=>void): Future<T> {
+        return Future.ofPromiseCtor((resolve,reject)=>fn((err, data)=>{
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        }));
+    }
+
+    /**
      * Build a successful Future with the value you provide.
      */
     static ok<T>(val:T): Future<T> {

@@ -165,6 +165,7 @@ function generateTestFileContents(fname: string, samplesInfo: Vector<SampleInfo>
         import { Option, Some, None } from "../src/Option";
         import { instanceOf, typeOf } from "../src/Comparison";
         import * as assert from 'assert';
+        import * as fs from 'fs';
 
         function myEq(a:any, b:any): boolean {
              if (a === null && b === null) {

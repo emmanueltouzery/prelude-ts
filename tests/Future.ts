@@ -1,6 +1,8 @@
 import { Future } from "../src/Future";
+import { Vector } from "../src/Vector";
 import { Option } from "../src/Option";
 import { Either } from "../src/Either";
+import * as fs from 'fs';
 import * as assert from 'assert';
 
 async function ensureFailedWithValue<T>(val: any, promise:Promise<T>) {
@@ -21,6 +23,25 @@ describe("Future.of", () => {
         // shows the need for future.catch!?
         // await Future.of(new Promise((a,r) => r(5)))
         return ensureFailedWithValue(5, Future.of(Promise.reject(5)).toPromise());
+    });
+});
+describe("Future.ofCallback (these tests will fail on windows)", () => {
+    it("properly operates with fs.readFile", async () => {
+        const passwd = await Future.ofCallback<string>(
+            cb => fs.readFile("/etc/passwd", "utf-8", cb));
+        // the first line of /etc/passwd should contain 6 ':' characters
+        assert.equal(6, Vector.ofIterable(passwd.split("\n")[0])
+                     .filter(c => c===':').length());
+    });
+    it("properly operates with fs.readFile in case of errors", async () => {
+        try {
+            const passwd = await Future.ofCallback<string>(
+                cb => fs.readFile("/efdtc/pasdsswd", "utf-8", cb));
+            assert.ok(false); // should not make it here
+        } catch (err) {
+            // file does not exist
+            assert.equal('ENOENT', err.code);
+        }
     });
 });
 describe("Future basics", () => {
