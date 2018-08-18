@@ -22,15 +22,15 @@ export class Future<T> {
     private constructor(private promise: Promise<T[]>) { }
 
     /**
-     * Build a Future from callback-style call.
-     * You get one callback to signal success, throw to signal
-     * failure.
+     * Build a Future in the same way as the 'new Promise'
+     * constructor.
+     * You get one callback to signal success (resolve),
+     * failure (reject), or you can throw to signal failure.
      *
-     *     Future.ofCallbackApi<string>(done => setTimeout(done, 10, "hello!"))
+     *     Future.ofPromiseCtor<string>((resolve,reject) => setTimeout(resolve, 10, "hello!"))
      */
-    static ofCallbackApi<T>(cb: (done:(x:T)=>void)=>void): Future<T> {
-        return new Future(new Promise<T[]>(
-            (resolve,reject) => cb((v:T) => resolve([v]))));
+    static ofPromiseCtor<T>(executor: (resolve:(x:T)=>void, reject: (x:any)=>void)=>void): Future<T> {
+        return new Future(new Promise(executor).then(v=>[v]));
     }
 
     /**

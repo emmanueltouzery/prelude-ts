@@ -26,13 +26,22 @@ describe("Future.of", () => {
 describe("Future basics", () => {
     it("works when triggered", async () => {
         let i=0;
-        await Future.ofCallbackApi(done=>done(++i));
+        await Future.ofPromiseCtor(done=>done(++i));
         assert.deepEqual(1, i);
+    });
+    it("works when failed", async () => {
+        let i=0;
+        try {
+            await Future.ofPromiseCtor((done,err)=>err(++i));
+        } catch (err) {
+            assert.deepEqual(1, err);
+            assert.deepEqual(1, i);
+        }
     });
     it("handles errors", async () => {
         let i = 0;
         let msg:Error|null = null;
-        Future.ofCallbackApi(done=>{throw "oops"})
+        Future.ofPromiseCtor(done=>{throw "oops"})
             .map(x => ++i)
             .onFailure(err => msg = err)
             .toPromise().then(
@@ -57,7 +66,7 @@ describe("Future basics", () => {
     });
     it("called only once if triggered twice", async () => {
         let i=0;
-        const f = Future.ofCallbackApi(done=>{++i; done(1);});
+        const f = Future.ofPromiseCtor(done=>{++i; done(1);});
         await f;
         assert.deepEqual(1, i);
         await f;
@@ -67,19 +76,19 @@ describe("Future basics", () => {
 describe("Future.map*", () => {
     it("map triggers and works", async () => {
         let i=0;
-        const f = Future.ofCallbackApi<number>(done=>done(++i)).map(x => x*2);
+        const f = Future.ofPromiseCtor<number>(done=>done(++i)).map(x => x*2);
         assert.deepEqual(1, i);
         assert.deepEqual(2, await f);
     });
     it("map doesn't flatten promises", async () => {
         let i=0;
-        const f = Future.ofCallbackApi<number>(done=>done(5))
+        const f = Future.ofPromiseCtor<number>(done=>done(5))
             .map(x => new Promise((r,f)=>r(x+1)));
         assert.ok((<any>await f).then !== null); // should get a promise out
     });
     it("map doesn't flatten futures", async () => {
         let i=0;
-        const f = Future.ok(5).map(x => Future.ofCallbackApi(done=>done(x+1)));
+        const f = Future.ok(5).map(x => Future.ofPromiseCtor(done=>done(x+1)));
         assert.ok((<any>await f).getPromise !== null); // should get a future out
     });
     it("mapFailure works", async () => {
@@ -90,7 +99,7 @@ describe("Future.map*", () => {
         assert.deepEqual(5, await Future.ok(5).mapFailure(_ => "oops"));
     });
     it("flatMap does flatten futures", async () => {
-        const f = Future.ok(5).flatMap(x => Future.ofCallbackApi(done=>done(x+1)));
+        const f = Future.ok(5).flatMap(x => Future.ofPromiseCtor(done=>done(x+1)));
         assert.ok((<any>await f).getPromise === undefined); // shouldn't get a future out
         assert.deepEqual(6, await f);
     });
@@ -99,7 +108,7 @@ describe("Future.liftA*", () => {
     it("applies liftAp properly", async () => {
         const fn = (x:{a:number,b:number}) => ({a:x.a+1,b:x.b-2});
         const computationPromise =
-            Future.liftAp(fn)({a:Future.ok(5), b:Future.ofCallbackApi(done=>done(12))});
+            Future.liftAp(fn)({a:Future.ok(5), b:Future.ofPromiseCtor(done=>done(12))});
         assert.deepEqual({a:6,b:10}, await computationPromise);
     });
     it("applies liftAp properly in case of failure", async () => {
@@ -111,7 +120,7 @@ describe("Future.liftA*", () => {
     it("applies liftA2 properly", async () => {
         const fn = (a:number,b:number) => ({a:a+1,b:b-2});
         const computationPromise =
-            Future.liftA2(fn)(Future.ok(5), Future.ofCallbackApi(done=>done(12)));
+            Future.liftA2(fn)(Future.ok(5), Future.ofPromiseCtor(done=>done(12)));
         assert.deepEqual({a:6,b:10}, await computationPromise);
     });
     it("applies liftA2 properly in case of failure", async () => {
@@ -127,7 +136,7 @@ describe("Future.traverse", () => {
     });
     it("traverses properly in case of failure", async () => {
         return ensureFailedWithValue("3", Future.traverse(
-            [1, 2, 3], x => Future.ofCallbackApi(() => { if (x < 3) { x } else { throw x; } }))
+            [1, 2, 3], x => Future.ofPromiseCtor(() => { if (x < 3) { x } else { throw x; } }))
             .map(v => v.toArray()).toPromise());
     });
 });
@@ -146,22 +155,22 @@ describe("Future.firstCompletedOf", () => {
     // TODO in these tests check the elapsed time is short!
     it("returns the one finishing the first", async () => {
         assert.deepEqual(1, await Future.firstCompletedOf(
-            [Future.ofCallbackApi(done=>setTimeout(done,100,3)), Future.ok(1)]));
+            [Future.ofPromiseCtor(done=>setTimeout(done,100,3)), Future.ok(1)]));
     });
     it("returns the one finishing even if it's a failure", async () => {
         return ensureFailedWithValue("3", Future.firstCompletedOf(
-            [Future.ofCallbackApi(done=>setTimeout(done, 100, 1)), Future.failed("3")]).toPromise());
+            [Future.ofPromiseCtor(done=>setTimeout(done, 100, 1)), Future.failed("3")]).toPromise());
     });
 });
 describe("Future.firstSuccessfulOf", () => {
     // TODO in these tests check the elapsed time is short!
     it("returns the one finishing the first", async () => {
         assert.deepEqual(1, await Future.firstSuccessfulOf(
-            [Future.ofCallbackApi(done=>setTimeout(done,100,3)), Future.ok(1)]));
+            [Future.ofPromiseCtor(done=>setTimeout(done,100,3)), Future.ok(1)]));
     });
     it("returns the one finishing slower if the other one is a failure", async () => {
         const v = await Future.firstSuccessfulOf(
-            [Future.ofCallbackApi(done=>setTimeout(done, 20, 1)), Future.failed("3")]).toPromise();
+            [Future.ofPromiseCtor(done=>setTimeout(done, 20, 1)), Future.failed("3")]).toPromise();
        assert.equal(1, v);
     });
 });
@@ -180,7 +189,7 @@ describe("Future.filter", () => {
 });
 describe("Future.recoverWith", () => {
     it("is a nop if the first promise succeeds, even if it's slower", async () => {
-        assert.deepEqual(1, await Future.ofCallbackApi(done => setTimeout(done, 50, 1))
+        assert.deepEqual(1, await Future.ofPromiseCtor(done => setTimeout(done, 50, 1))
                          .recoverWith(_=>Future.ok(2)));
     });
     it("falls back to the second promise in case the first one fails", async () => {
@@ -221,7 +230,7 @@ describe("Future.find", () => {
             Future.ok(-1),
             Future.failed<number>(5),
             Future.ok(-3),
-            Future.ofCallbackApi<number>(
+            Future.ofPromiseCtor<number>(
                 done => setTimeout(() => {waited = true; done(6);}, 60)),
             Future.ok(7)], x => x>=0);
         assert.ok(Option.of(7).equals(actual));
