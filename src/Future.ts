@@ -70,12 +70,19 @@ export class Future<T> {
     }
 
     /**
-     * Creates a Future from a do-notation block. asyncc/await can use
-     * inside the block, the result value will be wrapped into a new Future,
-     * without be worry about add try/catch to the async/await code.
+     * Creates a Future from a function returning a Promise,
+     * which can be inline in the call, for instance:
+     *
+     *     const f1 = Future.ok(1);
+     *     const f2 = Future.ok(2);
+     *     return Future.do(async () => {
+     *         const v1 = await f1;
+     *         const v2 = await f2;
+     *         return v1 + v2;
+     *     });
      */
-    static do<T>(doNotationBlock: ()=>Promise<T>): Future<T> {
-        return Future.of(doNotationBlock())
+    static do<T>(fn: ()=>Promise<T>): Future<T> {
+        return Future.of(fn())
     }
 
     /**
