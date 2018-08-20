@@ -280,6 +280,19 @@ export class HashMap<K,V> implements IMap<K,V> {
     }
 
     /**
+     * Call a function for element in the collection.
+     */
+    forEach(fun:(x:[K,V])=>void): HashMap<K,V> {
+        const iterator: Iterator<[K,V]> = this.hamt.entries();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            fun(curItem.value);
+            curItem = iterator.next();
+        }
+        return this;
+    }
+
+    /**
      * Calls the function you give for each item in the map,
      * your function returns a map, all the maps are
      * merged.
@@ -687,6 +700,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
 
     mapValues<V2>(fn:(v:V)=>V2): HashMap<K,V2> {
         return HashMap.empty<K,V2>();
+    }
+
+    forEach(fun:(x:[K,V])=>void): HashMap<K,V> {
+        return this;
     }
 
     allMatch(predicate:(k:K,v:V)=>boolean): boolean {

@@ -80,6 +80,11 @@ export interface ISet<T> extends Collection<T> {
     mapOption<U>(mapper:(v:T)=>Option<U&WithEquality>): ISet<U>;
 
     /**
+     * Call a function for element in the collection.
+     */
+    forEach(fun:(x:T)=>void):ISet<T>;
+
+    /**
      * Calls the function you give for each item in the set,
      * your function returns a set, all the sets are
      * merged.

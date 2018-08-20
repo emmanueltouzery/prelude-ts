@@ -133,6 +133,16 @@ describe("hashset access", () => {
             .intersect(HashSet.of<string>("a"))
             .single().getOrThrow().charAt(0);
     });
+    it("supports forEach, non empty set", () => {
+        const list: number[] = [];
+        HashSet.of(1,2,3,2).forEach(x => list.push(x));
+        assert.deepEqual([1,2,3], list.sort());
+    });
+    it("supports forEach, empty set", () => {
+        let i = 0;
+        HashSet.empty<number>().forEach(x=>i+=1);
+        assert.equal(0, i);
+    });
 });
 
 describe("hashset equality", () => {

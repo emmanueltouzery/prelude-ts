@@ -151,6 +151,19 @@ export class HashSet<T> implements ISet<T> {
     }
 
     /**
+     * Call a function for element in the collection.
+     */
+    forEach(fun:(x:T)=>void): HashSet<T> {
+        const iterator: Iterator<T> = this.hamt.values();
+        let curItem = iterator.next();
+        while (!curItem.done) {
+            fun(curItem.value);
+            curItem = iterator.next();
+        }
+        return this;
+    }
+
+    /**
      * Calls the function you give for each item in the set,
      * your function returns a set, all the sets are
      * merged.
@@ -657,9 +670,6 @@ class EmptyHashSet<T> extends HashSet<T> {
         return new HashSet<T>(hamt.make().set(elt,elt));
     }
 
-    /**
-     * Add multiple elements to this set.
-     */
     addAll(elts: Iterable<T & WithEquality>): HashSet<T> {
         const it = elts[Symbol.iterator]();
         let curItem = it.next();
@@ -679,6 +689,10 @@ class EmptyHashSet<T> extends HashSet<T> {
 
     mapOption<U>(mapper:(v:T)=>Option<U&WithEquality>): HashSet<U> {
         return <EmptyHashSet<U>>emptyHashSet;
+    }
+
+    forEach(fun:(x:T)=>void): HashSet<T> {
+        return this;
     }
 
     filter<U extends T>(fn:(v:T)=>v is U): HashSet<U>;

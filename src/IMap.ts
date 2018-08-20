@@ -71,6 +71,11 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
     mapValues<V2>(fn:(v:V)=>V2): IMap<K,V2>;
 
     /**
+     * Call a function for element in the collection.
+     */
+    forEach(fun:(x:[K,V])=>void):IMap<K,V>;
+
+    /**
      * Calls the function you give for each item in the map,
      * your function returns a map, all the maps are
      * merged.

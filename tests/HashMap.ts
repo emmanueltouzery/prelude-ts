@@ -210,6 +210,17 @@ describe("hashmap extract values", () => {
         HashMap.of([5,"a"],[6,"b"]).single().isNone()));
     it("correct returns single empty map", () => assert.ok(
         HashMap.empty<number,string>().single().isNone()));
+    it("supports forEach correctly", () => {
+        const list: Array<[number,string]> = [];
+        HashMap.of([5,"a"],[6,"b"]).forEach(x => list.push(x));
+        assert.deepEqual([[5,"a"],[6,"b"]],
+                         Vector.ofIterable(list).sortOn(x=>x[0]).toArray());
+    });
+    it("supports forEach correctly -- empty map", () => {
+        let count = 0;
+        HashMap.empty<number,string>().forEach(x => {count += 1});
+        assert.equal(0, count);
+    });
 });
 
 describe("hashmap transformation", () => {
