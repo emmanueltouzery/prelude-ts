@@ -65,6 +65,10 @@ export interface Seq<T> extends Collection<T> {
      * The mapper function returns an Option; if the Option is a Some,
      * the value it contains is added to the result Collection, if it's
      * a None, the value is discarded.
+     *
+     *     Vector.of(1,2,6).mapOption(x => x%2===0 ?
+     *         Option.of(x+1) : Option.none<number>())
+     *     => Vector.of(3, 7)
      */
     mapOption<U>(mapper:(v:T)=>Option<U>): Seq<U>;
 
@@ -281,6 +285,9 @@ export interface Seq<T> extends Collection<T> {
      * key of the pair will be used as a key in the map, the value,
      * as a value in the map. If several values get the same key,
      * entries will be lost.
+     *
+     *     Vector.of(1,2,3).toMap(x=>[x.toString(), x])
+     *     => HashMap.of(["1",1], ["2",2], ["3",3])
      */
     toMap<K,V>(converter:(x:T)=>[K & WithEquality,V]): HashMap<K,V>;
 

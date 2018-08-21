@@ -141,6 +141,10 @@ export class HashSet<T> implements ISet<T> {
      * The mapper function returns an Option; if the Option is a Some,
      * the value it contains is added to the result Collection, if it's
      * a None, the value is discarded.
+     *
+     *     HashSet.of(1,2,6).mapOption(x => x%2===0 ?
+     *         Option.of(x+1) : Option.none<number>())
+     *     => HashSet.of(3, 7)
      */
     mapOption<U>(mapper:(v:T)=>Option<U&WithEquality>): HashSet<U> {
         return this.hamt.fold(
@@ -609,6 +613,8 @@ export class HashSet<T> implements ISet<T> {
 
     /**
      * Get a human-friendly string representation of that value.
+     *
+     * Also see [[HashSet.mkString]]
      */
     toString(): string {
         return "HashSet(" +
