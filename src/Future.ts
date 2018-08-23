@@ -1,22 +1,10 @@
 import { Vector } from "./Vector";
-import { Lazy } from "./Lazy";
 import { Option } from "./Option";
 import { Either } from "./Either";
 
 /**
  * A Future is the equivalent, and ultimately wraps, a javascript Promise.
- * A fundamental difference is that Futures are lazy. Just defining a
- * Future won't trigger its execution, you'll have to use it for that
- * (call [[Future.map]], [[Future.flatMap]], use `await` on it and so on).
- * This means that a Future can have one of the four states:
- *
- * 1. not triggered
- * 2. pending
- * 3. fulfilled
- * 4. rejected
- *
- * That first state doesn't exist with Javascript Promises. In addition,
- * while Futures support the [[Future.then]] call (so that among others
+ * While Futures support the [[Future.then]] call (so that among others
  * you can use `await` on them), you should call [[Future.map]] and
  * [[Future.flatMap]].
  *
@@ -31,59 +19,89 @@ export class Future<T> {
     // for that reason I wrap the value in an array
     // to make sure JS will never turn a Promise<Promise<T>>
     // in a Promise<T>
-    private constructor(private promise: Lazy<Promise<T[]>>) { }
+    private constructor(private promise: Promise<T[]>) { }
 
     /**
-     * Build a Future from callback-style call.
-     * You get one callback to signal success, throw to signal
-     * failure.
+     * Build a Future in the same way as the 'new Promise'
+     * constructor.
+     * You get one callback to signal success (resolve),
+     * failure (reject), or you can throw to signal failure.
      *
-     *     Future.ofCallbackApi<string>(done => setTimeout(done, 10, "hello!"))
+     *     Future.ofPromiseCtor<string>((resolve,reject) => setTimeout(resolve, 10, "hello!"))
      */
-    static ofCallbackApi<T>(cb: (done:(x:T)=>void)=>void): Future<T> {
-        return new Future(Lazy.of(() => new Promise<T[]>(
-            (resolve,reject) => cb((v:T) => resolve([v])))));
+    static ofPromiseCtor<T>(executor: (resolve:(x:T)=>void, reject: (x:any)=>void)=>void): Future<T> {
+        return new Future(new Promise(executor).then(v=>[v]));
     }
 
     /**
      * Build a Future from an existing javascript Promise.
      */
     static of<T>(promise: Promise<T>): Future<T> {
-        return new Future(Lazy.of(()=>promise.then(x => [x])));
+        return new Future(promise.then(x => [x]));
+    }
+
+    /**
+     * Build a Future from a node-style callback API, for instance:
+     *
+     *     Future.ofCallback<string>(cb => fs.readFile('/etc/passwd', 'utf-8', cb))
+     */
+    static ofCallback<T>(fn: (cb:(err:any, val:T)=>void)=>void): Future<T> {
+        return Future.ofPromiseCtor((resolve,reject)=>fn((err, data)=>{
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        }));
     }
 
     /**
      * Build a successful Future with the value you provide.
      */
     static ok<T>(val:T): Future<T> {
-        return new Future(Lazy.of(()=>Promise.resolve([val])));
+        return new Future(Promise.resolve([val]));
     }
 
     /**
      * Build a failed Future with the error data you provide.
      */
     static failed<T>(reason: any): Future<T> {
-        return new Future(Lazy.of(()=>Promise.reject(reason)));
+        return new Future(Promise.reject(reason));
+    }
+
+    /**
+     * Creates a Future from a function returning a Promise,
+     * which can be inline in the call, for instance:
+     *
+     *     const f1 = Future.ok(1);
+     *     const f2 = Future.ok(2);
+     *     return Future.do(async () => {
+     *         const v1 = await f1;
+     *         const v2 = await f2;
+     *         return v1 + v2;
+     *     });
+     */
+    static do<T>(fn: ()=>Promise<T>): Future<T> {
+        return Future.of(fn())
     }
 
     /**
      * The `then` call is not meant to be a part of the `Future` API,
      * we need then so that `await` works directly.
-     * This method is eager, will trigger the underlying Promise.
      *
      * Please rather use [[Future.map]] or [[Future.flatMap]].
      */
     then<TResult1 = T, TResult2 = never>(
         onfulfilled: ((value: T) => TResult1 | PromiseLike<TResult1>),
         onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): PromiseLike<TResult1 | TResult2> {
-        return this.promise.get().then(([x]) => onfulfilled(x), rejected => onrejected?onrejected(rejected):Promise.reject(rejected)); 
+        return this.promise.then(([x]) => onfulfilled(x), rejected => onrejected?onrejected(rejected):Promise.reject(rejected)); 
     }
 
     /**
      * Get a `Promise` from this `Future`.
      */
     toPromise(): Promise<T> {
-        return this.promise.get().then(([x]) => x);
+        return this.promise.then(([x]) => x);
     }
 
     /**
@@ -172,7 +190,7 @@ export class Future<T> {
             .map(
                 f => f
                     .map<FutOptPair>(item => [f, Option.of(item)])
-                    .orElse(Future.ok<FutOptPair>([f, Option.none<T>()])));
+                    .recoverWith(_=>Future.ok<FutOptPair>([f, Option.none<T>()])));
         // go for the first completed of the iterable
         // remember after our map they're all successful now
         const success = Future.firstCompletedOf(velts);
@@ -237,13 +255,9 @@ export class Future<T> {
      * if the Future was failed. Will turn a successful Future in a failed
      * one if you throw an exception in the map callback (but please don't
      * do it.. Rather use [[Future.filter]] or another mechanism).
-     *
-     * This method is eager, will trigger the underlying Promise.
      */
     map<U>(fn: (x:T)=>U): Future<U> {
-        const lazy = Lazy.of(()=>this.promise.get().then(([x]) => [fn(x)]));
-        lazy.get();
-        return new Future<U>(lazy);
+        return new Future<U>(this.promise.then(([x]) => [fn(x)]));
     }
 
     /**
@@ -253,57 +267,54 @@ export class Future<T> {
      * Has no effect if the Future was failed. Will turn a successful Future in a failed
      * one if you throw an exception in the map callback (but please don't
      * do it.. Rather use [[Future.filter]] or another mechanism).
-     * This method is eager, will trigger the underlying Promise.
      * This is the monadic bind.
      */
     flatMap<U>(fn: (x:T)=>Future<U>): Future<U> {
-        const lazy = Lazy.of(()=>this.promise.get().then(([x]) => fn(x).promise.get()));
-        lazy.get();
-        return new Future<U>(lazy);
+        return new Future<U>(this.promise.then(([x]) => fn(x).promise));
     }
 
     /**
      * Transform the value contained in a failed Future. Has no effect
      * if the Future was successful.
-     *
-     * This method is eager, will trigger the underlying Promise.
      */
     mapFailure(fn: (x:any)=>any): Future<T> {
-        const lazy = Lazy.of(()=>this.promise.get().catch(x => {throw fn(x)}));
-        lazy.get();
-        return new Future<T>(lazy);
+        return new Future<T>(this.promise.catch(x => {throw fn(x)}));
     }
 
     /**
      * Execute the side-effecting function you give if the Future is a failure.
+     *
+     * The Future is unchanged by this call.
      */
     onFailure(fn: (x:any)=>void): Future<T> {
-        // rethrow in the catch to make sure the promise chain stays rejected
-        const lazy = Lazy.of(()=>this.promise.get().catch(x => {fn(x); throw x;}));
-        lazy.get();
-        return new Future(lazy);
+        this.promise.catch(x => fn(x));
+        return this;
     }
 
     /**
      * Execute the side-effecting function you give if the Future is a success.
+     *
+     * The Future is unchanged by this call.
      */
     onSuccess(fn: (x:T)=>void): Future<T> {
-        const lazy = Lazy.of(()=>this.promise.get().then(x => {fn(x[0]); return x;}));
-        lazy.get();
-        return new Future(lazy);
+        // we create a new promise here, need to catch errors on it,
+        // to avoid node UnhandledPromiseRejectionWarning warnings
+        this.promise.then(x => {fn(x[0]); return x;}).catch(_ => {});
+        return this;
     }
 
     /**
      * Execute the side-effecting function you give when the Future is
      * completed. You get an [[Either]], a `Right` if the Future is a
      * success, a `Left` if it's a failure.
+     *
+     * The Future is unchanged by this call.
      */
     onComplete(fn: (x:Either<any,T>)=>void): Future<T> {
-        const lazy = Lazy.of(()=>this.promise.get().then(
+        this.promise.then(
             x => {fn(Either.right(x[0])); return x;},
-            x => {fn(Either.left(x)); throw x;}));
-        lazy.get();
-        return new Future(lazy);
+            x => fn(Either.left(x)));
+        return this;
     }
 
     /**
@@ -323,11 +334,12 @@ export class Future<T> {
     
     /**
      * Has no effect if this Future is successful. If it's failed however,
-     * a Future equivalent to the one given as parameter is returned.
+     * the function you give will be called, receiving as parameter
+     * the error contents, and a Future equivalent to the one your
+     * function returns will be returned.
      */
-    orElse(other: Future<T>): Future<T> {
-        const lazy = Lazy.of(()=>this.promise.get().catch(_ => other.promise.get()));
-        return new Future<T>(lazy);
+    recoverWith(f: (err:any)=>Future<T>): Future<T> {
+        return new Future<T>(this.promise.catch(err => f(err).promise));
     }
 
     /**
