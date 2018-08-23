@@ -8,7 +8,30 @@ import { WithEquality, areEqual, getHashCode,
          Ordering, ToOrderable } from "./Comparison";
 import { Collection } from "./Collection";
 import * as SeqHelpers from "./SeqHelpers";
-import * as L from "list";
+
+const nodeBits = 5;
+const nodeSize = (1<<nodeBits); // 32
+const nodeBitmask = nodeSize - 1;
+
+/**
+ * We can get a mutable vector besides the immutable one,
+ * to enable faster performance in some scenarios (for instance
+ * append in a loop). However this is not exported to users
+ * of the library but purely for internal use.
+ *
+ * Note that since we can never modify nodes of an immutable vector,
+ * we must consider long and hard before adding more operations besides
+ * append to this interface.
+ * @hidden
+ * this is accessible only within the library because index.ts
+ * doesn't export it.
+ */
+export interface MutableVector<T> {
+    append:(x:T)=>void;
+    appendAll:(x:Iterable<T>)=>void;
+    getVector(): Vector<T>;
+    internalGet(idx:number): T|undefined;
+}
 
 /**
  * A general-purpose list class with all-around good performance.
@@ -17,19 +40,22 @@ import * as L from "list";
  * @param T the item type
  */
 export class Vector<T> implements Seq<T> {
+    // Based on https://github.com/graue/immutable-vector from Scott Feeney.
 
     /**
      * @hidden
      */
     // _contents will be undefined only if length===0
-    protected constructor(private _list: L.List<T>) {}
+    protected constructor(private _contents: any[]|undefined,
+                          private _length: number,
+                          private _maxShift: number) {}
 
     /**
      * The empty vector.
      * @param T the item type
      */
     static empty<T>(): Vector<T> {
-        return new Vector(L.empty());
+        return Vector.ofArray<T>([]);
     }
 
     /**
@@ -38,25 +64,6 @@ export class Vector<T> implements Seq<T> {
      */
     static of<T>(...data: T[]): Vector<T> {
         return Vector.ofArray(data);
-    }
-
-    // copy-pasted from funkia/list master
-    private static lfrom<A>(sequence: A[] | ArrayLike<A> | Iterable<A>): L.List<A>;
-    private static lfrom<A>(sequence: any): L.List<A> {
-        let l = <L.List<A>>L.empty();
-        if (sequence.length > 0 && (sequence[0] !== undefined || 0 in sequence)) {
-            for (let i = 0; i < sequence.length; ++i) {
-                l = L.append(sequence[i], l);
-            }
-        } else if (Symbol.iterator in sequence) {
-            const iterator = sequence[Symbol.iterator]();
-            let cur;
-            // tslint:disable-next-line:no-conditional-assignment
-            while (!(cur = iterator.next()).done) {
-                l = L.append(cur.value, l);
-            }
-        }
-        return l;
     }
 
     /**
@@ -68,11 +75,51 @@ export class Vector<T> implements Seq<T> {
         if (Array.isArray(elts)) {
             return Vector.ofArray(elts);
         }
-        return new Vector(Vector.lfrom(elts));
+        // I measure appendAll to be 2x faster than Array.from on my
+        // machine (node 6.11.3+8.8.0)
+        // return Vector.ofArray(Array.from(elts));
+        return Vector.empty<T>().appendAll(elts);
     }
 
     private static ofArray<T>(data: T[]): Vector<T> {
-        return new Vector(L.fromArray(data));
+        let nodes = [];
+
+        let i=0;
+        for (; i < data.length-(data.length%nodeSize); i += nodeSize) {
+            const node = data.slice(i, i + nodeSize);
+            nodes.push(node);
+        }
+
+        // potentially one non-full node to add.
+        if (data.length-i>0) {
+            const extraNode = new Array(nodeSize);
+            for (let idx=0;i+idx<data.length;idx++) {
+                extraNode[idx] = data[i+idx];
+            }
+            nodes.push(extraNode);
+        }
+
+        return Vector.fromLeafNodes(nodes, data.length);
+    }
+
+    /**
+     * Build a new vector from the leaf nodes containing data.
+     */
+    private static fromLeafNodes<T>(nodes: T[][], length: number): Vector<T> {
+        let depth = 1;
+        while (nodes.length > 1) {
+            let lowerNodes:any[] = nodes;
+            nodes = [];
+            for (let i = 0; i < lowerNodes.length; i += nodeSize) {
+                const node = lowerNodes.slice(i, i + nodeSize);
+                nodes.push(node);
+            }
+            depth++;
+        }
+
+        const _contents = nodes[0];
+        const _maxShift = _contents ? nodeBits * (depth - 1) : 0;
+        return new Vector<T>(_contents, length, _maxShift);
     }
 
     /**
@@ -101,14 +148,87 @@ export class Vector<T> implements Seq<T> {
      * Get the length of the collection.
      */
     length(): number {
-        return L.length(this._list);
+        return this._length;
     }
 
     /**
      * true if the collection is empty, false otherwise.
      */
     isEmpty(): boolean {
-        return L.length(this._list) === 0;
+        return this._length === 0;
+    }
+
+    /**
+     * Get an empty mutable vector. Append is much more efficient, and you can
+     * get a normal vector from it.
+     */
+    private static emptyMutable<T>(): MutableVector<T> {
+        return Vector.appendToMutable(Vector.empty<T>(), <any>undefined);
+    }
+
+    /**
+     * Get a mutable vector from an immutable one, however you must add a
+     * a value to the immutable vector at least once, so that the last
+     * node is modified to a temporary vector, because we can't modify
+     * the nodes from the original immutable vector.
+     * Note that is only safe because the only modifying operation on
+     * mutable vector is append at the end (so we know other tiles besides
+     * the last one won't be modified).
+     */
+    private static appendToMutable<T>(vec: Vector<T>, toAppend:T): MutableVector<T> {
+        // i don't want to offer even a private API to get a mutable vector from
+        // an immutable one without adding a value to protect the last node, but
+        // I need it for emptyMutable(), so I have this trick with undefined and any.
+        if (typeof toAppend !== "undefined") {
+            vec = vec.append(toAppend);
+        }
+        let lastNode: T[]|undefined = undefined;
+        const append = (val:T) => {
+            if (vec._length % nodeSize !== 0) {
+                // in the middle of a node
+                if (!lastNode) {
+                    lastNode = vec.getLastNode();
+                }
+                lastNode[vec._length%nodeSize] = val;
+                ++vec._length;
+            } else if (vec._length < (nodeSize << vec._maxShift)) {
+                // finishing a node, no need to add a new root node
+                const index = vec._length;
+                let node = vec._contents || (vec._contents = new Array(nodeSize));
+                let shift = vec._maxShift;
+                while (shift > 0) {
+                    let childIndex = (index >> shift) & nodeBitmask;
+                    if (!node[childIndex]) {
+                        // Need to create new node. Can happen when appending element.
+                        node[childIndex] = new Array(nodeSize);
+                    }
+                    node = node[childIndex];
+                    shift -= nodeBits;
+                }
+                node[index & nodeBitmask] = val;
+                lastNode = node;
+                ++vec._length;
+            } else {
+                // We'll need a new root node.
+                const newNode = new Array(nodeSize);
+                newNode[0] = val;
+                vec = Vector.setupNewRootNode(vec, newNode, 1);
+                lastNode = newNode;
+            }
+        };
+        return {
+            append,
+            appendAll: (elts: Iterable<T>) => {
+                const iterator = elts[Symbol.iterator]();
+                let curItem = iterator.next();
+                while (!curItem.done) {
+                    append(curItem.value);
+                    curItem = iterator.next();
+                }
+            },
+            internalGet: (idx:number) => vec.internalGet(idx),
+            getVector: () => vec
+        };
     }
 
     /**
@@ -127,12 +247,39 @@ export class Vector<T> implements Seq<T> {
      */
     static unfoldRight<T,U>(seed: T, fn: (x:T)=>Option<[U,T]>): Vector<U> {
         let nextVal = fn(seed);
-        let r = L.empty();
+        let r = Vector.emptyMutable<U>();
         while (nextVal.isSome()) {
-            r = L.append(nextVal.get()[0], r);
+            r.append(nextVal.get()[0]);
             nextVal = fn(nextVal.get()[1]);
         }
-        return new Vector(r);
+        return r.getVector();
+    }
+
+    private cloneVec(): Vector<T> {
+        return new Vector<T>(this._contents, this._length, this._maxShift);
+    }
+
+    // WILL blow up if you give out of bounds index!
+    // it's the caller's responsability to check bounds.
+    private internalGet(index: number): T {
+        let shift = this._maxShift;
+        let node = this._contents;
+        while (shift > 0) {
+            node = (<any>node)[(index >> shift) & nodeBitmask];
+            shift -= nodeBits;
+        }
+        return (<any>node)[index & nodeBitmask];
+    }
+
+    // will blow on an empty vector
+    private getLastNode(): T[] {
+        let shift = this._maxShift;
+        let node = this._contents;
+        while (shift > 0) {
+            node = (<any>node)[(this._length >> shift) & nodeBitmask];
+            shift -= nodeBits;
+        }
+        return <any[]>node;
     }
 
     /**
@@ -141,7 +288,10 @@ export class Vector<T> implements Seq<T> {
      * contain less elements than the index.
      */
     get(index: number): Option<T> {
-        return Option.of(L.nth(index, this._list));
+        if (index < 0 || index >= this._length) {
+            return Option.none();
+        }
+        return Option.of(this.internalGet(index));
     }
 
     /**
@@ -149,9 +299,32 @@ export class Vector<T> implements Seq<T> {
      * return Some of its value, otherwise return None.
      */
     single(): Option<T> {
-        return L.length(this._list) === 1 ?
+        return this._length === 1 ?
             this.head() :
             Option.none<T>();
+    }
+
+    // OK to call with index === vec.length (an append) as long as vector
+    // length is not a (nonzero) power of the branching factor (32, 1024, ...).
+    // Cannot be called on the empty vector!! It would crash
+    private internalSet(index: number, val: T|null): Vector<T> {
+        let newVec = this.cloneVec();
+        // next line will crash on empty vector
+        let node = newVec._contents = (<any[]>this._contents).slice();
+        let shift = this._maxShift;
+        while (shift > 0) {
+            let childIndex = (index >> shift) & nodeBitmask;
+            if (node[childIndex]) {
+                node[childIndex] = node[childIndex].slice();
+            } else {
+                // Need to create new node. Can happen when appending element.
+                node[childIndex] = new Array(nodeSize);
+            }
+            node = node[childIndex];
+            shift -= nodeBits;
+        }
+        node[index & nodeBitmask] = val;
+        return newVec;
     }
 
     /**
@@ -159,17 +332,73 @@ export class Vector<T> implements Seq<T> {
      * Will throw if the index is out of bounds!
      */
     replace(index: number, val: T): Vector<T> {
-        if (index >= this.length() || index < 0) {
+        if (index >= this._length || index < 0) {
             throw new Error('Vector.replace: index is out of range: ' + index);
         }
-        return new Vector(L.update(index, val, this._list));
+        return this.internalSet(index, val);
     }
 
     /**
      * Append an element at the end of the collection.
      */
     append(val:T): Vector<T> {
-        return new Vector(L.append(val, this._list));
+        if (this._length === 0) {
+            return Vector.ofArray<T>([val]);
+        } else if (this._length < (nodeSize << this._maxShift)) {
+            const newVec = this.internalSet(this._length, val);
+            newVec._length++;
+            return newVec;
+        } else {
+            // We'll need a new root node.
+            const newNode = new Array(nodeSize);
+            newNode[0] = val;
+            return Vector.setupNewRootNode(this, newNode, 1);
+        }
+    }
+
+    private appendNode(val:T[], length:number): Vector<T> {
+        if (this._length % nodeSize !== 0) {
+            throw "prelude.ts Vector: invalid state, can't append a node if the previous node isn't full";
+        }
+        if (this._length === 0) {
+            return Vector.ofArray<T>(val);
+        } else if (this._length < (nodeSize << this._maxShift)) { // here i know the this._length is a multiple of nodeSize so < is enough
+            let newVec = this.cloneVec();
+            // next line will crash on empty vector
+            let node = newVec._contents = (<any[]>this._contents).slice();
+            let shift = this._maxShift;
+            while (shift > nodeBits) {
+                let childIndex = (this._length >> shift) & nodeBitmask;
+                if (node[childIndex]) {
+                    node[childIndex] = node[childIndex].slice();
+                } else {
+                    // Need to create new node. Can happen when appending element.
+                    node[childIndex] = new Array(nodeSize);
+                }
+                node = node[childIndex];
+                shift -= nodeBits;
+            }
+            node[(this._length >> shift) & nodeBitmask] = val;
+            newVec._length += length;
+            return newVec;
+        } else {
+            // We'll need a new root node.
+            return Vector.setupNewRootNode(this, val, length);
+        }
+    }
+
+    private static setupNewRootNode<T>(vec: Vector<T>, nodeToAdd:T[], length: number): Vector<T> {
+        const newVec = vec.cloneVec();
+        newVec._length += length;
+        newVec._maxShift += nodeBits;
+        let depth = newVec._maxShift / nodeBits + 1;
+        let node:any[] = nodeToAdd;
+        for (let i = 2; i < depth; i++) {
+            const newNode = [node];
+            node = newNode;
+        }
+        newVec._contents = [vec._contents, node];
+        return newVec;
     }
 
     /**
@@ -177,11 +406,115 @@ export class Vector<T> implements Seq<T> {
      * Note that arrays are also iterables.
      */
     appendAll(elts: Iterable<T>): Vector<T> {
-        if ((<any>elts)._list && (<any>elts).replace) {
-            // elts is a vector too
-            return new Vector(L.concat(this._list, (<Vector<T>>elts)._list));
+        if (Number.isInteger((<any>elts)._maxShift) && (<any>elts).sortOn) {
+            // elts is a Vector too!
+            if ((<Vector<T>>elts).isEmpty()) {
+                return this;
+            }
+            return this.appendAllArrays(
+                { [Symbol.iterator]: () => (<Vector<T>>elts).iterateLeafNodes() },
+                (<Vector<T>>elts).length());
         }
-        return new Vector(L.concat(this._list, Vector.lfrom(elts)));
+        if (Array.isArray(elts)) {
+            return this.appendAllArrays([elts], elts.length);
+        }
+        return this.appendAllIterable(elts);
+    }
+
+    private static iteratorPrepend<T>(it: Iterator<T>, toPrepend: T): Iterator<T> {
+        let gaveFirst = false;
+        return {
+            next: () => {
+                const v = gaveFirst ?
+                    it.next() :
+                    { value: toPrepend, done: false};
+                gaveFirst = true;
+                return v;
+            }
+        };
+    }
+
+    private appendAllArrays(_arrays: Iterable<T[]>, length: number): Vector<T> {
+        if (length === 0) {
+            return this;
+        }
+        // first need to create a new Vector through the first append
+        // call, and then we can mutate that new Vector, otherwise
+        // we'll mutate the receiver which is a big no-no!!
+        // also, make sure 'baseVec' is never empty as the rest
+        // of the code won't know what do with an empty array
+        const _it = _arrays[Symbol.iterator]();
+        const firstArray = _it.next().value; // I know the iterable of arrays is not empty
+        let [baseVec, it, copied] = this.isEmpty()
+            ? [Vector.ofArray(firstArray.slice(0, Math.min(length, firstArray.length))),
+               _it,
+               Math.min(length, firstArray.length)]
+            : [this.append(firstArray[0]),
+               Vector.iteratorPrepend(_it, firstArray.slice(1)),
+               1];
+
+        // first finish the last node
+        const lastNode = baseVec.getLastNode();
+        let idxInNode = baseVec._length % nodeSize;
+        let curInArrayIdx = 0;
+        let curArray = it.next().value;
+        while (copied < length && idxInNode > 0 && idxInNode < nodeSize) {
+            lastNode[idxInNode++] = curArray[curInArrayIdx++];
+            ++copied;
+            ++baseVec._length;
+            if (curInArrayIdx === curArray.length) {
+                curInArrayIdx = 0;
+                curArray = it.next().value;
+            }
+        }
+        if (copied === length) {
+            // already done, didn't need to add new nodes!
+            return baseVec;
+        }
+
+        // we're now at node boundary, add remaining array items
+        // by adding nodes one by one
+        let curNewVec = new Array(nodeSize);
+        idxInNode = 0;
+        while (copied < length && idxInNode < nodeSize) {
+            curNewVec[idxInNode++] = curArray[curInArrayIdx++];
+            ++copied;
+            if (idxInNode === nodeSize) {
+                baseVec = baseVec.appendNode(curNewVec, nodeSize);
+                idxInNode = 0;
+                curNewVec = new Array(nodeSize);
+            }
+            if (curInArrayIdx === curArray.length) {
+                curInArrayIdx = 0;
+                curArray = it.next().value;
+            }
+        }
+        return idxInNode > 0
+            ? baseVec.appendNode(curNewVec, idxInNode)
+            : baseVec;
+    }
+
+    /**
+     * Append multiple elements at the end of the collection.
+     * Note that arrays are also iterables.
+     */
+    private appendAllIterable(elts: Iterable<T>): Vector<T> {
+        const iterator = elts[Symbol.iterator]();
+        let curItem = iterator.next();
+        if (curItem.done) {
+            return this;
+        }
+        // first need to create a new Vector through the first append
+        // call, and then we can mutate that new Vector, otherwise
+        // we'll mutate the receiver which is a big no-no!!
+        const mutVec = Vector.appendToMutable(this, curItem.value);
+
+        curItem = iterator.next();
+        while (!curItem.done) {
+            mutVec.append(curItem.value);
+            curItem = iterator.next();
+        }
+        return mutVec.getVector();
     }
 
     /**
@@ -199,7 +532,10 @@ export class Vector<T> implements Seq<T> {
      * Option.None if it's empty.
      */
     last(): Option<T> {
-        return Option.of(L.last(this._list));
+        if (this._length === 0) {
+            return Option.none();
+        }
+        return Option.of(this.internalGet(this._length-1));
     }
 
     /**
@@ -211,7 +547,45 @@ export class Vector<T> implements Seq<T> {
      *     => Vector.of(1,2)
      */
     init(): Vector<T> {
-        return new Vector(L.pop(this._list));
+        let popped;
+
+        if (this._length === 0) {
+            return this;
+        }
+        if (this._length === 1) {
+            return Vector.empty<T>();
+        }
+
+        if ((this._length & nodeBitmask) !== 1) {
+            popped = this.internalSet(this._length - 1, null);
+        }
+        // If the length is a power of the branching factor plus one,
+        // reduce the tree's depth and install the root's first child as
+        // the new root.
+        else if (this._length - 1 === nodeSize << (this._maxShift - nodeBits)) {
+            popped = this.cloneVec();
+            popped._contents = (<any[]>this._contents)[0]; // length>0 => _contents!==undefined
+            popped._maxShift = this._maxShift - nodeBits;
+        }
+        // Otherwise, the root stays the same but we remove a leaf node.
+        else {
+            popped = this.cloneVec();
+
+            // we know the vector is not empty, there is a if at the top
+            // of the function => ok to cast to any[]
+            let node = popped._contents = (<any[]>popped._contents).slice();
+            let shift = this._maxShift;
+            let removedIndex = this._length - 1;
+
+            while (shift > nodeBits) { // i.e., Until we get to lowest non-leaf node.
+                let localIndex = (removedIndex >> shift) & nodeBitmask;
+                node = node[localIndex] = node[localIndex].slice();
+                shift -= nodeBits;
+            }
+            node[(removedIndex >> shift) & nodeBitmask] = null;
+        }
+        popped._length--;
+        return popped;
     }
 
     /**
@@ -220,7 +594,18 @@ export class Vector<T> implements Seq<T> {
      * after that point are retained.
      */
     dropWhile(predicate:(x:T)=>boolean): Vector<T> {
-        return new Vector(L.dropWhile(predicate, this._list));
+        let r = Vector.emptyMutable<T>();
+        let skip = true;
+        for (let i=0;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            if (skip && !predicate(val)) {
+                skip = false;
+            }
+            if (!skip) {
+                r.append(val);
+            }
+        }
+        return r.getVector();
     }
 
     /**
@@ -229,7 +614,13 @@ export class Vector<T> implements Seq<T> {
      * Option.None otherwise.
      */
     find(predicate:(v:T)=>boolean): Option<T> {
-        return Option.of(L.find(predicate, this._list));
+        for (let i=0;i<this._length;i++) {
+            const item = <T>this.internalGet(i);
+            if (predicate(item)) {
+                return Option.of(item);
+            }
+        }
+        return Option.none<T>();
     }
 
     /**
@@ -237,7 +628,7 @@ export class Vector<T> implements Seq<T> {
      * elements in the collection.
      */
     allMatch(predicate:(v:T)=>boolean): boolean {
-        return L.every(predicate, this._list);
+        return this.find(x => !predicate(x)).isNone();
     }
 
     /**
@@ -245,7 +636,7 @@ export class Vector<T> implements Seq<T> {
      * element in the collection.
      */
     anyMatch(predicate:(v:T)=>boolean): boolean {
-        return L.some(predicate, this._list);
+        return this.find(predicate).isSome();
     }
 
     /**
@@ -261,8 +652,17 @@ export class Vector<T> implements Seq<T> {
     partition<U extends T>(predicate:(v:T)=>v is U): [Vector<U>,Vector<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>];
     partition(predicate:(v:T)=>boolean): [Vector<T>,Vector<T>] {
-        return <[Vector<T>,Vector<T>]>L.toArray(L.partition(predicate, this._list))
-            .map(x => new Vector(x));
+        const fst = Vector.emptyMutable<T>();
+        const snd = Vector.emptyMutable<T>();
+        for (let i=0;i<this._length;i++) {
+            const val = this.internalGet(i);
+            if (predicate(val)) {
+                fst.append(val);
+            } else {
+                snd.append(val);
+            }
+        }
+        return [fst.getVector(), snd.getVector()];
     }
 
     /**
@@ -283,11 +683,15 @@ export class Vector<T> implements Seq<T> {
      */
     groupBy<C>(classifier: (v:T)=>C & WithEquality): HashMap<C,Vector<T>> {
         return this.foldLeft(
-            HashMap.empty<C,Vector<T>>(),
-            (acc: HashMap<C,Vector<T>>, v:T) =>
+            HashMap.empty<C,MutableVector<T>>(),
+            (acc: HashMap<C,MutableVector<T>>, v:T) =>
                 acc.putWithMerge(
-                    classifier(v), Vector.of(v), // !!! DOUBLE CHECK THIS
-                    (v1:Vector<T>,v2:Vector<T>) => v1.append(<T>L.nth(0, v2._list))));
+                    classifier(v), Vector.appendToMutable(Vector.empty<T>(), v),
+                    (v1:MutableVector<T>,v2:MutableVector<T>)=> {
+                        v1.append(<T>v2.internalGet(0));
+                        return v1;
+                    }))
+            .mapValues(mutVec => mutVec.getVector());
     }
 
     /**
@@ -311,15 +715,101 @@ export class Vector<T> implements Seq<T> {
         return <Vector<T>>SeqHelpers.distinctBy(this, keyExtractor);
     }
 
+    // TODO lots of duplication between iterateLeafNodes & [Symbol.iterator],
+    // but don't know how merge some code while keeping performance.
     [Symbol.iterator](): Iterator<T> {
-        return this._list[Symbol.iterator]();
+        let _index = -1;
+        let _stack: any[] = [];
+        let _node = this._contents;
+        const sz = nodeSize - 1;
+        return {
+            next: () => {
+                // Iterator state:
+                //  _node: "Current" leaf node, meaning the one we returned a value from
+                //         on the previous call.
+                //  _index: Index (within entire vector, not node) of value returned last
+                //          time.
+                //  _stack: Path we traveled to current node, as [node, local index]
+                //          pairs, starting from root node, not including leaf.
+
+                if (_index === this._length - 1) {
+                    return {done: true, value: <any>undefined};
+                }
+
+                if (_index > 0 && (_index & nodeBitmask) === sz) {
+                    // Using the stack, go back up the tree, stopping when we reach a node
+                    // whose children we haven't fully iterated over.
+                    let step;
+                    while ((step = _stack.pop())[1] === sz) ;
+                    step[1]++;
+                    _stack.push(step);
+                    _node = step[0][step[1]];
+                }
+
+                for (let shift = _stack.length * nodeBits; shift < this._maxShift;
+                     shift += nodeBits) {
+                    _stack.push([_node, 0]);
+                    _node = (<any[]>_node)[0];
+                }
+
+                ++_index;
+                return {value: (<any[]>_node)[_index & nodeBitmask], done: false};
+            }
+        };
+    }
+
+    // TODO lots of duplication between iterateLeafNodes & [Symbol.iterator],
+    // but don't know how merge some code while keeping performance.
+    private iterateLeafNodes(): Iterator<T[]> {
+        let _index = -1;
+        let _stack: any[] = [];
+        let _node = this._contents;
+        const sz = nodeSize - 1;
+        return {
+            next: () => {
+                // Iterator state:
+                //  _node: "Current" leaf node, meaning the one we returned a value from
+                //         on the previous call.
+                //  _index: Index (within entire vector, not node) of value returned last
+                //          time.
+                //  _stack: Path we traveled to current node, as [node, local index]
+                //          pairs, starting from root node, not including leaf.
+
+                // need >= not === since we add nodeSize everytime, we'll pass
+                // over the end for vectors with a length not multiple of nodeSize.
+                if (_index >= this._length - 1) {
+                    return {done: true, value: <any>undefined};
+                }
+
+                if (_index > 0) {
+                    // Using the stack, go back up the tree, stopping when we reach a node
+                    // whose children we haven't fully iterated over.
+                    let step;
+                    while ((step = _stack.pop())[1] === sz) ;
+                    step[1]++;
+                    _stack.push(step);
+                    _node = step[0][step[1]];
+                }
+
+                for (let shift = _stack.length * nodeBits; shift < this._maxShift;
+                     shift += nodeBits) {
+                    _stack.push([_node, 0]);
+                    _node = (<any[]>_node)[0];
+                }
+
+                _index += nodeSize;
+                return {value: _node, done: false};
+            }
+        };
     }
 
     /**
      * Call a function for element in the collection.
      */
     forEach(fun:(x:T)=>void):Vector<T> {
-        L.forEach(fun, this._list);
+        for (let i = 0; i < this._length; i++) {
+            fun(this.internalGet(i));
+        }
         return this;
     }
 
@@ -328,7 +818,28 @@ export class Vector<T> implements Seq<T> {
      * by the mapper function you give.
      */
     map<U>(fun:(x:T)=>U): Vector<U> {
-        return new Vector(L.map(fun, this._list));
+        const leafNodes = this.getLeafNodes(this._length);
+        const newLeafNodes: U[][] = [];
+        newLeafNodes.length = leafNodes.length;
+        // don't do the last leaf node
+        for (let i=0;i<leafNodes.length-1;i++) {
+            newLeafNodes[i] = [];
+            newLeafNodes[i].length = nodeSize;
+            const curLeafNode = leafNodes[i];
+            const curNewLeafNode = newLeafNodes[i];
+            for (let j=0;j<nodeSize;j++) {
+                curNewLeafNode[j] = fun(curLeafNode[j]);
+            }
+        }
+        // last leaf node, the last node may not be full
+        newLeafNodes[leafNodes.length-1] = [];
+        newLeafNodes[leafNodes.length-1].length = nodeSize;
+        const curLeafNode = leafNodes[leafNodes.length-1];
+        const curNewLeafNode = newLeafNodes[leafNodes.length-1];
+        for (let j=0;j<this._length-(leafNodes.length-1)*nodeSize;j++) {
+            curNewLeafNode[j] = fun(curLeafNode[j]);
+        }
+        return Vector.fromLeafNodes(newLeafNodes, this._length);
     }
 
     /**
@@ -339,7 +850,14 @@ export class Vector<T> implements Seq<T> {
     filter<U extends T>(fun:(v:T)=>v is U): Vector<U>;
     filter(fun:(v:T)=>boolean): Vector<T>;
     filter(fun:(v:T)=>boolean): Vector<T> {
-        return new Vector(L.filter(fun, this._list));
+        const mutVec = Vector.emptyMutable<T>();
+        for (let i = 0; i < this._length; i++) {
+            const value = this.internalGet(i);
+            if (fun(value)) {
+                mutVec.append(value);
+            }
+        }
+        return mutVec.getVector();
     }
 
     /**
@@ -349,14 +867,14 @@ export class Vector<T> implements Seq<T> {
      * a None, the value is discarded.
      */
     mapOption<U>(mapper:(v:T)=>Option<U>): Vector<U> {
-        let vec = L.empty();
-        for (let i = 0; i < this.length(); i++) {
-            const v = mapper(<T>L.nth(i, this._list));
+        let mutVec = Vector.emptyMutable<U>();
+        for (let i = 0; i < this._length; i++) {
+            const v = mapper(this.internalGet(i));
             if (v.isSome()) {
-                vec = L.append(v.get(), vec);
+                mutVec.append(v.get());
             }
         }
-        return new Vector(vec);
+        return mutVec.getVector();
     }
 
     /**
@@ -366,7 +884,11 @@ export class Vector<T> implements Seq<T> {
      * This is the monadic bind.
      */
     flatMap<U>(mapper:(v:T)=>Vector<U>): Vector<U> {
-        return new Vector(L.chain(x => mapper(x)._list, this._list));
+        const mutVec = Vector.emptyMutable<U>();
+        for (let i = 0; i < this._length; i++) {
+            mutVec.appendAll(mapper(this.internalGet(i)));
+        }
+        return mutVec.getVector();
     }
 
     /**
@@ -398,7 +920,11 @@ export class Vector<T> implements Seq<T> {
      *           an updated value.
      */
     foldLeft<U>(zero:U, fn:(soFar:U,cur:T)=>U):U {
-        return L.foldl(fn, zero, this._list);
+        let acc = zero;
+        for (let i = 0; i < this._length; i++) {
+            acc = fn(acc, this.internalGet(i));
+        }
+        return acc;
     }
 
     /**
@@ -416,10 +942,29 @@ export class Vector<T> implements Seq<T> {
      *           an updated value.
      */
     foldRight<U>(zero: U, fn:(cur:T, soFar:U)=>U): U {
-        return L.foldr(fn, zero, this._list);
+        let r = zero;
+        for (let i=this._length-1;i>=0;i--) {
+            r = fn(<T>this.internalGet(i), r);
+        }
+        return r;
     }
 
     // indexOf(element:T, fromIndex:number): number {
+    //     if (fromIndex === undefined) {
+    //         fromIndex = 0;
+    //     } else {
+    //         fromIndex >>>= 0;
+    //     }
+    //     let isImmutableCollection = ImmutableVector.isImmutableVector(element);
+    //     for (let index = fromIndex; index < this.length; index++) {
+    //         let val = this.get(index);
+    //         if (isImmutableCollection) {
+    //             if (element.equals(this.get(index))) return index;
+    //         } else {
+    //             if (element === this.internalGet(index)) return index;
+    //         }
+    //     }
+    //     return -1;
     // }
 
     /**
@@ -446,13 +991,13 @@ export class Vector<T> implements Seq<T> {
         if (<any>other === this) {
             return true;
         }
-        if (!other || (!other._list) || (!L.isList(other._list))) {
+        if (!other || (other._maxShift === undefined)) {
             return false;
         }
-        if (this.length() !== other.length()) return false;
-        for (let i = 0; i < this.length(); i++) {
-            const myVal: T & WithEquality|null|undefined = <T&WithEquality>L.nth(i, this._list);
-            const hisVal: T & WithEquality|null|undefined = L.nth(i, other._list);
+        if (this._length !== other._length) return false;
+        for (let i = 0; i < this._length; i++) {
+            const myVal: T & WithEquality|null|undefined = <T&WithEquality>this.internalGet(i);
+            const hisVal: T & WithEquality|null|undefined = other.internalGet(i);
             if ((myVal === undefined) !== (hisVal === undefined)) {
                 return false;
             }
@@ -475,8 +1020,8 @@ export class Vector<T> implements Seq<T> {
      */
     hashCode(): number {
         let hash = 1;
-        for (let i=0;i<this.length();i++) {
-            hash = 31 * hash + getHashCode(L.nth(i, this._list));
+        for (let i=0;i<this._length;i++) {
+            hash = 31 * hash + getHashCode(this.internalGet(i));
         }
         return hash;
     }
@@ -486,11 +1031,11 @@ export class Vector<T> implements Seq<T> {
      */
     toString(): string {
         let r = "Vector(";
-        for (let i=0;i<this.length();i++) {
+        for (let i=0;i<this._length;i++) {
             if (i>0) {
                 r += ", ";
             }
-            r += SeqHelpers.toStringHelper(L.nth(i, this._list));
+            r += SeqHelpers.toStringHelper(this.internalGet(i));
         }
         return r + ")";
     }
@@ -512,11 +1057,11 @@ export class Vector<T> implements Seq<T> {
      */
     mkString(separator: string): string {
         let r = "";
-        for (let i=0;i<this.length();i++) {
+        for (let i=0;i<this._length;i++) {
             if (i>0) {
                 r += separator;
             }
-            r += SeqHelpers.toStringHelper(<T>L.nth(i, this._list), {quoteStrings:false});
+            r += SeqHelpers.toStringHelper(<T>this.internalGet(i), {quoteStrings:false});
         }
         return r;
     }
@@ -583,8 +1128,58 @@ export class Vector<T> implements Seq<T> {
      * Convert to array.
      */
     toArray(): T[] {
-        return L.toArray(this._list);
+        let out = new Array(this._length);
+        for (let i = 0; i < this._length; i++) {
+            out[i] = <T>this.internalGet(i);
+        }
+        return out;
+        // alternative implementation, measured slower
+        // (concat is creating a new array everytime) =>
+        //
+        // const nodes = this.getLeafNodes(this._length);
+        // return [].concat.apply([], nodes).slice(0,this._length);
     };
+
+    /**
+     * get the leaf nodes, which contain the data, from the vector.
+     * return only the leaf nodes containing the first n items from the vector.
+     * (give n=_length to get all the data)
+     */
+    private getLeafNodes(_n:number): T[][] {
+        if (_n<=0) {
+            return [];
+        }
+        const n = Math.min(_n, this._length);
+        let _index = 0;
+        let _stack: any[] = [];
+        let _node = this._contents;
+        let result:T[][] = new Array(Math.floor(n/nodeSize)+1);
+        if (!_node) {
+            // empty vector
+            return result;
+        }
+
+        while (_index*nodeSize < n) {
+            if (_index > 0) {
+                // Using the stack, go back up the tree, stopping when we reach a node
+                // whose children we haven't fully iterated over.
+                let step;
+                while ((step = _stack.pop())[1] === nodeSize - 1) ;
+                step[1]++;
+                _stack.push(step);
+                _node = step[0][step[1]];
+            }
+
+            let shift;
+            for (shift=_stack.length*nodeBits; shift<this._maxShift; shift+=nodeBits) {
+                _stack.push([_node, 0]);
+                _node = (<any[]>_node)[0];
+            }
+
+            result[_index++] = <any>_node;
+        }
+        return result;
+    }
 
     /**
      * @hidden
@@ -605,18 +1200,18 @@ export class Vector<T> implements Seq<T> {
      * of both collections. Extra elements will be discarded.
      */
     zip<U>(other: Iterable<U>): Vector<[T,U]> {
-        let r = <L.List<[T,U]>>L.empty();
+        let r = Vector.emptyMutable<[T,U]>();
         const thisIterator = this[Symbol.iterator]();
         const otherIterator = other[Symbol.iterator]();
         let thisCurItem = thisIterator.next();
         let otherCurItem = otherIterator.next();
 
         while (!thisCurItem.done && !otherCurItem.done) {
-            r = L.append<[T,U]>([thisCurItem.value, otherCurItem.value], r);
+            r.append([thisCurItem.value, otherCurItem.value]);
             thisCurItem = thisIterator.next();
             otherCurItem = otherIterator.next();
         }
-        return new Vector(r);
+        return r.getVector();
     }
 
     /**
@@ -626,7 +1221,11 @@ export class Vector<T> implements Seq<T> {
      *     => Vector.of(3,2,1)
      */
     reverse(): Vector<T> {
-        return new Vector(L.reverse(this._list));
+        const mutVec = Vector.emptyMutable<T>();
+        for (let i=this._length-1;i>=0;i--) {
+            mutVec.append(<T>this.internalGet(i));
+        }
+        return mutVec.getVector();
     }
 
     /**
@@ -646,7 +1245,12 @@ export class Vector<T> implements Seq<T> {
      * after the first element which fails the predicate.
      */
     takeWhile(predicate:(x:T)=>boolean): Vector<T> {
-        return new Vector(L.takeWhile(predicate, this._list));
+        for (let i=0;i<this._length;i++) {
+            if (!predicate(<T>this.internalGet(i))) {
+                return this.take(i);
+            }
+        }
+        return this;
     }
 
     /**
@@ -656,10 +1260,7 @@ export class Vector<T> implements Seq<T> {
      *     => [Vector.of(1,2,3), Vector.of(4,5)]
      */
     splitAt(index:number): [Vector<T>,Vector<T>] {
-        if (index < 0) {
-            return [Vector.empty<T>(), this];
-        }
-        return <[Vector<T>,Vector<T>]>L.splitAt(index, this._list).map(x => new Vector(x));
+        return [this.take(index),this.drop(index)];
     }
 
     /**
@@ -672,7 +1273,6 @@ export class Vector<T> implements Seq<T> {
      *    => [Vector.of(1,2), Vector.of(3,4,5,6)]
      */
     span(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>] {
-        // could be potentially faster using splitAt.
         const first = this.takeWhile(predicate);
         return [first, this.drop(first.length())];
     }
@@ -684,7 +1284,18 @@ export class Vector<T> implements Seq<T> {
      * returns the empty collection.
      */
     drop(n:number): Vector<T> {
-        return new Vector(L.drop(n, this._list));
+        if (n<0) {
+            return this;
+        }
+        if (n>=this._length) {
+            return Vector.empty<T>();
+        }
+        const mutVec = Vector.emptyMutable<T>();
+        for (let i=n;i<this._length;i++) {
+            const val = <T>this.internalGet(i);
+            mutVec.append(val);
+        }
+        return mutVec.getVector();
     }
 
     /**
@@ -695,17 +1306,62 @@ export class Vector<T> implements Seq<T> {
      *     => Vector.of(1,2)
      */
     take(n:number): Vector<T> {
-        if (n<0) {
+        if (n<=0 || this._length === 0) {
             return Vector.empty<T>();
         }
-        return new Vector(L.take(n, this._list));
+        if (n >= this._length) {
+            // not only an optimization. we want to wipe from
+            // the first item after the current one, but in case
+            // the length is a multiple of nodeSize, and we want
+            // to take the full array length, that next item is
+            // on a node which doesn't exist currently. Trying to
+            // go there to wipe that item would fail, so that's also
+            // a fix for  that.
+            return this;
+        }
+        // note that index actually points to the
+        // first item we want to wipe (item after
+        // the last item we want to keep)
+        const index = Math.min(n, this._length);
+
+        let newVec = this.cloneVec();
+        newVec._length = index;
+        // next line will crash on empty vector
+        let node = newVec._contents = (<any[]>this._contents).slice();
+        let shift = this._maxShift;
+        let underRoot = true;
+        while (shift > 0) {
+            const childIndex = (index >> shift) & nodeBitmask;
+            if (underRoot && childIndex === 0) {
+                // root killing, skip this node, we don't want
+                // root nodes with only 1 child
+                newVec._contents = node[childIndex].slice();
+                newVec._maxShift -= nodeBits;
+                node = <any[]>newVec._contents;
+            } else {
+                underRoot = false;
+                for (let i=childIndex+1;i<nodeSize;i++) {
+                    // remove pointers if present, to enable GC
+                    node[i] = undefined;
+                }
+                node[childIndex] = node[childIndex].slice();
+                node = node[childIndex];
+            }
+            shift -= nodeBits;
+        }
+        for (let i=(index & nodeBitmask);i<nodeSize;i++) {
+            // remove pointers if present, to enable GC
+            node[i] = undefined;
+        }
+        return newVec;
     }
 
     /**
      * Prepend an element at the beginning of the collection.
      */
     prepend(elt: T): Vector<T> {
-        return new Vector(L.prepend(elt, this._list));
+        // TODO must be optimized!!
+        return this.prependAll([elt]);
     }
 
     /**
@@ -731,10 +1387,10 @@ export class Vector<T> implements Seq<T> {
      * returns the empty collection.
      */
     dropRight(n:number): Vector<T> {
-        if (n>=this.length()) {
+        if (n>=this._length) {
             return Vector.empty<T>();
         }
-        return new Vector(L.dropLast(n, this._list));
+        return this.take(this._length-n);
     }
 
     /**
@@ -743,9 +1399,9 @@ export class Vector<T> implements Seq<T> {
      * before that point are retained.
      */
     dropRightWhile(predicate:(x:T)=>boolean): Vector<T> {
-        let i=this.length()-1;
+        let i=this._length-1;
         for (;i>=0;i--) {
-            if (!predicate(<T>L.nth(i, this._list))) {
+            if (!predicate(<T>this.internalGet(i))) {
                 return this.take(i+1);
             }
         }
@@ -757,10 +1413,7 @@ export class Vector<T> implements Seq<T> {
      * If the collection is empty, return None.
      */
     tail(): Option<Vector<T>> {
-        if (this.isEmpty()) {
-            return Option.none<Vector<T>>();
-        }
-        return Option.of(new Vector(L.tail(this._list)));
+        return this._length > 0 ? Option.of(this.drop(1)) : Option.none<Vector<T>>();
     }
 
     /**
@@ -845,7 +1498,14 @@ export class Vector<T> implements Seq<T> {
      *     => Vector.of(0,1,3,6)
      */
     scanLeft<U>(init:U, fn:(soFar:U,cur:T)=>U): Vector<U> {
-        return new Vector(L.scan(fn, init, this._list));
+        const mutVec = Vector.emptyMutable<U>();
+        mutVec.append(init);
+        let cur = init;
+        for (let i = 0; i < this._length; i++) {
+            cur = fn(cur, this.internalGet(i));
+            mutVec.append(cur);
+        }
+        return mutVec.getVector();
     }
 
     /**
@@ -861,10 +1521,19 @@ export class Vector<T> implements Seq<T> {
         const r:U[] = [];
         r.unshift(init);
         let cur = init;
-        for (let i = this.length()-1; i>=0; i--) {
-            cur = fn(<T>L.nth(i, this._list), cur);
+        for (let i = this._length-1; i>=0; i--) {
+            cur = fn(this.internalGet(i), cur);
             r.unshift(cur);
         }
         return Vector.ofIterable(r);
     }
 }
+
+/**
+ * even though emptyMutable is private, we can in fact read it
+ * https://stackoverflow.com/a/12827621/516188
+ * this is accessible only within the library because index.ts
+ * doesn't export it.
+ * @hidden
+ */
+export const vectorEmptyMutable: <T> ()=>MutableVector<T> = (<any>Vector).emptyMutable;
