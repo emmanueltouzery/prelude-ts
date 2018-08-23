@@ -1,6 +1,7 @@
 import { Vector } from "./Vector";
 import { Option } from "./Option";
 import { Either } from "./Either";
+import { HashMap } from "./HashMap";
 
 /**
  * A Future is the equivalent, and ultimately wraps, a javascript Promise.
@@ -164,12 +165,55 @@ export class Future<T> {
      * But if a single element results in failure, the result also
      * resolves to a failure.
      *
+     * There is an optional third parameter to specify options.
+     * You can specify `{maxConcurrent: number}` to request that
+     * the futures are not all triggered at the same time, but
+     * rather only 'number' at a time.
+     *
      * Also see [[Future.sequence]]
      */
-    static traverse<T,U>(elts: Iterable<T>, fn: (x:T)=>Future<U>): Future<Vector<U>> {
-        return Future.of(
-            Promise.all(Vector.ofIterable(elts).map(x => fn(x).toPromise()))
-                .then(Vector.ofIterable));
+    static traverse<T,U>(elts: Iterable<T>, fn: (x:T)=>Future<U>,
+                         opts?: {maxConcurrent:number}): Future<Vector<U>> {
+        if (!opts) {
+            return Future.of(
+                Promise.all(Vector.ofIterable(elts).map(x => fn(x).toPromise()))
+                    .then(Vector.ofIterable));
+        }
+        // maxConcurrent algorithm inspired by https://stackoverflow.com/a/38778887/516188
+        let index = 0;
+        let active: Future<U>[] = [];
+        const results: {[idx:number]:U} = {};
+        const it = elts[Symbol.iterator]();
+        let failed: Future<U>|undefined;
+        const addAsNeeded = (_?:U): Future<Vector<U>> => {
+            if (failed) {
+                return <any>failed;
+            }
+            let cur;
+            while (active.length < opts.maxConcurrent &&
+                   !(cur = it.next()).done) {
+                const p = fn(cur.value);
+                active.push(p);
+                const curIdx = index++;
+                p.onComplete(eitherRes => {
+                    active.splice(active.indexOf(p), 1)
+                    if (eitherRes.isLeft()) {
+                        failed = p;
+                    } else {
+                        results[curIdx] = eitherRes.get();
+                    }
+                });
+            }
+            if (!failed && active.length === 0 && cur && cur.done) {
+                return Future.ok(
+                    HashMap.ofObjectDictionary<U>(results)
+                        .toVector()
+                        .sortOn(kv => parseInt(kv[0]))
+                        .map(kv => kv[1]));
+            }
+            return Future.firstCompletedOf(active).flatMap(addAsNeeded);
+        };
+        return addAsNeeded();
     }
 
     /**

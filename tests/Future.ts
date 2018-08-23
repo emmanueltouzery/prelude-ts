@@ -157,7 +157,53 @@ describe("Future.traverse", () => {
     it("traverses properly in case of failure", async () => {
         return ensureFailedWithValue("3", Future.traverse(
             [1, 2, 3], x => Future.ofPromiseCtor(() => { if (x < 3) { x } else { throw x; } }))
-            .map(v => v.toArray()).toPromise());
+                                     .map(v => v.toArray()).toPromise());
+    });
+    it("handles failures properly also with maxConcurrent>1", async () => {
+        return ensureFailedWithValue("3", Future.traverse(
+            [1, 2, 3],
+            x => Future.ofPromiseCtor(() => { if (x < 3) { x } else { throw x; } }),
+            {maxConcurrent:3}
+        ).map(v => v.toArray()).toPromise());
+    });
+    it("honors maxConcurrent", async () => {
+        const checkMaxConcurrent = async (input: number[], maxC: number) => {
+            type Operation = {type:string, input: number, time: number};
+            const operationsOrder:Operation[] = [];
+            const mkFuture =
+                (i:number):Future<number> =>
+                Future.ofPromiseCtor(done => {
+                    operationsOrder.push({type:"start", input: i, time: new Date().getTime()});
+                    setTimeout(v => {
+                        operationsOrder.push({type:"finish", input: i, time: new Date().getTime()});
+                        done(v);
+                    }, Math.random()*50,i*2)})
+            const r = await Future.traverse(input, mkFuture, {maxConcurrent:maxC});
+            assert.ok(Vector.ofIterable(input.map(x=>x*2)).equals(r));
+            const concurrent = Vector.ofIterable(operationsOrder)
+                .scanLeft(0, (soFar,cur) => soFar + (cur.type === 'start' ? 1 : -1));
+            // we should start at 0 ops, then start/stop for each item in the list.
+            assert.equal(input.length*2+1, concurrent.length());
+            const expectedConc = [];
+            // number of concurrent increases from 0
+            for (let i=0;i<=maxC;i++) {
+                expectedConc.push(i);
+            }
+            // constantly switching between maxC & maxC-1 as
+            // futures complete
+            let flip = true;
+            for (let i=maxC;i<input.length*2-maxC-1;i++) {
+                expectedConc.push(flip ? (maxC-1) : maxC);
+                flip = !flip;
+            }
+            // decrease back to 0
+            for (let i=maxC;i>=0;i--) {
+                expectedConc.push(i);
+            }
+            assert.deepEqual(expectedConc, concurrent.toArray());
+        };
+        checkMaxConcurrent([1,2,3,4,5,6,7,8,9,10,11,12,13], 3);
+        checkMaxConcurrent([1,2,3,4,5,6,7,8,9], 6);
     });
 });
 describe("Future.sequence", () => {
