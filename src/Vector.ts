@@ -818,6 +818,10 @@ export class Vector<T> implements Seq<T> {
      * by the mapper function you give.
      */
     map<U>(fun:(x:T)=>U): Vector<U> {
+        if (this._length === 0) {
+            return Vector.empty<U>();
+        }
+
         const leafNodes = this.getLeafNodes(this._length);
         const newLeafNodes: U[][] = [];
         newLeafNodes.length = leafNodes.length;
