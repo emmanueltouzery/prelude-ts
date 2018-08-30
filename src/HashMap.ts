@@ -726,6 +726,10 @@ class EmptyHashMap<K,V> extends HashMap<K,V> {
         return this;
     }
 
+    findAny(predicate:(k:K,v:V)=>boolean): Option<[K,V]> {
+        return Option.none<[K,V]>();
+    }
+
     foldLeft<U>(zero: U, fn:(soFar:U,cur:[K,V])=>U): U {
         return zero;
     }
