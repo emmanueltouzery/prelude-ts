@@ -43,6 +43,8 @@ describe("Vector extra methods", () => {
         Vector.of(1,2,3).map(x=>{i+=1; return x+4;});
         assert.equal(3, i);
     });
+    it("map works on the empty vector", () => assert.ok(
+        Vector.empty<number>().equals(Vector.empty<number>().map(x=>x+1))));
     it("handles init correctly on a non-empty vector", () => assert.deepEqual(
         [1,2,3], Vector.of(1,2,3,4).init().toArray()));
     it("handles init correctly on an empty vector", () => assert.deepEqual(
