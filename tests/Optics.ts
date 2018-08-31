@@ -6,6 +6,7 @@ import * as assert from 'assert'
 interface Person {
 	name: string
 	address?: Address
+	phoneNumbers?: number[]
 }
 
 interface Address {
@@ -23,7 +24,8 @@ const emmanuel: Person = {
 	address: {
 		city: "Maribor",
 		street: "Fake Street"
-	}
+	},
+	phoneNumbers: [123451, 134561, 124567]
 }
 
 const opticsRicardo = optics(ricardo)
@@ -48,6 +50,29 @@ describe("Optics can get props", () => {
 
 	it("should return Some with the actual value when getting existing property", () => {
 		assert( opticsEmmanuel.prop("address").prop("city").get().getOrNull() === "Maribor")
+	})
+});
+
+
+describe("Optics can access arrays", () => {
+	it("should return Option when getting existing index value", () => {
+		assert(opticsEmmanuel.prop("phoneNumbers").index(0) instanceof Optic)
+	})
+
+	it("should return Option when getting an out of bounds index value ", () => {
+		assert(opticsEmmanuel.prop("phoneNumbers").index(1000) instanceof Optic)
+	})
+
+	it("should return Some when getting existing index value", () => {
+		assert(opticsEmmanuel.prop("phoneNumbers").index(1).get().isSome())
+	})
+
+	it("should return None when getting an out of bounds index value ", () => {
+		assert(opticsEmmanuel.prop("phoneNumbers").index(4).get().isNone())
+	})
+
+	it("should return Some with the actual value when getting existing index value", () => {
+		assert(opticsEmmanuel.prop("phoneNumbers").index(2).get().getOrNull() === 124567)
 	})
 });
 
