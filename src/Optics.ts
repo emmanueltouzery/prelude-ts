@@ -21,19 +21,8 @@ export class Optic<T> {
 		return new Optic(property.get()) as any;
   }
 
-  /*public index: T extends Array<infer I> // tslint:disable-line
-    ? (index: number) => Optic<I>
-    : Optic<undefined>;*/
-
   public get(): Option<T> {
     return this.value;
   }
 
 }
-
-/*Optic.prototype.index = function<U>(index: number): Optic<U> {
-  if (this.value[index] === undefined) {
-    return new Optic(undefined as any);
-  }
-  return new Optic(this.value[index]);
-};*/
