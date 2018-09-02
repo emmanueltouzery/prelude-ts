@@ -386,7 +386,7 @@ export class Some<T> implements Value {
      * You can optionally pass a message that'll be used as the
      * exception message.
      */
-    getOrThrow(message?: string): T {
+    getOrThrow(errorInfo?: Error|string): T {
         return this.value;
     }
 
@@ -657,10 +657,13 @@ export class None<T> implements Value {
      * Get the value from this option if it's a Some, otherwise
      * throw an exception.
      * You can optionally pass a message that'll be used as the
-     * exception message.
+     * exception message, or an Error object.
      */
-    getOrThrow(message?: string): T & WithEquality {
-        throw message || "getOrThrow called on none!";
+    getOrThrow(errorInfo?: Error|string): T & WithEquality {
+        if (typeof errorInfo === 'string') {
+            throw new Error(errorInfo || "getOrThrow called on none!");
+        }
+        throw errorInfo || new Error("getOrThrow called on none!");
     }
 
     /**

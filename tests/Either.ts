@@ -137,7 +137,8 @@ describe("either retrieval", () => {
     it("should throw on Left.getOrThrow", () =>
        assert.throws(() => Either.left<number,number>(5).getOrThrow()));
     it("should throw on Left.getOrThrow with custom msg", () =>
-       assert.throws(() => Either.left<number,number>(5).getOrThrow("my custom msg"), /^my custom msg$/));
+       assert.throws(() => Either.left<number,number>(5).getOrThrow("my custom msg"),
+                     (err:any) => err.message === 'my custom msg'));
     it("should offer get() if i checked for isRight", () => {
         const either = <Either<string,number>>Either.right(5);
         if (either.isRight()) {

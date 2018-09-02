@@ -452,10 +452,13 @@ export class Left<L,R> implements Value {
      * If this either is a right, return its value, else throw
      * an exception.
      * You can optionally pass a message that'll be used as the
-     * exception message.
+     * exception message, or an Error object.
      */
-    getOrThrow(message?: string): R {
-        throw message || "Left.getOrThrow called!";
+    getOrThrow(errorInfo?: Error|string): R {
+        if (typeof errorInfo === 'string') {
+            throw new Error(errorInfo || "Left.getOrThrow called!");
+        }
+        throw errorInfo || new Error("Left.getOrThrow called!");
     }
 
     /**
@@ -717,9 +720,9 @@ export class Right<L,R> implements Value {
      * If this either is a right, return its value, else throw
      * an exception.
      * You can optionally pass a message that'll be used as the
-     * exception message.
+     * exception message, or an Error object.
      */
-    getOrThrow(message?: string): R {
+    getOrThrow(errorInfo?: Error|string): R {
         return this.value;
     }
 
