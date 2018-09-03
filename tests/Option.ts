@@ -176,3 +176,48 @@ describe("option retrieval", () => {
         }
     })
 });
+
+describe("lifting", () => {
+    it("should lift 0-parameter functions", () => {
+        assert.ok(Option.lift(()=>1)().equals(Option.of(1)));
+        assert.ok(Option.lift(()=>undefined)().isNone());
+        assert.ok(Option.lift(()=>{throw "x"})().isNone());
+    });
+    it("should lift 1-parameter functions", () => {
+        assert.ok(Option.lift((x:number)=>x+1)(1).equals(Option.of(2)));
+        assert.ok(Option.lift((x:number)=>undefined)(1).isNone());
+        assert.ok(Option.lift((x:number)=>{throw "x"})(1).isNone());
+    });
+    it("should lift 2-parameter functions", () => {
+        assert.ok(Option.lift(
+            (x:number,y:number)=>x+1)(1,2).equals(Option.of(2)));
+        assert.ok(Option.lift(
+            (x:number,y:number)=>undefined)(1,2).isNone());
+        assert.ok(Option.lift(
+            (x:number,y:number)=>{throw "x"})(1,2).isNone());
+    });
+    it("should lift 3-parameter functions" , () => {
+        assert.ok(Option.lift(
+            (x:number,y:number,z:number)=>x+1)(1,2,3).equals(Option.of(2)));
+        assert.ok(Option.lift(
+            (x:number,y:number,z:number)=>undefined)(1,2,3).isNone());
+        assert.ok(Option.lift(
+            (x:number,y:number,z:number)=>{throw "x"})(1,2,3).isNone());
+    });
+    it("should lift 4-parameter functions", () => {
+        assert.ok(Option.lift(
+            (x:number,y:number,z:number,a:number)=>x+1)(1,2,3,4).equals(Option.of(2)));
+        assert.ok(Option.lift(
+            (x:number,y:number,z:number,a:number)=>undefined)(1,2,3,4).isNone());
+        assert.ok(Option.lift(
+            (x:number,y:number,z:number,a:number)=>{throw "x"})(1,2,3,4).isNone());
+    });
+    it("should lift 5-parameter functions", () => {
+        assert.ok(Option.lift(
+            (x:number,y:number,z:number,a:number,b:number)=>x+1)(1,2,3,4,5).equals(Option.of(2)));
+        assert.ok(Option.lift(
+            (x:number,y:number,z:number,a:number,b:number)=>undefined)(1,2,3,4,5).isNone());
+        assert.ok(Option.lift(
+            (x:number,y:number,z:number,a:number,b:number)=>{throw "x"})(1,2,3,4,5).isNone());
+    });
+});

@@ -96,6 +96,14 @@ describe("either transformation", () => {
     it("should abort liftAp on left", () => assert.ok(Either.left(2).equals(
         Either.liftAp<number,{a:number,b:number},number>(x => x.a+x.b)
         ({a:Either.right<number,number>(5), b:Either.left<number,number>(2)}))));
+    it("should lift 5-parameter functions", () => {
+        assert.ok(Either.lift(
+            (x:number,y:number,z:number,a:number,b:number)=>x+1)(1,2,3,4,5).equals(Either.right(2)));
+        assert.throws(()=>Either.lift(
+            (x:number,y:number,z:number,a:number,b:number)=>undefined)(1,2,3,4,5));
+        assert.ok(Either.lift(
+            (x:number,y:number,z:number,a:number,b:number)=>{throw "x"})(1,2,3,4,5).isLeft());
+    });
     it("left should provide transform", () => assert.equal(
         6, Either.left<number,number>(5).transform(x => 6)));
     it("right should provide transform", () => assert.equal(

@@ -278,6 +278,52 @@ export class EitherStatic {
     }
 
     /**
+     * Take a partial function (may return undefined or throw),
+     * and lift it to return an [[Either]] instead.
+     *
+     * Note that unlike the [[OptionStatic.lift]] version, if
+     * the function returns undefined, the Either.lift version will throw
+     * (the Option.lift version returns None()): if you want to do
+     * pure side-effects which may throw, you're better off just using
+     * javascript try blocks.
+     *
+     * When using typescript, to help the compiler infer the left type,
+     * you can either pass a second parameter like `{} as <type>`, or
+     * call with `lift<L,R>(...)`.
+     *
+     *     const add = Either.lift((x:number,y:number) => x+y, {} as string);
+     *     add(1,2);
+     *     => Either.right(3)
+     *
+     *     const undef = Either.lift((x:number,y:number,z:number) => undefined);
+     *     undef(1,2,3);
+     *     => throws
+     *
+     *     const throws = Either.lift(() => {throw "x"});
+     *     throws();
+     *     => Either.left("x")
+     */
+    lift<L,U>(fn:()=>U, witness?: L): ()=>Either<L,U>
+    lift<T1,L,U>(fn:(x:T1)=>U, witness?: L): (x:T1)=>Either<L,U>
+    lift<T1,T2,L,U>(fn:(x:T1,y:T2)=>U, witness?: L): (x:T1,y:T2)=>Either<L,U>
+    lift<T1,T2,T3,L,U>(fn:(x:T1,y:T2,z:T3)=>U, witness?: L): (x:T1,y:T2,z:T3)=>Either<L,U>
+    lift<T1,T2,T3,T4,L,U>(fn:(x:T1,y:T2,z:T3,z1:T4)=>U, witness?: L): (x:T1,y:T2,z:T3,z1:T4)=>Either<L,U>
+    lift<T1,T2,T3,T4,T5,L,U>(fn:(x:T1,y:T2,z:T3,z1:T4,z2:T5)=>U, witness?: L): (x:T1,y:T2,z:T3,z1:T4,z2:T5)=>Either<L,U>
+    lift<L,U>(fn:any, witness?: L): any {
+        return (...args:any[]) => {
+            try {
+                const r = fn(...args);
+                if (r !== undefined) {
+                    return Either.right(r);
+                }
+            } catch (err) {
+                return Either.left(err);
+            }
+            throw new Error("liftEither got undefined!");
+        };
+    }
+
+    /**
      * Take a no-parameter partial function (may return undefined or throw),
      * call it, and return an [[Either]] instead.
      *
@@ -304,7 +350,7 @@ export class EitherStatic {
      * [[OptionStatic.tryNullable]]
      */
     try_<L,T>(fn:()=>T, witness?: L): Either<L,T> {
-        return Function0.liftEither<L,T>(fn)();
+        return Either.lift<L,T>(fn)();
     }
 }
 

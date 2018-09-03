@@ -261,6 +261,80 @@ export class OptionStatic {
     }
 
     /**
+     * Take a partial function (may return undefined or throw),
+     * and lift it to return an [[Option]] instead.
+     * undefined becomes a [[None]], everything else a [[Some]]
+     *
+     *     const plus = Option.lift((x:number,y:number)=>x+y);
+     *     plus(1,2);
+     *     => Option.of(3)
+     *
+     *     const undef = Option.lift((x:number)=>undefined);
+     *     undef(1);
+     *     => Option.none()
+     *
+     *     const nl = Option.lift((x:number,y:number,z:number)=>null);
+     *     nl(1,2,3);
+     *     => Option.some(null)
+     *
+     *     const throws = Option.lift((x:number,y:number)=>{throw "x"});
+     *     throws(1,2);
+     *     => Option.none()
+     */
+    lift<U>(fn:()=>U|undefined): ()=>Option<U>
+    lift<T1,U>(fn:(a:T1)=>U|undefined): (a:T1)=>Option<U>
+    lift<T1,T2,U>(fn:(a:T1,b:T2)=>U|undefined): (a:T1,b:T2)=>Option<U>
+    lift<T1,T2,T3,U>(fn:(a:T1,b:T2,c:T3)=>U|undefined): (a:T1,b:T2,c:T3)=>Option<U>
+    lift<T1,T2,T3,T4,U>(fn:(a:T1,b:T2,c:T3,d:T4)=>U|undefined): (a:T1,b:T2,c:T3,d:T4)=>Option<U>
+    lift<T1,T2,T3,T4,T5,U>(fn:(a:T1,b:T2,c:T3,d:T4,e:T5)=>U|undefined): (a:T1,b:T2,c:T3,d:T4,e:T5)=>Option<U>
+    lift<U>(fn: any): any {
+        return (...args:any[]) => {
+            try {
+                return Option.of(fn(...args));
+            } catch {
+                return Option.none<U>();
+            }
+        };
+    }
+
+    /**
+     * Take a partial function (may return undefined or throw),
+     * and lift it to return an [[Option]] instead.
+     * null and undefined become a [[None]], everything else a [[Some]]
+     *
+     *     const plus = Option.liftNullable((x:number,y:number)=>x+y);
+     *     plus(1,2);
+     *     => Option.of(3)
+     *
+     *     const undef = Option.liftNullable((x:number,y:number,z:string)=>undefined);
+     *     undef(1,2,"");
+     *     => Option.none()
+     *
+     *     const nl = Option.liftNullable((x:number)=>null);
+     *     nl(1);
+     *     => Option.none()
+     *
+     *     const throws = Option.liftNullable((x:number,y:number)=>{throw "x"});
+     *     throws(1,2);
+     *     => Option.none()
+     */
+    liftNullable<U>(fn:()=>U|null|undefined): ()=>Option<U>
+    liftNullable<T1,U>(fn:(a:T1)=>U|null|undefined): (a:T1)=>Option<U>
+    liftNullable<T1,T2,U>(fn:(a:T1,b:T2)=>U|null|undefined): (a:T1,b:T2)=>Option<U>
+    liftNullable<T1,T2,T3,U>(fn:(a:T1,b:T2,c:T3)=>U|null|undefined): (a:T1,b:T2,c:T3)=>Option<U>
+    liftNullable<T1,T2,T3,T4,U>(fn:(a:T1,b:T2,c:T3,d:T4)=>U|null|undefined): (a:T1,b:T2,c:T3,d:T4)=>Option<U>
+    liftNullable<T1,T2,T3,T4,T5,U>(fn:(a:T1,b:T2,c:T3,d:T4,e:T5)=>U|null|undefined): (a:T1,b:T2,c:T3,d:T4,e:T5)=>Option<U>
+    liftNullable<U>(fn: any): any {
+        return (...args:any[]) => {
+            try {
+                return Option.ofNullable(fn(...args));
+            } catch {
+                return Option.none<U>();
+            }
+        };
+    }
+
+    /**
      * Take a no-parameter partial function (may return undefined or throw),
      * and call it, return an [[Option]] instead.
      * undefined becomes a [[None]], everything else a [[Some]]
@@ -277,11 +351,11 @@ export class OptionStatic {
      *     Option.try_(()=>{throw "x"});
      *     => Option.none()
      *
-     * Also see [[OptionStatic.tryNullable]], [[Function0Static.liftOption]],
-     * [[Function0Static.liftNullable]], [[EitherStatic.try_]].
+     * Also see [[OptionStatic.tryNullable]], [[OptionStatic.lift]],
+     * [[OptionStatic.liftNullable]], [[EitherStatic.try_]].
      */
     try_<T>(fn:()=>T|undefined): Option<T> {
-        return Function0.liftOption(fn)();
+        return Option.lift(fn)();
     }
 
     /**
@@ -301,11 +375,11 @@ export class OptionStatic {
      *     Option.tryNullable(()=>{throw "x"});
      *     => Option.none()
      *
-     * Also see [[OptionStatic.try_]], [[Function0Static.liftNullable]],
-     * [[Function0Static.liftOption]], [[EitherStatic.try_]].
+     * Also see [[OptionStatic.try_]], [[OptionStatic.liftNullable]],
+     * [[OptionStatic.liftOption]], [[EitherStatic.try_]].
      */
     tryNullable<T>(fn:()=>T|null|undefined): Option<T> {
-        return Function0.liftNullable(fn)();
+        return Option.liftNullable(fn)();
     }
 }
 
