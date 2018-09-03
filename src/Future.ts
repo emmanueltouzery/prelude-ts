@@ -295,6 +295,22 @@ export class Future<T> {
     }
 
     /**
+     * Take a function returning a Promise
+     * and lift it to return a [[Future]] instead.
+     */
+    static lift<U>(fn:()=>Promise<U>): ()=>Future<U>
+    static lift<T1,U>(fn:(x:T1)=>Promise<U>): (x:T1)=>Future<U>
+    static lift<T1,T2,U>(fn:(x:T1,y:T2)=>Promise<U>): (x:T1,y:T2)=>Future<U>
+    static lift<T1,T2,T3,U>(fn:(x:T1,y:T2,z:T3)=>Promise<U>): (x:T1,y:T2,z:T3)=>Future<U>
+    static lift<T1,T2,T3,T4,U>(fn:(x:T1,y:T2,z:T3,z1:T4)=>Promise<U>): (x:T1,y:T2,z:T3,z1:T4)=>Future<U>
+    static lift<T1,T2,T3,T4,T5,U>(fn:(x:T1,y:T2,z:T3,z1:T4,z2:T5)=>Promise<U>): (x:T1,y:T2,z:T3,z1:T4,z2:T5)=>Future<U>
+    static lift<L,U>(fn:any): any {
+        return (...args:any[]) => {
+            return Future.of(fn(...args));
+        };
+    }
+
+    /**
      * Transform the value contained in a successful Future. Has no effect
      * if the Future was failed. Will turn a successful Future in a failed
      * one if you throw an exception in the map callback (but please don't

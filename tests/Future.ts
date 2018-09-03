@@ -150,6 +150,24 @@ describe("Future.liftA*", () => {
         return ensureFailedWithValue("sorry", computationPromise.toPromise());
     });
 });
+describe("Future.lift", () => {
+    it("lifts a simple promise", async () => {
+        const fn = (x:number) => Promise.resolve(x+1);
+        const fn2 = Future.lift(fn);
+        assert.equal(5, await fn2(4));
+    });
+    it("lifts a failing promise", async () => {
+        const fn = (x:number) => Promise.reject(x+1);
+        const fn2 = Future.lift(fn);
+        try {
+            await fn2(4);
+            assert.ok(false);
+        } catch (ex) {
+            assert.equal(5, ex);
+        }
+
+    });
+});
 describe("Future.traverse", () => {
     it("traverses properly", async () => {
         assert.deepEqual([1,2,3], await Future.traverse([1,2,3], Future.ok).map(v => v.toArray()));
