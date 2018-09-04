@@ -37,26 +37,7 @@ export class Vector<T> implements Seq<T> {
      * @param T the item type
      */
     static of<T>(...data: T[]): Vector<T> {
-        return Vector.ofArray(data);
-    }
-
-    // copy-pasted from funkia/list master
-    private static lfrom<A>(sequence: A[] | ArrayLike<A> | Iterable<A>): L.List<A>;
-    private static lfrom<A>(sequence: any): L.List<A> {
-        let l = <L.List<A>>L.empty();
-        if (sequence.length > 0 && (sequence[0] !== undefined || 0 in sequence)) {
-            for (let i = 0; i < sequence.length; ++i) {
-                l = L.append(sequence[i], l);
-            }
-        } else if (Symbol.iterator in sequence) {
-            const iterator = sequence[Symbol.iterator]();
-            let cur;
-            // tslint:disable-next-line:no-conditional-assignment
-            while (!(cur = iterator.next()).done) {
-                l = L.append(cur.value, l);
-            }
-        }
-        return l;
+        return Vector.ofIterable(data);
     }
 
     /**
@@ -65,14 +46,7 @@ export class Vector<T> implements Seq<T> {
      * @param T the item type
      */
     static ofIterable<T>(elts: Iterable<T>): Vector<T> {
-        if (Array.isArray(elts)) {
-            return Vector.ofArray(elts);
-        }
-        return new Vector(Vector.lfrom(elts));
-    }
-
-    private static ofArray<T>(data: T[]): Vector<T> {
-        return new Vector(L.fromArray(data));
+        return new Vector(L.from(elts));
     }
 
     /**
@@ -181,7 +155,7 @@ export class Vector<T> implements Seq<T> {
             // elts is a vector too
             return new Vector(L.concat(this._list, (<Vector<T>>elts)._list));
         }
-        return new Vector(L.concat(this._list, Vector.lfrom(elts)));
+        return new Vector(L.concat(this._list, L.from(elts)));
     }
 
     /**
@@ -261,7 +235,7 @@ export class Vector<T> implements Seq<T> {
     partition<U extends T>(predicate:(v:T)=>v is U): [Vector<U>,Vector<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [Vector<T>,Vector<T>];
     partition(predicate:(v:T)=>boolean): [Vector<T>,Vector<T>] {
-        return <[Vector<T>,Vector<T>]>L.toArray(L.partition(predicate, this._list))
+        return <[Vector<T>,Vector<T>]>L.partition(predicate, this._list)
             .map(x => new Vector(x));
     }
 
@@ -430,7 +404,7 @@ export class Vector<T> implements Seq<T> {
      * Randomly reorder the elements of the collection.
      */
     shuffle(): Vector<T> {
-        return Vector.ofArray(SeqHelpers.shuffle(this.toArray()));
+        return Vector.ofIterable(SeqHelpers.shuffle(this.toArray()));
     }
 
     /**
@@ -534,7 +508,7 @@ export class Vector<T> implements Seq<T> {
      * also see [[Vector.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Vector<T> {
-        return Vector.ofArray<T>(this.toArray().sort(compare));
+        return Vector.ofIterable<T>(this.toArray().sort(compare));
     }
 
     /**

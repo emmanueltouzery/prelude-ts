@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "hamt_plus": "1.0.2",
-        "list": "2.0.13"
+        "list": "2.0.14"
     },
     "devDependencies": {
         "@types/mocha": "2.2.41",
@@ -23,8 +23,7 @@
         "uglify-js": "3.1.2",
         "immutable": "4.0.0-rc.9",
         "hamt": "2.2.2",
-        "mocha-testcheck": "1.0.0-rc.0",
-        "list": "2.0.13"
+        "mocha-testcheck": "1.0.0-rc.0"
     },
     "keywords": [
         "typescript",

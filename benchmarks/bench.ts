@@ -44,7 +44,7 @@ function getPrerequisites(length:number): Prerequisites {
 
     const list = LinkedList.ofIterable(array);
     const immList = imm.List(array);
-    const funkiaList = Funkia.fromArray(array);
+    const funkiaList = Funkia.from(array);
 
     const idxThreeQuarters = array.length*3/4;
     const atThreeQuarters = array[idxThreeQuarters];
@@ -172,7 +172,7 @@ compare(['Vector.ofIterable', (p:Prerequisites) => Vector.ofIterable(p.array)],
         }],
         ['LinkedList.ofIterable', (p:Prerequisites) =>LinkedList.ofIterable(p.array)],
         ['immList.ofIterable', (p:Prerequisites) => imm.List(p.array)],
-        ['funkiaList.ofArray', (p:Prerequisites) => Funkia.fromArray(p.array)]);
+        ['funkiaList.ofArray', (p:Prerequisites) => Funkia.from(p.array)]);
 
 compare(['Vector.get(i)', (p:Prerequisites) => p.vec.get(p.length/2)],
         ['rawhamt.get(i)', (p:Prerequisites) => p.rawhamt.get(p.length/2)],
