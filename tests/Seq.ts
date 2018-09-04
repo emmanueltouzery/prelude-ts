@@ -476,3 +476,63 @@ export function runTests(seqName: string,
         });
     });
 }
+
+describe("Seq fuzzer", () => {
+    const testsToRun = 200;
+    const opsToRun = 64;
+    const randomArrayMaxLength = 256;
+    const getRandomArray = () => Stream.iterate(0,i=>i+1)
+        .take(Math.random()*randomArrayMaxLength)
+        .toArray();
+    const getRandomVal = () => Math.round(Math.random()*randomArrayMaxLength);
+    const fuzOps: (()=>[string,(x:Seq<number>)=>Seq<number>])[] = [
+        () => {
+            const arr = getRandomArray();
+            return ["prepend " + arr.length, s => s.prependAll(arr)];
+        },
+        () => ["reverse", s => s.reverse()],
+        () => {
+            const arr = getRandomArray();
+            return ["append " + arr.length, s => s.appendAll(arr)];
+        },
+        () => {
+            const count = getRandomVal();
+            return ["take " + count, s => s.take(count)];
+        },
+        () => {
+            const count = getRandomVal();
+            return ["drop " + count, s => s.drop(count)];
+        },
+        () => ["map *2", s => s.map(x=>x*2)],
+        () => {
+            const val = getRandomVal();
+            return ["filter >=" + val, s => <any>s.filter(x=>x>=val)];
+        }
+    ];
+    it("should pass the fuzzer", () => {
+        for (let testIdx=0;testIdx<testsToRun;testIdx++) {
+            let vec: Seq<number> = Vector.empty<number>();
+            let llist: Seq<number> = LinkedList.empty<number>();
+            let stream: Seq<number> = Stream.empty<number>();
+            const ops = [];
+            for (let opIdx=0;opIdx<opsToRun;opIdx++) {
+                const opIdx = Math.round(Math.random()*(fuzOps.length-1));
+                const op = fuzOps[opIdx]();
+                ops.push(op[0]);
+                vec = op[1](vec);
+                llist = op[1](llist);
+                stream = op[1](stream);
+                if (vec.toArray().toString() !== llist.toArray().toString()) {
+                    console.log("*** vector/llist BUG");
+                    console.log(ops);
+                    assert.deepEqual(vec.toArray(), llist.toArray());
+                }
+                if (stream.toArray().toString() !== llist.toArray().toString()) {
+                    console.log("*** stream/llist BUG");
+                    console.log(ops);
+                    assert.deepEqual(stream.toArray(), llist.toArray());
+                }
+            }
+        }
+    });
+});
