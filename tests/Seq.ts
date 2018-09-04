@@ -519,9 +519,15 @@ describe("Seq fuzzer", () => {
                 const opIdx = Math.round(Math.random()*(fuzOps.length-1));
                 const op = fuzOps[opIdx]();
                 ops.push(op[0]);
-                vec = op[1](vec);
-                llist = op[1](llist);
-                stream = op[1](stream);
+                try {
+                    vec = op[1](vec);
+                    llist = op[1](llist);
+                    stream = op[1](stream);
+                } catch (ex) {
+                    console.log("*** got exception");
+                    console.log(ops);
+                    throw ex;
+                }
                 if (vec.toArray().toString() !== llist.toArray().toString()) {
                     console.log("*** vector/llist BUG");
                     console.log(ops);
