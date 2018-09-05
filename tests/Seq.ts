@@ -514,28 +514,41 @@ describe("Seq fuzzer", () => {
             let vec: Seq<number> = Vector.empty<number>();
             let llist: Seq<number> = LinkedList.empty<number>();
             let stream: Seq<number> = Stream.empty<number>();
-            const ops = [];
+            const ops:string[] = [];
             for (let opIdx=0;opIdx<opsToRun;opIdx++) {
                 const opIdx = Math.round(Math.random()*(fuzOps.length-1));
-                const op = fuzOps[opIdx]();
-                ops.push(op[0]);
-                try {
-                    vec = op[1](vec);
-                    llist = op[1](llist);
-                    stream = op[1](stream);
-                } catch (ex) {
-                    console.log("*** got exception");
-                    console.log(ops);
-                    throw ex;
-                }
+                const [opDesc, opFn] = fuzOps[opIdx]();
+                ops.push(opDesc);
+
+                const checkSeq = (desc: string, seq:Seq<number>, updateSeq:(val:Seq<number>)=>void) => {
+                    const previousSeqAr = seq.toArray();
+                    const previousSeq = seq;
+                    try {
+                        updateSeq(opFn(seq));
+                    } catch (ex) {
+                        console.error(`*** ${seq}: got exception`);
+                        console.error(ops);
+                        throw ex;
+                    }
+                    if (previousSeq.toArray().toString() !== previousSeqAr.toString()) {
+                        console.error(`*** ${desc} BUG previous ${desc} was modified`);
+                        console.error(ops);
+                        assert.deepEqual(previousSeqAr, previousSeq.toArray());
+                    }
+                };
+
+                checkSeq("Vector", vec, n=>{vec=n});
+                checkSeq("LinkedList", llist, n=>{llist=n});
+                checkSeq("Stream", stream, n=>{stream=n});
+
                 if (vec.toArray().toString() !== llist.toArray().toString()) {
-                    console.log("*** vector/llist BUG");
-                    console.log(ops);
+                    console.error("*** vector/llist BUG");
+                    console.error(ops);
                     assert.deepEqual(vec.toArray(), llist.toArray());
                 }
                 if (stream.toArray().toString() !== llist.toArray().toString()) {
-                    console.log("*** stream/llist BUG");
-                    console.log(ops);
+                    console.error("*** stream/llist BUG");
+                    console.error(ops);
                     assert.deepEqual(stream.toArray(), llist.toArray());
                 }
             }
