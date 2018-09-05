@@ -526,7 +526,7 @@ describe("Seq fuzzer", () => {
                     try {
                         updateSeq(opFn(seq));
                     } catch (ex) {
-                        console.error(`*** ${seq}: got exception`);
+                        console.error(`*** ${desc}: got exception`);
                         console.error(ops);
                         throw ex;
                     }
