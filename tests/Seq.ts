@@ -476,3 +476,82 @@ export function runTests(seqName: string,
         });
     });
 }
+
+describe("Seq fuzzer", () => {
+    const testsToRun = 3000;
+    const opsToRun = 64;
+    const randomArrayMaxLength = 256;
+    const getRandomArray = () => Stream.iterate(0,i=>i+1)
+        .take(Math.random()*randomArrayMaxLength)
+        .toArray();
+    const getRandomVal = () => Math.round(Math.random()*randomArrayMaxLength);
+    const fuzOps: (()=>[string,(x:Seq<number>)=>Seq<number>])[] = [
+        () => {
+            const arr = getRandomArray();
+            return ["prepend " + arr.length, s => s.prependAll(arr)];
+        },
+        () => ["reverse", s => s.reverse()],
+        () => {
+            const arr = getRandomArray();
+            return ["append " + arr.length, s => s.appendAll(arr)];
+        },
+        () => {
+            const count = getRandomVal();
+            return ["take " + count, s => s.take(count)];
+        },
+        () => {
+            const count = getRandomVal();
+            return ["drop " + count, s => s.drop(count)];
+        },
+        () => ["map *2", s => s.map(x=>x*2)],
+        () => {
+            const val = getRandomVal();
+            return ["filter >=" + val, s => <any>s.filter(x=>x>=val)];
+        }
+    ];
+    it("should pass the fuzzer", () => {
+        for (let testIdx=0;testIdx<testsToRun;testIdx++) {
+            let vec: Seq<number> = Vector.empty<number>();
+            let llist: Seq<number> = LinkedList.empty<number>();
+            let stream: Seq<number> = Stream.empty<number>();
+            const ops:string[] = [];
+            for (let opIdx=0;opIdx<opsToRun;opIdx++) {
+                const opIdx = Math.round(Math.random()*(fuzOps.length-1));
+                const [opDesc, opFn] = fuzOps[opIdx]();
+                ops.push(opDesc);
+
+                const checkSeq = (desc: string, seq:Seq<number>, updateSeq:(val:Seq<number>)=>void) => {
+                    const previousSeqAr = seq.toArray();
+                    const previousSeq = seq;
+                    try {
+                        updateSeq(opFn(seq));
+                    } catch (ex) {
+                        console.error(`*** ${desc}: got exception`);
+                        console.error(ops);
+                        throw ex;
+                    }
+                    if (previousSeq.toArray().toString() !== previousSeqAr.toString()) {
+                        console.error(`*** ${desc} BUG previous ${desc} was modified`);
+                        console.error(ops);
+                        assert.deepEqual(previousSeqAr, previousSeq.toArray());
+                    }
+                };
+
+                checkSeq("Vector", vec, n=>{vec=n});
+                checkSeq("LinkedList", llist, n=>{llist=n});
+                checkSeq("Stream", stream, n=>{stream=n});
+
+                if (vec.toArray().toString() !== llist.toArray().toString()) {
+                    console.error("*** vector/llist BUG");
+                    console.error(ops);
+                    assert.deepEqual(vec.toArray(), llist.toArray());
+                }
+                if (stream.toArray().toString() !== llist.toArray().toString()) {
+                    console.error("*** stream/llist BUG");
+                    console.error(ops);
+                    assert.deepEqual(stream.toArray(), llist.toArray());
+                }
+            }
+        }
+    });
+});
