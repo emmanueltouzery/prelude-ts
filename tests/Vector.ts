@@ -151,6 +151,8 @@ describe("Vector.appendAll() implementation", () => {
                     Vector.ofIterable(Stream.iterate(0,i=>i+1).take(74)));
     });
     it("handles large vectors at node boundaries", () => {
-        Stream.iterate(0,i=>i+1).take(86015).toVector().appendAll([1]);
+        assert.deepEqual(
+            Stream.iterate(0,i=>i+1).take(86016).toArray(),
+            Stream.iterate(0,i=>i+1).take(86015).toVector().appendAll([86015]).toArray());
     });
 });
