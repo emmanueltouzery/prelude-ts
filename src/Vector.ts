@@ -276,7 +276,7 @@ export class Vector<T> implements Seq<T> {
         let shift = this._maxShift;
         let node = this._contents;
         while (shift > 0) {
-            node = (<any>node)[(this._length >> shift) & nodeBitmask];
+            node = (<any>node)[((this._length-1) >> shift) & nodeBitmask];
             shift -= nodeBits;
         }
         return <any[]>node;
