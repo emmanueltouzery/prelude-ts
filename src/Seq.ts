@@ -96,6 +96,11 @@ export interface Seq<T> extends Collection<T> {
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
+     *     const activityOrder = ["Writer", "Actor", "Director"];
+     *     Vector.of({name:"George", activity: "Director"}, {name:"Robert", activity: "Actor"})
+     *         .sortBy((p1,p2) => activityOrder.indexOf(p1.activity) - activityOrder.indexOf(p2.activity));
+     *     => Vector.of({"name":"Robert","activity":"Actor"}, {"name":"George","activity":"Director"})
+     *
      * also see [[Seq.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Seq<T>;

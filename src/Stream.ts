@@ -620,6 +620,11 @@ export class EmptyStream<T> implements Seq<T> {
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
+     *     const activityOrder = ["Writer", "Actor", "Director"];
+     *     Stream.of({name:"George", activity: "Director"}, {name:"Robert", activity: "Actor"})
+     *         .sortBy((p1,p2) => activityOrder.indexOf(p1.activity) - activityOrder.indexOf(p2.activity));
+     *     => Stream.of({"name":"Robert","activity":"Actor"}, {"name":"George","activity":"Director"})
+     *
      * also see [[ConsStream.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): Stream<T> {
@@ -1420,6 +1425,11 @@ export class ConsStream<T> implements Seq<T> {
     /**
      * Returns a new collection with elements
      * sorted according to the comparator you give.
+     *
+     *     const activityOrder = ["Writer", "Actor", "Director"];
+     *     Stream.of({name:"George", activity: "Director"}, {name:"Robert", activity: "Actor"})
+     *         .sortBy((p1,p2) => activityOrder.indexOf(p1.activity) - activityOrder.indexOf(p2.activity));
+     *     => Stream.of({"name":"Robert","activity":"Actor"}, {"name":"George","activity":"Director"})
      *
      * also see [[ConsStream.sortOn]]
      */

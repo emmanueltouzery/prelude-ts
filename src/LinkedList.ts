@@ -564,6 +564,11 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * Returns a new collection with elements
      * sorted according to the comparator you give.
      *
+     *     const activityOrder = ["Writer", "Actor", "Director"];
+     *     LinkedList.of({name:"George", activity: "Director"}, {name:"Robert", activity: "Actor"})
+     *         .sortBy((p1,p2) => activityOrder.indexOf(p1.activity) - activityOrder.indexOf(p2.activity));
+     *     => LinkedList.of({"name":"Robert","activity":"Actor"}, {"name":"George","activity":"Director"})
+     *
      * also see [[ConsLinkedList.sortOn]]
      */
     sortBy(compare: (v1:T,v2:T)=>Ordering): LinkedList<T> {
@@ -1388,6 +1393,11 @@ export class ConsLinkedList<T> implements Seq<T> {
     /**
      * Returns a new collection with elements
      * sorted according to the comparator you give.
+     *
+     *     const activityOrder = ["Writer", "Actor", "Director"];
+     *     LinkedList.of({name:"George", activity: "Director"}, {name:"Robert", activity: "Actor"})
+     *         .sortBy((p1,p2) => activityOrder.indexOf(p1.activity) - activityOrder.indexOf(p2.activity));
+     *     => LinkedList.of({"name":"Robert","activity":"Actor"}, {"name":"George","activity":"Director"})
      *
      * also see [[ConsLinkedList.sortOn]]
      */
