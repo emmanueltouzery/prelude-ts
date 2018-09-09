@@ -24,6 +24,45 @@ type TTail<T extends any[]> =
 	: T extends [] ? []
 	: never;
 
+type TLast<T extends any[]> = T extends [] ? never :
+    T extends [infer T1] ? T1 : {0:TTail<T>, 1:never}[T extends [infer T1, infer S] ? 0 : 1];
+
+// type TInit<T extends any[]> = T extends []
+//     ? []
+//     : T extends [any]
+//     ? []
+//     : (((...args: T) => void) extends ((first: infer T1, ...rest: infer T2) => void) ?
+//        (((a:T1,...rest:TInit<T2>)=>void) extends ((...all: infer AP)=>void) ? AP : never) : never)
+
+type Head<Tuple extends any[]> = Tuple extends [infer H, ...any[]] ? H : never;
+type Tail<Tuple extends any[]> = ((...t: Tuple) => void) extends ((h: any, ...rest: infer R) => void) ? R : never;
+type Unshift<Tuple extends any[], Element> = ((h: Element, ...t: Tuple) => void) extends (...t: infer R) => void ? R : never;
+
+// https://github.com/Microsoft/TypeScript/pull/24897#issuecomment-401401470
+// he has a simpler head & tail than me!
+type Reverse<Tuple extends any[]> = Reverse_<Tuple, []>;
+type Reverse_<Tuple extends any[], Result extends any[]> = {
+    1: Result,
+    0: Reverse_<Tail<Tuple>, Unshift<Result, Head<Tuple>>>
+}[Tuple extends [] ? 1 : 0];
+
+// type TInit<T extends any[]> = {
+//         0: ((...args: T) => void) extends ((first: infer T1, ...rest: infer T2) => void)
+//             ? (((a:T1,...rest:TInit<T2>)=>void) extends ((...all: infer AP)=>void) ? AP : never)
+//             : never,
+//         1: []
+//     }[T extends []|[any] ? 1 : 0]
+
+// type TReverse<T extends any[]> = {
+//     0: [],
+//     1: ((a:TLast<T>, ...args: TReverse<TInit<T>>)=>void) extends ((...all: infer AP) => void)
+//     ? AP : never
+// }[T extends [] ? 0 : 1];
+// type TReverse<T extends any[]> = T extends []
+//     ? []
+//     : ((a:TLast<T>, ...args: TReverse<TInit<T>>)=>void) extends ((...all: infer AP) => void)
+//     ? AP : never;
+
 type Apply1ReturnType<P,R> = P extends [infer T1, infer T2, ...any[]] ?
     (((...args: P) => void) extends ((first: any, ...rest: infer S1) => void) ? FunctionX<T1,S1,R> : never)
     : FunctionX0<R>;
@@ -72,6 +111,10 @@ export class FunctionX<T, P extends any[], R> {
     public tupled(): ((a: T, ...args: P) => R) extends ((...allP: infer AP) => infer R1)
         ? FunctionX<AP,[],R>: never {
     // FunctionX<[T,...P],[],R> {
+        return <any>null;
+    }
+
+    public flipped(): FunctionX<Tail<P>, Tail<Reverse<P>>, R> {
         return <any>null;
     }
 }
