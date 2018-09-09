@@ -105,14 +105,14 @@ export interface Seq<T> extends Collection<T> {
      * elements from the collection, and the elements
      * are sorted according to that value.
      *
-     *     Vector.of({a:3,b:"b"},{a:1,b:"test"},{a:2,b:"a"}).sortOn(elt=>elt.a)
-     *     => Vector.of({a:1,b:"test"},{a:2,b:"a"},{a:3,b:"b"})
+     *     Vector.of({a:3,b:"b"}, {a:1,b:"test"}, {a:2,b:"a"}).sortOn(elt=>elt.a)
+     *     => Vector.of({a:1,b:"test"}, {a:2,b:"a"}, {a:3,b:"b"})
      *
      * You can also sort by multiple criteria, and request 'descending'
      * sorting:
      *
-     *     Vector.of({a:1,b:"b"},{a:1,b:"test"},{a:2,b:"a"}).sortOn(elt=>elt.a,{desc:elt=>elt.b})
-     *     => Vector.of({a:1,b:"test"},{a:1,b:"b"},{a:2,b:"a"})
+     *     Vector.of({a:1,b:"b"}, {a:1,b:"test"}, {a:2,b:"a"}).sortOn(elt=>elt.a, {desc:elt=>elt.b})
+     *     => Vector.of({a:1,b:"test"}, {a:1,b:"b"}, {a:2,b:"a"})
      *
      * also see [[Seq.sortBy]]
      */
