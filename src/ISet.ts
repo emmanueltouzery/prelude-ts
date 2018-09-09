@@ -169,4 +169,20 @@ export interface ISet<T> extends Collection<T> {
      * Converts this set to an list
      */
     toLinkedList(): LinkedList<T & WithEquality>;
+
+    /**
+     * Convert to an ES6 Set.
+     * You must provide a function to convert the
+     * key to a string, number or boolean, because
+     * with other types equality is not correctly
+     * managed by JS.
+     * https://stackoverflow.com/questions/29759480/how-to-customize-object-equality-for-javascript-set
+     * https://esdiscuss.org/topic/maps-with-object-keys
+     *
+     *     HashSet.of("a", "b").toJsSet(x=>x);
+     *     => new Set(["a", "b"])
+     */
+    toJsSet(keyConvert:(k:T)=>string): Set<string>;
+    toJsSet(keyConvert:(k:T)=>number): Set<number>;
+    toJsSet(keyConvert:(k:T)=>boolean): Set<boolean>;
 }

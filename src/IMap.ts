@@ -111,6 +111,23 @@ export interface IMap<K,V> extends Value, Iterable<[K,V]>, Foldable<[K,V]> {
     toObjectDictionary(keyConvert:(k:K)=>string): {[index:string]:V};
 
     /**
+     * Convert to an ES6 Map.
+     * You must provide a function to convert the
+     * key to a string, number or boolean, because
+     * with other types equality is not correctly
+     * managed by JS.
+     * https://stackoverflow.com/questions/29759480/how-to-customize-object-equality-for-javascript-set
+     * https://esdiscuss.org/topic/maps-with-object-keys
+     *
+     *     HashMap.of<string,number>(["a",1],["b",2])
+     *         .toJsMap(x=>x);
+     *     => new Map([["a",1], ["b",2]])
+     */
+    toJsMap(keyConvert:(k:K)=>string): Map<string,V>;
+    toJsMap(keyConvert:(k:K)=>number): Map<number,V>;
+    toJsMap(keyConvert:(k:K)=>boolean): Map<boolean,V>;
+
+    /**
      * number of items in the map
      */
     length(): number;

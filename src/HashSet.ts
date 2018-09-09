@@ -566,6 +566,25 @@ export class HashSet<T> implements ISet<T> {
     }
 
     /**
+     * Convert to an ES6 Set.
+     * You must provide a function to convert the
+     * key to a string, number or boolean, because
+     * with other types equality is not correctly
+     * managed by JS.
+     * https://stackoverflow.com/questions/29759480/how-to-customize-object-equality-for-javascript-set
+     * https://esdiscuss.org/topic/maps-with-object-keys
+     *
+     *     HashSet.of("a", "b").toJsSet(x=>x);
+     *     => new Set(["a", "b"])
+     */
+    toJsSet(keyConvert:(k:T)=>string): Set<string>;
+    toJsSet(keyConvert:(k:T)=>number): Set<number>;
+    toJsSet(keyConvert:(k:T)=>boolean): Set<boolean>;
+    toJsSet<K extends string|number|boolean>(keyConvert:(k:T)=>K): Set<K> {
+        return this.foldLeft(new Set<K>(), (sofar,cur) => sofar.add(keyConvert(cur)));
+    }
+
+    /**
      * Two objects are equal if they represent the same value,
      * regardless of whether they are the same object physically
      * in memory.

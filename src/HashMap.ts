@@ -542,6 +542,28 @@ export class HashMap<K,V> implements IMap<K,V> {
     }
 
     /**
+     * Convert to an ES6 Map.
+     * You must provide a function to convert the
+     * key to a string, number or boolean, because
+     * with other types equality is not correctly
+     * managed by JS.
+     * https://stackoverflow.com/questions/29759480/how-to-customize-object-equality-for-javascript-set
+     * https://esdiscuss.org/topic/maps-with-object-keys
+     *
+     *     HashMap.of<string,number>(["a",1],["b",2])
+     *         .toJsMap(x=>x);
+     *     => new Map([["a",1], ["b",2]])
+     */
+    toJsMap(keyConvert:(k:K)=>string): Map<string,V>;
+    toJsMap(keyConvert:(k:K)=>number): Map<number,V>;
+    toJsMap(keyConvert:(k:K)=>boolean): Map<boolean,V>;
+    toJsMap<K2 extends number|string|boolean>(keyConvert:(k:K)=>K2): Map<K2,V> {
+        return this.foldLeft(
+            new Map<K2,V>(),
+            (soFar,cur)=> soFar.set(keyConvert(cur[0]), cur[1]));
+    }
+
+    /**
      * Transform this value to another value type.
      * Enables fluent-style programming by chaining calls.
      */
