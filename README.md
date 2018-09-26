@@ -1,6 +1,7 @@
 # prelude.ts
 [![NPM version][npm-image]][npm-url]
 [![Tests][circleci-image]][circleci-url]
+[![apidoc][apidoc-image]][apidoc-url]
 
 ## Intro
 
@@ -208,3 +209,5 @@ typescript 2.8.3 or newer.
 [npm-url]: https://www.npmjs.com/package/prelude.ts
 [circleci-image]: https://circleci.com/gh/emmanueltouzery/prelude.ts.svg?style=shield&circle-token=6d8b74ef7ea7d1c204e77c4f88b05348682b4161
 [circleci-url]: https://circleci.com/gh/emmanueltouzery/prelude.ts
+[apidoc-image]: http://emmanueltouzery.github.io/prelude.ts/apidoc.svg
+[apidoc-url]: http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html
