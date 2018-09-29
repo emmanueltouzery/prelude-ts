@@ -281,14 +281,8 @@ export class OptionStatic {
      *     throws(1,2);
      *     => Option.none()
      */
-    lift<U>(fn:()=>U|undefined): ()=>Option<U>
-    lift<T1,U>(fn:(a:T1)=>U|undefined): (a:T1)=>Option<U>
-    lift<T1,T2,U>(fn:(a:T1,b:T2)=>U|undefined): (a:T1,b:T2)=>Option<U>
-    lift<T1,T2,T3,U>(fn:(a:T1,b:T2,c:T3)=>U|undefined): (a:T1,b:T2,c:T3)=>Option<U>
-    lift<T1,T2,T3,T4,U>(fn:(a:T1,b:T2,c:T3,d:T4)=>U|undefined): (a:T1,b:T2,c:T3,d:T4)=>Option<U>
-    lift<T1,T2,T3,T4,T5,U>(fn:(a:T1,b:T2,c:T3,d:T4,e:T5)=>U|undefined): (a:T1,b:T2,c:T3,d:T4,e:T5)=>Option<U>
-    lift<U>(fn: any): any {
-        return (...args:any[]) => {
+    lift<T extends any[],U>(fn: (...args: T)=>U|undefined): (...args:T)=>Option<U> {
+        return (...args:T) => {
             try {
                 return Option.of(fn(...args));
             } catch {
@@ -318,14 +312,8 @@ export class OptionStatic {
      *     throws(1,2);
      *     => Option.none()
      */
-    liftNullable<U>(fn:()=>U|null|undefined): ()=>Option<U>
-    liftNullable<T1,U>(fn:(a:T1)=>U|null|undefined): (a:T1)=>Option<U>
-    liftNullable<T1,T2,U>(fn:(a:T1,b:T2)=>U|null|undefined): (a:T1,b:T2)=>Option<U>
-    liftNullable<T1,T2,T3,U>(fn:(a:T1,b:T2,c:T3)=>U|null|undefined): (a:T1,b:T2,c:T3)=>Option<U>
-    liftNullable<T1,T2,T3,T4,U>(fn:(a:T1,b:T2,c:T3,d:T4)=>U|null|undefined): (a:T1,b:T2,c:T3,d:T4)=>Option<U>
-    liftNullable<T1,T2,T3,T4,T5,U>(fn:(a:T1,b:T2,c:T3,d:T4,e:T5)=>U|null|undefined): (a:T1,b:T2,c:T3,d:T4,e:T5)=>Option<U>
-    liftNullable<U>(fn: any): any {
-        return (...args:any[]) => {
+    liftNullable<T extends any[],U>(fn: (...args: T)=>U|null|undefined): (...args:T)=>Option<U> {
+        return (...args:T) => {
             try {
                 return Option.ofNullable(fn(...args));
             } catch {

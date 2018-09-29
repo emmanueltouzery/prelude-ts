@@ -303,14 +303,8 @@ export class EitherStatic {
      *     throws();
      *     => Either.left("x")
      */
-    lift<L,U>(fn:()=>U, witness?: L): ()=>Either<L,U>
-    lift<T1,L,U>(fn:(x:T1)=>U, witness?: L): (x:T1)=>Either<L,U>
-    lift<T1,T2,L,U>(fn:(x:T1,y:T2)=>U, witness?: L): (x:T1,y:T2)=>Either<L,U>
-    lift<T1,T2,T3,L,U>(fn:(x:T1,y:T2,z:T3)=>U, witness?: L): (x:T1,y:T2,z:T3)=>Either<L,U>
-    lift<T1,T2,T3,T4,L,U>(fn:(x:T1,y:T2,z:T3,z1:T4)=>U, witness?: L): (x:T1,y:T2,z:T3,z1:T4)=>Either<L,U>
-    lift<T1,T2,T3,T4,T5,L,U>(fn:(x:T1,y:T2,z:T3,z1:T4,z2:T5)=>U, witness?: L): (x:T1,y:T2,z:T3,z1:T4,z2:T5)=>Either<L,U>
-    lift<L,U>(fn:any, witness?: L): any {
-        return (...args:any[]) => {
+    lift<T extends any[],L,U>(fn: (...args: T)=>U, witness?: L): (...args:T)=>Either<L,U> {
+        return (...args:T) => {
             try {
                 const r = fn(...args);
                 if (r !== undefined) {
@@ -350,7 +344,7 @@ export class EitherStatic {
      * [[OptionStatic.tryNullable]]
      */
     try_<L,T>(fn:()=>T, witness?: L): Either<L,T> {
-        return Either.lift<L,T>(fn)();
+        return Either.lift<[],L,T>(fn)();
     }
 }
 
