@@ -512,6 +512,9 @@ describe("Seq fuzzer", () => {
     ];
     it("should pass the fuzzer", () => {
         for (let testIdx=0;testIdx<testsToRun;testIdx++) {
+            if (testIdx % 1000 === 0) {
+                console.log(`fuzzer: ran ${testIdx} tests`);
+            }
             let vec: Seq<number> = Vector.empty<number>();
             let llist: Seq<number> = LinkedList.empty<number>();
             let stream: Seq<number> = Stream.empty<number>();
