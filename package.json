@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "hamt_plus": "1.0.2",
-        "list": "2.0.15"
+        "list": "2.0.16"
     },
     "devDependencies": {
         "@types/mocha": "2.2.41",

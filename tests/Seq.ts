@@ -478,8 +478,7 @@ export function runTests(seqName: string,
 }
 
 describe("Seq fuzzer", () => {
-    // ### reduce to 0 testruns for now as the fuzzer turns up bugs from the 'list' dependency
-    const testsToRun = 0; 
+    const testsToRun = 3000; 
     const opsToRun = 64;
     const randomArrayMaxLength = 256;
     const getRandomArray = () => Stream.iterate(0,i=>i+1)
