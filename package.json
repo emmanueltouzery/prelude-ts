@@ -13,8 +13,8 @@
         "list": "2.0.16"
     },
     "devDependencies": {
-        "@types/mocha": "2.2.41",
-        "mocha": "3.4.2",
+        "@types/mocha": "5.2.5",
+        "mocha": "5.2.0",
         "typedoc": "0.7.2",
         "@types/node": "9.6.7",
         "benchmark": "2.1.4",
