@@ -36,3 +36,5 @@ jobs:
       # run tests!
       - run: yarn test
 
+      # apidoc generation can easily fail -- check it.
+      - run: yarn run docgen
