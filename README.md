@@ -190,10 +190,10 @@ such as typescript.
 
 ## Typescript version
 
-If you're getting the error `error TS2304: Cannot find name 'Exclude'` when building
-prelude.ts, it means your version of typescript is too old. You can try prelude.ts
-0.7.5, which didn't require such a new version, but versions after 0.7.5 require
-typescript 2.8.3 or newer.
+If you're getting the error `error TS2304: Cannot find name 'Exclude'` 
+or `error TS2370: A rest parameter must be of an array type`,
+it means your version of typescript is too old. As of 0.8.0, prelude
+requires typescript 3.0 or newer.
 
 ## Commands
 
