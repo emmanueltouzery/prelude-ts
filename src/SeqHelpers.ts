@@ -207,3 +207,12 @@ export function sliding<T>(seq: Seq<T>, count:number): Stream<Seq<T>> {
         Stream.empty<Seq<T>>() :
         new ConsStream(seq.take(count), Lazy.of(() => sliding(seq.drop(count), count)));
 }
+
+/**
+ * @hidden
+ */
+export function removeAll<T>(seq: Seq<T>, elts:Iterable<T&WithEquality>): Seq<T> {
+    const toRemove = HashSet.ofIterable(elts);
+    // I know T must have equality since the parameter has it and is the same type.
+    return <Seq<T>><any>(<Seq<T&WithEquality>><any>seq).filter(x => !toRemove.contains(x));
+}

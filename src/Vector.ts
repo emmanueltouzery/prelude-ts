@@ -159,6 +159,16 @@ export class Vector<T> implements Seq<T> {
     }
 
     /**
+     * Remove multiple elements from a vector
+     *
+     *     Vector.of(1,2,3,4,3,2,1).removeAll([2,4])
+     *     => Vector.of(1,3,3,1)
+     */
+    removeAll(elts:Iterable<T&WithEquality>): Vector<T> {
+        return <Vector<T>><any>SeqHelpers.removeAll(this, elts);
+    }
+
+    /**
      * Get the first value of the collection, if any.
      * returns Option.Some if the collection is not empty,
      * Option.None if it's empty.

@@ -107,6 +107,10 @@ export function runTests(seqName: string,
            assertFailCompile(
                seqName + ".of([1]).contains([1])",
                "Argument of type \'number[]\' is not assignable to parameter"));
+        it("should fail compilation trying to call removeAll without equality", () =>
+           assertFailCompile(
+               seqName + ".of([1]).removeAll([1])",
+               "Argument of type \'number[]\' is not assignable to parameter"));
     });
 
     describe(seqName + " iteration", () => {
@@ -374,6 +378,8 @@ export function runTests(seqName: string,
             [0,1,2,3,4], of(0,1,2,3,4).removeFirst(Predicate.equals(5)).toArray()));
         it("calculates removeFirst from empty well", () => assert.ok(
             empty<number>().equals(empty<number>().removeFirst(x => x === 3))));
+        it("calculates removeAll from empty well", () => assert.ok(
+            empty<number>().equals(empty<number>().removeAll([2,3]))));
         it("handles a simple splitAt", () => assert.deepEqual(
             [[1,2,3],[4,5]], of(1,2,3,4,5).splitAt(3).map(x=>x.toArray())));
         it("handles a simple splitAt 2", () => assert.deepEqual(

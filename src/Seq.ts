@@ -23,6 +23,14 @@ export interface Seq<T> extends Collection<T> {
     appendAll(elts: Iterable<T>): Seq<T>;
 
     /**
+     * Remove multiple elements from a collection
+     *
+     *     Vector.of(1,2,3,4,3,2,1).removeAll([2,4])
+     *     => Vector.of(1,3,3,1)
+     */
+    removeAll(elts: Iterable<T&WithEquality>): Seq<T>;
+
+    /**
      * Removes the first element matching the predicate
      * (use [[Seq.filter]] to remove all elements matching a predicate)
      */

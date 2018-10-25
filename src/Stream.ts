@@ -512,6 +512,16 @@ export class EmptyStream<T> implements Seq<T> {
     }
 
     /**
+     * Remove multiple elements from a stream
+     *
+     *     Stream.of(1,2,3,4,3,2,1).removeAll([2,4])
+     *     => Stream.of(1,3,3,1)
+     */
+    removeAll(elts:Iterable<T&WithEquality>): Stream<T> {
+        return this;
+    }
+
+    /**
      * Removes the first element matching the predicate
      * (use [[ConsStream.filter]] to remove all elements matching a predicate)
      */
@@ -1290,6 +1300,16 @@ export class ConsStream<T> implements Seq<T> {
      */
     appendAll(elts:Iterable<T>): Stream<T> {
         return this.appendStream(Stream.ofIterable(elts));
+    }
+
+    /**
+     * Remove multiple elements from a stream
+     *
+     *     Stream.of(1,2,3,4,3,2,1).removeAll([2,4])
+     *     => Stream.of(1,3,3,1)
+     */
+    removeAll(elts:Iterable<T&WithEquality>): Stream<T> {
+        return <Stream<T>><any>SeqHelpers.removeAll(this, elts);
     }
 
     /**

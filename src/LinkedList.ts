@@ -480,6 +480,16 @@ export class EmptyLinkedList<T> implements Seq<T> {
     }
 
     /**
+     * Remove multiple elements from a LinkedList
+     *
+     *     LinkedList.of(1,2,3,4,3,2,1).removeAll([2,4])
+     *     => LinkedList.of(1,3,3,1)
+     */
+    removeAll(elts:Iterable<T&WithEquality>): LinkedList<T> {
+        return this;
+    }
+
+    /**
      * Removes the first element matching the predicate
      * (use [[Seq.filter]] to remove all elements matching a predicate)
      */
@@ -1261,6 +1271,16 @@ export class ConsLinkedList<T> implements Seq<T> {
      */
     appendAll(elts:Iterable<T>): LinkedList<T> {
         return LinkedList.ofIterable(elts).prependAll(<LinkedList<T>>this);
+    }
+
+    /**
+     * Remove multiple elements from a LinkedList
+     *
+     *     LinkedList.of(1,2,3,4,3,2,1).removeAll([2,4])
+     *     => LinkedList.of(1,3,3,1)
+     */
+    removeAll(elts:Iterable<T&WithEquality>): LinkedList<T> {
+        return <LinkedList<T>><any>SeqHelpers.removeAll(this, elts);
     }
 
     /**
