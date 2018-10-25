@@ -6,6 +6,12 @@ import { MyClass, MySubclass } from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
 
+describe("option creation", () => {
+    it("should create a Some for Option.ofNullable(0)", () => {
+        assert.ok(Option.ofNullable(0).equals(Option.of(0)));
+        assert.ok(Option.ofNullable(0).isSome());
+      });
+});
 describe("option comparison", () => {
     it("should mark equal options as equal", () =>
        assert.ok(Option.of(5).equals(Option.of(5))))

@@ -88,7 +88,7 @@ export class OptionStatic {
      * Also see [[OptionStatic.some]], [[OptionStatic.of]]
      */
     ofNullable<T>(v:T|undefined|null): Option<T> {
-        return v ? new Some(v) : <None<T>>none;
+        return (v !== undefined && v !== null) ? new Some(v) : <None<T>>none;
     }
 
     /**
