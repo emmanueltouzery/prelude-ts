@@ -87,7 +87,7 @@ prelude.ts will reject the code at runtime; for instance if you call
 
     Error building a HashSet: element doesn't support true equality: Vector([1])
 
-(this behavior is [customizable](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html#setcontractviolationaction)).
+(this behavior is [customizable](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/files/contract.html#setcontractviolationaction)).
 
 ## Installation
 
