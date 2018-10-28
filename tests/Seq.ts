@@ -175,6 +175,12 @@ export function runTests(seqName: string,
         abc.last(); // needed to force the stream to get loaded
         it("toString works for strings too", () => assert.equal(
             seqName + "('a', 'b', 'c')", abc.toString()));
+        it("handles circular structures on toString too", () => {
+            const a: any = {};
+            a.b = a;
+            assert.equal(
+                seqName + "({})", of(a).toString());
+        })
         it("transforms to map", () => {
             assert.ok(HashMap.empty<number,string>().put(1,"ok").put(2, "bad")
                       .equals(<HashMap<number,string>>of<[number,string]>([1,"ok"],[2,"bad"]).toMap(x => x)));
