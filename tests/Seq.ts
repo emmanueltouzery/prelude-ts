@@ -179,7 +179,7 @@ export function runTests(seqName: string,
             const a: any = {};
             a.b = a;
             assert.equal(
-                seqName + "({})", of(a).toString());
+                of({}).toString(), of(a).toString());
         })
         it("transforms to map", () => {
             assert.ok(HashMap.empty<number,string>().put(1,"ok").put(2, "bad")
