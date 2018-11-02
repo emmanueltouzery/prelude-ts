@@ -2,7 +2,10 @@ import { WithEquality } from "./Comparison";
 
 import * as util from 'util';
 
-// @ts-ignore
+/**
+ * @hidden
+ */
+// @ts-ignore -- see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/30241
 export const inspect: unique symbol = util.inspect.custom;
 
 export interface Value {
