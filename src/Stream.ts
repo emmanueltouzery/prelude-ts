@@ -18,15 +18,13 @@
  *     Stream.continually(Math.random).take(2);
  *     => Stream.of(0.49884723907769635, 0.3226548779864311)
  */
-import { Option, Some, None } from "./Option";
+import { Option, Some } from "./Option";
 import { Vector } from "./Vector";
 import { WithEquality, getHashCode,
          areEqual, Ordering, ToOrderable } from "./Comparison";
 import { contractTrueEquality } from "./Contract";
-import { Value } from "./Value";
-import { IMap } from "./IMap";
+import { inspect } from "./Value";
 import { HashMap } from "./HashMap";
-import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
 import { Seq } from "./Seq";
 import { Lazy } from "./Lazy";
@@ -865,7 +863,7 @@ export class EmptyStream<T> implements Seq<T> {
         return 1;
     }
 
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 
@@ -1748,7 +1746,7 @@ export class ConsStream<T> implements Seq<T> {
         return hash;
     }
 
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 

@@ -8,6 +8,7 @@ import { WithEquality, hasEquals, HasEquals,
          getHashCode, areEqual, Ordering, ToOrderable  } from "./Comparison";
 import * as SeqHelpers from "./SeqHelpers";
 import { contractTrueEquality } from "./Contract";
+import { inspect } from "./Value";
 const hamt: any = require("hamt_plus");
 
 /**
@@ -643,7 +644,7 @@ export class HashSet<T> implements ISet<T> {
             + ")";
     }
 
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 

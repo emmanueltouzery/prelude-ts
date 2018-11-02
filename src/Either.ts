@@ -19,11 +19,10 @@
  * Right has the extra [[Right.get]] method that [[Left]] doesn't have.
  */
     
-import { Value } from "./Value";
+import { Value, inspect } from "./Value";
 import { Option } from "./Option";
 import { LinkedList } from "./LinkedList";
 import { Vector } from "./Vector";
-import { Function0 } from "./Function";
 import { WithEquality, areEqual,
          hasTrueEquality, getHashCode } from "./Comparison";
 import { contractTrueEquality} from "./Contract";
@@ -612,7 +611,7 @@ export class Left<L,R> implements Value {
     /**
      * Used by the node REPL to display values.
      */
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 }
@@ -868,7 +867,7 @@ export class Right<L,R> implements Value {
     /**
      * Used by the node REPL to display values.
      */
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 }

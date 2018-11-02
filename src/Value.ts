@@ -1,5 +1,10 @@
 import { WithEquality } from "./Comparison";
 
+import * as util from 'util';
+
+// @ts-ignore
+export const inspect: unique symbol = util.inspect.custom;
+
 export interface Value {
 
     /**
@@ -25,5 +30,5 @@ export interface Value {
      * Used by the node REPL to display values.
      * Most of the time should be the same as toString()
      */
-    inspect(): string;
+    [inspect](): string;
 }

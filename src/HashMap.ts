@@ -5,10 +5,10 @@ import { toStringHelper } from "./SeqHelpers";
 import { contractTrueEquality } from "./Contract"
 import { Option, none, None } from "./Option";
 import { HashSet } from "./HashSet";
-import { ISet } from "./ISet";
 import { Vector } from "./Vector";
 import { LinkedList } from "./LinkedList";
 import * as SeqHelpers from "./SeqHelpers";
+import { inspect } from "./Value";
 const hamt: any = require("hamt_plus");
 
 // HashMap could extend Collection, conceptually. But I'm
@@ -631,7 +631,7 @@ export class HashMap<K,V> implements IMap<K,V> {
             .join(", ") + ")";
     }
 
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 }

@@ -1,3 +1,4 @@
+import { inspect } from './Value';
 import { Option } from "./Option";
 import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
@@ -489,7 +490,7 @@ export class Vector<T> implements Seq<T> {
      * Used by the node REPL to display values.
      * Most of the time should be the same as toString()
      */
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 

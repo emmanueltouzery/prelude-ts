@@ -25,10 +25,8 @@ import { Vector } from "./Vector";
 import { WithEquality, getHashCode,
          areEqual, Ordering, ToOrderable } from "./Comparison";
 import { contractTrueEquality } from "./Contract";
-import { Value } from "./Value";
-import { IMap } from "./IMap";
+import { inspect } from "./Value";
 import { HashMap } from "./HashMap";
-import { ISet } from "./ISet";
 import { HashSet } from "./HashSet";
 import { Seq } from "./Seq";
 import { Stream } from "./Stream";
@@ -803,7 +801,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
         return 1;
     }
 
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 
@@ -1721,7 +1719,7 @@ export class ConsLinkedList<T> implements Seq<T> {
         return hash;
     }
 
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 

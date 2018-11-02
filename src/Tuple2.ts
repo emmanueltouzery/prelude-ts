@@ -1,4 +1,4 @@
-import { Value } from "./Value";
+import { Value, inspect } from "./Value";
 import { Option } from "./Option";
 import { Vector } from "./Vector";
 import { LinkedList, ConsLinkedList } from "./LinkedList";
@@ -167,7 +167,7 @@ export class Tuple2<T,U> implements Value {
      * Used by the node REPL to display values.
      * Most of the time should be the same as toString()
      */
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 }

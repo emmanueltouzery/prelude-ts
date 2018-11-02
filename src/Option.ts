@@ -27,11 +27,9 @@
  * Some has the extra [[Some.get]] method that [[None]] doesn't have.
  */
 
-import { Value } from "./Value";
-import { Seq } from "./Seq";
+import { Value, inspect } from "./Value";
 import { Vector } from "./Vector";
 import { Either } from "./Either";
-import { Function0 } from "./Function";
 import { WithEquality, areEqual, hasTrueEquality,
          getHashCode, } from "./Comparison";
 import { toStringHelper } from "./SeqHelpers";
@@ -665,7 +663,7 @@ export class Some<T> implements Value {
     /**
      * Used by the node REPL to display values.
      */
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 }
@@ -930,7 +928,7 @@ export class None<T> implements Value {
     /**
      * Used by the node REPL to display values.
      */
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 }

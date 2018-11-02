@@ -1,3 +1,4 @@
+import { inspect } from "./Value";
 import { toStringHelper } from "./SeqHelpers";
 
 /**
@@ -65,7 +66,7 @@ export class Lazy<T> {
      * Used by the node REPL to display values.
      * Most of the time should be the same as toString()
      */
-    inspect(): string {
+    [inspect](): string {
         return this.toString();
     }
 }
