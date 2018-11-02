@@ -23,7 +23,10 @@
         "uglify-js": "3.1.2",
         "immutable": "4.0.0-rc.9",
         "hamt": "2.2.2",
-        "mocha-testcheck": "1.0.0-rc.0"
+        "mocha-testcheck": "1.0.0-rc.0",
+        "request-promise-native": "1.0.5",
+        "@types/request-promise-native": "1.0.15",
+        "request": "2.88.0"
     },
     "keywords": [
         "typescript",
