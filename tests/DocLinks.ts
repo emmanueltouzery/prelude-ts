@@ -1,4 +1,3 @@
-import * as assert from 'assert'
 import { readFileSync } from "fs";
 import { Vector } from "../src/Vector";
 import { Future } from "../src/Future";
@@ -22,6 +21,10 @@ describe("documentation links work", () => {
     });
     it("User Guide", async () => {
         const userGuide = await rp("https://github.com/emmanueltouzery/prelude.ts/wiki/Prelude.ts-user-guide");
+        await checkUrlsInText(userGuide, url => url.indexOf("emmanuel") >= 0 && !url.endsWith(".git"));
+    });
+    it("Equality Guide", async () => {
+        const userGuide = await rp("https://github.com/emmanueltouzery/prelude.ts/wiki/Equality");
         await checkUrlsInText(userGuide, url => url.indexOf("emmanuel") >= 0 && !url.endsWith(".git"));
     });
 });
