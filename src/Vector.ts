@@ -4,14 +4,12 @@ import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
 import { IMap } from "./IMap";
 import { Stream } from "./Stream";
-import { Seq } from "./Seq";
+import { Seq, IterableArray, Unshift } from "./Seq";
 import { WithEquality, areEqual, getHashCode,
          Ordering, ToOrderable } from "./Comparison";
 import { Collection } from "./Collection";
 import * as SeqHelpers from "./SeqHelpers";
 import * as L from "list";
-
-export type IterableArray<T> = { [K in keyof T] : Iterable<T[K]> };
 
 /**
  * A general-purpose list class with all-around good performance.
@@ -589,18 +587,6 @@ export class Vector<T> implements Seq<T> {
         return SeqHelpers.seqHasTrueEquality<T>(this);
     }
 
-    static zip<A extends any[]>(...iterables: IterableArray<A>): Vector<A> {
-        let r = <L.List<A>>L.empty();
-        const iterators = (iterables).map(i => i[Symbol.iterator]());
-        let items = iterators.map(i => i.next());
-
-        while (!items.some(item => item.done)) {
-            r = L.append<A>(<any>items.map(item => item.value), r);
-            items = iterators.map(i => i.next());
-        }
-        return new Vector(r);
-    }
-
     /**
      * Combine this collection with the collection you give in
      * parameter to produce a new collection which combines both,
@@ -612,17 +598,18 @@ export class Vector<T> implements Seq<T> {
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
      */
-    zip<U>(other: Iterable<U>): Vector<[T,U]> {
-        let r = <L.List<[T,U]>>L.empty();
+    zip<A extends any[]>(...iterables: IterableArray<A>): Vector<Unshift<A,T>> {
+        let r = <L.List<Unshift<A,T>>>L.empty();
         const thisIterator = this[Symbol.iterator]();
-        const otherIterator = other[Symbol.iterator]();
+        const otherIterators = iterables.map(i => i[Symbol.iterator]());
         let thisCurItem = thisIterator.next();
-        let otherCurItem = otherIterator.next();
+        let otherItems = otherIterators.map(i => i.next());
 
-        while (!thisCurItem.done && !otherCurItem.done) {
-            r = L.append<[T,U]>([thisCurItem.value, otherCurItem.value], r);
+        while (!thisCurItem.done && !otherItems.some(item => item.done)) {
+            r = L.append<Unshift<A,T>>(
+                [thisCurItem.value, ...otherItems.map(item => item.value)] as Unshift<A,T>, r);
             thisCurItem = thisIterator.next();
-            otherCurItem = otherIterator.next();
+            otherItems = otherIterators.map(i => i.next());
         }
         return new Vector(r);
     }

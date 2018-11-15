@@ -28,7 +28,7 @@ import { contractTrueEquality } from "./Contract";
 import { inspect } from "./Value";
 import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
-import { Seq } from "./Seq";
+import { Seq, IterableArray, Unshift } from "./Seq";
 import { Stream } from "./Stream";
 import * as SeqHelpers from "./SeqHelpers";
 
@@ -367,8 +367,8 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
      */
-    zip<U>(other: Iterable<U>): LinkedList<[T,U]> {
-        return <EmptyLinkedList<[T,U]>>emptyLinkedList;
+    zip<A extends any[]>(...iterables: IterableArray<A>): LinkedList<Unshift<A,T>> {
+        return <EmptyLinkedList<Unshift<A,T>>>emptyLinkedList;
     }
 
     /**
@@ -1116,18 +1116,18 @@ export class ConsLinkedList<T> implements Seq<T> {
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
      */
-    zip<U>(other: Iterable<U>): LinkedList<[T,U]> {
-        const otherIterator = other[Symbol.iterator]();
-        let otherCurItem = otherIterator.next();
+    zip<A extends any[]>(...iterables: IterableArray<A>): LinkedList<Unshift<A,T>> {
+        const otherIterators = iterables.map(i => i[Symbol.iterator]());
+        let otherItems = otherIterators.map(i => i.next());
 
         let curItem: LinkedList<T> = this;
-        let result: LinkedList<[T,U]> = <EmptyLinkedList<[T,U]>>emptyLinkedList;
+        let result: LinkedList<Unshift<A,T>> = <EmptyLinkedList<Unshift<A,T>>>emptyLinkedList;
 
-        while ((!curItem.isEmpty()) && (!otherCurItem.done)) {
+        while ((!curItem.isEmpty()) && !otherItems.some(item => item.done)) {
             result = new ConsLinkedList(
-                [curItem.value, otherCurItem.value] as [T,U], result);
+                [curItem.value, ...otherItems.map(item => item.value)] as Unshift<A,T>, result);
             curItem = curItem._tail;
-            otherCurItem = otherIterator.next();
+            otherItems = otherIterators.map(i => i.next());
         }
         return result.reverse();
     }

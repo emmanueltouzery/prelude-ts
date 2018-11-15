@@ -26,7 +26,7 @@ import { contractTrueEquality } from "./Contract";
 import { inspect } from "./Value";
 import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
-import { Seq } from "./Seq";
+import { Seq, IterableArray, Unshift } from "./Seq";
 import { Lazy } from "./Lazy";
 import { LinkedList } from "./LinkedList";
 import * as SeqHelpers from "./SeqHelpers";
@@ -401,8 +401,8 @@ export class EmptyStream<T> implements Seq<T> {
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
      */
-    zip<U>(other: Iterable<U>): Stream<[T,U]> {
-        return <EmptyStream<[T,U]>>emptyStream;
+    zip<A extends any[]>(...iterables: IterableArray<A>): Stream<Unshift<A,T>> {
+        return <EmptyStream<Unshift<A,T>>>emptyStream;
     }
 
     /**
@@ -1174,17 +1174,17 @@ export class ConsStream<T> implements Seq<T> {
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
      */
-    zip<U>(other: Iterable<U>): Stream<[T,U]> {
-        const otherIterator = other[Symbol.iterator]();
-        let otherCurItem = otherIterator.next();
+    zip<A extends any[]>(...iterables: IterableArray<A>): LinkedList<Unshift<A,T>> {
+        const otherIterators = iterables.map(i => i[Symbol.iterator]());
+        let otherItems = otherIterators.map(i => i.next());
 
         if (this.isEmpty() || otherCurItem.done) {
             return <EmptyStream<[T,U]>>emptyStream;
         }
 
-        return new ConsStream([this.value, otherCurItem.value] as [T,U],
+        return new ConsStream([this.value, , ...otherItems.map(item => item.value)] as Unshift<A,T>,
                               Lazy.of(() => this._tail.get().zip(
-                                  { [Symbol.iterator]: ()=>otherIterator})));
+                                  otherIterators.map(it => { [Symbol.iterator]: ()=>it}))));
     }
 
     /**

@@ -5,6 +5,10 @@ import { Option } from "./Option";
 import { Collection } from "./Collection";
 import { Stream } from "./Stream";
 
+export type IterableArray<T> = { [K in keyof T] : Iterable<T[K]> };
+export type Unshift<Tuple extends any[], Element> = ((h: Element, ...t: Tuple) => void) extends (...t: infer R) => void ? R : never;
+
+
 /**
  * A generic interface for list-like implementations.
  * @param T the item type
@@ -161,7 +165,7 @@ export interface Seq<T> extends Collection<T> {
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
      */
-    zip<U>(other: Iterable<U>): Seq<[T,U]>;
+    zip<A extends any[]>(...iterables: IterableArray<A>): Seq<Unshift<A,T>>;
 
     /**
      * Combine this collection with the index of the elements
