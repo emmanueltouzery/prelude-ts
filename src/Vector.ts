@@ -11,6 +11,8 @@ import { Collection } from "./Collection";
 import * as SeqHelpers from "./SeqHelpers";
 import * as L from "list";
 
+export type IterableArray<T> = { [K in keyof T] : Iterable<T[K]> };
+
 /**
  * A general-purpose list class with all-around good performance.
  * quasi-O(1) (actually O(log32(n))) access, append, replace.
@@ -585,6 +587,18 @@ export class Vector<T> implements Seq<T> {
      */
     hasTrueEquality(): boolean {
         return SeqHelpers.seqHasTrueEquality<T>(this);
+    }
+
+    static zip<A extends any[]>(...iterables: IterableArray<A>): Vector<A> {
+        let r = <L.List<A>>L.empty();
+        const iterators = (iterables).map(i => i[Symbol.iterator]());
+        let items = iterators.map(i => i.next());
+
+        while (!items.some(item => item.done)) {
+            r = L.append<A>(<any>items.map(item => item.value), r);
+            items = iterators.map(i => i.next());
+        }
+        return new Vector(r);
     }
 
     /**
