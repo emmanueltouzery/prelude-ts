@@ -157,7 +157,7 @@ describe("Vector.appendAll() implementation", () => {
     });
 });
 describe("static Vector.zip", () => {
-    const r = Vector.of(1,2).zipN(["a", "b"], Vector.of(11,10,9));
+    const r = Vector.zip<[number,string,number]>([1,2], ["a", "b"], Vector.of(11,10,9));
     assert.equal(2, r.length());
     // check that the types are properly inferred
     const head: [number,string,number] = r.head().getOrThrow();
@@ -169,12 +169,4 @@ describe("static Vector.zip", () => {
     assert.equal(2, other[0]);
     assert.equal("b", other[1]);
     assert.equal(10, other[2]);
-
-    it("zips with an array", () => assert.deepEqual(
-        [[1,"a"], [2,"b"]], Vector.of(1,2,3).zipN(["a","b"]).toArray()));
-    it("zips with a stream", () => assert.deepEqual(
-        [["a",0], ["b",1]], Vector.of("a","b").zipN(Stream.iterate(0,x=>x+1)).toArray()));
-    it("richer example", () => assert.deepEqual(
-        [[1,"a"],[2,"b"]], Vector.of(1,2,3)
-            .zipN(["a", "b", "c"]).takeWhile(([k,v]) => k<3).toArray()));
 });
