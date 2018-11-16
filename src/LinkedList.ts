@@ -28,7 +28,7 @@ import { contractTrueEquality } from "./Contract";
 import { inspect } from "./Value";
 import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
-import { Seq } from "./Seq";
+import { Seq, IterableArray } from "./Seq";
 import { Stream } from "./Stream";
 import * as SeqHelpers from "./SeqHelpers";
 
@@ -117,6 +117,18 @@ export class LinkedListStatic {
             nextVal = fn(nextVal.get()[1]);
         }
         return result.reverse();
+    }
+
+    zip<A extends any[]>(...iterables: IterableArray<A>): LinkedList<A> {
+        let r = LinkedList.empty<A>();
+        const iterators = iterables.map(i => i[Symbol.iterator]());
+        let items = iterators.map(i => i.next());
+
+        while (!items.some(item => item.done)) {
+            r = r.prepend(<any>items.map(item => item.value));
+            items = iterators.map(i => i.next());
+        }
+        return r.reverse();
     }
 }
 

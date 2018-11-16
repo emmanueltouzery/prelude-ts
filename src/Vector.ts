@@ -4,14 +4,12 @@ import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
 import { IMap } from "./IMap";
 import { Stream } from "./Stream";
-import { Seq } from "./Seq";
+import { Seq, IterableArray } from "./Seq";
 import { WithEquality, areEqual, getHashCode,
          Ordering, ToOrderable } from "./Comparison";
 import { Collection } from "./Collection";
 import * as SeqHelpers from "./SeqHelpers";
 import * as L from "list";
-
-export type IterableArray<T> = { [K in keyof T] : Iterable<T[K]> };
 
 /**
  * A general-purpose list class with all-around good performance.
@@ -591,7 +589,7 @@ export class Vector<T> implements Seq<T> {
 
     static zip<A extends any[]>(...iterables: IterableArray<A>): Vector<A> {
         let r = <L.List<A>>L.empty();
-        const iterators = (iterables).map(i => i[Symbol.iterator]());
+        const iterators = iterables.map(i => i[Symbol.iterator]());
         let items = iterators.map(i => i.next());
 
         while (!items.some(item => item.done)) {

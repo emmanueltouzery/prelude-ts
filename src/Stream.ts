@@ -26,7 +26,7 @@ import { contractTrueEquality } from "./Contract";
 import { inspect } from "./Value";
 import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
-import { Seq } from "./Seq";
+import { Seq, IterableArray } from "./Seq";
 import { Lazy } from "./Lazy";
 import { LinkedList } from "./LinkedList";
 import * as SeqHelpers from "./SeqHelpers";
@@ -158,6 +158,20 @@ export class StreamStatic {
             nextVal.get()[0],
             Lazy.of(()=>Stream.unfoldRight(nextVal.getOrThrow()[1], fn)));
     }
+
+    zip<A extends any[]>(...iterables: IterableArray<A>): Stream<A> {
+        const iterators: Iterator<A>[] = iterables.map(i => i[Symbol.iterator]());
+        let items = iterators.map(i => i.next());
+
+        if (items.some(item => item.done)) {
+            return <EmptyStream<A>>emptyStream;
+        }
+
+        return new ConsStream(items.map(item => item.value) as A,
+                              Lazy.of(() => Stream.zip<A>(...
+                                  <any>iterators.map(i=>({ [Symbol.iterator]: ()=>i})))));
+    }
+
 }
 
 /**
@@ -1168,8 +1182,8 @@ export class ConsStream<T> implements Seq<T> {
      * parameter to produce a new collection which combines both,
      * in pairs. For instance:
      *
-     *     Vector.of(1,2,3).zip(["a","b","c"])
-     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
+     *     Stream.of(1,2,3).zip(["a","b","c"])
+     *     => Stream.of([1,"a"], [2,"b"], [3,"c"])
      *
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.

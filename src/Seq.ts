@@ -5,6 +5,8 @@ import { Option } from "./Option";
 import { Collection } from "./Collection";
 import { Stream } from "./Stream";
 
+export type IterableArray<T> = { [K in keyof T] : Iterable<T[K]> };
+
 /**
  * A generic interface for list-like implementations.
  * @param T the item type
