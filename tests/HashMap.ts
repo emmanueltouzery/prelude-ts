@@ -144,7 +144,7 @@ describe("hashmap equality", () => {
         () => HashMap.of([HashMap.of(["a",[1]]), "value"])));
     it("should fail compilation on an obviously bad key type", () =>
        assertFailCompile(
-           "HashMap.of([[1], 'test'])", "Argument of type \'[number[], string]\' is not assignable to parameter"));
+           "HashMap.of([[1], 'test'])", "is not assignable to"));
 })
 
 describe("hashmap - toString should be nicely formatted", () => {
