@@ -2,12 +2,10 @@ import { inspect } from './Value';
 import { Option } from "./Option";
 import { HashMap } from "./HashMap";
 import { HashSet } from "./HashSet";
-import { IMap } from "./IMap";
 import { Stream } from "./Stream";
-import { Seq } from "./Seq";
+import { Seq, IterableArray } from "./Seq";
 import { WithEquality, areEqual, getHashCode,
          Ordering, ToOrderable } from "./Comparison";
-import { Collection } from "./Collection";
 import * as SeqHelpers from "./SeqHelpers";
 import * as L from "list";
 
@@ -588,6 +586,34 @@ export class Vector<T> implements Seq<T> {
     }
 
     /**
+     * Combine any number of iterables you give in as
+     * parameters to produce a new collection which combines all,
+     * in tuples. For instance:
+     *
+     *     Vector.zip(Vector.of(1,2,3), ["a","b","c"], LinkedList.of(8,9,10))
+     *     => Vector.of([1,"a",8], [2,"b",9], [3,"c",10])
+     *
+     * The result collection will have the length of the shorter
+     * of the input iterables. Extra elements will be discarded.
+     *
+     * Also see [the non-static version](#zip), which only combines two
+     * collections.
+     * @param A A is the type of the tuple that'll be generated
+     *          (`[number,string,number]` for the code sample)
+     */
+    static zip<A extends any[]>(...iterables: IterableArray<A>): Vector<A> {
+        let r = <L.List<A>>L.empty();
+        const iterators = iterables.map(i => i[Symbol.iterator]());
+        let items = iterators.map(i => i.next());
+
+        while (!items.some(item => item.done)) {
+            r = L.append<A>(<any>items.map(item => item.value), r);
+            items = iterators.map(i => i.next());
+        }
+        return new Vector(r);
+    }
+
+    /**
      * Combine this collection with the collection you give in
      * parameter to produce a new collection which combines both,
      * in pairs. For instance:
@@ -597,6 +623,9 @@ export class Vector<T> implements Seq<T> {
      *
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
+     *
+     * Also see [[Vector.zip]] (static version which can more than two
+     * iterables)
      */
     zip<U>(other: Iterable<U>): Vector<[T,U]> {
         let r = <L.List<[T,U]>>L.empty();

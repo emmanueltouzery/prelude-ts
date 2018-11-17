@@ -6,6 +6,15 @@ import { Collection } from "./Collection";
 import { Stream } from "./Stream";
 
 /**
+ * IterableArray can take a type and apply iterable to its
+ * "components". That is useful for instance for [[Vector.zip]]
+ *
+ * `IterableArray<[string,number,string]>`
+ * => `[Iterable<string>, Iterable<number>, Iterable<string>]`
+ */
+export type IterableArray<T> = { [K in keyof T] : Iterable<T[K]> };
+
+/**
  * A generic interface for list-like implementations.
  * @param T the item type
  */
