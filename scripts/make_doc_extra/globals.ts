@@ -11,7 +11,7 @@ const CATEGORIES = Vector.of<[string,Vector<string>]>(
         "Function", "Predicate", "Future")],
     ["Collection", Vector.of(
         "Collection", "Foldable",
-        "IMap","HashMap", "ISet", "HashSet",
+        "IMap","IterableArray","HashMap", "ISet", "HashSet",
         "Seq", "LinkedList", "Stream", "Vector",
         "Tuple2", "SortOnSpec", "SortBySpec")],
     ["Core", Vector.of(

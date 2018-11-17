@@ -119,6 +119,22 @@ export class LinkedListStatic {
         return result.reverse();
     }
 
+    /**
+     * Combine any number of iterables you give in as
+     * parameters to produce a new collection which combines all,
+     * in tuples. For instance:
+     *
+     *     LinkedList.zip(LinkedList.of(1,2,3), ["a","b","c"], Vector.of(8,9,10))
+     *     => LinkedList.of([1,"a",8], [2,"b",9], [3,"c",10])
+     *
+     * The result collection will have the length of the shorter
+     * of the input iterables. Extra elements will be discarded.
+     *
+     * Also see the non-static version [[ConsLinkedList.zip]], which only combines two
+     * collections.
+     * @param A A is the type of the tuple that'll be generated
+     *          (`[number,string,number]` for the code sample)
+     */
     zip<A extends any[]>(...iterables: IterableArray<A>): LinkedList<A> {
         let r = LinkedList.empty<A>();
         const iterators = iterables.map(i => i[Symbol.iterator]());
@@ -378,6 +394,9 @@ export class EmptyLinkedList<T> implements Seq<T> {
      *
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
+     *
+     * Also see [[LinkedListStatic.zip]] (static version which can more than two
+     * iterables)
      */
     zip<U>(other: Iterable<U>): LinkedList<[T,U]> {
         return <EmptyLinkedList<[T,U]>>emptyLinkedList;
@@ -1127,6 +1146,9 @@ export class ConsLinkedList<T> implements Seq<T> {
      *
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
+     *
+     * Also see [[LinkedListStatic.zip]] (static version which can more than two
+     * iterables)
      */
     zip<U>(other: Iterable<U>): LinkedList<[T,U]> {
         const otherIterator = other[Symbol.iterator]();

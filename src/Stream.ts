@@ -159,6 +159,22 @@ export class StreamStatic {
             Lazy.of(()=>Stream.unfoldRight(nextVal.getOrThrow()[1], fn)));
     }
 
+    /**
+     * Combine any number of iterables you give in as
+     * parameters to produce a new collection which combines all,
+     * in tuples. For instance:
+     *
+     *     Stream.zip(Stream.of(1,2,3), ["a","b","c"], LinkedList.of(8,9,10))
+     *     => Stream.of([1,"a",8], [2,"b",9], [3,"c",10])
+     *
+     * The result collection will have the length of the shorter
+     * of the input iterables. Extra elements will be discarded.
+     *
+     * Also see the non-static version [[ConsStream.zip]], which only combines two
+     * collections.
+     * @param A A is the type of the tuple that'll be generated
+     *          (`[number,string,number]` for the code sample)
+     */
     zip<A extends any[]>(...iterables: IterableArray<A>): Stream<A> {
         const iterators: Iterator<A>[] = iterables.map(i => i[Symbol.iterator]());
         let items = iterators.map(i => i.next());
@@ -409,11 +425,14 @@ export class EmptyStream<T> implements Seq<T> {
      * parameter to produce a new collection which combines both,
      * in pairs. For instance:
      *
-     *     Vector.of(1,2,3).zip(["a","b","c"])
-     *     => Vector.of([1,"a"], [2,"b"], [3,"c"])
+     *     Stream.of(1,2,3).zip(["a","b","c"])
+     *     => Stream.of([1,"a"], [2,"b"], [3,"c"])
      *
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
+     *
+     * Also see [[StreamStatic.zip]] (static version which can more than two
+     * iterables)
      */
     zip<U>(other: Iterable<U>): Stream<[T,U]> {
         return <EmptyStream<[T,U]>>emptyStream;
@@ -1187,6 +1206,9 @@ export class ConsStream<T> implements Seq<T> {
      *
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
+     *
+     * Also see [[StreamStatic.zip]] (static version which can more than two
+     * iterables)
      */
     zip<U>(other: Iterable<U>): Stream<[T,U]> {
         const otherIterator = other[Symbol.iterator]();
