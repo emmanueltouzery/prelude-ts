@@ -6,7 +6,7 @@ import * as ts from 'typescript';
 
 /**
  * In this little script we extract source code from the apidoc comments
- * all over the source of prelude.ts, generate for each source file which
+ * all over the source of prelude-ts, generate for each source file which
  * has apidoc comments containing source code samples a special apidoc-*.ts
  * test file.
  *

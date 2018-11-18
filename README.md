@@ -1,11 +1,11 @@
-# prelude.ts
+# prelude-ts
 [![NPM version][npm-image]][npm-url]
 [![Tests][circleci-image]][circleci-url]
 [![apidoc][apidoc-image]][apidoc-url]
 
 ## Intro
 
-Prelude.ts is a typescript library which aims to make functional programming
+prelude-ts is a typescript library which aims to make functional programming
 concepts accessible and productive in typescript. Note that even though it's
 written in typescript, it's perfectly usable from javascript (including ES5)!
 
@@ -53,7 +53,7 @@ and concretely the [list library](https://github.com/funkia/list/), as of 0.7.7.
 In addition the library is written in idiomatic javascript style, with loops
 instead of recursion, so the performance should be good
 ([see benchmarks here comparing to immutable.js and more](https://github.com/emmanueltouzery/prelude.ts/wiki/Benchmarks)).
-`list` and `hamt_plus` are the two only dependencies of prelude.ts.
+`list` and `hamt_plus` are the two only dependencies of prelude-ts.
 
 ## Set, Map and equality
 
@@ -62,17 +62,17 @@ So, `1 === 1` is true. But `[1] === [1]` is not, and neither `{a:1} === {a:1}`.
 This poses problems for collections, because if you have a `Set`, you don't
 want duplicate elements because of this limited definition of equality.
 
-For that reason, prelude.ts encourages you to define for your non-primitive types
+For that reason, prelude-ts encourages you to define for your non-primitive types
 methods `equals(other: any): boolean` and `hashCode(): number` (the same
 methods that [immutable.js uses](https://facebook.github.io/immutable-js/docs/#/ValueObject)).
 With these methods, structural equality is achievable, and indeed
 `Vector.of(1,2,3).equals(Vector.of(1,2,3))` is `true`. However this can only
 work if the values you put in collections have themselves properly defined equality
-([see how prelude.ts can help](https://github.com/emmanueltouzery/prelude.ts/wiki/Equality)).
+([see how prelude-ts can help](https://github.com/emmanueltouzery/prelude.ts/wiki/Equality)).
 If these values don't have structural equality, then we can get no better than
 `===` behavior.
 
-prelude.ts attempts to assist the programmer with this; it tries to encourage
+prelude-ts attempts to assist the programmer with this; it tries to encourage
 the developer to do the right thing. First, it'll refuse types without obviously properly
 defined equality in Sets and in Maps keys, so `HashSet.of([1])`,
 or `Vector.of([1]).equals(Vector.of([2]))` will not compile.
@@ -82,7 +82,7 @@ For both of these, you get (a longer version of) this message:
       Property 'equals' is missing in type 'number[]'.
 
 But in some less obvious cases, we can't detect the issue at compile-time, so
-prelude.ts will reject the code at runtime; for instance if you call
+prelude-ts will reject the code at runtime; for instance if you call
 `HashSet.of(Vector.of([1]))` you'll get an exception at runtime:
 
     Error building a HashSet: element doesn't support true equality: Vector([1])
@@ -92,7 +92,7 @@ prelude.ts will reject the code at runtime; for instance if you call
 ## Installation
 
 Typescript must know about `Iterable`, an ES6 feature (but present in most browsers)
-to compile prelude.ts. If you use typescript and target ES5, a minimum change to your tsconfig.json
+to compile prelude-ts. If you use typescript and target ES5, a minimum change to your tsconfig.json
 could be to add:
 
 ```json
@@ -104,9 +104,9 @@ could be to add:
 ### Using in nodejs
 
 Just add the dependency in your `package.json` and start using it (like
-`import { Vector } from "prelude.ts";`, or `const { Vector } = require("prelude.ts");`
+`import { Vector } from "prelude-ts";`, or `const { Vector } = require("prelude-ts");`
 if you use commonjs).
-Everything should work, including type-checking if you use typescript. Prelude.ts also provides
+Everything should work, including type-checking if you use typescript. prelude-ts also provides
 pretty-printing in the node REPL.
 
 ### Using in the browser
@@ -122,13 +122,13 @@ include the relevant one in your index.html in script tags:
 <script src="node_modules/prelude.ts/dist/src/prelude_ts.min.js"></script>
 ```
 
-You shouldn't have an issue to import prelude.ts in your application, but if you use
+You shouldn't have an issue to import prelude-ts in your application, but if you use
 modules it gets a little more complicated; One solution if you use them is to create
 an `imports.d.ts` file with the following contents:
 
 ```typescript
 // https://github.com/Microsoft/TypeScript/issues/3180#issuecomment-283007750
-import * as _P from 'prelude.ts';
+import * as _P from 'prelude-ts';
 export as namespace prelude_ts;
 export = _P;
 ```
@@ -144,7 +144,7 @@ To get the values without namespace.
 Finally, if you also include `dist/src/chrome_dev_tools_formatters.js` through
 a `script` tag, and [enable Chrome custom formatters](http://bit.ly/object-formatters),
 then you can get
-[a nice display of prelude.ts values in the chrome debugger](https://raw.githubusercontent.com/wiki/emmanueltouzery/prelude.ts/chrome_formatters.png).
+[a nice display of prelude-ts values in the chrome debugger](https://raw.githubusercontent.com/wiki/emmanueltouzery/prelude.ts/chrome_formatters.png).
 
 ## Wishlist/upcoming features
 
@@ -152,7 +152,7 @@ then you can get
 * Non-empty vector? (already have [non-empty linkedlist](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/classes/linkedlist.conslinkedlist.html))
 * More functions on existing classes
 
-## Out of scope for prelude.ts
+## Out of scope for prelude-ts
 
 * Free monads
 * Monad transformers
@@ -166,16 +166,16 @@ such as typescript.
 
 * [monet.js](https://monet.github.io/monet.js/) -- only has the `List` and
   `Option` collections, implemented in functional-style ES5. The implementation,
-  using recursion, means its list type is noticeably slower than prelude.ts's.
+  using recursion, means its list type is noticeably slower than prelude-ts's.
 * [immutables.js](https://facebook.github.io/immutable-js/) -- doesn't have the
   `Option` concept, the types can be clunky.
 * [sanctuary](https://github.com/sanctuary-js/sanctuary)
-  offers global functions like `S.filter(S.where(...))` while prelude.ts prefers a
+  offers global functions like `S.filter(S.where(...))` while prelude-ts prefers a
   fluent-api style like `list.filter(..).sortBy(...)`. Also, sanctuary doesn't
   offer sets and maps. On the other hand, sanctuary has some JS runtime type system
-  which prelude.ts doesn't have.
+  which prelude-ts doesn't have.
 * [ramdajs](http://ramdajs.com/) offers global functions like 
-  `R.filter(R.where(...))` while prelude.ts prefers a
+  `R.filter(R.where(...))` while prelude-ts prefers a
   fluent-api style like `list.filter(..).sortBy(...)`. Also, ramda doesn't offer
   sets and maps. Ramda also uses currying a lot out of the box, which may not
   be intuitive to a number of developers. In prelude, 
@@ -184,8 +184,8 @@ such as typescript.
   are opt-in.
 * [lodash](https://lodash.com) also has the global functions, and many functions
   mutate the collections.
-* [vavr](http://www.vavr.io/) -- it's a java library, but it's the main inspiration for prelude.ts.
-  Note that vavr is inspired by the scala library, so prelude.ts also is,
+* [vavr](http://www.vavr.io/) -- it's a java library, but it's the main inspiration for prelude-ts.
+  Note that vavr is inspired by the scala library, so prelude-ts also is,
   transitively.
 
 ## Typescript version
