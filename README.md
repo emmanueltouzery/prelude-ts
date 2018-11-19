@@ -38,8 +38,8 @@ you can use the `for .. of` construct on them. If you're not familiar with
 immutable collections, `list.append(newItem)` keeps `list` unchanged; `append()`
 returns a new list. Immutability helps reasoning about code.
 
-You can check the **[User Guide](https://github.com/emmanueltouzery/prelude.ts/wiki/Prelude.ts-user-guide)**, and browse the
 **[API documentation](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html)**,
+You can check the **[User Guide](https://github.com/emmanueltouzery/prelude-ts/wiki/Prelude.ts-user-guide)**, and browse the
 or our **[blog](http://emmanueltouzery.github.io/blog/tags/prelude.ts.html)**.
 Note that the constructors are private, and you should use static methods to build
 items, for instance `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
@@ -52,7 +52,7 @@ and concretely the [hamt_plus library](https://www.npmjs.com/package/hamt_plus).
 and concretely the [list library](https://github.com/funkia/list/), as of 0.7.7.
 In addition the library is written in idiomatic javascript style, with loops
 instead of recursion, so the performance should be good
-([see benchmarks here comparing to immutable.js and more](https://github.com/emmanueltouzery/prelude.ts/wiki/Benchmarks)).
+([see benchmarks here comparing to immutable.js and more](https://github.com/emmanueltouzery/prelude-ts/wiki/Benchmarks)).
 `list` and `hamt_plus` are the two only dependencies of prelude-ts.
 
 ## Set, Map and equality
@@ -68,7 +68,7 @@ methods that [immutable.js uses](https://facebook.github.io/immutable-js/docs/#/
 With these methods, structural equality is achievable, and indeed
 `Vector.of(1,2,3).equals(Vector.of(1,2,3))` is `true`. However this can only
 work if the values you put in collections have themselves properly defined equality
-([see how prelude-ts can help](https://github.com/emmanueltouzery/prelude.ts/wiki/Equality)).
+([see how prelude-ts can help](https://github.com/emmanueltouzery/prelude-ts/wiki/Equality)).
 If these values don't have structural equality, then we can get no better than
 `===` behavior.
 
@@ -119,7 +119,7 @@ which are UMD bundles; they work with other module systems and set `prelude_ts`
 as a window global if no module system is found.
 include the relevant one in your index.html in script tags:
 ```html
-<script src="node_modules/prelude.ts/dist/src/prelude_ts.min.js"></script>
+<script src="node_modules/prelude-ts/dist/src/prelude_ts.min.js"></script>
 ```
 
 You shouldn't have an issue to import prelude-ts in your application, but if you use
@@ -144,7 +144,7 @@ To get the values without namespace.
 Finally, if you also include `dist/src/chrome_dev_tools_formatters.js` through
 a `script` tag, and [enable Chrome custom formatters](http://bit.ly/object-formatters),
 then you can get
-[a nice display of prelude-ts values in the chrome debugger](https://raw.githubusercontent.com/wiki/emmanueltouzery/prelude.ts/chrome_formatters.png).
+[a nice display of prelude-ts values in the chrome debugger](https://raw.githubusercontent.com/wiki/emmanueltouzery/prelude-ts/chrome_formatters.png).
 
 ## Wishlist/upcoming features
 
@@ -205,9 +205,9 @@ requires typescript 3.0 or newer.
 
     npm run benchmarks
 
-[npm-image]: https://img.shields.io/npm/v/prelude.ts.svg?style=flat-square
+[npm-image]: https://img.shields.io/npm/v/prelude-ts.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/prelude-ts
 [circleci-image]: https://circleci.com/gh/emmanueltouzery/prelude.ts.svg?style=shield&circle-token=6d8b74ef7ea7d1c204e77c4f88b05348682b4161
-[circleci-url]: https://circleci.com/gh/emmanueltouzery/prelude.ts
+[circleci-url]: https://circleci.com/gh/emmanueltouzery/prelude-ts
 [apidoc-image]: http://emmanueltouzery.github.io/prelude.ts/apidoc.svg
 [apidoc-url]: http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html
