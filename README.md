@@ -207,7 +207,7 @@ requires typescript 3.0 or newer.
 
 [npm-image]: https://img.shields.io/npm/v/prelude-ts.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/prelude-ts
-[circleci-image]: https://circleci.com/gh/emmanueltouzery/prelude.ts.svg?style=shield&circle-token=6d8b74ef7ea7d1c204e77c4f88b05348682b4161
+[circleci-image]: https://circleci.com/gh/emmanueltouzery/prelude-ts.svg?style=shield&circle-token=6d8b74ef7ea7d1c204e77c4f88b05348682b4161
 [circleci-url]: https://circleci.com/gh/emmanueltouzery/prelude-ts
 [apidoc-image]: http://emmanueltouzery.github.io/prelude.ts/apidoc.svg
 [apidoc-url]: http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html
