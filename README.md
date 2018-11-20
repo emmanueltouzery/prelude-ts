@@ -39,7 +39,7 @@ immutable collections, `list.append(newItem)` keeps `list` unchanged; `append()`
 returns a new list. Immutability helps reasoning about code.
 
 **[API documentation](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html)**,
-You can check the **[User Guide](https://github.com/emmanueltouzery/prelude-ts/wiki/Prelude.ts-user-guide)**, and browse the
+You can check the **[User Guide](https://github.com/emmanueltouzery/prelude-ts/wiki/Prelude%E2%88%92ts-user-guide)**, and browse the
 or our **[blog](http://emmanueltouzery.github.io/blog/tags/prelude.ts.html)**.
 Note that the constructors are private, and you should use static methods to build
 items, for instance `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
@@ -174,12 +174,12 @@ such as typescript.
   fluent-api style like `list.filter(..).sortBy(...)`. Also, sanctuary doesn't
   offer sets and maps. On the other hand, sanctuary has some JS runtime type system
   which prelude-ts doesn't have.
-* [ramdajs](http://ramdajs.com/) offers global functions like 
+* [ramdajs](http://ramdajs.com/) offers global functions like
   `R.filter(R.where(...))` while prelude-ts prefers a
   fluent-api style like `list.filter(..).sortBy(...)`. Also, ramda doesn't offer
   sets and maps. Ramda also uses currying a lot out of the box, which may not
-  be intuitive to a number of developers. In prelude, 
-  [currying](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function.function2.html#curried) 
+  be intuitive to a number of developers. In prelude,
+  [currying](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function.function2.html#curried)
   & [partial application](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function.function2.html#apply1)
   are opt-in.
 * [lodash](https://lodash.com) also has the global functions, and many functions
@@ -190,10 +190,7 @@ such as typescript.
 
 ## Typescript version
 
-If you're getting the error `error TS2304: Cannot find name 'Exclude'` 
-or `error TS2370: A rest parameter must be of an array type`,
-it means your version of typescript is too old. As of 0.8.0, prelude
-requires typescript 3.0 or newer.
+As of 0.8.2, prelude requires typescript 3.1 or newer.
 
 ## Commands
 
