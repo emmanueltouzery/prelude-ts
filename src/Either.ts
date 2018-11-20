@@ -18,7 +18,7 @@
  * Left has the extra [[Left.getLeft]] method that [[Right]] doesn't have.
  * Right has the extra [[Right.get]] method that [[Left]] doesn't have.
  */
-    
+
 import { Value, inspect } from "./Value";
 import { Option } from "./Option";
 import { LinkedList } from "./LinkedList";
@@ -97,7 +97,7 @@ export class EitherStatic {
     /**
      * Takes a list, a function that can transform list elements
      * to eithers, then return an either containing a list of
-     * the transformed elements. 
+     * the transformed elements.
      *
      *     const getUserById: (x:number)=>Either<string,string> = x => x > 0 ?
      *         Either.right("user" + x.toString()) : Either.left("invalid id!");
@@ -339,7 +339,7 @@ export class EitherStatic {
      *     Either.try_(() => {throw "x"});
      *     => Either.left("x")
      *
-     * Also see [[Function0.liftEither]], [[OptionStatic.try_]],
+     * Also see [[EitherStatic.lift]], [[OptionStatic.try_]],
      * [[OptionStatic.tryNullable]]
      */
     try_<L,T>(fn:()=>T, witness?: L): Either<L,T> {

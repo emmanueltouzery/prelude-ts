@@ -171,7 +171,7 @@ export class OptionStatic {
     /**
      * Takes a list, a function that can transform list elements
      * to options, then return an option containing a list of
-     * the transformed elements. 
+     * the transformed elements.
      *
      *     const getUserById: (x:number)=>Option<string> = x => x > 0 ?
      *         Option.of("user" + x.toString()) : Option.none();
@@ -362,7 +362,7 @@ export class OptionStatic {
      *     => Option.none()
      *
      * Also see [[OptionStatic.try_]], [[OptionStatic.liftNullable]],
-     * [[OptionStatic.liftOption]], [[EitherStatic.try_]].
+     * [[OptionStatic.lift]], [[EitherStatic.try_]].
      */
     tryNullable<T>(fn:()=>T|null|undefined): Option<T> {
         return Option.liftNullable(fn)();

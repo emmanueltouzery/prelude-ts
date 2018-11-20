@@ -912,7 +912,7 @@ export class EmptyStream<T> implements Seq<T> {
     /**
      * Get a human-friendly string representation of that value.
      *
-     * Also see [[Stream.mkString]]
+     * Also see [[ConsStream.mkString]]
      */
     toString(): string {
         return "[]";
@@ -1807,7 +1807,7 @@ export class ConsStream<T> implements Seq<T> {
     /**
      * Get a human-friendly string representation of that value.
      *
-     * Also see [[Stream.mkString]]
+     * Also see [[ConsStream.mkString]]
      */
     toString(): string {
         let curItem: Stream<T> = this;
