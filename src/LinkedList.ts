@@ -848,7 +848,7 @@ export class EmptyLinkedList<T> implements Seq<T> {
     /**
      * Get a human-friendly string representation of that value.
      *
-     * Also see [[LinkedList.mkString]]
+     * Also see [[ConsLinkedList.mkString]]
      */
     toString(): string {
         return "LinkedList()";
@@ -1778,7 +1778,7 @@ export class ConsLinkedList<T> implements Seq<T> {
     /**
      * Get a human-friendly string representation of that value.
      *
-     * Also see [[LinkedList.mkString]]
+     * Also see [[ConsLinkedList.mkString]]
      */
     toString(): string {
         let curItem: LinkedList<T> = this;
