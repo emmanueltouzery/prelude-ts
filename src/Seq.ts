@@ -169,6 +169,9 @@ export interface Seq<T> extends Collection<T> {
      *
      * The result collection will have the length of the shorter
      * of both collections. Extra elements will be discarded.
+     *
+     * Also see [[Vector.zip]], [[LinkedListStatic.zip]] and [[StreamStatic.zip]]
+     * (static versions which can more than two iterables)
      */
     zip<U>(other: Iterable<U>): Seq<[T,U]>;
 

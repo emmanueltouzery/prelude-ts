@@ -97,6 +97,9 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      * and return the element for which the result was the smallest.
      * Returns Option.none if the collection is empty.
      *
+     *     Vector.of({name:"Joe", age:12}, {name:"Paula", age:6}).minOn(x=>x.age)
+     *     => Option.of({name:"Paula", age:6})
+     *
      * also see [[Collection.minBy]]
      */
     minOn(getNumber: ToOrderable<T>): Option<T>;
@@ -114,6 +117,9 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      * and return the element for which the result was the largest.
      * Returns Option.none if the collection is empty.
      *
+     *     Vector.of({name:"Joe", age:12}, {name:"Paula", age:6}).maxOn(x=>x.age)
+     *     => Option.of({name:"Joe", age:12})
+     *
      * also see [[Collection.maxBy]]
      */
     maxOn(getSortable: ToOrderable<T>): Option<T>;
@@ -122,6 +128,9 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      * Call the function you give for each element in the collection
      * and sum all the numbers, return that sum.
      * Will return 0 if the collection is empty.
+     *
+     *     Vector.of(1,2,3).sumOn(x=>x)
+     *     => 6
      */
     sumOn(getNumber: (v:T)=>number): number;
 }

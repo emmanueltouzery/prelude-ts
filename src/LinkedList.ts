@@ -677,6 +677,9 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * and return the element for which the result was the smallest.
      * Returns Option.none if the collection is empty.
      *
+     *     LinkedList.of({name:"Joe", age:12}, {name:"Paula", age:6}).minOn(x=>x.age)
+     *     => Option.of({name:"Paula", age:6})
+     *
      * also see [[ConsLinkedList.minBy]]
      */
     minOn(getOrderable: ToOrderable<T>): Option<T> {
@@ -698,6 +701,9 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * and return the element for which the result was the largest.
      * Returns Option.none if the collection is empty.
      *
+     *     LinkedList.of({name:"Joe", age:12}, {name:"Paula", age:6}).maxOn(x=>x.age)
+     *     => Option.of({name:"Joe", age:12})
+     *
      * also see [[ConsLinkedList.maxBy]]
      */
     maxOn(getOrderable: ToOrderable<T>): Option<T> {
@@ -708,6 +714,9 @@ export class EmptyLinkedList<T> implements Seq<T> {
      * Call the function you give for each element in the collection
      * and sum all the numbers, return that sum.
      * Will return 0 if the collection is empty.
+     *
+     *     LinkedList.of(1,2,3).sumOn(x=>x)
+     *     => 6
      */
     sumOn(getNumber: (v:T)=>number): number {
         return SeqHelpers.sumOn(this, getNumber);
@@ -1525,6 +1534,9 @@ export class ConsLinkedList<T> implements Seq<T> {
      * and return the element for which the result was the smallest.
      * Returns Option.none if the collection is empty.
      *
+     *     LinkedList.of({name:"Joe", age:12}, {name:"Paula", age:6}).minOn(x=>x.age)
+     *     => Option.of({name:"Paula", age:6})
+     *
      * also see [[ConsLinkedList.minBy]]
      */
     minOn(getOrderable: ToOrderable<T>): Option<T> {
@@ -1534,6 +1546,9 @@ export class ConsLinkedList<T> implements Seq<T> {
     /**
      * Compare values in the collection and return the largest element.
      * Returns Option.none if the collection is empty.
+     *
+     *     LinkedList.of({name:"Joe", age:12}, {name:"Paula", age:6}).maxOn(x=>x.age)
+     *     => Option.of({name:"Joe", age:12})
      *
      * also see [[ConsLinkedList.maxOn]]
      */
@@ -1556,6 +1571,9 @@ export class ConsLinkedList<T> implements Seq<T> {
      * Call the function you give for each element in the collection
      * and sum all the numbers, return that sum.
      * Will return 0 if the collection is empty.
+     *
+     *     LinkedList.of(1,2,3).sumOn(x=>x)
+     *     => 6
      */
     sumOn(getNumber: (v:T)=>number): number {
         return SeqHelpers.sumOn(this, getNumber);

@@ -553,6 +553,9 @@ export class HashSet<T> implements ISet<T> {
      * Call the function you give for each element in the collection
      * and sum all the numbers, return that sum.
      * Will return 0 if the collection is empty.
+     *
+     *     HashSet.of(1,2,3).sumOn(x=>x)
+     *     => 6
      */
     sumOn(getNumber: (v:T)=>number): number {
         return SeqHelpers.sumOn(this, getNumber);
