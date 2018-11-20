@@ -8,7 +8,7 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/node:8.11.1
-      
+
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
@@ -32,9 +32,12 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-        
+
       # run tests!
       - run: yarn test
 
       # apidoc generation can easily fail -- check it.
       - run: yarn run docgen
+
+      # check for bad links in the apidocs
+      - run: ! grep -r "\[\[\w" apidoc/
