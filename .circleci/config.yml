@@ -40,4 +40,4 @@ jobs:
       - run: yarn run docgen
 
       # check for bad links in the apidocs
-      - run: ! grep -r "\[\[\w" apidoc/
+      - run: sh -c "! grep -r \"\[\[\w\" apidoc/"
