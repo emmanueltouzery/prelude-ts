@@ -81,13 +81,8 @@ For both of these, you get (a longer version of) this message:
     Type 'number[]' is not assignable to type 'HasEquals'.
       Property 'equals' is missing in type 'number[]'.
 
-But in some less obvious cases, we can't detect the issue at compile-time, so
-prelude-ts will reject the code at runtime; for instance if you call
-`HashSet.of(Vector.of([1]))` you'll get an exception at runtime:
-
-    Error building a HashSet: element doesn't support true equality: Vector([1])
-
-(this behavior is [customizable](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/files/contract.html#setcontractviolationaction)).
+See the [User Guide](https://github.com/emmanueltouzery/prelude-ts/wiki/Prelude%E2%88%92ts-user-guide#equality)
+for more details.
 
 ## Installation
 
