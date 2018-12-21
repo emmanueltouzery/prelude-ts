@@ -73,7 +73,7 @@ If these values don't have structural equality, then we can get no better than
 `===` behavior.
 
 prelude-ts attempts to assist the programmer with this; it tries to encourage
-the developer to do the right thing. First, it'll refuse types without obviously properly
+the developer to do the right thing. It'll refuse types without obviously properly
 defined equality in Sets and in Maps keys, so `HashSet.of([1])`,
 or `Vector.of([1]).equals(Vector.of([2]))` will not compile.
 For both of these, you get (a longer version of) this message:
@@ -199,7 +199,7 @@ As of 0.8.2, prelude requires typescript 3.1 or newer.
 
 [npm-image]: https://img.shields.io/npm/v/prelude-ts.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/prelude-ts
-[circleci-image]: https://circleci.com/gh/emmanueltouzery/prelude-ts.svg?style=shield&circle-token=6d8b74ef7ea7d1c204e77c4f88b05348682b4161
+[circleci-image]: https://circleci.com/gh/emmanueltouzery/prelude-ts.svg?style=shield
 [circleci-url]: https://circleci.com/gh/emmanueltouzery/prelude-ts
 [apidoc-image]: http://emmanueltouzery.github.io/prelude.ts/apidoc.svg
 [apidoc-url]: http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html
