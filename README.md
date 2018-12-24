@@ -1,13 +1,14 @@
 # prelude-ts
+
 [![NPM version][npm-image]][npm-url]
 [![Tests][circleci-image]][circleci-url]
 [![apidoc][apidoc-image]][apidoc-url]
 
 ## Intro
 
-prelude-ts is a typescript library which aims to make functional programming
-concepts accessible and productive in typescript. Note that even though it's
-written in typescript, it's perfectly usable from javascript (including ES5)!
+prelude-ts is a TypeScript library which aims to make functional programming
+concepts accessible and productive in TypeScript. Note that even though it's
+written in TypeScript, it's perfectly usable from JavaScript (including ES5)!
 
 It provides [persistent](https://en.wikipedia.org/wiki/Persistent_data_structure)
 immutable collections (Vector, Set, Map, Stream), and constructs such as Option,
@@ -33,16 +34,16 @@ HashMap.of(["a",1],["b",2]).get("a")
 // Option.of(1)
 ```
 
-The collections are also javascript iterables, so if you have an ES6 runtime,
+The collections are also JavaScript iterables, so if you have an ES6 runtime,
 you can use the `for .. of` construct on them. If you're not familiar with
 immutable collections, `list.append(newItem)` keeps `list` unchanged; `append()`
 returns a new list. Immutability helps reasoning about code.
 
-**[API documentation](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html)**,
-You can check the **[User Guide](https://github.com/emmanueltouzery/prelude-ts/wiki/Prelude%E2%88%92ts-user-guide)**, and browse the
+You can check the **[User Guide](https://github.com/emmanueltouzery/prelude-ts/wiki/Prelude%E2%88%92ts-user-guide)**,
+and browse the **[API documentation](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html)**,
 or our **[blog](http://emmanueltouzery.github.io/blog/tags/prelude.ts.html)**.
 Note that the constructors are private, and you should use static methods to build
-items, for instance `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
+items — for instance: `Option.of`, `Vector.of`, `Vector.ofIterable`, and so on.
 
 `HashSet` and `HashMap` are implemented using the
 [HAMT algorithm](http://en.wikipedia.org/wiki/Hash_array_mapped_trie),
@@ -50,15 +51,15 @@ and concretely the [hamt_plus library](https://www.npmjs.com/package/hamt_plus).
 `Vector` is implemented through a
 [bit-mapped vector trie](http://hypirion.com/musings/understanding-persistent-vector-pt-1)
 and concretely the [list library](https://github.com/funkia/list/), as of 0.7.7.
-In addition the library is written in idiomatic javascript style, with loops
+In addition, the library is written in idiomatic JavaScript style, with loops
 instead of recursion, so the performance should be good
 ([see benchmarks here comparing to immutable.js and more](https://github.com/emmanueltouzery/prelude-ts/wiki/Benchmarks)).
 `list` and `hamt_plus` are the two only dependencies of prelude-ts.
 
 ## Set, Map and equality
 
-Javascript doesn't have structural equality, except for primitive types.
-So, `1 === 1` is true. But `[1] === [1]` is not, and neither `{a:1} === {a:1}`.
+JavaScript doesn't have structural equality, except for primitive types.
+So `1 === 1` is true, but `[1] === [1]` is not, and neither is `{a:1} === {a:1}`.
 This poses problems for collections, because if you have a `Set`, you don't
 want duplicate elements because of this limited definition of equality.
 
@@ -86,39 +87,40 @@ for more details.
 
 ## Installation
 
-Typescript must know about `Iterable`, an ES6 feature (but present in most browsers)
-to compile prelude-ts. If you use typescript and target ES5, a minimum change to your tsconfig.json
+TypeScript must know about `Iterable`, an ES6 feature (but present in most browsers)
+to compile prelude-ts. If you use TypeScript and target ES5, a minimum change to your tsconfig.json
 could be to add:
 
 ```json
 "lib": ["DOM", "ES5", "ScriptHost", "es2015.iterable"]
 ```
 
-(compared to the default es5 settings it only adds 'es2015.iterable')
+(compared to the default ES5 settings it only adds 'es2015.iterable')
 
-### Using in nodejs
+### Using in Node.js
 
 Just add the dependency in your `package.json` and start using it (like
 `import { Vector } from "prelude-ts";`, or `const { Vector } = require("prelude-ts");`
 if you use commonjs).
-Everything should work, including type-checking if you use typescript. prelude-ts also provides
+Everything should work, including type-checking if you use TypeScript. prelude-ts also provides
 pretty-printing in the node REPL.
 
 ### Using in the browser
 
-Add the dependency in your `package.json`; Typescript should automatically
+Add the dependency in your `package.json`; TypeScript should automatically
 register the type definitions.
 
-The npm package contains the files `dist/src/prelude_ts.js`, `dist/src/prelude_ts.min.js`,
+The npm package contains the files `dist/src/prelude_ts.js` and `dist/src/prelude_ts.min.js`,
 which are UMD bundles; they work with other module systems and set `prelude_ts`
-as a window global if no module system is found.
-include the relevant one in your index.html in script tags:
+as a window global if no module system is found. Include the relevant one in your
+index.html in script tags:
+
 ```html
 <script src="node_modules/prelude-ts/dist/src/prelude_ts.min.js"></script>
 ```
 
 You shouldn't have an issue to import prelude-ts in your application, but if you use
-modules it gets a little more complicated; One solution if you use them is to create
+modules it gets a little more complicated. One solution if you use them is to create
 an `imports.d.ts` file with the following contents:
 
 ```typescript
@@ -129,17 +131,17 @@ export = _P;
 ```
 
 Then in a `.ts` file of your application, outside of a module, you can do:
+
 ```typescript
 import Vector = prelude_ts.Vector;
 ```
 
-To get the values without namespace.
-
+\- to get values without the namespace.
 
 Finally, if you also include `dist/src/chrome_dev_tools_formatters.js` through
 a `script` tag, and [enable Chrome custom formatters](http://bit.ly/object-formatters),
 then you can get
-[a nice display of prelude-ts values in the chrome debugger](https://raw.githubusercontent.com/wiki/emmanueltouzery/prelude-ts/chrome_formatters.png).
+[a nice display of prelude-ts values in the Chrome debugger](https://raw.githubusercontent.com/wiki/emmanueltouzery/prelude-ts/chrome_formatters.png).
 
 ## Wishlist/upcoming features
 
@@ -154,38 +156,38 @@ then you can get
 * Effect tracking
 * Higher-kinded types simulation
 
-I think these concepts are not expressible in a good enough manner on a language
-such as typescript.
+I think these concepts are not expressible in a good enough manner in a language
+such as TypeScript.
 
 ## Alternatives and Influences
 
 * [monet.js](https://monet.github.io/monet.js/) -- only has the `List` and
   `Option` collections, implemented in functional-style ES5. The implementation,
   using recursion, means its list type is noticeably slower than prelude-ts's.
-* [immutables.js](https://facebook.github.io/immutable-js/) -- doesn't have the
-  `Option` concept, the types can be clunky.
+* [immutable.js](https://facebook.github.io/immutable-js/) -- doesn't have the
+  `Option` concept; the types can be clunky.
 * [sanctuary](https://github.com/sanctuary-js/sanctuary)
   offers global functions like `S.filter(S.where(...))` while prelude-ts prefers a
-  fluent-api style like `list.filter(..).sortBy(...)`. Also, sanctuary doesn't
+  fluent-API style like `list.filter(..).sortBy(...)`. Also, sanctuary doesn't
   offer sets and maps. On the other hand, sanctuary has some JS runtime type system
-  which prelude-ts doesn't have.
+  support, which prelude-ts doesn't have.
 * [ramdajs](http://ramdajs.com/) offers global functions like
   `R.filter(R.where(...))` while prelude-ts prefers a
-  fluent-api style like `list.filter(..).sortBy(...)`. Also, ramda doesn't offer
+  fluent-API style like `list.filter(..).sortBy(...)`. Also, ramda doesn't offer
   sets and maps. Ramda also uses currying a lot out of the box, which may not
   be intuitive to a number of developers. In prelude,
   [currying](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function.function2.html#curried)
   & [partial application](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/interfaces/function.function2.html#apply1)
   are opt-in.
-* [lodash](https://lodash.com) also has the global functions, and many functions
+* [lodash](https://lodash.com) also has global functions, and many functions
   mutate the collections.
-* [vavr](http://www.vavr.io/) -- it's a java library, but it's the main inspiration for prelude-ts.
-  Note that vavr is inspired by the scala library, so prelude-ts also is,
+* [vavr](http://www.vavr.io/) -- it's a Java library, but it's the main inspiration for prelude-ts.
+  Note that vavr is inspired by the Scala library, so prelude-ts also is,
   transitively.
 
-## Typescript version
+## TypeScript version
 
-As of 0.8.2, prelude requires typescript 3.1 or newer.
+As of 0.8.2, prelude requires TypeScript 3.1 or newer.
 
 ## Commands
 
