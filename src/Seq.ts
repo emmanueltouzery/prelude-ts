@@ -229,6 +229,16 @@ export interface Seq<T> extends Collection<T> {
     takeWhile(predicate:(x:T)=>boolean): Seq<T>;
 
     /**
+     * Returns a new collection, discarding the elements
+     * after the first element which fails the predicate,
+     * but starting from the end of the collection.
+     *
+     *     Vector.of(1,2,3,4).takeRightWhile(x => x > 2)
+     *     => Vector.of(3,4)
+     */
+    takeRightWhile(predicate:(x:T)=>boolean): Seq<T>;
+
+    /**
      * Return a new collection containing the first n
      * elements from this collection
      *

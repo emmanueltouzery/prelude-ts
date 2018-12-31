@@ -297,6 +297,18 @@ export class EmptyLinkedList<T> implements Seq<T> {
     }
 
     /**
+     * Returns a new collection, discarding the elements
+     * after the first element which fails the predicate,
+     * but starting from the end of the collection.
+     *
+     *     LinkedList.of(1,2,3,4).takeRightWhile(x => x > 2)
+     *     => LinkedList.of(3,4)
+     */
+    takeRightWhile(predicate:(x:T)=>boolean): LinkedList<T> {
+        return this;
+    }
+
+    /**
      * Returns a new collection with the first
      * n elements discarded.
      * If the collection has less than n elements,
@@ -1038,6 +1050,18 @@ export class ConsLinkedList<T> implements Seq<T> {
             curItem =curItem._tail;
         }
         return result.reverse();
+    }
+
+    /**
+     * Returns a new collection, discarding the elements
+     * after the first element which fails the predicate,
+     * but starting from the end of the collection.
+     *
+     *     LinkedList.of(1,2,3,4).takeRightWhile(x => x > 2)
+     *     => LinkedList.of(3,4)
+     */
+    takeRightWhile(predicate:(x:T)=>boolean): LinkedList<T> {
+        return this.reverse().takeWhile(predicate).reverse();
     }
 
     /**
