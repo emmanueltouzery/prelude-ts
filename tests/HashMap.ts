@@ -179,6 +179,11 @@ describe("hashmap extract values", () => {
         HashSet.empty<string>().equals(HashSet.ofIterable(HashMap.empty<string,string>().valueIterable()))));
     it("should get non-empty valueIterable", () => assert.ok(
         HashSet.of("b","d").equals(HashSet.ofIterable(HashMap.empty<string,string>().put("a","b").put("c","d").valueIterable()))));
+    it("should allow iteration of valueIterable more than once", () => {
+        const i = HashMap.empty<string, string>().put("a", "b").put("c", "d").valueIterable();
+        HashSet.of("b", "d").equals(HashSet.ofIterable(Array.from(i)));
+        HashSet.of("b", "d").equals(HashSet.ofIterable(Array.from(i)));
+    })
     it("supports iterator", () => {
         let total = 0;
         let letters = [];
