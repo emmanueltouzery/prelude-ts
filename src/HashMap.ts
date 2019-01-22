@@ -227,7 +227,10 @@ export class HashMap<K,V> implements IMap<K,V> {
      * to have equality in the generics type)
      */
     valueIterable(): Iterable<V> {
-        return <Iterable<V>>this.hamt.values();
+        const hamt = this.hamt;
+        return {
+            [Symbol.iterator]() { return hamt.values(); }
+        };
     }
 
     /**
