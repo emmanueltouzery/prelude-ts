@@ -785,7 +785,7 @@ class EmptyHashSet<T> extends HashSet<T> {
     partition<U extends T>(predicate:(v:T)=>v is U): [HashSet<U>,HashSet<Exclude<T,U>>];
     partition(predicate:(x:T)=>boolean): [HashSet<T>,HashSet<T>];
     partition<U extends T>(predicate:(v:T)=>boolean): [HashSet<U>,HashSet<any>] {
-        return [<any>this, this];
+        return [<any>this, <any>this];
     }
 
     remove(elt: T&WithEquality): HashSet<T> {
