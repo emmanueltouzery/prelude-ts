@@ -751,6 +751,20 @@ export class Vector<T> implements Seq<T> {
     }
 
     /**
+     * Insert an element at the given index in the list
+     */
+    insert(index: number, elt: T): Vector<T> {
+        return new Vector(L.insert(index, elt, this._list));
+    }
+
+    /**
+     * Insert multiple elements at the given index in the list
+     */
+    insertAll(index: number, elts: Iterable<T>): Vector<T> {
+        return new Vector(L.insertAll(index, L.from(elts), this._list));
+    }
+
+    /**
      * Removes the first element matching the predicate
      * (use [[Seq.filter]] to remove all elements matching a predicate)
      */

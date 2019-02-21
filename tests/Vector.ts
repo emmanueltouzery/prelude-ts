@@ -138,6 +138,74 @@ describe("Vector.appendAll() implementation", () => {
             Stream.iterate(0,i=>i+1).take(86015).toVector().appendAll([86015]).toArray());
     });
 });
+
+function checkInsert<T>(base: Vector<T>, index: number, toInsert: T, combined: Vector<T>) {
+    const arrayBefore = base.toArray();
+    assert.deepStrictEqual(
+        combined.toArray(),
+        base.insert(index, toInsert).toArray());
+    // inserting should not have modified the original vector
+    assert.deepStrictEqual(arrayBefore, base.toArray());
+}
+
+describe("Vector.insert() implementation", () => {
+    it("handles simple cases correctly", () => {
+        checkInsert(Vector.of(1,2,3,4,5,6), 2, 7, Vector.of(1,2,7,3,4,5,6));
+    });
+    it("Handles correctly insertion into a long vector", () => {
+        checkInsert(
+            Vector.ofIterable(Stream.iterate(1, i=>i+1).take(100)).appendAll(Stream.iterate(102, i=>i+1).take(100)),
+           100, 101, Vector.ofIterable(Stream.iterate(1, i=>i+1).take(201)));
+    });
+    it("Handles insertion to the beginning", () => {
+        checkInsert(
+            Vector.ofIterable(Stream.iterate(1, i=>i+1).take(100)),
+            0, 0, Vector.ofIterable(Stream.iterate(0, i=>i+1).take(101)));
+    });
+    it("Handles insertion to the end", () => {
+        checkInsert(
+            Vector.ofIterable(Stream.iterate(1, i=>i+1).take(100)),
+            100, 101, Vector.ofIterable(Stream.iterate(1, i=>i+1).take(101)));
+    });
+});
+
+function checkInsertAll<T>(base: Vector<T>, index: number, toInsert: Iterable<T>, combined: Vector<T>) {
+    const arrayBefore = base.toArray();
+    assert.deepStrictEqual(
+        combined.toArray(),
+        base.insertAll(index, toInsert).toArray());
+    // inserting should not have modified the original vector
+    assert.deepStrictEqual(arrayBefore, base.toArray());
+}
+
+describe("Vector.insertAll() implementation", () => {
+    it("handles simple cases correctly", () => {
+        checkInsertAll(Vector.of(1,2,3,4,5,6), 2, [7,8], Vector.of(1,2,7,8,3,4,5,6));
+    });
+    it("handles insertion of a long iterable", () => {
+        checkInsertAll(Vector.of(1,72,73), 1, Stream.iterate(2,i=>i+1).take(70),
+            Vector.ofIterable(Stream.iterate(1,i=>i+1).take(73)));
+    });
+    it("handles adding an array", () => {
+        checkInsertAll(Vector.of(1,72,73), 1, Stream.iterate(2,i=>i+1).take(70).toArray(),
+            Vector.ofIterable(Stream.iterate(1,i=>i+1).take(73)));
+    });
+    it("handles adding a vector", () => {
+        checkInsertAll(Vector.of(1,72,73), 1, Stream.iterate(2,i=>i+1).take(70).toVector(),
+            Vector.ofIterable(Stream.iterate(1,i=>i+1).take(73)));
+    });
+    it("Handles insertion to the beginning", () => {
+        checkInsertAll(
+            Vector.ofIterable(Stream.iterate(101, i=>i+1).take(100)),
+            0, Stream.iterate(1, i=>i+1).take(100), Vector.ofIterable(Stream.iterate(1, i=>i+1).take(200)));
+    });
+    it("Handles insertion to the end", () => {
+        checkInsertAll(
+            Vector.ofIterable(Stream.iterate(1, i=>i+1).take(100)),
+            100, Stream.iterate(101, i=>i+1).take(100), Vector.ofIterable(Stream.iterate(1, i=>i+1).take(200)));
+    });
+});
+
 describe("static Vector.zip", () => {
     const r = Vector.zip<[number,string,number]>([1,2], ["a", "b"], Vector.of(11,10,9));
     assert.equal(2, r.length());

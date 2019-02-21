@@ -91,6 +91,7 @@ function _compare(preReqs: Prerequisites, items: Array<[string, (x:Prerequisites
         console.log('Fastest is ' + this.filter('fastest').map('name') + "\n");
     }).run();
 }
+
 function compare(...items: Array<[string, (x:Prerequisites)=>any]>) {
     for (let i=0;i<lengths.length;i++) {
         let length = lengths[i];
@@ -286,6 +287,31 @@ compare(['Vector.appendAll', (p:Prerequisites) => p.vec.appendAll(p.vec)],
 compare(['Vector.prependAll', (p:Prerequisites) => p.vec.prependAll(p.vec)],
         ['Array.prependAll', (p:Prerequisites) => p.array.concat(p.array)],
         ['LinkedList.prependAll', (p:Prerequisites) => p.list.prependAll(p.list)]);
+
+compare(['Vector.insert', (p:Prerequisites) => {
+        let v = p.vec;
+        p.array.forEach(elt => {
+            v = v.insert(p.idxThreeQuarters, elt);
+        })
+    }],
+    ['Array.splice single element', (p:Prerequisites) => {
+        let v = p.array.slice();
+        p.array.forEach(elt => {
+            v.splice(p.idxThreeQuarters, 0, elt);
+        })
+    }],
+    //The insert operation for Immutable.js list is linear, and consequently much too slow to test for 10000 elements
+    ['Funkia.insert', (p:Prerequisites) => {
+        let v = p.funkiaList;
+        p.array.forEach(elt => {
+            v = Funkia.insert(p.idxThreeQuarters, elt, v);
+        });
+    }]);
+
+compare(['Vector.insertAll', (p:Prerequisites) => p.vec.insertAll(p.idxThreeQuarters, p.array)],
+    ['Array.splice multiple elements', (p:Prerequisites) => p.array.slice().splice(p.idxThreeQuarters, 0, ...p.array)],
+    ['immList.splice multiple elements', (p:Prerequisites) => p.immList.splice(p.idxThreeQuarters, ...p.array)],
+    ['Funkia.insertAll', (p:Prerequisites) => Funkia.insertAll(p.idxThreeQuarters, p.funkiaList, Funkia.from(p.array))]);
 
 compare(['Vector.foldLeft', (p:Prerequisites) => p.vec.foldLeft(0, (acc,i)=>acc+i)],
         ['Array.foldLeft', (p:Prerequisites) => p.array.reduce((acc,i)=>acc+i)],
