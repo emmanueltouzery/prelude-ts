@@ -65,7 +65,7 @@ want duplicate elements because of this limited definition of equality.
 
 For that reason, prelude-ts encourages you to define for your non-primitive types
 methods `equals(other: any): boolean` and `hashCode(): number` (the same
-methods that [immutable.js uses](https://facebook.github.io/immutable-js/docs/#/ValueObject)).
+methods that [immutable.js uses](https://immutable-js.github.io/immutable-js/docs/#/ValueObject)).
 With these methods, structural equality is achievable, and indeed
 `Vector.of(1,2,3).equals(Vector.of(1,2,3))` is `true`. However this can only
 work if the values you put in collections have themselves properly defined equality
@@ -164,7 +164,7 @@ such as TypeScript.
 * [monet.js](https://monet.github.io/monet.js/) -- only has the `List` and
   `Option` collections, implemented in functional-style ES5. The implementation,
   using recursion, means its list type is noticeably slower than prelude-ts's.
-* [immutable.js](https://facebook.github.io/immutable-js/) -- doesn't have the
+* [immutable.js](https://immutable-js.github.io/immutable-js/) -- doesn't have the
   `Option` concept; the types can be clunky.
 * [sanctuary](https://github.com/sanctuary-js/sanctuary)
   offers global functions like `S.filter(S.where(...))` while prelude-ts prefers a
