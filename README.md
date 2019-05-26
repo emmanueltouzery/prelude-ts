@@ -147,6 +147,7 @@ then you can get
 
 * CharSeq, a string wrapper?
 * Non-empty vector? (already have [non-empty linkedlist](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/classes/linkedlist.conslinkedlist.html))
+* Make use of trampolining or a similar technique in `Stream` to avoid stack overflow exceptions on very large streams
 * More functions on existing classes
 
 ## Out of scope for prelude-ts
