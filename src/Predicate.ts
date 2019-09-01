@@ -11,7 +11,7 @@
  *
  * Examples:
  *
- *     const check = Predicate.of(x => x > 10).and(x => x < 20);
+ *     const check = Predicate.of((x: number) => x > 10).and(x => x < 20);
  *     check(12); // => true
  *     check(21);
  *     => false
@@ -46,7 +46,7 @@ export interface Predicate<T> {
      * Combines two predicates with the 'and' logical operation.
      * For instance:
      *
-     *     Predicate.of(x => x > 10).and(x => x < 20)
+     *     Predicate.of((x: number) => x > 10).and(x => x < 20)
      */
     and(fn:(x:T)=>boolean): Predicate<T>;
 
@@ -54,7 +54,7 @@ export interface Predicate<T> {
      * Combines two predicates with the 'or' logical operation.
      * For instance:
      *
-     *     Predicate.of(x => x < 5).or(x => x > 10)
+     *     Predicate.of((x: number) => x < 5).or(x => x > 10)
      */
     or(fn:(x:T)=>boolean): Predicate<T>;
 

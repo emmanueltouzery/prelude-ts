@@ -264,7 +264,7 @@ describe("Future.filter", () => {
     });
     it("is a nop if the future was failed", async () => {
         return ensureFailedWithValue(
-            "already bad", Future.failed("already bad").filter(x => x >= 2, v => "value was " + v).toPromise());
+            "already bad", Future.failed<number>("already bad").filter(x => x >= 2, v => "value was " + v).toPromise());
     });
     it("does filter if it applies", async () => {
         return ensureFailedWithValue(
