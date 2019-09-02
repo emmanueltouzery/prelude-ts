@@ -95,7 +95,7 @@ export class Future<T> {
     then<TResult1 = T, TResult2 = never>(
         onfulfilled: ((value: T) => TResult1 | PromiseLike<TResult1>),
         onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): PromiseLike<TResult1 | TResult2> {
-        return this.promise.then(([x]) => onfulfilled(x), rejected => onrejected?onrejected(rejected):Promise.reject(rejected)); 
+        return this.promise.then(([x]) => onfulfilled(x), rejected => onrejected?onrejected(rejected):Promise.reject<TResult2>(rejected)); 
     }
 
     /**
