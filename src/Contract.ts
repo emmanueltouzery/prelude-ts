@@ -16,8 +16,8 @@ let preludeTsContractViolationCb = (msg:string):void => { throw msg; };
  *
  * You can reproduce the issue easily by running for instance:
  *
- *     HashSet.of(Option.of([1]))
- *     => throws
+ *  HashSet.of(Option.of([1]))
+ *  => throws
  */
 export function setContractViolationAction(action: (msg:string)=>void) {
     preludeTsContractViolationCb = action;

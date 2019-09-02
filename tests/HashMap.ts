@@ -137,6 +137,7 @@ describe("hashmap equality", () => {
     it("should refuse keys which don't offer true equality (stream)", () => assert.throws(
         () => HashMap.of([Stream.of([1]), "value"])));
     it("should refuse keys which don't offer true equality (option)", () => assert.throws(
+        // @ts-ignore
         () => HashMap.of([Option.of([1]), "value"])));
     it("should refuse keys which don't offer true equality (tuple2)", () => assert.throws(
         () => HashMap.of([Tuple2.of(1,Vector.of([1])), "value"])));

@@ -163,6 +163,7 @@ describe("hashset equality", () => {
     it("should refuse elements which don't offer true equality (stream)", () => assert.throws(
         () => HashSet.of(Stream.of([1]))));
     it("should refuse elements which don't offer true equality (option)", () => assert.throws(
+        // @ts-ignore
         () => HashSet.of(Option.of([1]))));
     it("should refuse elements which don't offer true equality (tuple2)", () => assert.throws(
         () => HashSet.of(Tuple2.of(1,Vector.of([1])))));
