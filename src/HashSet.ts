@@ -390,7 +390,7 @@ export class HashSet<T> implements ISet<T> {
      * rather call 'diff', as it'll be faster.
      */
     removeAll(elts: Iterable<T&WithEquality>): HashSet<T> {
-        return this.diff(HashSet.ofIterable(elts));
+        return this.diff(HashSet.ofIterable<T&WithEquality>(elts));
     }
 
     /**
