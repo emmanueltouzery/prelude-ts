@@ -1,5 +1,4 @@
 import { Option } from "./Option";
-import { Vector } from "./Vector";
 
 /**
  * Sorting function for type T: function
