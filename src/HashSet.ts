@@ -173,7 +173,7 @@ export class HashSet<T> implements ISet<T> {
      * your function returns a set, all the sets are
      * merged.
      */
-    flatMap<U>(mapper:(v:T)=>ISet<U&WithEquality>): HashSet<U> {
+    flatMap<U>(mapper:(v:T)=>HashSet<U&WithEquality>): HashSet<U> {
         return this.foldLeft(HashSet.empty<U>(),
                              (soFar,cur) => soFar.addAll(mapper(cur)));
     }
