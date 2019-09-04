@@ -13,8 +13,8 @@
         "list": "2.0.18"
     },
     "devDependencies": {
-        "@types/mocha": "5.2.5",
-        "mocha": "5.2.0",
+        "@types/mocha": "5.2.7",
+        "mocha": "6.2.0",
         "typedoc": "0.7.2",
         "@types/node": "12.7.3",
         "benchmark": "2.1.4",
@@ -24,8 +24,8 @@
         "immutable": "4.0.0-rc.9",
         "hamt": "2.2.2",
         "mocha-testcheck": "1.0.0-rc.0",
-        "request-promise-native": "1.0.5",
-        "@types/request-promise-native": "1.0.15",
+        "request-promise-native": "1.0.7",
+        "@types/request-promise-native": "1.0.16",
         "request": "2.88.0"
     },
     "keywords": [
