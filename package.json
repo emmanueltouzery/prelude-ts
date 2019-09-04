@@ -21,7 +21,7 @@
         "typescript": "3.1.6",
         "browserify": "14.4.0",
         "uglify-js": "3.1.2",
-        "immutable": "4.0.0-rc.9",
+        "immutable": "4.0.0-rc.12",
         "hamt": "2.2.2",
         "mocha-testcheck": "1.0.0-rc.0",
         "request-promise-native": "1.0.7",
