@@ -4,3 +4,10 @@ Comments for the package.json cause I can't put them in the file itself...
    => pin the types/node dependency for a more reliable build
       example https://github.com/DefinitelyTyped/DefinitelyTyped/issues/25342
       @types/node is a transitive dep from typedoc, typedoc doesn't lock it
+
+   the typescript dependency is at 3.1.x because that's the oldest TS version
+   that we support. You can also build with the TS version of your choice by
+   running 'tsc' manually.
+
+   we are modifying the generated typedoc HTML to improve it, hence did not
+   upgrade typedoc for a while.
