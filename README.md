@@ -6,7 +6,7 @@
 
 ## Intro
 
-prelude-ts is a TypeScript library which aims to make functional programming
+prelude-ts (previously prelude.ts) is a TypeScript library which aims to make functional programming
 concepts accessible and productive in TypeScript. Note that even though it's
 written in TypeScript, it's perfectly usable from JavaScript (including ES5)!
 
