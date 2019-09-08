@@ -112,8 +112,20 @@ describe("either transformation", () => {
         Either.left("bad").equals(
             Either.left<string,number>("bad").filter(x => x<0, v => ""))));
     it("should return the unchanged either if it was a right and predicate passes on filter", () => assert.ok(
-        Either.right(5).equals(
-            Either.right<string,number>(5).filter(x => x>0, v => ""))));
+        Either.right<string, number>(5).equals(
+            Either.right<string, number>(5).filter(x => x>0, v => ""))));
+    it("should return the unchanged successful either on recoverWith", () => assert.ok(
+        Either.right<number, number>(6).equals(
+            Either.right<number, number>(6).recoverWith(v => Either.right<number, number>(v+1)))
+    ));
+    it("should return the new either on a failed Either with recoverWith", () => assert.ok(
+        Either.right<number, number>(7).equals(
+            Either.left<number, number>(6).recoverWith(v => Either.right<number, number>(v+1)))
+    ));
+    it("should return the new failed either on a failed Either with recoverWith", () => assert.ok(
+        Either.left<number, number>(7).equals(
+            Either.left<number, number>(6).recoverWith(v => Either.left<number, number>(v+1)))
+    ));
 });
 
 describe("Either helpers", () => {

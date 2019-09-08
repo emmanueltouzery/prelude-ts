@@ -456,6 +456,16 @@ export class Left<L,R> implements Value {
     }
 
     /**
+     * Has no effect if this Either is a right. If it's a left however,
+     * the function you give will be called, receiving as parameter
+     * the left contents, and an Either equivalent to the one your
+     * function returns will be returned.
+     */
+    recoverWith(recoveryFn: (left:L)=>Either<L, R>): Either<L, R> {
+        return recoveryFn(this.value);
+    }
+
+    /**
      * Execute a side-effecting function if the either
      * is a right; returns the either.
      */
@@ -711,6 +721,16 @@ export class Right<L,R> implements Value {
      * If it's a left, returns the other one.
      */
     orElse(other: Either<L,R>): Either<L,R> {
+        return this;
+    }
+    
+    /**
+     * Has no effect if this Either is a right. If it's a left however,
+     * the function you give will be called, receiving as parameter
+     * the left contents, and an Either equivalent to the one your
+     * function returns will be returned.
+     */
+    recoverWith(recoveryFn: (left:L)=>Either<L, R>): Either<L, R> {
         return this;
     }
 
