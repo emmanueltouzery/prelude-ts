@@ -207,12 +207,30 @@ export class Vector<T> implements Seq<T> {
     }
 
     /**
-     * Search for an item matching the predicate you pass,
+     * Search for the first item matching the predicate you pass,
      * return Option.Some of that element if found,
      * Option.None otherwise.
      */
     find(predicate:(v:T)=>boolean): Option<T> {
         return Option.of(L.find(predicate, this._list));
+    }
+
+    /**
+     * Search for the last item matching the predicate you pass,
+     * return Option.Some of that element if found,
+     * Option.None otherwise.
+     */
+    findLast(predicate:(v:T)=>boolean): Option<T> {
+        return Option.of(L.findLast(predicate, this._list));
+    }
+
+    /**
+     * Search for the first item matching the predicate you pass,
+     * returning its index in the form of Option.Some if found,
+     * Option.None otherwise.
+     */
+    findIndex(predicate:(v:T)=>boolean): Option<number> {
+        return Option.of(L.findIndex(predicate, this._list)).filter(i => i != -1);
     }
 
     /**

@@ -2,6 +2,7 @@ import { Vector } from "../src/Vector";
 import { Stream } from "../src/Stream";
 import { MyClass } from "./SampleData";
 import { typeOf } from "../src/Comparison";
+import { Option } from "../src/Option";
 import * as SeqTest from "./Seq";
 import * as assert from 'assert'
 
@@ -76,6 +77,41 @@ describe("Vector extra methods", () => {
         Vector.of<string|number>(1,"test",2,"a")
             .partition(typeOf("string"))[0]
             .get(0).getOrThrow().charAt(0);
+    });
+});
+
+describe("Vector search methods beside those defined in Seq", () => {
+    it("should find last by predicate", () => {
+        const x = Vector.of(1,2,3,4);
+        assert.ok(
+            Option.some(4).equals(
+                x.findLast(i => i % 2 === 0)
+            )
+        );
+    });
+    it("should return none from findList if not found", () => {
+        const x = Vector.of(1,2,3,4);
+        assert.ok(
+            Option.none().equals(
+                x.findLast(i => i === 5)
+            )
+        );
+    });
+    it("should find first index", () => {
+        const x = Vector.of(1,2,3,4);
+        assert.ok(
+            Option.some(1).equals(
+                x.findIndex(i => i % 2 === 0)
+            )
+        );
+    });
+    it("should return none from findIndex it not found", () => {
+        const x = Vector.of(1,2,3,4);
+        assert.ok(
+            Option.none().equals(
+                x.findIndex(i => i === 5)
+            )
+        );
     });
 });
 
