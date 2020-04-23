@@ -41,10 +41,10 @@
     },
     "homepage": "https://github.com/emmanueltouzery/prelude.ts#readme",
     "scripts": {
-        "prepublish": "rm tests/apidoc-*; scripts/prepublish.sh",
-        "test": "rm tests/apidoc-*; tsc && node ./dist/tests/Comments.js && tsc && ./node_modules/mocha/bin/mocha --throw-deprecation --timeout 60000 ./dist/tests/*.js",
+        "prepublish": "npm run clean; scripts/prepublish.sh",
+        "test": "rm tests/apidoc-*; tsc -p tsconfig.test.json && node ./dist/tests/Comments.js && ./node_modules/mocha/bin/mocha --throw-deprecation --timeout 60000 ./dist/tests/*.js",
         "clean": "rm tests/apidoc-*; rm -Rf ./dist",
         "docgen": "./scripts/make_doc.sh",
-        "benchmarks": "tsc && node ./dist/benchmarks/bench.js"
+        "benchmarks": "tsc -p tsconfig.benchmarks.json && node ./dist/benchmarks/bench.js"
     }
 }

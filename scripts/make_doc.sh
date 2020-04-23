@@ -2,7 +2,7 @@
 set -e
 
 npm install --no-package-lock
-tsc
+tsc -p tsconfig.docgen.json
 
 # https://github.com/TypeStrong/typedoc/issues/564
 # i would like typedoc to group functions in categories but it's not supported
