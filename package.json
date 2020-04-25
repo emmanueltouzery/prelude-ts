@@ -47,5 +47,11 @@
         "docgen": "./scripts/make_doc.sh",
         "benchmarks": "tsc -p tsconfig.benchmarks.json && node ./dist/benchmarks/bench.js"
     },
-    "files": ["dist", "src", "LICENSE.TXT", "README.md", "package.json"]
+    "files": [
+        "dist",
+        "src",
+        "LICENSE.TXT",
+        "README.md",
+        "package.json"
+    ]
 }
