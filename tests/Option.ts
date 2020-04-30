@@ -53,6 +53,12 @@ describe("option transformation", () => {
     it("should transform with map", () => {
         assert.ok(Option.of(5).equals(Option.of(4).map(x=>x+1)));
     });
+    it("should return the original Some with orCall", () => {
+        assert.ok(Option.of(5).equals(Option.of(5).orCall(() => Option.none())));
+    });
+    it("should call the function when calling orCall on None", () => {
+        assert.ok(Option.of(5).equals(Option.none<number>().orCall(() => Option.of(5))));
+    });
     it("should handle null as Some", () =>
        assert.ok(Option.of(5).map<number|null>(x => null).equals(Option.of<number|null>(null))));
     it("should transform a Some to string properly", () =>
@@ -155,7 +161,7 @@ describe("option retrieval", () => {
        assert.equal(5, Option.of(5).getOrThrow()));
     it("should throw on None.getOrThrow", () =>
        assert.throws(() => Option.none().getOrThrow()));
-    it("should throw on None.getOrThrow with custom msg", () => 
+    it("should throw on None.getOrThrow with custom msg", () =>
         assert.throws(() => Option.none().getOrThrow("my custom msg"),
                       (err: Error) => err.message === 'my custom msg'));
     it("should offer get() if i checked for isSome", () => {
