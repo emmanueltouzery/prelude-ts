@@ -3,6 +3,7 @@ import { Stream } from "../src/Stream";
 import { MyClass } from "./SampleData";
 import { typeOf } from "../src/Comparison";
 import { Option } from "../src/Option";
+import { assertFailCompile } from "./TestHelpers";
 import * as SeqTest from "./Seq";
 import * as assert from 'assert'
 
@@ -202,6 +203,10 @@ describe("vector replaceFirst", () => {
             Vector.of(new MyClass("a", 1), new MyClass("b", 2), new MyClass("a", 1))
                 .replaceFirst(new MyClass("a", 1), new MyClass("c", 2))));
     });
+    it("should fail compilation on replace if not equality", () =>
+       assertFailCompile(
+           "Vector.of([1]).replaceFirst([1], [2])", "Argument of type \'" +
+               "number[]\' is not assignable to parameter"));
 });
 describe("vector replaceAll", () => {
     it("empty vector", () => {
@@ -215,6 +220,10 @@ describe("vector replaceAll", () => {
             Vector.of(new MyClass("a", 1), new MyClass("b", 2), new MyClass("a", 1))
                 .replaceAll(new MyClass("a", 1), new MyClass("c", 2))));
     });
+    it("should fail compilation on replace if not equality", () =>
+       assertFailCompile(
+           "Vector.of([1]).replaceAll([1], [2])", "Argument of type \'" +
+               "number[]\' is not assignable to parameter"));
 });
 describe("vector indexOf", () => {
     it("empty vector", () => {
@@ -228,4 +237,8 @@ describe("vector indexOf", () => {
             Vector.of(new MyClass("a", 1), new MyClass("b", 2), new MyClass("a", 1))
                 .indexOf(new MyClass("b", 2))));
     });
+    it("should fail compilation on replace if not equality", () =>
+       assertFailCompile(
+           "Vector.of([1]).indexOf([1])", "Argument of type \'" +
+               "number[]\' is not assignable to parameter"));
 });
