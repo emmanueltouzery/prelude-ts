@@ -175,16 +175,19 @@ describe("Vector.appendAll() implementation", () => {
     });
 });
 describe("static Vector.zip", () => {
-    const r = Vector.zip<[number,string,number]>([1,2], ["a", "b"], Vector.of(11,10,9));
-    assert.equal(2, r.length());
-    // check that the types are properly inferred
-    const head: [number,string,number] = r.head().getOrThrow();
-    assert.equal(1, head[0]);
-    assert.equal("a", head[1]);
-    assert.equal(11, head[2]);
+    it("performs static correctly", () => {
+        const r = Vector.zip<[number,string,number]>([1,2], ["a", "b"], Vector.of(11,10,9));
+        assert.equal(2, r.length());
+        // check that the types are properly inferred
+        const head: [number,string,number] = r.head().getOrThrow();
+        assert.equal(1, head[0]);
+        assert.equal("a", head[1]);
+        assert.equal(11, head[2]);
 
-    const other = r.get(1).getOrThrow();
-    assert.equal(2, other[0]);
-    assert.equal("b", other[1]);
-    assert.equal(10, other[2]);
+        const other = r.get(1).getOrThrow();
+        assert.equal(2, other[0]);
+        assert.equal("b", other[1]);
+        assert.equal(10, other[2]);
+    });
+});
 });
