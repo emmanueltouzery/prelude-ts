@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-tsc
+tsc -p tsconfig.prepublish.json
 node ./node_modules/browserify/bin/cmd.js -s prelude_ts dist/src/index.js -o /tmp/prelude_ts_pre.js
 scripts/with_header.sh /tmp/prelude_ts_pre.js > dist/src/prelude_ts.js
 node ./node_modules/browserify/bin/cmd.js -s prelude_ts_object_formatters dist/src/ChromeDevToolFormatters.js -o dist/src/chrome_dev_tools_formatters.js
