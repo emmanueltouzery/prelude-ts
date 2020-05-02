@@ -42,8 +42,8 @@
     "homepage": "https://github.com/emmanueltouzery/prelude.ts#readme",
     "scripts": {
         "prepublish": "npm run clean; scripts/prepublish.sh",
-        "test": "rm tests/apidoc-*; node ./dist/tests/Comments.js && tsc -p tsconfig.test.json && ./node_modules/mocha/bin/mocha --throw-deprecation --timeout 60000 ./dist/tests/*.js",
-        "clean": "rm tests/apidoc-*; rm -Rf ./dist",
+        "test": "rm -f tests/apidoc-*; tsc -p tsconfig.test.json && node ./dist/tests/Comments.js && tsc -p tsconfig.test.json && ./node_modules/mocha/bin/mocha --throw-deprecation --timeout 60000 ./dist/tests/*.js",
+        "clean": "rm -f tests/apidoc-*; rm -Rf ./dist",
         "docgen": "./scripts/make_doc.sh",
         "benchmarks": "tsc -p tsconfig.benchmarks.json && node ./dist/benchmarks/bench.js"
     },

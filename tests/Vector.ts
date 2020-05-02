@@ -190,4 +190,3 @@ describe("static Vector.zip", () => {
         assert.equal(10, other[2]);
     });
 });
-});
