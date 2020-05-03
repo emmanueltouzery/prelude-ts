@@ -3,6 +3,7 @@ import { Stream } from "../src/Stream";
 import { MyClass } from "./SampleData";
 import { typeOf } from "../src/Comparison";
 import { Option } from "../src/Option";
+import { assertFailCompile } from "./TestHelpers";
 import * as SeqTest from "./Seq";
 import * as assert from 'assert'
 
@@ -189,4 +190,55 @@ describe("static Vector.zip", () => {
         assert.equal("b", other[1]);
         assert.equal(10, other[2]);
     });
+});
+describe("vector replaceFirst", () => {
+    it("empty vector", () => {
+        assert.ok(Vector.empty<number>().equals(Vector.empty<number>().replaceFirst(2, 3)));
+    });
+    it("value not present", () => {
+        assert.ok(Vector.of(1, 3, 4, 5).equals(Vector.of(1, 3, 4, 5).replaceFirst(2, 3)));
+    });
+    it("type with real equals", () => {
+        assert.ok(Vector.of(new MyClass("c", 2), new MyClass("b", 2), new MyClass("a", 1)).equals(
+            Vector.of(new MyClass("a", 1), new MyClass("b", 2), new MyClass("a", 1))
+                .replaceFirst(new MyClass("a", 1), new MyClass("c", 2))));
+    });
+    it("should fail compilation on replace if not equality", () =>
+       assertFailCompile(
+           "Vector.of([1]).replaceFirst([1], [2])", "Argument of type \'" +
+               "number[]\' is not assignable to parameter"));
+});
+describe("vector replaceAll", () => {
+    it("empty vector", () => {
+        assert.ok(Vector.empty<number>().equals(Vector.empty<number>().replaceAll(2, 3)));
+    });
+    it("value not present", () => {
+        assert.ok(Vector.of(1, 3, 4, 5).equals(Vector.of(1, 3, 4, 5).replaceFirst(2, 3)));
+    });
+    it("type with real equals", () => {
+        assert.ok(Vector.of(new MyClass("c", 2), new MyClass("b", 2), new MyClass("c", 2)).equals(
+            Vector.of(new MyClass("a", 1), new MyClass("b", 2), new MyClass("a", 1))
+                .replaceAll(new MyClass("a", 1), new MyClass("c", 2))));
+    });
+    it("should fail compilation on replace if not equality", () =>
+       assertFailCompile(
+           "Vector.of([1]).replaceAll([1], [2])", "Argument of type \'" +
+               "number[]\' is not assignable to parameter"));
+});
+describe("vector indexOf", () => {
+    it("empty vector", () => {
+        assert.ok(Option.none<number>().equals(Vector.empty<number>().indexOf(2)));
+    });
+    it("value not present", () => {
+        assert.ok(Option.none<number>().equals(Vector.of(1, 3, 4, 5).indexOf(2)));
+    });
+    it("type with real equals", () => {
+        assert.ok(Option.of(1).equals(
+            Vector.of(new MyClass("a", 1), new MyClass("b", 2), new MyClass("a", 1))
+                .indexOf(new MyClass("b", 2))));
+    });
+    it("should fail compilation on replace if not equality", () =>
+       assertFailCompile(
+           "Vector.of([1]).indexOf([1])", "Argument of type \'" +
+               "number[]\' is not assignable to parameter"));
 });
