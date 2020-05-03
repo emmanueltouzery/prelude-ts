@@ -26,7 +26,8 @@
         "mocha-testcheck": "1.0.0-rc.0",
         "request-promise-native": "1.0.7",
         "@types/request-promise-native": "1.0.16",
-        "request": "2.88.0"
+        "request": "2.88.0",
+        "handlebars": "4.5.3"
     },
     "keywords": [
         "typescript",

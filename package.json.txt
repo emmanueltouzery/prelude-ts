@@ -11,3 +11,9 @@ Comments for the package.json cause I can't put them in the file itself...
 
    we are modifying the generated typedoc HTML to improve it, hence did not
    upgrade typedoc for a while.
+
+
+Direct handlebars dependency:
+https://github.com/TypeStrong/typedoc/issues/1159
+
+Need to pin handlebars to unbreak typedoc
