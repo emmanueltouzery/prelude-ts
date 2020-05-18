@@ -10,6 +10,9 @@
         "outDir": "./dist",
         "declaration": true,
         "sourceMap": true,
-        "lib": ["es2015", "dom"] // I need DOM because of typedoc..
-    }
+        "lib": ["es2015", "dom", "esnext.asynciterable"]
+    },
+    "include": [
+        "**/*"
+    ]
 }
