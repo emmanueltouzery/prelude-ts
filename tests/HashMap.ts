@@ -146,6 +146,12 @@ describe("hashmap equality", () => {
     it("should fail compilation on an obviously bad key type", () =>
        assertFailCompile(
            "HashMap.of([[1], 'test'])", "is not assignable to"));
+    it("should not have trivial hashcode collisions #1", () =>
+        assert.equal(false, HashMap.of(["48", 1], ["49", 2], ["50", 3], ["51", 4]).hashCode()
+            == HashMap.of(["49", 2], ["50", 3], ["51", 4]).hashCode()));
+    it("should not have trivial hashcode collisions #2", () =>
+        assert.equal(false, HashMap.of(["48", 1], ["49", 2], ["50", 3], ["51", 4]).hashCode()
+            == HashMap.of(["49345678", 2], ["50", 3], ["51", 4]).hashCode()));
 })
 
 describe("hashmap - toString should be nicely formatted", () => {

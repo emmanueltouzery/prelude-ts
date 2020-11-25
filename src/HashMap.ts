@@ -1,6 +1,6 @@
 import { IMap } from "./IMap";
 import { hasEquals, HasEquals, WithEquality,
-         getHashCode, areEqual } from "./Comparison";
+         getHashCode, areEqual, fieldsHashCode } from "./Comparison";
 import { toStringHelper } from "./SeqHelpers";
 import { contractTrueEquality } from "./Contract"
 import { Option, none, None } from "./Option";
@@ -618,7 +618,7 @@ export class HashMap<K,V> implements IMap<K,V> {
     hashCode(): number {
         return this.hamt.fold(
             (acc: number, value: V, key: K & WithEquality) =>
-                getHashCode(key) + getHashCode(value), 0);
+                acc + fieldsHashCode([key, value]), 0);
     }
 
     /*

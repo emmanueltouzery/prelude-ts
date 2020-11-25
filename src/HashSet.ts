@@ -631,7 +631,7 @@ export class HashSet<T> implements ISet<T> {
     hashCode(): number {
         return this.hamt.fold(
             (acc: number, value: T & WithEquality, key: T & WithEquality) =>
-                getHashCode(key), 0);
+                acc + getHashCode(key), 0);
     }
 
     /**

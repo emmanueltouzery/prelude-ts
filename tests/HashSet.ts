@@ -172,6 +172,9 @@ describe("hashset equality", () => {
     it("should fail compilation on an obviously bad key type", () =>
        assertFailCompile(
            "HashSet.of([1])", "Argument of type \'number[]\' is not assignable to parameter"));
+    it("hashcode should not have trivial collisions", () => assert.equal(
+        false, HashSet.of(1,2,3).hashCode() == HashSet.of(0,2,3).hashCode()
+    ))
 });
 
 describe("hashset combinations", () => {
