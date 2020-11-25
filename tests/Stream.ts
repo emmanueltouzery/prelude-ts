@@ -1,4 +1,5 @@
 import { Stream } from "../src/Stream";
+import { typeOf } from "../src/Comparison";
 import { Vector } from "../src/Vector";
 import { Option } from "../src/Option";
 import { MyClass} from "./SampleData";
@@ -30,6 +31,15 @@ describe("Stream basics", () => {
             stream.head().get();
         }
     });
+    // unfortunately this doesn't work for now (does work on Vector & HashSet)
+    // 
+    // it("correctly infers the more precise type on allMatch in case of typeguard", () => {
+    //     // just checking that this compiles. 'charAt' is available on strings not numbers.
+    //     const v = Stream.of<string|number>("test","a");
+    //     if (v.allMatch(typeOf("string"))) {
+    //         v.single().getOrThrow().charAt(0);
+    //     }
+    // });
 });
 
 describe("Stream filtering", () => {

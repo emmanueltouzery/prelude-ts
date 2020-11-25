@@ -52,6 +52,7 @@ export interface Collection<T> extends Value, Iterable<T>, Foldable<T> {
      * Returns true if the predicate returns true for all the
      * elements in the collection.
      */
+    allMatch<U extends T>(predicate:(v:T)=>v is U): this is Collection<U>;
     allMatch(predicate:(v:T)=>boolean): boolean;
 
     /**

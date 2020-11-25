@@ -79,6 +79,15 @@ describe("Vector extra methods", () => {
             .partition(typeOf("string"))[0]
             .get(0).getOrThrow().charAt(0);
     });
+    it("correctly infers the more precise type on allMatch in case of typeguard", () => {
+        // just checking that this compiles. 'charAt' is available on strings not numbers.
+        // the get(0) is to make sure that I get a Vector
+        // not a Collection or something less precise than Vector.
+        const v = Vector.of<string|number>("test","a");
+        if (v.allMatch(typeOf("string"))) {
+            v.get(0).getOrThrow().charAt(0);
+        }
+    });
 });
 
 describe("Vector search methods beside those defined in Seq", () => {

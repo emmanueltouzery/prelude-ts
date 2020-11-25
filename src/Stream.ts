@@ -646,6 +646,8 @@ export class EmptyStream<T> implements Seq<T> {
      * Returns true if the predicate returns true for all the
      * elements in the collection.
      */
+    allMatch<U extends T>(predicate:(v:T)=>v is U): this is Stream<U>;
+    allMatch(predicate:(v:T)=>boolean): boolean;
     allMatch(predicate:(v:T)=>boolean): boolean {
         return true;
     }
@@ -1483,6 +1485,8 @@ export class ConsStream<T> implements Seq<T> {
      * Returns true if the predicate returns true for all the
      * elements in the collection.
      */
+    allMatch<U extends T>(predicate:(v:T)=>v is U): this is Stream<U>;
+    allMatch(predicate:(v:T)=>boolean): boolean;
     allMatch(predicate:(v:T)=>boolean): boolean {
         return this.find(x => !predicate(x)).isNone();
     }

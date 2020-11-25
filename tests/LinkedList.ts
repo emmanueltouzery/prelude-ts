@@ -1,4 +1,5 @@
 import { LinkedList, ConsLinkedList } from "../src/LinkedList";
+import { typeOf } from "../src/Comparison";
 import { HashMap } from "../src/HashMap";
 import { Option } from "../src/Option";
 import { Stream } from "../src/Stream";
@@ -12,6 +13,18 @@ SeqTest.runTests("LinkedList",
                  LinkedList.empty,
                  LinkedList.unfoldRight,
                  "ConsLinkedList");
+
+describe("LinkedList basics", () => {
+    // unfortunately this doesn't work for now (does work on Vector & HashSet)
+    // 
+    // it("correctly infers the more precise type on allMatch in case of typeguard", () => {
+    //     // just checking that this compiles. 'charAt' is available on strings not numbers.
+    //     const v = LinkedList.of<string|number>("test","a");
+    //     if (v.allMatch(typeOf("string"))) {
+    //         v.single().getOrThrow().charAt(0);
+    //     }
+    // });
+})
 
 describe("LinkedList toString", () => {
     it("serializes to string correctly", () => assert.equal(

@@ -397,6 +397,8 @@ export class HashSet<T> implements ISet<T> {
      * Returns true if the predicate returns true for all the
      * elements in the collection.
      */
+    allMatch<U extends T>(predicate:(v:T)=>v is U): this is HashSet<U>;
+    allMatch(predicate:(v:T)=>boolean): boolean;
     allMatch(predicate:(v:T)=>boolean): boolean {
         const iterator: Iterator<T> = this.hamt.values();
         let curItem = iterator.next();
@@ -778,6 +780,8 @@ class EmptyHashSet<T> extends HashSet<T> {
         return HashMap.empty();
     }
 
+    allMatch<U extends T>(predicate:(v:T)=>v is U): this is HashSet<U>;
+    allMatch(predicate:(v:T)=>boolean): boolean;
     allMatch(predicate:(v:T)=>boolean): boolean {
         return true;
     }

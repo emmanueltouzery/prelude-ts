@@ -125,6 +125,7 @@ export interface ISet<T> extends Collection<T> {
      * Returns true if the predicate returns true for all the
      * elements in the collection.
      */
+    allMatch<U extends T>(predicate:(v:T)=>v is U): this is ISet<U>;
     allMatch(predicate:(v:T)=>boolean): boolean;
 
     /**

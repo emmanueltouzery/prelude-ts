@@ -133,6 +133,13 @@ describe("hashset access", () => {
             .intersect(HashSet.of<string>("a"))
             .single().getOrThrow().charAt(0);
     });
+    it("correctly infers the more precise type on allMatch in case of typeguard", () => {
+        // just checking that this compiles. 'charAt' is available on strings not numbers.
+        const v = HashSet.of<string|number>("test");
+        if (v.allMatch(typeOf("string"))) {
+            v.single().getOrThrow().charAt(0);
+        }
+    });
     it("supports forEach, non empty set", () => {
         const list: number[] = [];
         HashSet.of(1,2,3,2).forEach(x => list.push(x));

@@ -282,6 +282,8 @@ export class Vector<T> implements Seq<T> {
      * Returns true if the predicate returns true for all the
      * elements in the collection.
      */
+    allMatch<U extends T>(predicate:(v:T)=>v is U): this is Vector<U>;
+    allMatch(predicate:(v:T)=>boolean): boolean;
     allMatch(predicate:(v:T)=>boolean): boolean {
         return L.every(predicate, this._list);
     }
