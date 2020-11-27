@@ -5,7 +5,7 @@ import { LinkedList } from "../src/LinkedList";
 import { Option } from "../src/Option";
 import { Stream } from "../src/Stream";
 import { Tuple2 } from "../src/Tuple2";
-import { fieldsHashCode } from "../src/Comparison";
+import { fieldsHashCode, HasEquals, getHashCode } from "../src/Comparison";
 import { MyClass} from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
@@ -152,6 +152,26 @@ describe("hashmap equality", () => {
     it("should not have trivial hashcode collisions #2", () =>
         assert.equal(false, HashMap.of(["48", 1], ["49", 2], ["50", 3], ["51", 4]).hashCode()
             == HashMap.of(["49345678", 2], ["50", 3], ["51", 4]).hashCode()));
+    it("should generate hashCodes for values implementing HasEquals", () => {
+        class TestClass implements HasEquals {
+            constructor(
+                public value: string
+            ) {}
+
+            public equals(other: unknown): boolean {
+                return this.hashCode() === getHashCode(other);
+            }
+
+            public hashCode(): number {
+                return fieldsHashCode(this.value)
+            }
+        }
+
+        const a = HashMap.of(["48", new TestClass("foo")]).hashCode();
+        const b = HashMap.of(["48", new TestClass("bar")]).hashCode();
+
+        assert.equal(false, a == b);
+    });
 })
 
 describe("hashmap - toString should be nicely formatted", () => {

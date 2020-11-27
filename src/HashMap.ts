@@ -618,7 +618,7 @@ export class HashMap<K,V> implements IMap<K,V> {
     hashCode(): number {
         return this.hamt.fold(
             (acc: number, value: V, key: K & WithEquality) =>
-                acc + fieldsHashCode([key, value]), 0);
+                acc + fieldsHashCode(key, value), 0);
     }
 
     /*
