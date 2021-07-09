@@ -6,6 +6,7 @@ import { Option } from "../src/Option";
 import { assertFailCompile } from "./TestHelpers";
 import * as SeqTest from "./Seq";
 import * as assert from 'assert'
+import * as util from "util";
 
 SeqTest.runTests("Vector",
                  Vector.ofIterable,
@@ -22,6 +23,9 @@ describe("Vector toString", () => {
         "Vector({field1: hi, field2: 99})", Vector.of(new MyClass("hi", 99)).toString()));
     it("serializes to string correctly - plain map", () => assert.equal(
         "Vector({\"name\":\"hi\",\"age\":99})", Vector.of({name:"hi", age:99}).toString()));
+    it("supports util.inspect on node", () =>
+      assert.equal("Vector(1, 2, 3)", util.inspect(Vector.of(1, 2, 3)))
+    );
 });
 
 // tests with over 32 elements
