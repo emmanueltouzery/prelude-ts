@@ -5,8 +5,7 @@ import * as util from 'util';
 /**
  * @hidden
  */
-// @ts-ignore -- see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/30241
-export const inspect: unique symbol = util.inspect.custom;
+export const inspect = Symbol.for("nodejs.util.inspect.custom");
 
 export interface Value {
 
