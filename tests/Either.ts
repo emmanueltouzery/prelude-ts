@@ -3,6 +3,7 @@ import { Vector } from "../src/Vector";
 import { Seq } from "../src/Seq";
 import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
+import {Future} from "../src";
 
 describe("either comparison", () => {
     it("should mark equal eithers as equal", () =>
@@ -21,13 +22,13 @@ describe("either comparison", () => {
        assert.ok(!Either.left(5).contains(5)));
     it("should return false on contains", () =>
        assert.ok(!Either.right(6).contains(5)));
-    it("doesn't throw when given another type on equals", () => assert.equal(
+    it("doesn't throw when given another type on equals", () => assert.strictEqual(
         false, Either.right(1).equals(<any>[1,2])));
-    it("doesn't throw when given null on equals", () => assert.equal(
+    it("doesn't throw when given null on equals", () => assert.strictEqual(
         false, Either.right(1).equals(<any>null)));
-    it("empty doesn't throw when given another type on equals", () => assert.equal(
+    it("empty doesn't throw when given another type on equals", () => assert.strictEqual(
         false, Either.left(1).equals(<any>[1,2])));
-    it("empty doesn't throw when given null on equals", () => assert.equal(
+    it("empty doesn't throw when given null on equals", () => assert.strictEqual(
         false, Either.left(1).equals(<any>null)));
     it("should throw when comparing eithers without true equality", () => assert.throws(
         () => Either.right(Vector.of([1])).equals(
@@ -45,13 +46,33 @@ describe("either transformation", () => {
     it("should transform with map", () => {
         assert.ok(Either.right(5).equals(Either.right<number,number>(4).map(x=>x+1)));
     });
+    it("should transform with map returning a future", async () => {
+       assert.ok(Either.right(2).equals(
+           await Either.right<number, number>(1).mapF(x => Future.ok(x + 1)).toPromise()
+       ))
+    });
+    it("should preserve the left when transforming with a map returning a future", async () =>
+      assert.ok(Either.left(1).equals(
+          await Either.left<number, number>(1).mapF(x => Future.ok(x + 1)).toPromise()
+      ))
+    )
+    it("should transform with mapLeft returning a future", async () => {
+        assert.ok(Either.left(2).equals(
+            await Either.left<number, number>(1).mapLeftF(x => Future.ok(x + 1)).toPromise()
+        ))
+    });
+    it("should preserve the right when transforming with a mapLeft returning a future", async () =>
+        assert.ok(Either.right(1).equals(
+            await Either.right<number, number>(1).mapLeftF(x => Future.ok(x + 1)).toPromise()
+        ))
+    )
     it("should handle null as Right", () =>
        assert.ok(Either.right(5).map<number|null>(x => null).equals(
            Either.right<string,number|null>(null))));
     it("should transform a Right to string properly", () =>
-       assert.equal("Right(5)", Either.right(5).toString()));
+       assert.strictEqual("Right(5)", Either.right(5).toString()));
     it("should transform a Left to string properly", () =>
-       assert.equal("Left(5)", Either.left(5).toString()));
+       assert.strictEqual("Left(5)", Either.left(5).toString()));
     it("should transform with flatMap x->y", () => {
         assert.ok(Either.right(5).equals(
             Either.right<number,number>(4)
@@ -72,12 +93,12 @@ describe("either transformation", () => {
        assert.ok(Either.right<number,number>(2).equals(
            Either.right<number,number>(3).bimap(x=>x+1,x=>x-1))));
     it("should apply match to a right", () =>
-       assert.equal(5, Either.right<number,number>(4).match({
+       assert.strictEqual(5, Either.right<number,number>(4).match({
            Right: x=>x+1,
            Left:  x=>-1
        })));
     it("should apply match to a left", () =>
-       assert.equal(4, Either.left<number,number>(5).match({
+       assert.strictEqual(4, Either.left<number,number>(5).match({
            Right: x=>1,
            Left:  x=>x-1
        })));
@@ -104,9 +125,9 @@ describe("either transformation", () => {
         assert.ok(Either.lift(
             (x:number,y:number,z:number,a:number,b:number)=>{throw "x"})(1,2,3,4,5).isLeft());
     });
-    it("left should provide transform", () => assert.equal(
+    it("left should provide transform", () => assert.strictEqual(
         6, Either.left<number,number>(5).transform(x => 6)));
-    it("right should provide transform", () => assert.equal(
+    it("right should provide transform", () => assert.strictEqual(
         6, Either.right<number,number>(5).transform(x => 6)));
     it("should return the unchanged either if it was a left on filter", () => assert.ok(
         Either.left("bad").equals(
@@ -141,19 +162,52 @@ describe("Either helpers", () => {
                Either.sequence(Vector.of(Either.right<number,number>(1),
                                          Either.left<number,number>(2),
                                          Either.left<number,number>(3))))));
+
+    it("should flatten nested rights", () =>
+       assert.ok(
+           Either.right(2).equals(
+               Either.flatten(Either.right<number, Either<number, number>>(Either.right<number, number>(2)))
+           )
+       )
+    )
+
+    it("should preserve a left when flattening", () =>
+      assert.ok(
+          Either.left(2).equals(
+              Either.flatten(Either.left<number, Either<number, number>>(2))
+          )
+      )
+    )
+
+    it("should flatten nested lefts", () =>
+        assert.ok(
+            Either.left(2).equals(
+                Either.flattenLeft(Either.left<Either<number, number>, number>(Either.left<number, number>(2)))
+            )
+        )
+    )
+
+    it("should preserve a left when flattening", () =>
+        assert.ok(
+            Either.right(2).equals(
+                Either.flattenLeft(Either.right<Either<number, number>, number>(2))
+            )
+        )
+    )
 });
+
 
 describe("either retrieval", () => {
     it("should return the value on Right.getOrElse", () =>
-       assert.equal(5, Either.right(5).getOrElse(6)));
+       assert.strictEqual(5, Either.right(5).getOrElse(6)));
     it("should return the alternative on Left.getOrElse", () =>
-       assert.equal(6, Either.left<number,number>(5).getOrElse(6)));
+       assert.strictEqual(6, Either.left<number,number>(5).getOrElse(6)));
     it("should return the value on Right.toVector", () =>
-       assert.deepEqual([5], Either.right(5).toVector().toArray()));
+       assert.deepStrictEqual([5], Either.right(5).toVector().toArray()));
     it("should return empty on Left.toVector", () =>
-       assert.deepEqual([], Either.left<number,number>(5).toVector().toArray()));
+       assert.deepStrictEqual([], Either.left<number,number>(5).toVector().toArray()));
     it("should not throw on Right.getOrThrow", () =>
-       assert.equal(5, Either.right(5).getOrThrow()));
+       assert.strictEqual(5, Either.right(5).getOrThrow()));
     it("should throw on Left.getOrThrow", () =>
        assert.throws(() => Either.left<number,number>(5).getOrThrow()));
     it("should throw on Left.getOrThrow with custom msg", () =>
@@ -164,7 +218,7 @@ describe("either retrieval", () => {
         if (either.isRight()) {
             // what we are checking here is whether this does build
             // .get() is available only on Right
-            assert.equal(5, either.get());
+            assert.strictEqual(5, either.get());
         }
     });
     it("should offer get() if i checked against isLeft", () => {
@@ -172,7 +226,7 @@ describe("either retrieval", () => {
         if (!either.isLeft()) {
             // what we are checking here is whether this does build
             // .get() is available only on Right
-            assert.equal(5, either.get());
+            assert.strictEqual(5, either.get());
         }
     });
     it("should offer getLeft() if i checked for isLeft", () => {
@@ -180,7 +234,7 @@ describe("either retrieval", () => {
         if (either.isLeft()) {
             // what we are checking here is whether this does build
             // .get() is available only on Left
-            assert.equal("5", either.getLeft());
+            assert.strictEqual("5", either.getLeft());
         }
     });
     it("should offer getLeft() if i checked against isRight", () => {
@@ -188,7 +242,7 @@ describe("either retrieval", () => {
         if (!either.isRight()) {
             // what we are checking here is whether this does build
             // .get() is available only on Left
-            assert.equal("5", either.getLeft());
+            assert.strictEqual("5", either.getLeft());
         }
     });
 });
