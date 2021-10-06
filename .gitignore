@@ -9,3 +9,4 @@ tests/apidoc-*
 # => skip the package lock stuff.
 package-lock.json
 yarn.lock
+.idea

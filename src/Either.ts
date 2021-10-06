@@ -26,6 +26,7 @@ import { Vector } from "./Vector";
 import { WithEquality, areEqual,
          hasTrueEquality, getHashCode } from "./Comparison";
 import { contractTrueEquality} from "./Contract";
+import {Future} from "./Future";
 
 /**
  * Holds the "static methods" for [[Either]]
@@ -69,6 +70,44 @@ export class EitherStatic {
      */
     isRight<L,R>(e: Either<L,R>): e is Right<L,R> {
         return e.isRight();
+    }
+
+    /**
+     * Flattens out an Either where the R is also an Either.
+     * The R remains the same type but the L is widened to allow for encompassing more error types
+     *
+     * type ParseError = ...
+     * type ValidationError = ...
+     *
+     * Either.flatten(
+     *   Either.right<ParseError, Either.right<ValidationError, number>>(Either.right(2))
+     * );
+     * => Either.right<ParseError | ValidationError, number>(2)
+     *
+     * Also see [[EitherStatic.flattenLeft]]
+     */
+    flatten<L, L2, R>(e: Either<L, Either<L2, R>>): Either<L | L2, R> {
+        return e.match({
+            Left: left => Either.left(left) as Either<L | L2, R>,
+            Right: rightE => rightE as Either<L | L2, R>
+        })
+    }
+
+    /**
+     * Flattens out an Either where the L is also an Either.
+     *
+     * Either.flatten(
+     *   Either.left<string, Either.left<string, number>>(Either.left("oops"))
+     * );
+     * => Either.left<string, number>("oops")
+     *
+     * Also see [[EitherStatic.flatten]]
+     */
+    flattenLeft<L, R>(e: Either<Either<L, R>, R>): Either<L, R> {
+        return e.match({
+            Left: left => left,
+            Right: right => Either.right(right),
+        })
     }
 
     /**
@@ -405,6 +444,15 @@ export class Left<L,R> implements Value {
     }
 
     /**
+     * If this either is a right, applies the future returning function you give
+     * to its contents and build a new right either within the same Future context,
+     * otherwise return this inside a completed future
+     */
+    mapF<U>(fn: (x:R)=>Future<U>): Future<Either<L,U>> {
+        return Future.ok(<any>this)
+    }
+
+    /**
      * If this either is a right, call the function you give with
      * the contents, and return what the function returns, else
      * returns this.
@@ -421,6 +469,15 @@ export class Left<L,R> implements Value {
      */
     mapLeft<U>(fn: (x:L)=>U): Either<U,R> {
         return new Left<U,R>(fn(this.value));
+    }
+
+    /**
+     * If this either is a left, applies the future returning function you give
+     * to its contents and build a new right either within the same Future context,
+     * otherwise return this inside a completed future
+     */
+    mapLeftF<U>(fn: (x: L) => Future<U>): Future<Either<U, R>> {
+        return fn(this.value).map(r => new Left<U, R>(r))
     }
 
     /**
@@ -671,6 +728,15 @@ export class Right<L,R> implements Value {
     }
 
     /**
+     * If this either is a right, applies the future returning function you give
+     * to its contents and build a new right either within the same Future context,
+     * otherwise return this inside a completed future
+     */
+    mapF<U>(fn: (x: R) => Future<U>): Future<Either<L, U>> {
+        return fn(this.value).map(r => new Right<L, U>(r))
+    }
+
+    /**
      * If this either is a right, call the function you give with
      * the contents, and return what the function returns, else
      * returns this.
@@ -687,6 +753,15 @@ export class Right<L,R> implements Value {
      */
     mapLeft<U>(fn: (x:L)=>U): Either<U,R> {
         return <any>this;
+    }
+
+    /**
+     * If this either is a left, applies the future returning function you give
+     * to its contents and build a new right either within the same Future context,
+     * otherwise return this inside a completed future
+     */
+    mapLeftF<U>(fn: (x: L) => Future<U>): Future<Either<U, R>> {
+        return Future.ok(<any>this)
     }
 
     /**
