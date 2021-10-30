@@ -1,58 +1,60 @@
 {
-    "name": "prelude-ts",
-    "version": "1.0.3",
-    "description": "A typescript functional programming library",
-    "main": "dist/src/index.js",
-    "typings": "dist/src/index.d.ts",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/emmanueltouzery/prelude.ts.git"
-    },
-    "dependencies": {
-        "hamt_plus": "1.0.2",
-        "list": "2.0.19"
-    },
-    "devDependencies": {
-        "@types/mocha": "5.2.7",
-        "@types/node": "12.7.3",
-        "@types/request-promise-native": "1.0.16",
-        "benchmark": "2.1.4",
-        "browserify": "16.5.0",
-        "hamt": "2.2.2",
-        "handlebars": "4.5.3",
-        "immutable": "4.0.0-rc.12",
-        "mocha": "6.2.0",
-        "mocha-testcheck": "1.0.0-rc.0",
-        "request": "2.88.0",
-        "request-promise-native": "1.0.7",
-        "typedoc": "0.7.2",
-        "typescript": "3.1.6",
-        "uglify-js": "3.6.0"
-    },
-    "keywords": [
-        "typescript",
-        "functional-programming",
-        "immutable",
-        "collections"
-    ],
-    "author": "Emmanuel Touzery",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/emmanueltouzery/prelude.ts/issues"
-    },
-    "homepage": "https://github.com/emmanueltouzery/prelude.ts#readme",
-    "scripts": {
-        "prepublish": "npm run clean; scripts/prepublish.sh",
-        "test": "rm -f tests/apidoc-*; tsc -p tsconfig.test.json && node ./dist/tests/Comments.js && tsc -p tsconfig.test.json && ./node_modules/mocha/bin/mocha --throw-deprecation --timeout 60000 ./dist/tests/*.js",
-        "clean": "rm -f tests/apidoc-*; rm -Rf ./dist",
-        "docgen": "./scripts/make_doc.sh",
-        "benchmarks": "tsc -p tsconfig.benchmarks.json && node ./dist/benchmarks/bench.js"
-    },
-    "files": [
-        "dist",
-        "src",
-        "LICENSE.TXT",
-        "README.md",
-        "package.json"
-    ]
+  "name": "prelude-ts",
+  "version": "1.0.3",
+  "description": "A typescript functional programming library",
+  "main": "dist/src/index.js",
+  "typings": "dist/src/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emmanueltouzery/prelude.ts.git"
+  },
+  "dependencies": {
+    "hamt_plus": "1.0.2",
+    "list": "2.0.19"
+  },
+  "devDependencies": {
+    "@types/mocha": "5.2.7",
+    "@types/node": "12.7.3",
+    "@types/request-promise-native": "1.0.16",
+    "benchmark": "2.1.4",
+    "browserify": "16.5.0",
+    "hamt": "2.2.2",
+    "handlebars": "4.5.3",
+    "immutable": "4.0.0-rc.12",
+    "mismatched": "^2.8.2",
+    "mocha": "6.2.0",
+    "mocha-testcheck": "1.0.0-rc.0",
+    "request": "2.88.0",
+    "request-promise-native": "1.0.7",
+    "typedoc": "0.7.2",
+    "typescript": "4.4.4",
+    "uglify-js": "3.6.0"
+  },
+  "keywords": [
+    "typescript",
+    "functional-programming",
+    "immutable",
+    "collections"
+  ],
+  "author": "Emmanuel Touzery",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/emmanueltouzery/prelude.ts/issues"
+  },
+  "homepage": "https://github.com/emmanueltouzery/prelude.ts#readme",
+  "scripts": {
+    "prepublish": "npm run clean; scripts/prepublish.sh",
+    "compile": "tsc -p tsconfig.json",
+    "test": "rm -f tests/apidoc-*; tsc -p tsconfig.test.json && node ./dist/tests/Comments.js && tsc -p tsconfig.test.json && ./node_modules/mocha/bin/mocha --throw-deprecation --timeout 60000 ./dist/tests/*.js",
+    "clean": "rm -f tests/apidoc-*; rm -Rf ./dist",
+    "docgen": "./scripts/make_doc.sh",
+    "benchmarks": "tsc -p tsconfig.benchmarks.json && node ./dist/benchmarks/bench.js"
+  },
+  "files": [
+    "dist",
+    "src",
+    "LICENSE.TXT",
+    "README.md",
+    "package.json"
+  ]
 }
