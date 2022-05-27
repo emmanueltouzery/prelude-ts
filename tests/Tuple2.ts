@@ -29,4 +29,10 @@ describe("Tuple2 manipulation", () => {
         Option.of(Tuple2.of(1,2)).equals(Tuple2.ofArray<number,number>([1,2]))));
     it("build from array works - failure", () => assert.ok(
         Tuple2.ofArray([1,2,3]).isNone()));
+    it("gives correct equality answer even if fst is falsy", () => assert.ok(
+        Tuple2.of(0, "").equals(Tuple2.of(0, ""))));
+    it("gives correct equality answer #2", () => assert.ok(
+        !Tuple2.of(0, "").equals(Tuple2.of(0, "a"))));
+    it("gives correct equality answer #3", () => assert.ok(
+        !Tuple2.of(1, "").equals(Tuple2.of(0, ""))));
 });

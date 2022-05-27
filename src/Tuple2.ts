@@ -105,7 +105,7 @@ export class Tuple2<T,U> implements Value {
         if (<any>other === this) {
             return true;
         }
-        if (!other || !other._fst) {
+        if (!other || other._fst === undefined) {
             return false;
         }
         contractTrueEquality("Tuple2.equals", this, other);
