@@ -1,0 +1,4 @@
+# Required so that built files are included when using this github repo directly as an npm dependency
+#
+# See https://stackoverflow.com/questions/40528053/npm-install-and-build-of-forked-github-repo/57829251#57829251
+# for more details.
