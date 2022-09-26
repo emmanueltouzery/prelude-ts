@@ -1,7 +1,7 @@
 import { hasTrueEquality } from "./Comparison";
 import { toStringHelper } from "./SeqHelpers";
 
-let preludeTsContractViolationCb = (msg:string):void => { throw msg; };
+let preludeTsContractViolationCb = (msg:string):void => { throw new Error(msg); };
 
 /**
  * Some programmatic errors are only detectable at runtime
