@@ -31,6 +31,8 @@ export class HashMap<K,V> implements IMap<K,V> {
      */
     protected constructor(private hamt: any) {}
 
+    private _hash: number | undefined;
+
     /**
      * The empty map.
      * @param K the key type
@@ -610,15 +612,34 @@ export class HashMap<K,V> implements IMap<K,V> {
         return true;
     }
 
+    private mapHash(): number {
+        return this.hamt.fold(
+            (acc: number, value: V, key: K & WithEquality) =>
+                acc + (getHashCode(key) ^ getHashCode(value)), 0);
+    }
+
     /**
      * Get a number for that object. Two different values
      * may get the same number, but one value must always get
      * the same number. The formula can impact performance.
      */
     hashCode(): number {
-        return this.hamt.fold(
-            (acc: number, value: V, key: K & WithEquality) =>
-                acc + fieldsHashCode(key, value), 0);
+        // references:
+        // https://github.com/clojure/clojure/blob/5ffe3833508495ca7c635d47ad7a1c8b820eab76/src/jvm/clojure/lang/APersistentMap.java#L98
+        // https://github.com/AdoptOpenJDK/openjdk-jdk11/blob/19fb8f93c59dfd791f62d41f332db9e306bc1422/src/java.base/share/classes/java/util/HashMap.java#L296
+
+        // Both the Clojure and AdoptOpenJDK references calculate the bitwise XOR
+        // of the key/value pairs. Because the Clojure implementation is immutable,
+        // like ours, we can also cache the result.
+        // The significance of the bitwise XOR is that, unlike just adding the hashcode
+        // of the key and value pair, they become intertwined, which prevents
+        // collissions when identical values are swapped between keys.
+        if (typeof this._hash === "number") {
+            return this._hash;
+        } else {
+            this._hash = this.mapHash();
+            return this._hash;
+        }
     }
 
     /*
