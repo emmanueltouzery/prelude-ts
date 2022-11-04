@@ -31,8 +31,6 @@ export class HashMap<K,V> implements IMap<K,V> {
      */
     protected constructor(private hamt: any) {}
 
-    private _hash: number | undefined;
-
     /**
      * The empty map.
      * @param K the key type
@@ -612,12 +610,6 @@ export class HashMap<K,V> implements IMap<K,V> {
         return true;
     }
 
-    private mapHash(): number {
-        return this.hamt.fold(
-            (acc: number, value: V, key: K & WithEquality) =>
-                acc + (getHashCode(key) ^ getHashCode(value)), 0);
-    }
-
     /**
      * Get a number for that object. Two different values
      * may get the same number, but one value must always get
@@ -629,17 +621,21 @@ export class HashMap<K,V> implements IMap<K,V> {
         // https://github.com/AdoptOpenJDK/openjdk-jdk11/blob/19fb8f93c59dfd791f62d41f332db9e306bc1422/src/java.base/share/classes/java/util/HashMap.java#L296
 
         // Both the Clojure and AdoptOpenJDK references calculate the bitwise XOR
-        // of the key/value pairs. Because the Clojure implementation is immutable,
-        // like ours, we can also cache the result.
-        // The significance of the bitwise XOR is that, unlike just adding the hashcode
-        // of the key and value pair, they become intertwined, which prevents
-        // collissions when identical values are swapped between keys.
-        if (typeof this._hash === "number") {
-            return this._hash;
-        } else {
-            this._hash = this.mapHash();
-            return this._hash;
-        }
+        // of the key/value pairs. The significance of the bitwise XOR is that,
+        // unlike just adding the hashcode of the key and value pair, they become
+        // intertwined, which prevents collisions when identical values are swapped
+        // between keys.
+
+        // This algorithm only intertwines the keys and the values. The calculations
+        // for the pairs are summed up, to make sure that we get the same result
+        // if the pairs are in a different order.
+
+        // The Clojure implementation also caches the result of the calculation, but
+        // we've decided not to do that yet, see the discussion on the PR for context:
+        // https://github.com/emmanueltouzery/prelude-ts/pull/67
+        return this.hamt.fold(
+            (acc: number, value: V, key: K & WithEquality) =>
+                acc + (getHashCode(key) ^ getHashCode(value)), 0);
     }
 
     /*
