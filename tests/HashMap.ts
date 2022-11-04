@@ -152,6 +152,18 @@ describe("hashmap equality", () => {
     it("should not have trivial hashcode collisions #2", () =>
         assert.equal(false, HashMap.of(["48", 1], ["49", 2], ["50", 3], ["51", 4]).hashCode()
             == HashMap.of(["49345678", 2], ["50", 3], ["51", 4]).hashCode()));
+    it("should calculate the same hashcode if the values are provided in a different order", () => {
+        const a = HashMap.of(["a", 1], ["b", 0]);
+        const b = HashMap.of(["b", 0], ["a", 1]);
+
+        assert.equal(a.hashCode(), b.hashCode());
+    });
+    it("should not have hashcode collisions when duplicate values are swapped between keys", () => {
+        const a = HashMap.of(["a", 1], ["b", 0]);
+        const b = HashMap.of(["a", 0], ["b", 1]);
+
+        assert.equal(false, a.hashCode() === b.hashCode());
+    });
     it("should generate hashCodes for values implementing HasEquals", () => {
         class TestClass implements HasEquals {
             constructor(

@@ -616,9 +616,26 @@ export class HashMap<K,V> implements IMap<K,V> {
      * the same number. The formula can impact performance.
      */
     hashCode(): number {
+        // references:
+        // https://github.com/clojure/clojure/blob/5ffe3833508495ca7c635d47ad7a1c8b820eab76/src/jvm/clojure/lang/APersistentMap.java#L98
+        // https://github.com/AdoptOpenJDK/openjdk-jdk11/blob/19fb8f93c59dfd791f62d41f332db9e306bc1422/src/java.base/share/classes/java/util/HashMap.java#L296
+
+        // Both the Clojure and AdoptOpenJDK references calculate the bitwise XOR
+        // of the key/value pairs. The significance of the bitwise XOR is that,
+        // unlike just adding the hashcode of the key and value pair, they become
+        // intertwined, which prevents collisions when identical values are swapped
+        // between keys.
+
+        // This algorithm only intertwines the keys and the values. The calculations
+        // for the pairs are summed up, to make sure that we get the same result
+        // if the pairs are in a different order.
+
+        // The Clojure implementation also caches the result of the calculation, but
+        // we've decided not to do that yet, see the discussion on the PR for context:
+        // https://github.com/emmanueltouzery/prelude-ts/pull/67
         return this.hamt.fold(
             (acc: number, value: V, key: K & WithEquality) =>
-                acc + fieldsHashCode(key, value), 0);
+                acc + (getHashCode(key) ^ getHashCode(value)), 0);
     }
 
     /*
