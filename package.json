@@ -14,7 +14,7 @@
     },
     "devDependencies": {
         "@types/mocha": "5.2.7",
-        "mocha": "6.2.0",
+        "mocha": "10.2.0",
         "typedoc": "0.7.2",
         "@types/node": "12.7.3",
         "benchmark": "2.1.4",
