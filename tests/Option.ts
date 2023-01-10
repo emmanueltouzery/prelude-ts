@@ -17,6 +17,8 @@ describe("option comparison", () => {
        assert.ok(Option.of(5).equals(Option.of(5))))
     it("should mark different options as not equal", () =>
        assert.ok(!Option.of(5).equals(Option.of(6))))
+    it("should mark different options as not equal", () =>
+       assert.ok(!Option.of<any>(Vector.of(12, 2674)).equals(Option.of<any>(null))))
     it("should mark none as equals to none", () =>
        assert.ok(Option.none<string>().equals(Option.none<string>())));
     it("should mark none and some as not equal", () =>

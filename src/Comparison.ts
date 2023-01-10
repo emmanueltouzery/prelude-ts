@@ -82,7 +82,7 @@ export function stringHashCode(str: string): number {
  * if possible, degrades to === if not available, and is also null-safe.
  */
 export function areEqual(obj: any|null, obj2: any|null): boolean {
-    if (obj === null != obj2 === null) {
+    if ((obj === null) != (obj2 === null)) {
         return false;
     }
     if (obj === null || obj2 === null) {
