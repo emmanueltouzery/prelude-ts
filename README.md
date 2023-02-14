@@ -206,3 +206,6 @@ As of 0.8.2, prelude requires TypeScript 3.1 or newer.
 [circleci-url]: https://circleci.com/gh/emmanueltouzery/prelude-ts
 [apidoc-image]: http://emmanueltouzery.github.io/prelude.ts/apidoc.svg
 [apidoc-url]: http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/globals.html
+
+## Related projects
+* [Prelude-IO](https://github.com/Annoiiyed/Prelude-IO), a library offering IO features -including deserializing and validation- on top of prelude-ts, emphasizing type-safety and immutability
