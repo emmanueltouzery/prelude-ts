@@ -5,6 +5,7 @@ import { Seq } from "../src/Seq";
 import { MyClass, MySubclass } from "./SampleData";
 import { assertFailCompile } from "./TestHelpers";
 import * as assert from 'assert'
+import { Tuple2 } from "../src";
 
 describe("option creation", () => {
     it("should create a Some for Option.ofNullable(0)", () => {
@@ -108,6 +109,12 @@ describe("option transformation", () => {
         const b = <None<number>>Option.none<number>();
         const c = Vector.of<Option<number>>(a, b);
     });
+    it("should zip two somes", () => {
+        assert.ok(Option.of(Tuple2.of("a", 2)).equals(Option.of("a").zip(Option.of(2))));
+    });
+    it("should not zip a none", () => {
+        assert.ok(Option.none().zip(Option.of("a")).isNone());
+    })
 });
 
 describe("Option helpers", () => {

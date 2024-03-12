@@ -34,6 +34,7 @@ import { WithEquality, areEqual, hasTrueEquality,
          getHashCode, } from "./Comparison";
 import { toStringHelper } from "./SeqHelpers";
 import { contractTrueEquality} from "./Contract";
+import { Tuple2 } from "./Tuple2";
 
 /**
  * An Option is either [[Some]] or [[None]]
@@ -628,6 +629,14 @@ export class Some<T> implements Value {
       return this;
     }
 
+    /**
+     * Zip two options together, returning either a Some
+     * with a pair of both values, or None if either is empty
+     */
+    zip<O>(other: Option<O>): Option<Tuple2<T, O>> {
+        return other.map(x => Tuple2.of(this.value, x));
+    }
+
     hasTrueEquality<T>(): boolean {
         return optionHasTrueEquality(this);
     }
@@ -910,6 +919,14 @@ export class None<T> implements Value {
      */
     orCall(fn: () => Option<T>): Option<T> {
       return fn();
+    }
+
+    /**
+     * Zip two options together, returning either a Some
+     * with a pair of both values, or None if either is empty
+     */
+    zip<O>(other: Option<O>): Option<Tuple2<T, O>> {
+        return none;
     }
 
     hasTrueEquality<T>(): boolean {
